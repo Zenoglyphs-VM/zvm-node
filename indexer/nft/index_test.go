@@ -1,0 +1,57 @@
+package nft
+
+import (
+	"context"
+	"log/slog"
+	"testing"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+)
+
+// slowHost answers every URI call, slowly: a collection whose tokenURI costs
+// something to run.
+type slowHost struct {
+	delay time.Duration
+	calls int
+}
+
+func (h *slowHost) Eth() *ethclient.Client { return nil }
+func (h *slowHost) Log() *slog.Logger      { return slog.New(slog.DiscardHandler) }
+func (h *slowHost) CallString(context.Context, common.Address, string) string {
+	return ""
+}
+func (h *slowHost) CallURI(context.Context, common.Address, []byte) string {
+	time.Sleep(h.delay)
+	h.calls++
+	return "ipfs://token"
+}
+
+// A Transfer is cheap to emit and each first sighting of a token costs a
+// tokenURI call, so one block's metadata reads share a budget. Past it tokens
+// are indexed without metadata rather than holding the chain's index back;
+// the next block starts afresh.
+func TestMetadataReadsStopAtTheBlocksBudget(t *testing.T) {
+	defer func(old time.Duration) { metadataBudget = old }(metadataBudget)
+	metadataBudget = 60 * time.Millisecond
+	h := &slowHost{delay: 25 * time.Millisecond}
+	x := New(Config{})
+	if err := x.Attach(h); err != nil {
+		t.Fatal(err)
+	}
+	collection := common.HexToAddress("0xc011")
+	ctx := context.Background()
+	read := 0
+	for i := 0; i < 20; i++ {
+		if x.tokenURI(ctx, 7, collection, common.Big1) != "" {
+			read++
+		}
+	}
+	if read == 0 || read >= 20 || h.calls != read {
+		t.Errorf("block 7 read %d of 20 URIs with %d calls; want the budget to stop it after a few", read, h.calls)
+	}
+	if x.tokenURI(ctx, 8, collection, common.Big1) == "" {
+		t.Error("the next block did not get a budget of its own")
+	}
+}
