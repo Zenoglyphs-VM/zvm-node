@@ -43,6 +43,8 @@ type Index struct {
 	warned      bool
 }
 
+const approvalRecoveryVersionKey = "nft_approval_recovery_v1"
+
 // metadataBudget is how long one block's tokenURI and contractURI reads may
 // take together. A Transfer is cheap to emit — a contract can log thousands in
 // a block without owning anything — and each first sighting of a token costs
@@ -129,13 +131,16 @@ func (x *Index) Deletes() []string {
 	}
 }
 
-// Restores puts each surviving token's owner back to what the surviving
-// transfers say, and drops approvals, which a reorg cannot be assumed to have
-// preserved.
+// Restores takes ownership from surviving ERC-721 transfers. The shared
+// transfer table also contains ERC-1155 ids, so bind the row to its own log.
+// Rebuild restores approvals only from the surviving event history.
 func (x *Index) Restores() []string {
 	return []string{
 		`UPDATE nft_tokens SET approved = NULL, owner = COALESCE((SELECT t.to_addr FROM token_transfers t
-			WHERE t.token = nft_tokens.collection AND t.token_id = nft_tokens.token_id ORDER BY t.block DESC, t.idx DESC LIMIT 1), owner)
+			JOIN logs l ON l.tx = t.tx AND l.idx = t.idx AND l.block = t.block AND l.address = t.token
+			WHERE t.token = nft_tokens.collection AND t.token_id = nft_tokens.token_id
+			AND l.topic0 = '` + topicTransfer.Hex() + `' AND l.topic3 IS NOT NULL
+			ORDER BY t.block DESC, t.idx DESC LIMIT 1), owner)
 			WHERE updated_block > ?`,
 	}
 }
@@ -156,12 +161,26 @@ func (x *Index) AfterRollback() {
 // Rebuild recomputes every collection's totals, which a rewind cannot repair by
 // deleting rows because a total is a sum over the range that survived.
 func (x *Index) Rebuild(dbtx *sql.Tx, block uint64) error {
-	return x.rebuildCollectionStats(dbtx, block)
+	if err := restoreTokenApprovals(dbtx); err != nil {
+		return err
+	}
+	if err := restoreOperatorApprovals(dbtx); err != nil {
+		return err
+	}
+	if err := x.rebuildCollectionStats(dbtx, block); err != nil {
+		return err
+	}
+	_, err := dbtx.Exec("INSERT OR REPLACE INTO index_meta (key,value) VALUES (?,1)", approvalRecoveryVersionKey)
+	return err
 }
 
 // Stale catches missing collection aggregates and orphan rows left by older
 // rewinds. Equal table counts do not imply matching collection identities.
 func (x *Index) Stale(db *sql.DB) bool {
+	var recovered int
+	if err := db.QueryRow("SELECT value FROM index_meta WHERE key=?", approvalRecoveryVersionKey).Scan(&recovered); err != nil || recovered != 1 {
+		return true
+	}
 	var stale bool
 	err := db.QueryRow(`SELECT
 		EXISTS (SELECT 1 FROM nft_collections c LEFT JOIN nft_collection_stats s ON s.collection = c.address WHERE s.collection IS NULL)

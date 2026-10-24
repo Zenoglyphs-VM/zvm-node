@@ -448,6 +448,13 @@ func (ix *Indexer) Rewind(number uint64) error {
 	}
 	commit, rollback := ix.guardTransaction(tx)
 	defer rollback()
+	// The removed range still names the affected tokens here. Recompute only
+	// their counters from the surviving prefix, without copying the history.
+	if _, err := tx.Exec(`UPDATE tokens SET transfers = (
+		SELECT COUNT(*) FROM token_transfers t WHERE t.token = tokens.address AND t.block <= ?)
+		WHERE address IN (SELECT token FROM token_transfers WHERE block > ?)`, number, number); err != nil {
+		return err
+	}
 	for _, stmt := range []string{
 		"DELETE FROM blocks WHERE number > ?", "DELETE FROM txs WHERE block > ?",
 		"DELETE FROM logs WHERE block > ?",
