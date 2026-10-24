@@ -58,13 +58,14 @@ func (b executionBackend) BlockChain() *core.BlockChain { return b.chain }
 func (executionBackend) TxPool() *txpool.TxPool         { return nil }
 
 type executionEngine struct {
-	mu        sync.Mutex
-	db        ethdb.Database
-	chain     *core.BlockChain
-	builder   *miner.Miner
-	payloads  map[engine.PayloadID]*engine.ExecutionPayloadEnvelope
-	lostReply uint64
-	closed    bool
+	mu           sync.Mutex
+	db           ethdb.Database
+	chain        *core.BlockChain
+	builder      *miner.Miner
+	payloads     map[engine.PayloadID]*engine.ExecutionPayloadEnvelope
+	lostReply    uint64
+	processPhase string
+	closed       bool
 }
 
 func openExecutionEngine(t *testing.T, path string, genesis *core.Genesis) *executionEngine {
@@ -112,6 +113,9 @@ func (b *executionEngine) ForkchoiceUpdatedV3(ctx context.Context, fc engine.For
 	}
 	result := engine.ForkChoiceResponse{PayloadStatus: engine.PayloadStatusV1{Status: engine.VALID, LatestValidHash: &fc.HeadBlockHash}}
 	if attrs == nil {
+		if b.processPhase == "engine-commit" && head.NumberU64() == 7 {
+			exitOwnedRecoveryProcess(b.processPhase)
+		}
 		if b.lostReply != 0 && head.NumberU64() == b.lostReply {
 			b.lostReply = 0
 			return engine.ForkChoiceResponse{}, errors.New("declared lost reply after canonical engine commit")
@@ -486,6 +490,8 @@ type executionRun struct {
 	limit                uint64
 	fault, observedFault string
 	callbackError        error
+	processPhase         string
+	clearProcessTrigger  bool
 }
 
 // Only these two read methods exist on the synthetic NoM port. The input
@@ -563,12 +569,22 @@ func (r *executionRun) open() {
 		r.t.Fatal(err)
 	}
 	r.db.SQL().SetMaxOpenConns(1)
+	if r.clearProcessTrigger {
+		// This trigger belongs only to the newly created process fixture.
+		if _, err := r.db.SQL().Exec("DROP TRIGGER IF EXISTS n04_owned_process_exit"); err != nil {
+			r.t.Fatal(err)
+		}
+	}
 	if _, err := r.db.SQL().Exec("PRAGMA foreign_keys=ON"); err != nil {
 		r.t.Fatal(err)
 	}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	plug := nft.New(nft.Config{Apps: func() nft.Apps { return nft.Apps{Exchange: r.scenario.exchange, CollectionFactory: r.scenario.factory} }})
-	r.ix, err = indexer.New(r.db, r.eth, r.scenario.cfg, logger, plug)
+	var plugin indexer.Plugin = plug
+	if r.processPhase == "index-before-commit" {
+		plugin = ownedProcessPlugin{Plugin: plug, phase: r.processPhase}
+	}
+	r.ix, err = indexer.New(r.db, r.eth, r.scenario.cfg, logger, plugin)
 	if err != nil {
 		r.t.Fatal(err)
 	}
@@ -588,6 +604,9 @@ func (r *executionRun) open() {
 	}
 	if r.callbackError != nil {
 		r.t.Fatal(r.callbackError)
+	}
+	if err := r.ix.ReconcileCanonical(context.Background(), r.d.Head()); err != nil {
+		r.t.Fatal(err)
 	}
 }
 
@@ -634,11 +653,20 @@ func (r *executionRun) through(height uint64, wantFailure bool) {
 	var derivationError error
 	r.d.Log = slog.New(executionFailureLog{cancel: cancel, failed: &derivationError})
 	r.d.OnDerived = func(row *store.Derived) {
+		if row.Momentum.Height == 8 && r.processPhase == "derivation-after-commit" {
+			exitOwnedRecoveryProcess(r.processPhase)
+		}
 		if r.callbackError == nil {
 			r.callbackError = r.ix.IndexBlock(ctx, row.L2Number)
 		}
+		if r.callbackError == nil && row.Momentum.Height == 8 && r.processPhase == "index-after-commit" {
+			exitOwnedRecoveryProcess(r.processPhase)
+		}
 		if r.callbackError == nil {
 			r.callbackError = r.book.step(ctx)
+		}
+		if r.callbackError == nil && row.Momentum.Height == 8 && r.processPhase == "book-after-commit" {
+			exitOwnedRecoveryProcess(r.processPhase)
 		}
 		if r.callbackError != nil || row.Momentum.Height == height {
 			cancel()

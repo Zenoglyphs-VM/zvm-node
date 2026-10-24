@@ -156,10 +156,12 @@ type Indexer struct {
 
 	plugins []Plugin
 
-	mu      sync.Mutex
-	pairs   map[common.Address]*pairInfo
-	dirty   map[string]bool
-	candles *candleCache
+	mu                    sync.Mutex
+	pairs                 map[common.Address]*pairInfo
+	dirty                 map[string]bool
+	candles               *candleCache
+	recoveryMu            sync.Mutex
+	canonicalLinksChecked bool
 
 	// Shared-database state must rewind inside the index transaction. The
 	// post-commit callbacks are for notifications or state outside that DB.
@@ -374,19 +376,44 @@ func (ix *Indexer) Head() (uint64, error) {
 // chain last agree, the way Blockscout and The Graph detect a reorg: by the
 // parent hash, not by being told.
 func (ix *Indexer) Follow(ctx context.Context, chainHead func() uint64) {
-	repaired := false
+	ix.follow(ctx, func() store.Head { return store.Head{L2Number: chainHead()} }, false)
+}
+
+// FollowCanonical observes both number and hash, including a quiet same-height
+// replacement or a missed rewind notification. An unchanged accepted head
+// avoids repeating canonical RPC checks on every idle polling pass.
+func (ix *Indexer) FollowCanonical(ctx context.Context, chainHead func() store.Head) {
+	ix.follow(ctx, chainHead, true)
+}
+
+func (ix *Indexer) follow(ctx context.Context, chainHead func() store.Head, bindDerived bool) {
+	var lastAnchor store.Head
+	checked := false
 	for {
-		ix.catchUp(ctx)
-		// Retried until it succeeds: the node starts following before the
-		// engine necessarily answers.
-		if !repaired {
-			if err := ix.repairBrokenLink(ctx); err != nil {
-				ix.log.Warn("checking the index's stored chain", "err", err)
-			} else {
-				repaired = true
+		anchor := chainHead()
+		if !checked || !bindDerived || anchor != lastAnchor {
+			if !bindDerived {
+				hdr, err := ix.eth.HeaderByNumber(ctx, new(big.Int).SetUint64(anchor.L2Number))
+				if err == nil && hdr != nil {
+					anchor.L2Hash = hdr.Hash()
+				}
 			}
+			if err := ix.reconcileCanonical(ctx, anchor, bindDerived); err != nil {
+				if ctx.Err() != nil {
+					return
+				}
+				ix.log.Warn("reconciling the canonical index", "err", err)
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(500 * time.Millisecond):
+				}
+				continue
+			}
+			lastAnchor, checked = anchor, true
 		}
-		head := chainHead()
+		ix.catchUp(ctx)
+		head := anchor.L2Number
 		indexed, err := ix.Head()
 		if err != nil {
 			ix.log.Warn("reading the index head", "err", err)
@@ -397,11 +424,10 @@ func (ix *Indexer) Follow(ctx context.Context, chainHead func() uint64) {
 					return
 				}
 				var pm *parentMismatch
-				if errors.As(err, &pm) {
+				var replaced *indexedBlockMismatch
+				if errors.As(err, &pm) || errors.As(err, &replaced) {
 					ix.log.Warn("the chain reorganised under the index", "err", err)
-					if err := ix.rewindToFork(ctx, n-1); err != nil {
-						ix.log.Warn("rewinding the index to the fork", "err", err)
-					}
+					checked = false
 					break
 				}
 				ix.log.Warn("indexing block", "number", n, "err", err)
@@ -414,48 +440,6 @@ func (ix *Indexer) Follow(ctx context.Context, chainHead func() uint64) {
 		case <-time.After(500 * time.Millisecond):
 		}
 	}
-}
-
-// repairBrokenLink finds the lowest stored block whose parent is not the
-// stored block below it and, if there is one, rewinds to the fork. A broken
-// link means one side of it is an orphan the index never dropped; walking down
-// from below the link against the chain says which.
-func (ix *Indexer) repairBrokenLink(ctx context.Context) error {
-	var broken sql.NullInt64
-	if err := ix.db.QueryRow(`SELECT MIN(b.number) FROM blocks b
-		JOIN blocks p ON p.number = b.number - 1 WHERE b.parent != p.hash`).Scan(&broken); err != nil {
-		return err
-	}
-	if !broken.Valid {
-		return nil
-	}
-	ix.log.Warn("the index holds a block that does not link to the one below it", "number", broken.Int64)
-	return ix.rewindToFork(ctx, uint64(broken.Int64)-1)
-}
-
-// rewindToFork walks down from `from` to the highest block the index and the
-// chain agree on, and rewinds the index to it.
-func (ix *Indexer) rewindToFork(ctx context.Context, from uint64) error {
-	fork := from
-	for ; fork > 0; fork-- {
-		var stored string
-		err := ix.db.QueryRow("SELECT hash FROM blocks WHERE number = ?", fork).Scan(&stored)
-		if errors.Is(err, sql.ErrNoRows) {
-			continue
-		}
-		if err != nil {
-			return err
-		}
-		hdr, err := ix.eth.HeaderByNumber(ctx, new(big.Int).SetUint64(fork))
-		if err != nil {
-			return err
-		}
-		if hdr.Hash().Hex() == stored {
-			break
-		}
-	}
-	ix.log.Warn("rewinding the index to where it and the chain agree", "to", fork, "checkedFrom", from)
-	return ix.Rewind(fork)
 }
 
 // catchUp fills a derived table from logs already indexed — the tables added
@@ -484,12 +468,21 @@ func (ix *Indexer) catchUp(ctx context.Context) {
 // says so, or when the index finds an orphan itself. Then the AfterRewind
 // hooks run.
 func (ix *Indexer) Rewind(number uint64) error {
+	return ix.rewindGuarded(number, nil)
+}
+
+func (ix *Indexer) rewindGuarded(number uint64, guard func(*sql.Tx) error) error {
 	tx, err := ix.db.Begin()
 	if err != nil {
 		return err
 	}
 	commit, rollback := ix.guardTransaction(tx)
 	defer rollback()
+	if guard != nil {
+		if err := guard(tx); err != nil {
+			return err
+		}
+	}
 	// The removed range still names the affected tokens here. Recompute only
 	// their counters from the surviving prefix, without copying the history.
 	if _, err := tx.Exec(`UPDATE tokens SET transfers = (
@@ -615,6 +608,29 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 	}
 	commit, rollback := ix.guardTransaction(dbtx)
 	defer rollback()
+	var existing string
+	err = dbtx.QueryRow("SELECT hash FROM blocks WHERE number=?", number).Scan(&existing)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if err == nil {
+		if existing == blk.Hash().Hex() {
+			return commit()
+		}
+		return &indexedBlockMismatch{number: number, observed: blk.Hash(), stored: existing}
+	}
+	// Recheck after acquiring the transaction: a rewind may have happened
+	// while the block and its receipts were being read from the engine.
+	if number > 1 {
+		var stored string
+		err := dbtx.QueryRow("SELECT hash FROM blocks WHERE number=?", number-1).Scan(&stored)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		if err == nil && stored != blk.ParentHash().Hex() {
+			return &parentMismatch{number: number, parent: blk.ParentHash(), stored: stored}
+		}
+	}
 
 	baseFee := blk.BaseFee()
 	if baseFee == nil {

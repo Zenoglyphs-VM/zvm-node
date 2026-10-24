@@ -10,9 +10,10 @@ import (
 )
 
 type tokenUpdate struct {
-	id      *big.Int
-	minted  uint64
-	updated uint64
+	id       *big.Int
+	minted   uint64
+	updated  uint64
+	previous uint64
 }
 
 // Restore the height from the events that remain, using the same transfer,
@@ -20,15 +21,15 @@ type tokenUpdate struct {
 // owner alone leaves an orphan's updated_block behind. Metadata payload values
 // are a separate concern: the retained event does not contain a previous URI.
 func restoreTokenUpdateHeights(tx *sql.Tx) error {
-	rows, err := tx.Query("SELECT collection,token_id,minted_block FROM nft_tokens ORDER BY collection,token_id")
+	rows, err := tx.Query("SELECT collection,token_id,minted_block,updated_block FROM nft_tokens ORDER BY collection,token_id")
 	if err != nil {
 		return err
 	}
 	tokens := map[string]map[string]*tokenUpdate{}
 	for rows.Next() {
 		var collection, id string
-		var minted uint64
-		if err := rows.Scan(&collection, &id, &minted); err != nil {
+		var minted, previous uint64
+		if err := rows.Scan(&collection, &id, &minted, &previous); err != nil {
 			rows.Close()
 			return err
 		}
@@ -40,7 +41,7 @@ func restoreTokenUpdateHeights(tx *sql.Tx) error {
 		if tokens[collection] == nil {
 			tokens[collection] = map[string]*tokenUpdate{}
 		}
-		tokens[collection][id] = &tokenUpdate{id: value, minted: minted, updated: minted}
+		tokens[collection][id] = &tokenUpdate{id: value, minted: minted, updated: minted, previous: previous}
 	}
 	if err := rows.Err(); err != nil {
 		rows.Close()
@@ -104,10 +105,17 @@ func restoreTokenUpdateHeights(tx *sql.Tx) error {
 		return err
 	}
 	rows.Close()
+	update, err := tx.Prepare("UPDATE nft_tokens SET updated_block=? WHERE collection=? AND token_id=? AND updated_block=?")
+	if err != nil {
+		return err
+	}
+	defer update.Close()
 	for collection, entries := range tokens {
 		for id, token := range entries {
-			if _, err := tx.Exec("UPDATE nft_tokens SET updated_block=? WHERE collection=? AND token_id=? AND updated_block!=?",
-				token.updated, collection, id, token.updated); err != nil {
+			if token.previous == token.updated {
+				continue
+			}
+			if _, err := update.Exec(token.updated, collection, id, token.previous); err != nil {
 				return err
 			}
 		}

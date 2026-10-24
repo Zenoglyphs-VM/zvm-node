@@ -88,10 +88,15 @@ func TestBatchUpdateRecoveryUsesTheLiveResourceBoundary(t *testing.T) {
 	}
 	defer tx.Rollback()
 	var ids []string
+	insert, err := tx.Prepare("INSERT INTO nft_tokens VALUES('collection',?,1,9)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer insert.Close()
 	for i := 1; i <= 5002; i++ {
 		id := fmt.Sprint(i)
 		ids = append(ids, id)
-		if _, err := tx.Exec("INSERT INTO nft_tokens VALUES('collection',?,1,9)", id); err != nil {
+		if _, err := insert.Exec(id); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -103,18 +108,32 @@ func TestBatchUpdateRecoveryUsesTheLiveResourceBoundary(t *testing.T) {
 	if err := restoreTokenUpdateHeights(tx); err != nil {
 		t.Fatal(err)
 	}
-	for position, id := range ids {
+	rows, err := tx.Query("SELECT token_id,updated_block FROM nft_tokens ORDER BY token_id")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	position := 0
+	for rows.Next() {
+		var id string
 		var got int
-		if err := tx.QueryRow("SELECT updated_block FROM nft_tokens WHERE token_id=?", id).Scan(&got); err != nil {
+		if err := rows.Scan(&id, &got); err != nil {
 			t.Fatal(err)
 		}
 		want := 1
 		if position < 5000 {
 			want = 2
 		}
-		if got != want {
+		if position >= len(ids) || id != ids[position] || got != want {
 			t.Fatalf("bounded batch update for %s = %d, want %d", id, got, want)
 		}
+		position++
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if position != len(ids) {
+		t.Fatal("bounded batch recovery lost token rows")
 	}
 }
 

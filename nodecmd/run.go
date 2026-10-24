@@ -132,6 +132,7 @@ func Run(args []string, ext ...Extender) error {
 	var rewinds []Result
 	var startExtensions func() error
 	var followIndex func()
+	var startHTTP func()
 	for _, e := range ext {
 		r, err := e.Build(ctx, Env{Rollup: cfg, DB: db, Eth: eth, L1: l1, Dex: *dexPath, Log: slog.Default()})
 		if err != nil {
@@ -153,19 +154,19 @@ func Run(args []string, ext ...Extender) error {
 		// Extensions rewind with the index, not with the deriver: the index also
 		// rewinds itself when it finds an orphan block, and state kept outside
 		// it — an order book's fills — has to go back all the same.
-		startExtensions, err = PrepareExtensions(ctx, ix, rewinds)
+		startExtensions, err = PrepareExtensions(ctx, ix, rewinds, d.Head)
 		if err != nil {
 			return err
 		}
 		d.OnRewind = func(l2Number uint64) {
-			// A failure here is repaired later: the index then finds the
-			// orphan by its parent hash and rewinds itself.
+			// The follower reconciles the accepted number and hash even if
+			// this notification is interrupted or the rewind is refused.
 			if err := ix.Rewind(l2Number); err != nil {
 				slog.Error("rewinding the index", "err", err)
 			}
 		}
 		// Startup recovery must finish before a follower can change the index.
-		followIndex = func() { ix.Follow(ctx, func() uint64 { return d.Head().L2Number }) }
+		followIndex = func() { ix.FollowCanonical(ctx, d.Head) }
 
 		var verifier *verify.Service
 		if *verifyOn {
@@ -209,7 +210,6 @@ func Run(args []string, ext ...Extender) error {
 				},
 				UI: uiHandler(*uiDir), Log: slog.Default().With("svc", "api"),
 			})
-			go srv.RunOps(ctx)
 			// A whole request, not just its headers, has to arrive in time: a
 			// body sent a byte at a time held a connection and its goroutine
 			// for as long as the sender liked. Two minutes is a 16 MB
@@ -219,19 +219,22 @@ func Run(args []string, ext ...Extender) error {
 				ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 2 * time.Minute,
 				WriteTimeout: 5 * time.Minute, IdleTimeout: 2 * time.Minute,
 			}
-			go func() {
-				<-ctx.Done()
-				c, done := context.WithTimeout(context.Background(), 5*time.Second)
-				defer done()
-				httpSrv.Shutdown(c)
-			}()
-			go func() {
-				slog.Info("explorer listening", "addr", *listen, "publicEth", *publicEth)
-				if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-					slog.Error("explorer http", "err", err)
-					cancel()
-				}
-			}()
+			startHTTP = func() {
+				go srv.RunOps(ctx)
+				go func() {
+					<-ctx.Done()
+					c, done := context.WithTimeout(context.Background(), 5*time.Second)
+					defer done()
+					httpSrv.Shutdown(c)
+				}()
+				go func() {
+					slog.Info("explorer listening", "addr", *listen, "publicEth", *publicEth)
+					if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+						slog.Error("explorer http", "err", err)
+						cancel()
+					}
+				}()
+			}
 		}
 	}
 
@@ -242,6 +245,9 @@ func Run(args []string, ext ...Extender) error {
 		if err := startExtensions(); err != nil {
 			return err
 		}
+	}
+	if startHTTP != nil {
+		startHTTP()
 	}
 	if followIndex != nil {
 		go followIndex()

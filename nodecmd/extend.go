@@ -79,12 +79,15 @@ func (r Result) BindRewind(ix *indexer.Indexer) {
 // The caller keeps the index follower idle, prepares extensions before exposing
 // their routes, and calls start only after node initialization is accepted.
 // The returned function launches each worker at most once.
-func PrepareExtensions(ctx context.Context, ix *indexer.Indexer, results []Result) (start func() error, err error) {
+func PrepareExtensions(ctx context.Context, ix *indexer.Indexer, results []Result, canonical ...func() store.Head) (start func() error, err error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 	if ix == nil {
 		return nil, errors.New("extension recovery requires an initialized index")
+	}
+	if len(canonical) > 1 || (len(canonical) == 1 && canonical[0] == nil) {
+		return nil, errors.New("extension recovery requires one canonical head source")
 	}
 	prepared := append([]Result(nil), results...)
 	for _, result := range prepared {
@@ -93,19 +96,28 @@ func PrepareExtensions(ctx context.Context, ix *indexer.Indexer, results []Resul
 	if err := ix.ReconcileExtensionState(ctx); err != nil {
 		return nil, err
 	}
-	var once sync.Once
-	var startErr error
+	var startMu sync.Mutex
+	started := false
 	return func() error {
-		once.Do(func() {
-			if startErr = ctx.Err(); startErr != nil {
-				return
+		startMu.Lock()
+		defer startMu.Unlock()
+		if started {
+			return nil
+		}
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if len(canonical) == 1 {
+			if err := ix.ReconcileCanonical(ctx, canonical[0]()); err != nil {
+				return err
 			}
-			for _, result := range prepared {
-				if result.Start != nil {
-					result.Start(ctx)
-				}
+		}
+		for _, result := range prepared {
+			if result.Start != nil {
+				result.Start(ctx)
 			}
-		})
-		return startErr
+		}
+		started = true
+		return nil
 	}, nil
 }
