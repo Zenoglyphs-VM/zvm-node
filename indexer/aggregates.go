@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 	"math/big"
+	"sort"
 	"sync"
 )
 
@@ -149,7 +150,16 @@ func (ix *Indexer) foldCandles(dbtx *sql.Tx, pair string, ts int64, block uint64
 	}
 	for _, interval := range CandleIntervals {
 		bucket := ts / interval * interval
-		if _, err := dbtx.Exec(`INSERT INTO dex_candles
+		if err := putCandle(dbtx, pair, interval, bucket, block, open, price, vol0, vol1, n); err != nil {
+			return err
+		}
+	}
+	ix.candles.set(pair, price)
+	return nil
+}
+
+func putCandle(dbtx *sql.Tx, pair string, interval, bucket int64, block uint64, open, price, vol0, vol1 float64, trades int) error {
+	_, err := dbtx.Exec(`INSERT INTO dex_candles
 			(pair, interval, bucket, open, high, low, close, vol0, vol1, trades, last_block)
 			VALUES (?,?,?,?,?,?,?,?,?,?,?)
 			ON CONFLICT(pair, interval, bucket) DO UPDATE SET
@@ -160,13 +170,9 @@ func (ix *Indexer) foldCandles(dbtx *sql.Tx, pair string, ts int64, block uint64
 				vol1 = dex_candles.vol1 + excluded.vol1,
 				trades = dex_candles.trades + excluded.trades,
 				last_block = excluded.last_block`,
-			pair, interval, bucket, open, math.Max(open, price), math.Min(open, price), price,
-			vol0, vol1, n, block); err != nil {
-			return err
-		}
-	}
-	ix.candles.set(pair, price)
-	return nil
+		pair, interval, bucket, open, math.Max(open, price), math.Min(open, price), price,
+		vol0, vol1, trades, block)
+	return err
 }
 
 // lastCandleClose is the price a new bucket opens at: the close of the newest
@@ -201,42 +207,17 @@ func (ix *Indexer) pruneCandles(dbtx *sql.Tx, pair string) error {
 // fromBlock 0.
 func (ix *Indexer) rebuildCandles(dbtx *sql.Tx, fromBlock uint64) error {
 	ix.candles.reset()
-	if _, err := dbtx.Exec(`DELETE FROM dex_candles WHERE last_block >= ?`, fromBlock); err != nil {
+	if fromBlock != 0 {
+		return ix.rewindCandles(dbtx, fromBlock)
+	}
+	if _, err := dbtx.Exec(`DELETE FROM dex_candles`); err != nil {
 		return err
 	}
-	// The buckets that survive keep their contents; anything from the oldest
-	// deleted bucket onwards is folded again in event order.
-	var from sql.NullInt64
-	if err := dbtx.QueryRow(`SELECT MIN(bucket) FROM dex_candles`).Scan(&from); err != nil {
-		return err
-	}
-	rows, err := dbtx.Query(`SELECT pair, timestamp, block, kind, price, amount0, amount1 FROM dex_events
-		WHERE price IS NOT NULL AND block >= ? ORDER BY block, idx`, fromBlock)
+	events, err := readCandleEvents(dbtx, "1 = 1")
 	if err != nil {
 		return err
 	}
-	type ev struct {
-		pair   string
-		ts     int64
-		block  uint64
-		kind   string
-		price  float64
-		a0, a1 string
-	}
-	var evs []ev
-	for rows.Next() {
-		var e ev
-		if err := rows.Scan(&e.pair, &e.ts, &e.block, &e.kind, &e.price, &e.a0, &e.a1); err != nil {
-			rows.Close()
-			return err
-		}
-		evs = append(evs, e)
-	}
-	rows.Close()
-	if err := rows.Err(); err != nil {
-		return err
-	}
-	for _, e := range evs {
+	for _, e := range events {
 		p := ix.pairDecimals(dbtx, e.pair)
 		v0, v1 := floatString(e.a0, p[0]), floatString(e.a1, p[1])
 		if err := ix.foldCandles(dbtx, e.pair, e.ts, e.block, e.price, v0, v1, e.kind == KindBuy || e.kind == KindSell); err != nil {
@@ -244,6 +225,119 @@ func (ix *Indexer) rebuildCandles(dbtx *sql.Tx, fromBlock uint64) error {
 		}
 	}
 	return nil
+}
+
+// A bucket can mix surviving and removed blocks. Remember its start before
+// deleting it, then replay all surviving events in that bucket. Filtering the
+// replay by the removed block range loses the surviving part of the candle.
+// The range is tracked per pair and interval so unaffected history stays put.
+func (ix *Indexer) rewindCandles(dbtx *sql.Tx, fromBlock uint64) error {
+	rows, err := dbtx.Query(`SELECT pair, interval, MIN(bucket) FROM dex_candles
+		WHERE last_block >= ? GROUP BY pair, interval`, fromBlock)
+	if err != nil {
+		return err
+	}
+	type span struct {
+		interval, bucket int64
+		previous         float64
+	}
+	spans := map[string][]span{}
+	for rows.Next() {
+		var pair string
+		var s span
+		if err := rows.Scan(&pair, &s.interval, &s.bucket); err != nil {
+			rows.Close()
+			return err
+		}
+		spans[pair] = append(spans[pair], s)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	pairs := make([]string, 0, len(spans))
+	for pair := range spans {
+		pairs = append(pairs, pair)
+	}
+	sort.Strings(pairs)
+	for _, pair := range pairs {
+		windows := spans[pair]
+		from := windows[0].bucket
+		for i := range windows {
+			s := &windows[i]
+			from = min(from, s.bucket)
+			if _, err := dbtx.Exec(`DELETE FROM dex_candles WHERE pair = ? AND interval = ? AND bucket >= ?`, pair, s.interval, s.bucket); err != nil {
+				return err
+			}
+			// The previous retained bucket supplies the opening price. If it
+			// was pruned, retained events can still provide that observation.
+			err := dbtx.QueryRow(`SELECT close FROM dex_candles WHERE pair = ? AND interval = ? ORDER BY bucket DESC LIMIT 1`, pair, s.interval).Scan(&s.previous)
+			if errors.Is(err, sql.ErrNoRows) {
+				err = dbtx.QueryRow(`SELECT price FROM dex_events WHERE pair = ? AND timestamp < ? AND price > 0 AND price <= ?
+					ORDER BY block DESC, idx DESC LIMIT 1`, pair, s.bucket, math.MaxFloat64).Scan(&s.previous)
+			}
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
+		}
+		events, err := readCandleEvents(dbtx, "pair = ? AND timestamp >= ?", pair, from)
+		if err != nil {
+			return err
+		}
+		dec := ix.pairDecimals(dbtx, pair)
+		for _, e := range events {
+			if e.price <= 0 || math.IsInf(e.price, 0) || math.IsNaN(e.price) {
+				continue
+			}
+			vol0, vol1, trades := 0.0, 0.0, 0
+			if e.kind == KindBuy || e.kind == KindSell {
+				vol0, vol1, trades = floatString(e.a0, dec[0]), floatString(e.a1, dec[1]), 1
+			}
+			for i := range windows {
+				s := &windows[i]
+				if e.ts < s.bucket {
+					continue
+				}
+				open := s.previous
+				if open <= 0 {
+					open = e.price
+				}
+				bucket := e.ts / s.interval * s.interval
+				if err := putCandle(dbtx, pair, s.interval, bucket, e.block, open, e.price, vol0, vol1, trades); err != nil {
+					return err
+				}
+				s.previous = e.price
+			}
+		}
+	}
+	return nil
+}
+
+type candleEvent struct {
+	pair   string
+	ts     int64
+	block  uint64
+	kind   string
+	price  float64
+	a0, a1 string
+}
+
+func readCandleEvents(dbtx *sql.Tx, where string, args ...any) ([]candleEvent, error) {
+	rows, err := dbtx.Query(`SELECT pair, timestamp, block, kind, price, amount0, amount1 FROM dex_events
+		WHERE price IS NOT NULL AND (`+where+`) ORDER BY block, idx`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []candleEvent
+	for rows.Next() {
+		var e candleEvent
+		if err := rows.Scan(&e.pair, &e.ts, &e.block, &e.kind, &e.price, &e.a0, &e.a1); err != nil {
+			return nil, err
+		}
+		out = append(out, e)
+	}
+	return out, rows.Err()
 }
 
 // pairDecimals is a pool's token decimals, for turning base units into whole

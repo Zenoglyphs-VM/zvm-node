@@ -268,7 +268,8 @@ func (ix *Indexer) backfillAggregates() error {
 	if err != nil {
 		return err
 	}
-	defer dbtx.Rollback()
+	commit, rollback := ix.guardTransaction(dbtx)
+	defer rollback()
 	if addrs == 0 && txs > 0 {
 		ix.log.Info("building address counters from the transactions already indexed", "txs", txs)
 		if err := rebuildAddrStats(dbtx); err != nil {
@@ -299,7 +300,7 @@ func (ix *Indexer) backfillAggregates() error {
 			return err
 		}
 	}
-	return dbtx.Commit()
+	return commit()
 }
 
 func (ix *Indexer) Head() (uint64, error) {
@@ -439,7 +440,8 @@ func (ix *Indexer) Rewind(number uint64) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	commit, rollback := ix.guardTransaction(tx)
+	defer rollback()
 	for _, stmt := range []string{
 		"DELETE FROM blocks WHERE number > ?", "DELETE FROM txs WHERE block > ?",
 		"DELETE FROM logs WHERE block > ?",
@@ -504,7 +506,7 @@ func (ix *Indexer) Rewind(number uint64) error {
 			return fmt.Errorf("rebuilding the %s index: %w", p.Name(), err)
 		}
 	}
-	if err := tx.Commit(); err != nil {
+	if err := commit(); err != nil {
 		return err
 	}
 	ix.forgetPairs()
@@ -551,7 +553,8 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 	if err != nil {
 		return err
 	}
-	defer dbtx.Rollback()
+	commit, rollback := ix.guardTransaction(dbtx)
+	defer rollback()
 
 	baseFee := blk.BaseFee()
 	if baseFee == nil {
@@ -654,7 +657,7 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 	if err := ix.afterBlock(dbtx, number); err != nil {
 		return err
 	}
-	return dbtx.Commit()
+	return commit()
 }
 
 func (ix *Indexer) origin(dbtx *sql.Tx, hash common.Hash) (string, *string) {

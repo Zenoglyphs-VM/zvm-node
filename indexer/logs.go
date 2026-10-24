@@ -99,7 +99,8 @@ func (ix *Indexer) backfill(ctx context.Context, key, where string, args []any, 
 	if err != nil {
 		return err
 	}
-	defer dbtx.Rollback()
+	commit, rollback := ix.guardTransaction(dbtx)
+	defer rollback()
 	for _, r := range logs {
 		if err := handle(ctx, dbtx, r); err != nil {
 			return fmt.Errorf("block %d log %d: %w", r.Block, r.Index, err)
@@ -111,7 +112,7 @@ func (ix *Indexer) backfill(ctx context.Context, key, where string, args []any, 
 	if _, err := dbtx.Exec("INSERT OR REPLACE INTO index_meta (key, value) VALUES (?, ?)", key, head); err != nil {
 		return err
 	}
-	if err := dbtx.Commit(); err != nil {
+	if err := commit(); err != nil {
 		return err
 	}
 	ix.log.Info("backfilled from indexed logs", "job", key, "logs", len(logs), "head", head)
