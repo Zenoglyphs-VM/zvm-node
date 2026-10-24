@@ -55,3 +55,25 @@ func TestMetadataReadsStopAtTheBlocksBudget(t *testing.T) {
 		t.Error("the next block did not get a budget of its own")
 	}
 }
+
+func TestRollbackDoesNotRenewTheMetadataBudget(t *testing.T) {
+	defer func(old time.Duration) { metadataBudget = old }(metadataBudget)
+	metadataBudget = time.Millisecond
+	h := &slowHost{delay: 5 * time.Millisecond}
+	x := New(Config{})
+	if err := x.Attach(h); err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	collection := common.Address{19: 31}
+	if x.tokenURI(ctx, 7, collection, common.Big1) == "" || h.calls != 1 {
+		t.Fatal("first metadata read did not execute")
+	}
+	x.AfterRollback()
+	if x.tokenURI(ctx, 7, collection, common.Big1) != "" || h.calls != 1 {
+		t.Fatal("rolling back renewed the same block's exhausted metadata budget")
+	}
+	if x.tokenURI(ctx, 8, collection, common.Big1) == "" || h.calls != 2 {
+		t.Fatal("the next block did not receive its own metadata budget")
+	}
+}

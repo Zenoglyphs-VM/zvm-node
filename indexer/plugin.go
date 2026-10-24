@@ -72,6 +72,15 @@ type Plugin interface {
 	Stale(db *sql.DB) bool
 }
 
+// RollbackAware is optional for plugins that retain transaction-derived state
+// in memory. AfterRollback runs after an index write fails or is abandoned, on
+// the same goroutine as the other plugin methods. It discards those pending
+// observations; resource accounting already consumed by the attempt must stay
+// in force across retries. Successful commits do not call it.
+type RollbackAware interface {
+	AfterRollback()
+}
+
 // A Job is one backfill: a WHERE clause over the indexed `logs l`, remembered
 // under Key so it runs once.
 type Job struct {

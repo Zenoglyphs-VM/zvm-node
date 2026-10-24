@@ -17,6 +17,11 @@ func (ix *Indexer) guardTransaction(tx *sql.Tx) (commit func() error, rollback f
 			if !committed {
 				ix.forgetPairs()
 				ix.candles.reset()
+				for _, plugin := range ix.plugins {
+					if p, ok := plugin.(RollbackAware); ok {
+						p.AfterRollback()
+					}
+				}
 			}
 		}
 }

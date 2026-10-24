@@ -252,17 +252,27 @@ func (ix *Indexer) backfillAggregates() error {
 	ix.db.QueryRow("SELECT COUNT(*) FROM txs").Scan(&txs)
 	ix.db.QueryRow("SELECT COUNT(*) FROM dex_events").Scan(&events)
 	ix.db.QueryRow("SELECT COUNT(*) FROM blocks").Scan(&blocks)
-	stale := false
+	var stalePlugins []Plugin
 	for _, p := range ix.plugins {
 		if p.Stale(ix.db) {
-			stale = true
+			stalePlugins = append(stalePlugins, p)
 		}
 	}
 	// The empty chain needs the same zero/basis row as a rebuilt chain. Without
 	// it, a zero-throughput block can create a different record on first index
 	// than after restart or rewind, although the surviving blocks are identical.
-	if (addrs > 0 || txs == 0) && (candles > 0 || events == 0) && !stale && chainStatsBasis == maxTPSBasis {
+	if (addrs > 0 || txs == 0) && (candles > 0 || events == 0) && len(stalePlugins) == 0 && chainStatsBasis == maxTPSBasis {
 		return nil
+	}
+	// Stale and Head read through the database pool. Resolve them before the
+	// write transaction holds a connection, including on a one-connection DB.
+	var head uint64
+	if len(stalePlugins) > 0 {
+		var err error
+		head, err = ix.Head()
+		if err != nil {
+			return err
+		}
 	}
 	dbtx, err := ix.db.Begin()
 	if err != nil {
@@ -282,12 +292,8 @@ func (ix *Indexer) backfillAggregates() error {
 			return err
 		}
 	}
-	for _, p := range ix.plugins {
-		if !p.Stale(ix.db) {
-			continue
-		}
+	for _, p := range stalePlugins {
 		ix.log.Info("rebuilding a plugin's derived tables", "plugin", p.Name())
-		head, _ := ix.Head()
 		if err := p.Rebuild(dbtx, head); err != nil {
 			return fmt.Errorf("rebuilding the %s index: %w", p.Name(), err)
 		}

@@ -144,19 +144,29 @@ func (x *Index) AfterBlock(dbtx *sql.Tx, block uint64) error {
 	return x.refreshDirtyCollections(dbtx, block)
 }
 
+// AfterRollback discards the collections touched by the aborted transaction.
+// Metadata read accounting is retained so retrying a block cannot renew its
+// already-consumed time budget.
+func (x *Index) AfterRollback() {
+	x.mu.Lock()
+	x.dirty = map[string]bool{}
+	x.mu.Unlock()
+}
+
 // Rebuild recomputes every collection's totals, which a rewind cannot repair by
 // deleting rows because a total is a sum over the range that survived.
 func (x *Index) Rebuild(dbtx *sql.Tx, block uint64) error {
 	return x.rebuildCollectionStats(dbtx, block)
 }
 
-// Stale is true for an index that has collections but no statistics — one
-// built before this plugin's aggregate table existed.
+// Stale catches missing collection aggregates and orphan rows left by older
+// rewinds. Equal table counts do not imply matching collection identities.
 func (x *Index) Stale(db *sql.DB) bool {
-	var stats, collections int64
-	db.QueryRow("SELECT COUNT(*) FROM nft_collection_stats").Scan(&stats)
-	db.QueryRow("SELECT COUNT(*) FROM nft_collections").Scan(&collections)
-	return stats == 0 && collections > 0
+	var stale bool
+	err := db.QueryRow(`SELECT
+		EXISTS (SELECT 1 FROM nft_collections c LEFT JOIN nft_collection_stats s ON s.collection = c.address WHERE s.collection IS NULL)
+		OR EXISTS (SELECT 1 FROM nft_collection_stats s LEFT JOIN nft_collections c ON c.address = s.collection WHERE c.address IS NULL)`).Scan(&stale)
+	return err != nil || stale
 }
 
 // The three things the host lends this plugin, named the way the code that
