@@ -33,9 +33,11 @@ var ownedRecoveryPhases = []string{
 // Exiting skips database Close/Stop and test cleanup in that owned child.
 // This is process termination, not a hardware power-loss or kernel-kill proof.
 type ownedRecoveryConfig struct {
-	Phase   string `json:"phase"`
-	Path    string `json:"path"`
-	Genesis string `json:"genesis"`
+	Phase     string `json:"phase"`
+	Path      string `json:"path"`
+	Genesis   string `json:"genesis"`
+	Validated bool   `json:"validated,omitempty"`
+	Buffered  bool   `json:"buffered,omitempty"`
 }
 
 func exitOwnedRecoveryProcess(phase string) {
@@ -108,7 +110,7 @@ func ownedRecoveryChild(t *testing.T, cfg ownedRecoveryConfig) {
 	if json.Unmarshal(raw, &recorded) != nil || recorded != cfg {
 		t.Fatal("owned fixture marker differs")
 	}
-	scenario := newExecutionScenario(t)
+	scenario := newExecutionScenarioProfile(t, cfg.Validated, cfg.Buffered, cfg.Path)
 	if scenario.cfg.L2GenesisHash.Hex() != cfg.Genesis {
 		t.Fatal("owned child genesis differs")
 	}
@@ -175,6 +177,11 @@ func TestExecutedNativeProcessRecoveryConverges(t *testing.T) {
 		return
 	}
 	scenario := newExecutionScenario(t)
+	ownedRecoveryMatrix(t, scenario)
+}
+
+func ownedRecoveryMatrix(t *testing.T, scenario *executionScenario) {
+	t.Helper()
 	reference := newExecutionRun(t, scenario)
 	reference.through(9, false)
 	reference.assertExpected()
@@ -184,7 +191,7 @@ func TestExecutedNativeProcessRecoveryConverges(t *testing.T) {
 			r := newExecutionRun(t, scenario)
 			r.through(7, false)
 			r.close()
-			cfg := ownedRecoveryConfig{Phase: phase, Path: r.path, Genesis: scenario.cfg.L2GenesisHash.Hex()}
+			cfg := ownedRecoveryConfig{Phase: phase, Path: r.path, Genesis: scenario.cfg.L2GenesisHash.Hex(), Validated: scenario.validated, Buffered: scenario.buffered}
 			raw, err := json.Marshal(cfg)
 			if err != nil {
 				t.Fatal(err)

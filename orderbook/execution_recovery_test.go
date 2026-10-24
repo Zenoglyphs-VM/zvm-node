@@ -1,6 +1,7 @@
 package orderbook
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -68,7 +69,7 @@ type executionEngine struct {
 	closed       bool
 }
 
-func openExecutionEngine(t *testing.T, path string, genesis *core.Genesis) *executionEngine {
+func openExecutionEngine(t *testing.T, path string, genesis *core.Genesis, buffered bool) *executionEngine {
 	t.Helper()
 	kv, err := leveldb.New(path, 16, 16, "execution-recovery", false)
 	if err != nil {
@@ -77,7 +78,7 @@ func openExecutionEngine(t *testing.T, path string, genesis *core.Genesis) *exec
 	db := rawdb.NewDatabase(kv)
 	cfg := core.DefaultConfig()
 	cfg.TrieCleanLimit, cfg.TrieDirtyLimit, cfg.SnapshotLimit = 16, 16, 0
-	cfg.ArchiveMode, cfg.TrieNoAsyncFlush = true, true
+	cfg.ArchiveMode, cfg.TrieNoAsyncFlush = !buffered, true
 	sealer := beacon.New(ethash.NewFaker())
 	chain, err := core.NewBlockChain(db, genesis, sealer, cfg)
 	if err != nil {
@@ -366,9 +367,14 @@ type executionScenario struct {
 	factory, exchange, token common.Address
 	orders                   []*Order
 	branches                 [2]map[uint64]*znn.DetailedMomentum
+	validated, buffered      bool
 }
 
 func newExecutionScenario(t *testing.T) *executionScenario {
+	return newExecutionScenarioProfile(t, false, false)
+}
+
+func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profileDir ...string) *executionScenario {
 	t.Helper()
 	arts, err := bench.LoadArtifacts()
 	if err != nil {
@@ -381,20 +387,59 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 	if err := arts.AddCombined(raw); err != nil {
 		t.Fatal(err)
 	}
-	s := &executionScenario{arts: arts, seller: znn.Address{19: 161}, buyer: znn.Address{19: 162}}
+	s := &executionScenario{arts: arts, seller: znn.Address{19: 161}, buyer: znn.Address{19: 162}, validated: validated, buffered: buffered}
 	s.cfg = &rollup.Config{L1ChainID: 70, L2ChainID: 7340470, Inbox: rollup.Inbox, Vault: znn.Address{19: 163},
 		L1StartHeight: 2, L2GenesisTimestamp: 1_800_000_000, GasLimit: 30_000_000, GasPerPlasma: 1000,
 		MaxNativeGas: 12_000_000, MaxNativeGasPerBlock: 22_500_000, NativeFloorBP: 2500, NativeCeilBP: 7500,
 		MandatoryShareBP: 200, MaxTxGas: 30_000_000, ChunkTTL: 100, MaxAssembledBytes: 1 << 19, MaxBatchBytes: 1 << 22,
 		FinalityDepth: 100, Forks: &rollup.Forks{Gas: 2, Wire: 2}}
+	if validated {
+		s.cfg.Forks = &rollup.Forks{Gas: 3, Wire: 3}
+		s.cfg.FeeSplitter = rollup.FeeSplitterAddr
+		s.cfg.MaxDepositCallGas = 1_000_000
+		s.cfg.Fee = &rollup.Fee{FromHeight: 3, GasPerSupply: 100_000_000_000_000, GenesisTimestamp: int64(s.cfg.L2GenesisTimestamp),
+			RefEpoch: 0, RefZNN: "100000000000000", RefQSR: "200000000000000"}
+	}
 	s.genesis, err = l2.BuildGenesis(s.cfg, s.cfg.L2GenesisTimestamp)
 	if err != nil {
 		t.Fatal(err)
 	}
 	s.cfg.L2GenesisHash = s.genesis.ToBlock().Hash()
-	implementation := crypto.CreateAddress(common.Address(s.seller), 0)
-	s.factory = crypto.CreateAddress(common.Address(s.seller), 1)
-	s.exchange = crypto.CreateAddress(common.Address(s.seller), 2)
+	if validated {
+		// Children use their parent's owned fixture directory so an intentional
+		// exit cannot leave an unowned sibling testing.T temporary directory.
+		if len(profileDir) > 1 {
+			t.Fatal("one owned profile directory is required")
+		}
+		var dir string
+		if len(profileDir) == 1 {
+			dir = profileDir[0]
+		} else {
+			dir = t.TempDir()
+		}
+		data, err := json.Marshal(s.cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		path := filepath.Join(dir, "validated-rollup.json")
+		if err := os.WriteFile(path, data, 0600); err != nil {
+			t.Fatal(err)
+		}
+		s.cfg, err = rollup.Load(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if s.cfg.L2GenesisHash != s.genesis.ToBlock().Hash() {
+			t.Fatal("loaded genesis hash differs")
+		}
+	}
+	offset := uint64(0)
+	if validated {
+		offset = 1
+	} // The real CREATE2 deployer call consumes a sender nonce.
+	implementation := crypto.CreateAddress(common.Address(s.seller), offset)
+	s.factory = crypto.CreateAddress(common.Address(s.seller), offset+1)
+	s.exchange = crypto.CreateAddress(common.Address(s.seller), offset+2)
 	s.token = crypto.CreateAddress(s.factory, 1)
 	for id := int64(1); id <= 2; id++ {
 		s.orders = append(s.orders, &Order{Trader: common.Address(s.seller), Side: SideSell, Collection: s.token,
@@ -411,6 +456,7 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 	for branch := range s.branches {
 		momentums := map[uint64]*znn.DetailedMomentum{1: {Momentum: &znn.Momentum{Height: 1, Hash: znn.Sha3([]byte("declared-native-recovery-genesis")), Timestamp: s.cfg.L2GenesisTimestamp}}}
 		heights := map[znn.Address]uint64{}
+		previous := map[znn.Address]znn.Hash{}
 		var chunk znn.Hash
 		for h := uint64(2); h <= 9; h++ {
 			variant := byte(0)
@@ -428,7 +474,27 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 					block.TokenStandard = znn.ZNN
 				}
 				block.FusedPlasma = block.UsedPlasma
+				if validated {
+					block.PreviousHash = previous[from]
+					block.MomentumAcknowledged = znn.HashHeight{Hash: dm.Momentum.PreviousHash, Height: h - 1}
+					if to == s.cfg.Inbox && s.cfg.Fee.Active(h) && len(data) > 0 && (data[0] == derive.MsgCall || data[0] == derive.MsgAssemble) {
+						gas := uint64(500_000)
+						if data[0] == derive.MsgCall {
+							call, err := derive.DecodeCall(data[1:], true)
+							if err != nil {
+								t.Fatal(err)
+							}
+							gas = call.Gas
+						}
+						quote := derive.FeeQuote(s.cfg, znn.ZNN, gas, dm.Momentum, block)
+						if !quote.IsUint64() {
+							t.Fatal("synthetic native fee exceeds the declared amount bound")
+						}
+						block.TokenStandard, block.Amount = znn.ZNN, znn.BigIntFromUint64(quote.Uint64())
+					}
+				}
 				block.Hash = block.ComputeHash()
+				previous[from] = block.Hash
 				dm.Blocks = append(dm.Blocks, block)
 				dm.Momentum.Content = append(dm.Momentum.Content, znn.AccountHeader{Address: from, Height: block.Height, Hash: block.Hash})
 				return block
@@ -438,6 +504,10 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 			}
 			switch h {
 			case 2, 3, 4:
+				if h == 2 && validated {
+					deployer := rollup.Create2Deployer
+					native(s.seller, &deployer, nil, rollup.DeployCalldata(rollup.FeesSalt, rollup.FeesArtifact.InitCode()))
+				}
 				name, args := "ZVMCollection", []any{}
 				if h == 3 {
 					name, args = "ZVMCollectionFactory", []any{implementation}
@@ -465,6 +535,22 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 				input := &Input{Order: *s.orders[branch], Kind: KindOnChain}
 				native(s.buyer, &s.exchange, input.Order.Price.Big(), callData("ZVMExchange", "buy", input.ABI()))
 				send(s.seller, s.cfg.Inbox, 0, derive.EncodeAssemble([]znn.Hash{chunk}))
+			}
+			if validated {
+				sort.Slice(dm.Blocks, func(i, j int) bool {
+					a, b := dm.Blocks[i], dm.Blocks[j]
+					if order := bytes.Compare(a.Address[:], b.Address[:]); order != 0 {
+						return order < 0
+					}
+					if a.Height != b.Height {
+						return a.Height < b.Height
+					}
+					return bytes.Compare(a.Hash[:], b.Hash[:]) < 0
+				})
+				dm.Momentum.Content = nil
+				for _, block := range dm.Blocks {
+					dm.Momentum.Content = append(dm.Momentum.Content, znn.AccountHeader{Address: block.Address, Height: block.Height, Hash: block.Hash})
+				}
 			}
 			momentums[h] = dm
 		}
@@ -546,7 +632,7 @@ func newExecutionRun(t *testing.T, scenario *executionScenario) *executionRun {
 func (r *executionRun) open() {
 	r.t.Helper()
 	r.callbackError = nil
-	r.backend = openExecutionEngine(r.t, filepath.Join(r.path, "engine"), r.scenario.genesis)
+	r.backend = openExecutionEngine(r.t, filepath.Join(r.path, "engine"), r.scenario.genesis, r.scenario.buffered)
 	srv := rpc.NewServer()
 	if err := srv.RegisterName("engine", r.backend); err != nil {
 		r.t.Fatal(err)
