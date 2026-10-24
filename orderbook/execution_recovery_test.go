@@ -3,6 +3,7 @@ package orderbook
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -189,6 +190,10 @@ func (b *executionEngine) NewPayloadV4(ctx context.Context, data engine.Executab
 }
 
 type executionEth struct{ backend *executionEngine }
+
+func (s executionEth) ChainId() *hexutil.Big {
+	return (*hexutil.Big)(new(big.Int).Set(s.backend.chain.Config().ChainID))
+}
 
 func (s executionEth) header(selector rpc.BlockNumberOrHash) (*types.Header, error) {
 	b := s.backend
@@ -825,9 +830,13 @@ func (r *executionRun) faultSQL(phase string) {
 // allowed to advance its local epoch and recheck time. Original stored order
 // inputs/hashes, chain-derived closure fields and all other tables are compared.
 func (r *executionRun) state() map[string][]string {
+	return r.stateFrom(r.db.SQL())
+}
+
+func (r *executionRun) stateFrom(db *sql.DB) map[string][]string {
 	r.t.Helper()
 	out := map[string][]string{}
-	rows, err := r.db.SQL().Query(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'execution_%' ORDER BY name`)
+	rows, err := db.Query(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'execution_%' ORDER BY name`)
 	if err != nil {
 		r.t.Fatal(err)
 	}
@@ -844,7 +853,7 @@ func (r *executionRun) state() map[string][]string {
 	}
 	rows.Close()
 	for _, table := range tables {
-		rows, err := r.db.SQL().Query(`SELECT * FROM "` + table + `"`)
+		rows, err := db.Query(`SELECT * FROM "` + table + `"`)
 		if err != nil {
 			r.t.Fatal(err)
 		}
@@ -913,6 +922,10 @@ func assertExecutionState(t *testing.T, got, want map[string][]string) {
 }
 
 func (r *executionRun) assertExpected() {
+	r.assertExpectedFrom(r.db.SQL())
+}
+
+func (r *executionRun) assertExpectedFrom(db *sql.DB) {
 	r.t.Helper()
 	s := r.scenario
 	head := r.backend.chain.CurrentBlock()
@@ -939,14 +952,14 @@ func (r *executionRun) assertExpected() {
 			r.t.Fatalf("executed ownerOf(%d) disagrees: %x, %v", id, raw, err)
 		}
 		var indexed string
-		if err := r.db.SQL().QueryRow("SELECT owner FROM nft_tokens WHERE collection=? AND token_id=?", s.token.Hex(), fmt.Sprint(id)).Scan(&indexed); err != nil || indexed != owner.Hex() {
+		if err := db.QueryRow("SELECT owner FROM nft_tokens WHERE collection=? AND token_id=?", s.token.Hex(), fmt.Sprint(id)).Scan(&indexed); err != nil || indexed != owner.Hex() {
 			r.t.Fatalf("indexed ownerOf(%d) = %s: %v", id, indexed, err)
 		}
 	}
 	for i, order := range s.orders {
 		var status, input string
 		var filled int
-		if err := r.db.SQL().QueryRow("SELECT status,filled,input FROM nft_orders WHERE hash=?", order.Hash().Hex()).Scan(&status, &filled, &input); err != nil {
+		if err := db.QueryRow("SELECT status,filled,input FROM nft_orders WHERE hash=?", order.Hash().Hex()).Scan(&status, &filled, &input); err != nil {
 			r.t.Fatal(err)
 		}
 		if i == 0 && (status != StatusFilled || filled != 1) || i == 1 && (status != StatusOpen || filled != 0) {
@@ -958,10 +971,10 @@ func (r *executionRun) assertExpected() {
 		}
 	}
 	var chunks, consumed, deferred, released int
-	if err := r.db.SQL().QueryRow("SELECT count(*),sum(consumed_at=8) FROM chunks").Scan(&chunks, &consumed); err != nil || chunks != 1 || consumed != 1 {
+	if err := db.QueryRow("SELECT count(*),sum(consumed_at=8) FROM chunks").Scan(&chunks, &consumed); err != nil || chunks != 1 || consumed != 1 {
 		r.t.Fatalf("chunk consumption differs: %d/%d, %v", chunks, consumed, err)
 	}
-	if err := r.db.SQL().QueryRow("SELECT count(*),sum(released_at=8) FROM deferred").Scan(&deferred, &released); err != nil || deferred != 1 || released != 1 {
+	if err := db.QueryRow("SELECT count(*),sum(released_at=8) FROM deferred").Scan(&deferred, &released); err != nil || deferred != 1 || released != 1 {
 		r.t.Fatalf("deferred release differs: %d/%d, %v", deferred, released, err)
 	}
 	for n := uint64(1); n <= 8; n++ {
