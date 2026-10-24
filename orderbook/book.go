@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"math/big"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -58,6 +60,10 @@ CREATE TABLE IF NOT EXISTS nft_orders (
 	block           INTEGER NOT NULL,
 	timestamp       INTEGER NOT NULL,
 	checked_at      INTEGER NOT NULL,
+	checked_epoch   INTEGER NOT NULL DEFAULT -1,
+	checked_block   INTEGER NOT NULL DEFAULT 0,
+	checked_hash    TEXT NOT NULL DEFAULT '',
+	filled_epoch    INTEGER NOT NULL DEFAULT -1,
 	closed_block    INTEGER,
 	source          TEXT    NOT NULL
 );
@@ -145,9 +151,10 @@ type Config struct {
 type Book struct {
 	cfg Config
 
-	mu        sync.Mutex
-	lastSweep time.Time
-	lastErr   string
+	mu             sync.Mutex
+	lastSweep      time.Time
+	lastSweepEpoch uint64
+	lastErr        string
 }
 
 func New(cfg Config) (*Book, error) {
@@ -166,7 +173,7 @@ func New(cfg Config) (*Book, error) {
 	if cfg.Log == nil {
 		cfg.Log = slog.Default()
 	}
-	if _, err := cfg.DB.Exec(schema); err != nil {
+	if err := initObservations(cfg.DB); err != nil {
 		return nil, fmt.Errorf("order book schema: %w", err)
 	}
 	return &Book{cfg: cfg}, nil
@@ -203,11 +210,23 @@ func (b *Book) Submit(ctx context.Context, inputs []*Input) ([]Result, error) {
 	if len(inputs) == 0 || len(inputs) > MaxSubmit {
 		return nil, fmt.Errorf("submit between 1 and %d orders", MaxSubmit)
 	}
+	at, err := b.snapshot(ctx)
+	if err != nil {
+		return nil, err
+	}
 	results := make([]Result, len(inputs))
 	var toCheck []*Input
 	var idx []int
 	for i, in := range inputs {
+		if in == nil {
+			results[i] = Result{Reason: "missing order input", Code: CodeMalformed}
+			continue
+		}
 		if err := in.Order.Check(); err != nil {
+			results[i] = Result{Reason: err.Error(), Code: CodeMalformed}
+			continue
+		}
+		if _, err := storedAmount(in); err != nil {
 			results[i] = Result{Reason: err.Error(), Code: CodeMalformed}
 			continue
 		}
@@ -218,7 +237,7 @@ func (b *Book) Submit(ctx context.Context, inputs []*Input) ([]Result, error) {
 			// else — a contract wallet's ERC-1271 answer — is the exchange's
 			// to judge.
 			if signer, ok := Recover(domain, in); ok && signer != in.Order.Trader {
-				if code, _ := b.cfg.Eth.CodeAt(ctx, in.Order.Trader, nil); len(code) == 0 {
+				if code, _ := b.cfg.Eth.CodeAt(ctx, in.Order.Trader, at.head.Number); len(code) == 0 {
 					results[i].Code, results[i].Reason = CodeBadSignature, fmt.Sprintf("signed by %s, not by the trader", signer)
 					continue
 				}
@@ -235,17 +254,24 @@ func (b *Book) Submit(ctx context.Context, inputs []*Input) ([]Result, error) {
 		toCheck = append(toCheck, in)
 		idx = append(idx, i)
 	}
-	checks, err := b.check(ctx, exchange, toCheck)
+	checks, err := b.check(ctx, exchange, toCheck, at.head)
 	if err != nil {
 		return nil, err
 	}
-	head, err := b.cfg.Eth.HeaderByNumber(ctx, nil)
+	if err := b.verifyHeader(ctx, at.head); err != nil {
+		return nil, err
+	}
+	tx, err := b.observationTx(ctx, at.epoch)
 	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	if err := guardScanHeight(tx, exchange, at.head); err != nil {
 		return nil, err
 	}
 	now := time.Now().Unix()
 	var open int
-	if err := b.cfg.DB.QueryRow("SELECT COUNT(*) FROM nft_orders WHERE status = ?", StatusOpen).Scan(&open); err != nil {
+	if err := tx.QueryRow("SELECT COUNT(*) FROM nft_orders WHERE status = ?", StatusOpen).Scan(&open); err != nil {
 		return nil, err
 	}
 	perTrader := map[common.Address]int{}
@@ -259,12 +285,14 @@ func (b *Book) Submit(ctx context.Context, inputs []*Input) ([]Result, error) {
 		}
 		// An order already in the book takes no new room; a new one has to fit.
 		var known int
-		b.cfg.DB.QueryRow("SELECT COUNT(*) FROM nft_orders WHERE hash = ?", in.Order.Hash().Hex()).Scan(&known)
+		if err := tx.QueryRow("SELECT COUNT(*) FROM nft_orders WHERE hash = ?", in.Order.Hash().Hex()).Scan(&known); err != nil {
+			return nil, err
+		}
 		if known == 0 {
 			trader := in.Order.Trader
 			n, counted := perTrader[trader]
 			if !counted {
-				if err := b.cfg.DB.QueryRow("SELECT COUNT(*) FROM nft_orders WHERE trader = ? AND status = ?",
+				if err := tx.QueryRow("SELECT COUNT(*) FROM nft_orders WHERE trader = ? AND status = ?",
 					trader.Hex(), StatusOpen).Scan(&n); err != nil {
 					return nil, err
 				}
@@ -281,18 +309,26 @@ func (b *Book) Submit(ctx context.Context, inputs []*Input) ([]Result, error) {
 			}
 			perTrader[trader], open = n+1, open+1
 		}
-		if err := b.insert(in, exchange, c, head, "api", now); err != nil {
+		accepted, err := b.insert(tx, in, exchange, c, at, "api", now)
+		if err != nil {
 			return nil, err
 		}
+		if !accepted {
+			results[i].Code, results[i].Reason = CodeUnchecked, errCheckConflict.Error()
+			continue
+		}
 		results[i].OK = true
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 	return results, nil
 }
 
-func (b *Book) insert(in *Input, exchange common.Address, c check, head *types.Header, source string, now int64) error {
+func (b *Book) insert(tx *sql.Tx, in *Input, exchange common.Address, c check, at observation, source string, now int64) (bool, error) {
 	raw, err := json.Marshal(in)
 	if err != nil {
-		return err
+		return false, err
 	}
 	o := &in.Order
 	var tokenID any = o.TokenID.Big().String()
@@ -303,30 +339,45 @@ func (b *Book) insert(in *Input, exchange common.Address, c check, head *types.H
 	if in.Root != nil {
 		root = in.Root.Hex()
 	}
-	amount := o.Amount.Big().Int64()
-	_, err = b.cfg.DB.Exec(`INSERT INTO nft_orders
+	amount, err := storedAmount(in)
+	if err != nil {
+		return false, err
+	}
+	_, err = tx.Exec(`INSERT INTO nft_orders
 		(hash, exchange, trader, side, collection, token_id, amount, filled, payment_token, price, price_num,
 		 listing_time, expiration_time, nonce, kind, root, input, status, code, block, timestamp, checked_at, source)
 		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-		ON CONFLICT(hash) DO UPDATE SET status = excluded.status, code = excluded.code, filled = excluded.filled,
-			checked_at = excluded.checked_at,
-			-- a signature for an order already approved on chain is still worth keeping
-			input = CASE WHEN nft_orders.kind = 2 AND excluded.kind != 2 THEN excluded.input ELSE nft_orders.input END,
-			kind = CASE WHEN nft_orders.kind = 2 AND excluded.kind != 2 THEN excluded.kind ELSE nft_orders.kind END`,
+		ON CONFLICT(hash) DO NOTHING`,
 		o.Hash().Hex(), exchange.Hex(), o.Trader.Hex(), o.Side, o.Collection.Hex(), tokenID, amount,
-		amount-int64(c.remaining), o.PaymentToken.Hex(), o.Price.Big().String(), b.priceNum(o.PaymentToken, o.Price.Big()),
+		0, o.PaymentToken.Hex(), o.Price.Big().String(), b.priceNum(tx, o.PaymentToken, o.Price.Big()),
 		o.ListingTime, o.ExpirationTime, o.Nonce.Big().String(), in.Kind, root, string(raw),
-		statusFor(c.code), c.code, head.Number.Uint64(), head.Time, now, source)
-	return err
+		StatusOpen, CodeUnchecked, at.head.Number.Int64(), at.head.Time, 0, source)
+	if err != nil {
+		return false, err
+	}
+	if c.code == CodeUnchecked {
+		return true, nil // A log supplied the input, not a fillability check.
+	}
+	accepted, err := b.observe(tx, in, exchange, c, at, now)
+	if err != nil || !accepted {
+		return accepted, err
+	}
+	// Keep a submitted signature for an input previously learned only from an
+	// on-chain approval. Existing signed inputs and their hashes stay intact.
+	if in.Kind != KindOnChain {
+		_, err = tx.Exec("UPDATE nft_orders SET input=?,kind=?,root=? WHERE hash=? AND kind=? AND exchange=?",
+			string(raw), in.Kind, root, o.Hash().Hex(), KindOnChain, exchange.Hex())
+	}
+	return err == nil, err
 }
 
 // priceNum is a price in whole units of its currency, for sorting and floors.
 // ZNN and wrapped ZNN have 18 decimals; anything the index knows says its own.
-func (b *Book) priceNum(token common.Address, price *big.Int) float64 {
+func (b *Book) priceNum(q bookSQL, token common.Address, price *big.Int) float64 {
 	decimals := 18
 	if token != (common.Address{}) {
 		var d sql.NullInt64
-		if b.cfg.DB.QueryRow("SELECT decimals FROM tokens WHERE address = ?", token.Hex()).Scan(&d) == nil && d.Valid {
+		if q.QueryRow("SELECT decimals FROM tokens WHERE address = ?", token.Hex()).Scan(&d) == nil && d.Valid {
 			decimals = int(d.Int64)
 		}
 	}
@@ -340,8 +391,15 @@ type check struct {
 }
 
 // check runs checkOrder for many inputs in as few calls as Multicall3 allows.
-func (b *Book) check(ctx context.Context, exchange common.Address, inputs []*Input) ([]check, error) {
+func (b *Book) check(ctx context.Context, exchange common.Address, inputs []*Input, head *types.Header) ([]check, error) {
 	out := make([]check, len(inputs))
+	if len(inputs) == 0 {
+		return out, nil
+	}
+	client, ok := b.cfg.Eth.(hashCaller)
+	if !ok {
+		return nil, errors.New("order checks require block-hash contract calls")
+	}
 	type call struct {
 		Target       common.Address
 		AllowFailure bool
@@ -362,7 +420,7 @@ func (b *Book) check(ctx context.Context, exchange common.Address, inputs []*Inp
 		if err != nil {
 			return nil, err
 		}
-		raw, err := b.cfg.Eth.CallContract(ctx, ethereum.CallMsg{To: &multicall3, Data: data}, nil)
+		raw, err := client.CallContractAtHash(ctx, ethereum.CallMsg{To: &multicall3, Data: data}, head.Hash())
 		if err != nil {
 			return nil, fmt.Errorf("checking orders: %w", err)
 		}
@@ -373,15 +431,34 @@ func (b *Book) check(ctx context.Context, exchange common.Address, inputs []*Inp
 		if err := mcABI.UnpackIntoInterface(&res, "aggregate3", raw); err != nil {
 			return nil, err
 		}
+		if len(res) != end-start {
+			return nil, errors.New("checking orders: result count does not match request")
+		}
 		for i, r := range res {
 			if !r.Success || len(r.ReturnData) != 64 {
-				out[start+i] = check{code: CodeMalformed}
-				continue
+				return nil, errors.New("checking orders: missing or malformed result")
 			}
-			out[start+i] = check{
-				code:      uint8(new(big.Int).SetBytes(r.ReturnData[:32]).Uint64()),
-				remaining: new(big.Int).SetBytes(r.ReturnData[32:]).Uint64(),
+			code := new(big.Int).SetBytes(r.ReturnData[:32])
+			remaining := new(big.Int).SetBytes(r.ReturnData[32:])
+			amount, err := storedAmount(inputs[start+i])
+			if err != nil {
+				return nil, err
 			}
+			if !code.IsUint64() || code.Uint64() > uint64(CodeMalformed) || !remaining.IsInt64() || remaining.Cmp(big.NewInt(amount)) > 0 {
+				return nil, errors.New("checking orders: out-of-range result")
+			}
+			c := check{code: uint8(code.Uint64()), remaining: remaining.Uint64()}
+			switch c.code {
+			case CodeOK, CodeNotHeld, CodeNotFunded:
+				if c.remaining == 0 {
+					return nil, errors.New("checking orders: inconsistent remaining amount")
+				}
+			default:
+				if c.remaining != 0 {
+					return nil, errors.New("checking orders: unexpected remaining amount")
+				}
+			}
+			out[start+i] = c
 		}
 	}
 	return out, nil
@@ -392,7 +469,9 @@ func (b *Book) check(ctx context.Context, exchange common.Address, inputs []*Inp
 func (b *Book) Get(hash common.Hash) (*Input, string, uint8, error) {
 	var raw, status string
 	var code uint8
-	err := b.cfg.DB.QueryRow("SELECT input, status, code FROM nft_orders WHERE hash = ?", hash.Hex()).Scan(&raw, &status, &code)
+	err := b.cfg.DB.QueryRow(`SELECT o.input,o.status,CASE
+		WHEN o.status='open' AND (o.checked_epoch!=m.value OR typeof(m.value)!='integer') THEN ? ELSE o.code END
+		FROM nft_orders o JOIN nft_order_meta m ON m.key='rewind_epoch' WHERE o.hash=?`, CodeUnchecked, hash.Hex()).Scan(&raw, &status, &code)
 	if err != nil {
 		return nil, "", 0, err
 	}
@@ -438,7 +517,11 @@ func (b *Book) meta(key string) (uint64, error) {
 }
 
 func (b *Book) setMeta(key string, v uint64) error {
-	_, err := b.cfg.DB.Exec(`INSERT INTO nft_order_meta (key, value) VALUES (?, ?)
+	return setBookMeta(b.cfg.DB, key, v)
+}
+
+func setBookMeta(q bookSQL, key string, v uint64) error {
+	_, err := q.Exec(`INSERT INTO nft_order_meta (key, value) VALUES (?, ?)
 		ON CONFLICT(key) DO UPDATE SET value = excluded.value`, key, v)
 	return err
 }
@@ -448,7 +531,7 @@ func (b *Book) step(ctx context.Context) error {
 	if exchange == (common.Address{}) {
 		return nil
 	}
-	head, err := b.cfg.Eth.BlockNumber(ctx)
+	at, err := b.snapshot(ctx)
 	if err != nil {
 		return err
 	}
@@ -458,6 +541,10 @@ func (b *Book) step(ctx context.Context) error {
 		return err
 	}
 	touched := map[common.Hash]bool{}
+	head := at.head.Number.Uint64()
+	if from > head {
+		return errStaleObservation
+	}
 	for from < head {
 		to := min(from+2_000, head)
 		logs, err := b.cfg.Eth.FilterLogs(ctx, ethereum.FilterQuery{
@@ -468,27 +555,111 @@ func (b *Book) step(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		for _, l := range logs {
-			if err := b.apply(ctx, exchange, l, touched); err != nil {
+		prepared, err := b.prepareLogs(ctx, exchange, logs, from, to, at.head)
+		if err != nil {
+			return err
+		}
+		if err := b.verifyHeader(ctx, at.head); err != nil {
+			return err
+		}
+		if err := func() error {
+			tx, err := b.observationTx(ctx, at.epoch)
+			if err != nil {
 				return err
 			}
-		}
-		if err := b.setMeta(key, to); err != nil {
+			defer tx.Rollback()
+			var cursor uint64
+			err = tx.QueryRow("SELECT value FROM nft_order_meta WHERE key=?", key).Scan(&cursor)
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
+			if cursor != from {
+				return errStaleObservation
+			}
+			for _, l := range prepared {
+				if err := b.apply(tx, exchange, l, touched, at.epoch); err != nil {
+					return err
+				}
+			}
+			if err := setBookMeta(tx, key, to); err != nil {
+				return err
+			}
+			return tx.Commit()
+		}(); err != nil {
 			return err
 		}
 		from = to
 	}
 
 	b.mu.Lock()
-	sweep := time.Since(b.lastSweep) >= b.cfg.Recheck
-	if sweep {
-		b.lastSweep = time.Now()
-	}
+	sweep := b.lastSweepEpoch != at.epoch || time.Since(b.lastSweep) >= b.cfg.Recheck
 	b.mu.Unlock()
-	return b.recheck(ctx, exchange, touched, sweep)
+	if err := b.recheck(ctx, exchange, touched, sweep, at); err != nil {
+		return err
+	}
+	if sweep {
+		b.mu.Lock()
+		b.lastSweep, b.lastSweepEpoch = time.Now(), at.epoch
+		b.mu.Unlock()
+	}
+	return nil
 }
 
-func (b *Book) apply(ctx context.Context, exchange common.Address, l types.Log, touched map[common.Hash]bool) error {
+type preparedLog struct {
+	log      types.Log
+	head     *types.Header
+	approved *Input
+}
+
+// Read and decode all headers before acquiring a writer. Every returned log
+// must belong to the requested range, exchange and canonical header observed by
+// this reader. The epoch and page cursor are fenced later in one transaction.
+func (b *Book) prepareLogs(ctx context.Context, exchange common.Address, logs []types.Log, from, to uint64, head *types.Header) ([]preparedLog, error) {
+	headers := map[uint64]*types.Header{head.Number.Uint64(): head}
+	out := make([]preparedLog, 0, len(logs))
+	for _, l := range logs {
+		if l.Removed || l.Address != exchange || l.BlockNumber <= from || l.BlockNumber > to {
+			return nil, errors.New("exchange log does not belong to the requested page")
+		}
+		hdr := headers[l.BlockNumber]
+		if hdr == nil {
+			var err error
+			hdr, err = b.cfg.Eth.HeaderByNumber(ctx, new(big.Int).SetUint64(l.BlockNumber))
+			if err != nil {
+				return nil, err
+			}
+			if validHeader(hdr) != nil || hdr.Number.Uint64() != l.BlockNumber {
+				return nil, errStaleObservation
+			}
+			headers[l.BlockNumber] = hdr
+		}
+		if hdr.Hash() != l.BlockHash {
+			return nil, errStaleObservation
+		}
+		entry := preparedLog{log: l, head: hdr}
+		if len(l.Topics) == 3 && l.Topics[0] == topicOrderApproved {
+			ev, err := b.cfg.Artifact.ABI.Unpack("OrderApproved", l.Data)
+			if err == nil && len(ev) == 1 {
+				raw, err := json.Marshal(ev[0])
+				if err != nil {
+					return nil, err
+				}
+				var v ABIOrder
+				if json.Unmarshal(raw, &v) == nil {
+					o := FromABI(v)
+					if o.Hash() == l.Topics[1] && o.Check() == nil && common.BytesToAddress(l.Topics[2][:]) == o.Trader {
+						entry.approved = &Input{Order: o, Kind: KindOnChain, Signature: []byte{}, Proof: []common.Hash{}}
+					}
+				}
+			}
+		}
+		out = append(out, entry)
+	}
+	return out, nil
+}
+
+func (b *Book) apply(tx *sql.Tx, exchange common.Address, entry preparedLog, touched map[common.Hash]bool, epoch uint64) error {
+	l := entry.log
 	if len(l.Topics) == 0 {
 		return nil
 	}
@@ -501,8 +672,8 @@ func (b *Book) apply(ctx context.Context, exchange common.Address, l types.Log, 
 		if len(l.Topics) != 3 {
 			return nil
 		}
-		_, err := b.cfg.DB.Exec(`UPDATE nft_orders SET status = ?, code = ?, closed_block = ? WHERE hash = ? AND status = ?`,
-			StatusCancelled, CodeCancelled, l.BlockNumber, l.Topics[1].Hex(), StatusOpen)
+		_, err := tx.Exec(`UPDATE nft_orders SET status = ?, code = ?, closed_block = ? WHERE hash = ? AND status = ? AND exchange=?`,
+			StatusCancelled, CodeCancelled, l.BlockNumber, l.Topics[1].Hex(), StatusOpen, exchange.Hex())
 		return err
 	case topicNonceIncremented:
 		if len(l.Topics) != 2 || len(l.Data) != 32 {
@@ -510,7 +681,7 @@ func (b *Book) apply(ctx context.Context, exchange common.Address, l types.Log, 
 		}
 		trader := common.BytesToAddress(l.Topics[1][:])
 		nonce := new(big.Int).SetBytes(l.Data)
-		rows, err := b.cfg.DB.Query(`SELECT hash, nonce FROM nft_orders WHERE trader = ? AND status = ?`, trader.Hex(), StatusOpen)
+		rows, err := tx.Query(`SELECT hash, nonce FROM nft_orders WHERE trader = ? AND status = ? AND exchange=?`, trader.Hex(), StatusOpen, exchange.Hex())
 		if err != nil {
 			return err
 		}
@@ -525,56 +696,36 @@ func (b *Book) apply(ctx context.Context, exchange common.Address, l types.Log, 
 				stale = append(stale, h)
 			}
 		}
+		err = rows.Err()
 		rows.Close()
+		if err != nil {
+			return err
+		}
 		for _, h := range stale {
-			if _, err := b.cfg.DB.Exec(`UPDATE nft_orders SET status = ?, code = ?, closed_block = ? WHERE hash = ?`,
+			if _, err := tx.Exec(`UPDATE nft_orders SET status = ?, code = ?, closed_block = ? WHERE hash = ?`,
 				StatusCancelled, CodeStaleNonce, l.BlockNumber, h); err != nil {
 				return err
 			}
 		}
 	case topicOrderApproved:
-		if len(l.Topics) != 3 {
+		if entry.approved == nil {
 			return nil
 		}
-		ev, err := b.cfg.Artifact.ABI.Unpack("OrderApproved", l.Data)
-		if err != nil || len(ev) != 1 {
-			return nil
-		}
-		raw, err := json.Marshal(ev[0])
-		if err != nil {
+		at := observation{epoch: epoch, head: entry.head}
+		if _, err := b.insert(tx, entry.approved, exchange, check{code: CodeUnchecked}, at, "chain", time.Now().Unix()); err != nil {
 			return err
 		}
-		var v ABIOrder
-		if err := json.Unmarshal(raw, &v); err != nil {
-			return nil
-		}
-		o := FromABI(v)
-		if o.Hash() != l.Topics[1] || o.Check() != nil {
-			return nil
-		}
-		in := &Input{Order: o, Kind: KindOnChain, Signature: []byte{}, Proof: []common.Hash{}}
-		var exists int
-		b.cfg.DB.QueryRow("SELECT COUNT(*) FROM nft_orders WHERE hash = ?", o.Hash().Hex()).Scan(&exists)
-		if exists == 0 {
-			hdr, err := b.cfg.Eth.HeaderByNumber(ctx, new(big.Int).SetUint64(l.BlockNumber))
-			if err != nil {
-				return err
-			}
-			if err := b.insert(in, exchange, check{code: CodeNotStarted, remaining: o.Amount.Big().Uint64()}, hdr, "chain", time.Now().Unix()); err != nil {
-				return err
-			}
-		}
-		touched[o.Hash()] = true
+		touched[entry.approved.Order.Hash()] = true
 	}
 	return nil
 }
 
 // recheck asks the exchange about the orders the logs touched and, on a sweep,
 // about every open one.
-func (b *Book) recheck(ctx context.Context, exchange common.Address, touched map[common.Hash]bool, sweep bool) error {
-	var hashes []string
+func (b *Book) recheck(ctx context.Context, exchange common.Address, touched map[common.Hash]bool, sweep bool, at observation) error {
+	selected := map[string]bool{}
 	for h := range touched {
-		hashes = append(hashes, h.Hex())
+		selected[h.Hex()] = true
 	}
 	if sweep {
 		rows, err := b.cfg.DB.Query(`SELECT hash FROM nft_orders WHERE status = ? AND exchange = ?`, StatusOpen, exchange.Hex())
@@ -587,48 +738,67 @@ func (b *Book) recheck(ctx context.Context, exchange common.Address, touched map
 				rows.Close()
 				return err
 			}
-			hashes = append(hashes, h)
+			selected[h] = true
 		}
+		err = rows.Err()
 		rows.Close()
-	}
-	if len(hashes) == 0 {
-		return nil
-	}
-	var inputs []*Input
-	var amounts []int64
-	for _, h := range hashes {
-		in, _, _, err := b.Get(common.HexToHash(h))
 		if err != nil {
+			return err
+		}
+	}
+	var hashes []string
+	for h := range selected {
+		hashes = append(hashes, h)
+	}
+	sort.Strings(hashes)
+	var inputs []*Input
+	for _, h := range hashes {
+		var raw string
+		err := b.cfg.DB.QueryRow("SELECT input FROM nft_orders WHERE hash=? AND exchange=?", h, exchange.Hex()).Scan(&raw)
+		if errors.Is(err, sql.ErrNoRows) {
 			continue // an order this node never had: somebody else's fill
 		}
+		if err != nil {
+			return err
+		}
+		in := new(Input)
+		if err := json.Unmarshal([]byte(raw), in); err != nil {
+			return err
+		}
+		if in.Order.Check() != nil || in.Order.Hash().Hex() != h {
+			return errors.New("stored order does not match its original hash")
+		}
 		inputs = append(inputs, in)
-		amounts = append(amounts, in.Order.Amount.Big().Int64())
 	}
-	checks, err := b.check(ctx, exchange, inputs)
+	checks, err := b.check(ctx, exchange, inputs, at.head)
 	if err != nil {
 		return err
 	}
-	head, err := b.cfg.Eth.BlockNumber(ctx)
+	if err := b.verifyHeader(ctx, at.head); err != nil {
+		return err
+	}
+	tx, err := b.observationTx(ctx, at.epoch)
 	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err := guardScanHeight(tx, exchange, at.head); err != nil {
 		return err
 	}
 	now := time.Now().Unix()
+	conflict := false
 	for i, in := range inputs {
-		c := checks[i]
-		filled := amounts[i] - int64(c.remaining)
-		if c.code == CodeFilled {
-			filled = amounts[i]
-		}
-		status := statusFor(c.code)
-		var closed any
-		if status != StatusOpen {
-			closed = head
-		}
-		if _, err := b.cfg.DB.Exec(`UPDATE nft_orders SET status = ?, code = ?, filled = MAX(filled, ?), checked_at = ?,
-			closed_block = COALESCE(closed_block, ?) WHERE hash = ?`,
-			status, c.code, filled, now, closed, in.Order.Hash().Hex()); err != nil {
+		accepted, err := b.observe(tx, in, exchange, checks[i], at, now)
+		if err != nil {
 			return err
 		}
+		conflict = conflict || !accepted
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	if conflict {
+		return errCheckConflict
 	}
 	return nil
 }
@@ -651,8 +821,17 @@ func (b *Book) Rewind(block uint64) error {
 // transaction. It changes derived cache markers and cursors, never the original
 // order payload or hash. The caller owns commit/rollback of the transaction.
 func (b *Book) RewindTx(tx *sql.Tx, block uint64) error {
+	if block > math.MaxInt64 {
+		return errors.New("unsupported order-book rewind height")
+	}
+	if err := advanceEpoch(tx); err != nil {
+		return err
+	}
 	if _, err := tx.Exec(`UPDATE nft_orders SET status = ?, closed_block = NULL, checked_at = 0
-		WHERE closed_block > ? AND status IN (?, ?)`, StatusOpen, block, StatusFilled, StatusCancelled); err != nil {
+		WHERE closed_block > ?`, StatusOpen, block); err != nil {
+		return err
+	}
+	if err := invalidateOpenChecks(tx); err != nil {
 		return err
 	}
 	_, err := tx.Exec(`UPDATE nft_order_meta SET value = ? WHERE key LIKE 'scanned:%' AND value > ?`, block, block)

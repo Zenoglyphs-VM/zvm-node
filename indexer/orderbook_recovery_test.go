@@ -70,7 +70,7 @@ func storedRecoveryIntent(t *testing.T, db *sql.DB, hash common.Hash) string {
 
 func cursorRecoveryRefusal(t *testing.T, db *sql.DB) {
 	t.Helper()
-	if _, err := db.Exec("CREATE TRIGGER n04_book_cursor_refusal BEFORE UPDATE ON nft_order_meta BEGIN SELECT RAISE(ABORT,'declared book cursor refusal'); END"); err != nil {
+	if _, err := db.Exec("CREATE TRIGGER n04_book_cursor_refusal BEFORE UPDATE ON nft_order_meta WHEN OLD.key LIKE 'scanned:%' BEGIN SELECT RAISE(ABORT,'declared book cursor refusal'); END"); err != nil {
 		t.Fatal(err)
 	}
 }
