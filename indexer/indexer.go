@@ -161,15 +161,21 @@ type Indexer struct {
 	dirty   map[string]bool
 	candles *candleCache
 
-	// afterRewind is state kept outside the index that has to move with it,
-	// the order book's fills. It is the index's to call rather than the
-	// deriver's, because the index now also rewinds itself (parentMismatch).
-	afterRewind []func(l2Number uint64)
+	// Shared-database state must rewind inside the index transaction. The
+	// post-commit callbacks are for notifications or state outside that DB.
+	beforeRewindCommit []func(*sql.Tx, uint64) error
+	afterRewind        []func(l2Number uint64)
 }
 
-// AfterRewind registers fn to run after every rewind of the index, whoever
-// asked for it: the deriver after an L1 reorg, or the index on finding a block
-// that no longer links to the one below it.
+// BeforeRewindCommit registers a participant in the shared database rewind.
+// It must use the provided transaction for local SQL only, without committing
+// it or opening another write transaction. An error aborts the entire rewind.
+func (ix *Indexer) BeforeRewindCommit(fn func(*sql.Tx, uint64) error) {
+	ix.beforeRewindCommit = append(ix.beforeRewindCommit, fn)
+}
+
+// AfterRewind registers a post-commit notification. Persistent state in the
+// shared database belongs in BeforeRewindCommit so a refusal can roll back both.
 func (ix *Indexer) AfterRewind(fn func(l2Number uint64)) {
 	ix.afterRewind = append(ix.afterRewind, fn)
 }
@@ -517,6 +523,11 @@ func (ix *Indexer) Rewind(number uint64) error {
 	for _, p := range ix.plugins {
 		if err := p.Rebuild(tx, number); err != nil {
 			return fmt.Errorf("rebuilding the %s index: %w", p.Name(), err)
+		}
+	}
+	for _, fn := range ix.beforeRewindCommit {
+		if err := fn(tx, number); err != nil {
+			return fmt.Errorf("rewinding extension state: %w", err)
 		}
 	}
 	if err := commit(); err != nil {

@@ -636,11 +636,26 @@ func (b *Book) recheck(ctx context.Context, exchange common.Address, touched map
 // Rewind reopens what a chain reorganisation undid: orders closed above the
 // block are checked again, and the logs are read again from there.
 func (b *Book) Rewind(block uint64) error {
-	if _, err := b.cfg.DB.Exec(`UPDATE nft_orders SET status = ?, closed_block = NULL, checked_at = 0
+	tx, err := b.cfg.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err := b.RewindTx(tx, block); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// RewindTx participates in a rewind owned by the index's shared database
+// transaction. It changes derived cache markers and cursors, never the original
+// order payload or hash. The caller owns commit/rollback of the transaction.
+func (b *Book) RewindTx(tx *sql.Tx, block uint64) error {
+	if _, err := tx.Exec(`UPDATE nft_orders SET status = ?, closed_block = NULL, checked_at = 0
 		WHERE closed_block > ? AND status IN (?, ?)`, StatusOpen, block, StatusFilled, StatusCancelled); err != nil {
 		return err
 	}
-	_, err := b.cfg.DB.Exec(`UPDATE nft_order_meta SET value = ? WHERE key LIKE 'scanned:%' AND value > ?`, block, block)
+	_, err := tx.Exec(`UPDATE nft_order_meta SET value = ? WHERE key LIKE 'scanned:%' AND value > ?`, block, block)
 	return err
 }
 

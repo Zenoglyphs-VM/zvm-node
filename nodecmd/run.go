@@ -129,7 +129,7 @@ func Run(args []string, ext ...Extender) error {
 	// which tables it has.
 	var plugins []indexer.Plugin
 	var extensions []api.Extension
-	var rewinds []func(uint64)
+	var rewinds []Result
 	for _, e := range ext {
 		r, err := e.Build(ctx, Env{Rollup: cfg, DB: db, Eth: eth, L1: l1, Dex: *dexPath, Log: slog.Default()})
 		if err != nil {
@@ -137,8 +137,8 @@ func Run(args []string, ext ...Extender) error {
 		}
 		plugins = append(plugins, r.Plugins...)
 		extensions = append(extensions, r.Extensions...)
-		if r.OnRewind != nil {
-			rewinds = append(rewinds, r.OnRewind)
+		if r.OnRewindTx != nil || r.OnRewind != nil {
+			rewinds = append(rewinds, r)
 		}
 	}
 
@@ -151,8 +151,8 @@ func Run(args []string, ext ...Extender) error {
 		// Extensions rewind with the index, not with the deriver: the index also
 		// rewinds itself when it finds an orphan block, and state kept outside
 		// it — an order book's fills — has to go back all the same.
-		for _, fn := range rewinds {
-			ix.AfterRewind(fn)
+		for _, r := range rewinds {
+			r.BindRewind(ix)
 		}
 		d.OnRewind = func(l2Number uint64) {
 			// A failure here is repaired later: the index then finds the

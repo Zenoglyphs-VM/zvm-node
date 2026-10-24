@@ -99,12 +99,8 @@ func (m *Market) Build(ctx context.Context, env Env) (Result, error) {
 			DB: env.DB.SQL(), Rollup: env.Rollup, Orders: book, Apps: appsFile, Media: store,
 			Log: slog.Default().With("svc", "market"),
 		})},
-		// The book is not in the index, so the index's rewind does not touch
-		// it: an order whose fill was rolled back has to go back to open.
-		OnRewind: func(l2Number uint64) {
-			if err := book.Rewind(l2Number); err != nil {
-				slog.Error("rewinding the order book", "err", err)
-			}
-		},
+		// The book's payloads stay intact; cache markers and cursors rewind
+		// in the same SQL transaction as the index, including on refusal.
+		OnRewindTx: book.RewindTx,
 	}, nil
 }

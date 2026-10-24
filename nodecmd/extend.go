@@ -2,6 +2,7 @@ package nodecmd
 
 import (
 	"context"
+	"database/sql"
 	"flag"
 	"log/slog"
 
@@ -49,7 +50,20 @@ type Result struct {
 	Plugins []indexer.Plugin
 	// Extensions add routes and a slice of /api/info.
 	Extensions []api.Extension
-	// OnRewind is called after the index has rewound, for state an extension
-	// keeps outside it — an order book, a cache.
+	// OnRewindTx rewinds extension state in the shared Env.DB transaction.
+	// It uses only the provided transaction for local SQL and must not commit
+	// it. Returning an error prevents the index and extension from diverging.
+	OnRewindTx func(tx *sql.Tx, l2Number uint64) error
+	// OnRewind is a post-commit notification for state outside the shared DB.
 	OnRewind func(l2Number uint64)
+}
+
+// BindRewind installs both transaction participants and post-commit notices.
+func (r Result) BindRewind(ix *indexer.Indexer) {
+	if r.OnRewindTx != nil {
+		ix.BeforeRewindCommit(r.OnRewindTx)
+	}
+	if r.OnRewind != nil {
+		ix.AfterRewind(r.OnRewind)
+	}
 }
