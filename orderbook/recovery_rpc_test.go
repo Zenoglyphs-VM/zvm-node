@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"os"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -16,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Zenoglyphs-VM/zvm-node/apps"
+	"github.com/Zenoglyphs-VM/zvm-node/bench"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -142,8 +143,17 @@ func recoveryBook(t *testing.T) (*Book, *recoveryRPC, *sql.DB, common.Hash) {
 	}
 	t.Cleanup(func() { db.Close() })
 	db.SetMaxOpenConns(1)
-	arts, err := apps.LoadArtifacts()
+	// apps imports orderbook for deployment helpers. Read its pinned artifact
+	// file directly so the complete orderbook test package stays acyclic.
+	arts, err := bench.LoadArtifacts()
 	if err != nil {
+		t.Fatal(err)
+	}
+	rawArtifacts, err := os.ReadFile("../apps/artifacts/apps.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := arts.AddCombined(rawArtifacts); err != nil {
 		t.Fatal(err)
 	}
 	p := &recoveryRPC{header: &types.Header{Number: big.NewInt(2), Time: 1020, GasLimit: 30000000, Difficulty: new(big.Int), Extra: []byte{1}}, remaining: 8, started: make(chan struct{}), release: make(chan struct{})}
