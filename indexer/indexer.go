@@ -258,8 +258,10 @@ func (ix *Indexer) backfillAggregates() error {
 			stale = true
 		}
 	}
-	if (addrs > 0 || txs == 0) && (candles > 0 || events == 0) && !stale &&
-		(chainStatsBasis == maxTPSBasis || blocks == 0) {
+	// The empty chain needs the same zero/basis row as a rebuilt chain. Without
+	// it, a zero-throughput block can create a different record on first index
+	// than after restart or rewind, although the surviving blocks are identical.
+	if (addrs > 0 || txs == 0) && (candles > 0 || events == 0) && !stale && chainStatsBasis == maxTPSBasis {
 		return nil
 	}
 	dbtx, err := ix.db.Begin()
@@ -289,8 +291,10 @@ func (ix *Indexer) backfillAggregates() error {
 			return fmt.Errorf("rebuilding the %s index: %w", p.Name(), err)
 		}
 	}
-	if chainStatsBasis != maxTPSBasis && blocks > 0 {
-		ix.log.Info("finding the chain's highest transactions-per-second block", "blocks", blocks)
+	if chainStatsBasis != maxTPSBasis {
+		if blocks > 0 {
+			ix.log.Info("finding the chain's highest transactions-per-second block", "blocks", blocks)
+		}
 		if err := rebuildMaxTPS(dbtx); err != nil {
 			return err
 		}
