@@ -80,8 +80,6 @@ func (m *Market) Build(ctx context.Context, env Env) (Result, error) {
 	if err != nil {
 		return zero, err
 	}
-	go book.Run(ctx)
-
 	plugin := nft.New(nft.Config{
 		Apps: func() nft.Apps {
 			d := appsFile.Get()
@@ -94,6 +92,7 @@ func (m *Market) Build(ctx context.Context, env Env) (Result, error) {
 	})
 
 	return Result{
+		Start:   func(ctx context.Context) { go book.Run(ctx) },
 		Plugins: []indexer.Plugin{plugin},
 		Extensions: []api.Extension{market.New(market.Config{
 			DB: env.DB.SQL(), Rollup: env.Rollup, Orders: book, Apps: appsFile, Media: store,

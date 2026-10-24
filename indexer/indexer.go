@@ -180,6 +180,42 @@ func (ix *Indexer) AfterRewind(fn func(l2Number uint64)) {
 	ix.afterRewind = append(ix.afterRewind, fn)
 }
 
+// ReconcileExtensionState closes an older startup gap where the index committed
+// its rewind before an extension did. Participants use one local transaction
+// and the persisted index head. Bind them before calling this method, and keep
+// followers and extension workers idle until it succeeds. This does not validate
+// that head against an independent chain or send post-rewind notifications.
+func (ix *Indexer) ReconcileExtensionState(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if ix.db == nil {
+		return errors.New("extension recovery requires an initialized index")
+	}
+	if len(ix.beforeRewindCommit) == 0 {
+		return nil
+	}
+	tx, err := ix.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	commit, rollback := ix.guardTransaction(tx)
+	defer rollback()
+	var height sql.NullInt64
+	if err := tx.QueryRow("SELECT MAX(number) FROM blocks").Scan(&height); err != nil {
+		return err
+	}
+	if height.Valid && height.Int64 < 0 {
+		return errors.New("invalid persisted index height during extension recovery")
+	}
+	for _, fn := range ix.beforeRewindCommit {
+		if err := fn(tx, uint64(height.Int64)); err != nil {
+			return fmt.Errorf("reconciling extension state: %w", err)
+		}
+	}
+	return commit()
+}
+
 // parentMismatch is IndexBlock refusing a block whose parent is not the block
 // the index holds below it: the chain was reorganised under the index and the
 // rows below are an orphan's.

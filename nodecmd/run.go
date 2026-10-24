@@ -130,6 +130,8 @@ func Run(args []string, ext ...Extender) error {
 	var plugins []indexer.Plugin
 	var extensions []api.Extension
 	var rewinds []Result
+	var startExtensions func() error
+	var followIndex func()
 	for _, e := range ext {
 		r, err := e.Build(ctx, Env{Rollup: cfg, DB: db, Eth: eth, L1: l1, Dex: *dexPath, Log: slog.Default()})
 		if err != nil {
@@ -137,7 +139,7 @@ func Run(args []string, ext ...Extender) error {
 		}
 		plugins = append(plugins, r.Plugins...)
 		extensions = append(extensions, r.Extensions...)
-		if r.OnRewindTx != nil || r.OnRewind != nil {
+		if r.OnRewindTx != nil || r.OnRewind != nil || r.Start != nil {
 			rewinds = append(rewinds, r)
 		}
 	}
@@ -151,8 +153,9 @@ func Run(args []string, ext ...Extender) error {
 		// Extensions rewind with the index, not with the deriver: the index also
 		// rewinds itself when it finds an orphan block, and state kept outside
 		// it — an order book's fills — has to go back all the same.
-		for _, r := range rewinds {
-			r.BindRewind(ix)
+		startExtensions, err = PrepareExtensions(ctx, ix, rewinds)
+		if err != nil {
+			return err
 		}
 		d.OnRewind = func(l2Number uint64) {
 			// A failure here is repaired later: the index then finds the
@@ -161,7 +164,8 @@ func Run(args []string, ext ...Extender) error {
 				slog.Error("rewinding the index", "err", err)
 			}
 		}
-		go ix.Follow(ctx, func() uint64 { return d.Head().L2Number })
+		// Startup recovery must finish before a follower can change the index.
+		followIndex = func() { ix.Follow(ctx, func() uint64 { return d.Head().L2Number }) }
 
 		var verifier *verify.Service
 		if *verifyOn {
@@ -233,6 +237,14 @@ func Run(args []string, ext ...Extender) error {
 
 	if _, err := service.WaitFor(ctx, "L1 node", func() (struct{}, error) { return struct{}{}, d.Init(ctx) }); err != nil {
 		return err
+	}
+	if startExtensions != nil {
+		if err := startExtensions(); err != nil {
+			return err
+		}
+	}
+	if followIndex != nil {
+		go followIndex()
 	}
 	return d.Run(ctx)
 }

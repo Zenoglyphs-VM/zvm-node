@@ -3,8 +3,10 @@ package nodecmd
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"flag"
 	"log/slog"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -50,6 +52,10 @@ type Result struct {
 	Plugins []indexer.Plugin
 	// Extensions add routes and a slice of /api/info.
 	Extensions []api.Extension
+	// Start launches a worker and returns immediately. Fallible local setup
+	// belongs in Build or the shared transaction, before any worker starts.
+	// The worker must honor ctx. PrepareExtensions provides the start barrier.
+	Start func(ctx context.Context)
 	// OnRewindTx rewinds extension state in the shared Env.DB transaction.
 	// It uses only the provided transaction for local SQL and must not commit
 	// it. Returning an error prevents the index and extension from diverging.
@@ -66,4 +72,40 @@ func (r Result) BindRewind(ix *indexer.Indexer) {
 	if r.OnRewind != nil {
 		ix.AfterRewind(r.OnRewind)
 	}
+}
+
+// PrepareExtensions binds shared-database participants and reconciles them with
+// the persisted index in one transaction. A failure returns no start function.
+// The caller keeps the index follower idle, prepares extensions before exposing
+// their routes, and calls start only after node initialization is accepted.
+// The returned function launches each worker at most once.
+func PrepareExtensions(ctx context.Context, ix *indexer.Indexer, results []Result) (start func() error, err error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if ix == nil {
+		return nil, errors.New("extension recovery requires an initialized index")
+	}
+	prepared := append([]Result(nil), results...)
+	for _, result := range prepared {
+		result.BindRewind(ix)
+	}
+	if err := ix.ReconcileExtensionState(ctx); err != nil {
+		return nil, err
+	}
+	var once sync.Once
+	var startErr error
+	return func() error {
+		once.Do(func() {
+			if startErr = ctx.Err(); startErr != nil {
+				return
+			}
+			for _, result := range prepared {
+				if result.Start != nil {
+					result.Start(ctx)
+				}
+			}
+		})
+		return startErr
+	}, nil
 }
