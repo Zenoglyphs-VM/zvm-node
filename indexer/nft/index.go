@@ -44,6 +44,7 @@ type Index struct {
 }
 
 const approvalRecoveryVersionKey = "nft_approval_recovery_v1"
+const updateRecoveryVersionKey = "nft_update_recovery_v1"
 
 // metadataBudget is how long one block's tokenURI and contractURI reads may
 // take together. A Transfer is cheap to emit — a contract can log thousands in
@@ -167,10 +168,13 @@ func (x *Index) Rebuild(dbtx *sql.Tx, block uint64) error {
 	if err := restoreOperatorApprovals(dbtx); err != nil {
 		return err
 	}
+	if err := restoreTokenUpdateHeights(dbtx); err != nil {
+		return err
+	}
 	if err := x.rebuildCollectionStats(dbtx, block); err != nil {
 		return err
 	}
-	_, err := dbtx.Exec("INSERT OR REPLACE INTO index_meta (key,value) VALUES (?,1)", approvalRecoveryVersionKey)
+	_, err := dbtx.Exec("INSERT OR REPLACE INTO index_meta (key,value) VALUES (?,1),(?,1)", approvalRecoveryVersionKey, updateRecoveryVersionKey)
 	return err
 }
 
@@ -178,7 +182,7 @@ func (x *Index) Rebuild(dbtx *sql.Tx, block uint64) error {
 // rewinds. Equal table counts do not imply matching collection identities.
 func (x *Index) Stale(db *sql.DB) bool {
 	var recovered int
-	if err := db.QueryRow("SELECT value FROM index_meta WHERE key=?", approvalRecoveryVersionKey).Scan(&recovered); err != nil || recovered != 1 {
+	if err := db.QueryRow("SELECT COUNT(*) FROM index_meta WHERE key IN (?,?) AND value=1", approvalRecoveryVersionKey, updateRecoveryVersionKey).Scan(&recovered); err != nil || recovered != 2 {
 		return true
 	}
 	var stale bool

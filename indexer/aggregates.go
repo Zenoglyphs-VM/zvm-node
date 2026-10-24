@@ -475,9 +475,9 @@ func rebuildAddrStats(dbtx *sql.Tx) error {
 	_, err := dbtx.Exec(`INSERT INTO addr_stats (addr, txs, first_block, last_block)
 		SELECT addr, COUNT(*), MIN(block), MAX(block) FROM (
 			SELECT from_addr AS addr, block FROM txs
-			UNION ALL SELECT to_addr, block FROM txs WHERE to_addr IS NOT NULL
+			UNION ALL SELECT to_addr, block FROM txs WHERE to_addr IS NOT NULL AND to_addr != from_addr
 			UNION ALL SELECT contract, block FROM txs WHERE contract IS NOT NULL
-				AND (to_addr IS NULL OR contract != to_addr)
+				AND contract != from_addr AND (to_addr IS NULL OR contract != to_addr)
 		) GROUP BY addr`)
 	return err
 }
