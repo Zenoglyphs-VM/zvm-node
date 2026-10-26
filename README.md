@@ -37,3 +37,10 @@ submodule here.
 
 MIT licence; GPL-3.0 files are listed in [NOTICE.md](NOTICE.md). The full
 guide, with how it works and why: [docs/GUIDE.md](docs/GUIDE.md).
+
+## Uniswap artifact reconstruction
+
+Reproduce the committed Factory, Pair and Router02 compiler artifacts with
+[locked source archives and exact legacy compiler modules](contracts/UNISWAP_BUILD.md).
+The tool checks the complete compiler target inventory and full artifact bytes;
+deployment and initialized pool-state witnesses remain separate.
