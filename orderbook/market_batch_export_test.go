@@ -12,6 +12,7 @@ import (
 	"github.com/Zenoglyphs-VM/zvm-core/znn"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rpc"
 )
@@ -135,7 +136,7 @@ func (p *ExecutedMarketProviderFixture) BatchCancellationHash() common.Hash {
 	return p.partial.legs[0].hash()
 }
 
-func (p *ExecutedMarketProviderFixture) sendPartialBatch(ctx context.Context, raw []byte, tx *types.Transaction, from common.Address) (common.Hash, error) {
+func (p *ExecutedMarketProviderFixture) sendPartialBatch(ctx context.Context, raw hexutil.Bytes, tx *types.Transaction, from common.Address) (common.Hash, error) {
 	index, to, value := 1, p.f.Exchange(), new(big.Int)
 	matching := p.exactBatchCall(tx.Data())
 	if from == p.f.Seller() {
