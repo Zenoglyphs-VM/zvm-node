@@ -102,7 +102,11 @@ for (let i = 0; i < orders.length; i++) {
   assert.equal(returned.order.expirationTime, orders[i].expirationTime)
   assert.equal(returned.signature, inputs[i].signature)
   assert.deepEqual([...returned.proof], [...inputs[i].proof])
-  const call = program.namespace.buyCall(fixture.exchange, returned, 'Read-only time-wire encoding')
+  const call = fixture.app === 'nft'
+    ? program.namespace.buyCall(fixture.exchange, returned, 'Read-only time-wire encoding')
+    : program.namespace.buyCall(returned, 'Read-only time-wire encoding')
+  assert.equal(call.to.toLowerCase(), fixture.exchange.toLowerCase())
+  assert.equal(call.value, returned.order.price)
   const decoded = sdk.decodeFunctionData({abi: program.namespace.exchangeAbi, data: call.data})
   assert.equal(decoded.functionName, 'buy')
   assert.equal(BigInt(decoded.args[0].order.listingTime), orders[i].listingTime)
