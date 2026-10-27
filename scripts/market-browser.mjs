@@ -146,6 +146,22 @@ try {
       await follow(itemPath)
       await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'collection card did not return to the actual item')
       record(result, 'canonical collection and item links navigate the actual pages')
+      if (app === 'karum') {
+        await follow(collectionPath)
+        await page.waitForFunction(path => [...document.querySelectorAll('main a')]
+          .some(a => a.getAttribute('href') === path), {timeout: 12000}, itemPath)
+        await page.evaluate(path => {
+          const state = {...history.state, back: location.pathname, current: path, forward: null,
+            position: (history.state?.position || 0) + 1}
+          history.pushState(state, '', path)
+          window.dispatchEvent(new PopStateEvent('popstate', {state}))
+        }, '/zvm-karum/collection/not-an-address')
+        await until(page, () => document.querySelector('main')?.textContent.includes('Invalid collection address.'), 'invalid collection route did not settle in its error state')
+        assert.equal(await page.evaluate(path => [...document.querySelectorAll('main a')]
+          .some(a => a.getAttribute('href') === path), itemPath), false, 'invalid route retained the prior item card')
+        await projection(true)
+        record(result, 'invalid collection route clears old data and recovers to a valid item')
+      }
       if (app === 'nft') {
         const accountPath = '/zvm-nft/account/' + fixture.alice
         await follow(accountPath)
@@ -237,5 +253,5 @@ try {
     exchangeRPCChecksAndChainMetadata: 'declared controls; not execution or full-client evidence',
     actualTransactionsOrSignatures: 0, browserJoined: browser.process()?.exitCode !== null}))
 }
-assert.ok(results.length === 2 && results.every(r => r.pass && r.checks.length === (r.app === 'nft' ? 14 : 10)), 'both real page paths must pass every declared check')
+assert.ok(results.length === 2 && results.every(r => r.pass && r.checks.length === (r.app === 'nft' ? 14 : 11)), 'both real page paths must pass every declared check')
 assert.equal(failedHTTP.length, 0, 'actual page HTTP failures observed')

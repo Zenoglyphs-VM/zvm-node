@@ -16,7 +16,7 @@ must remain byte-for-byte unchanged.
 Canonical collection-to-item navigation adds one check per application. Three
 additional NFT checks cover legacy item/collection bookmarks and generated
 explore/create links. Owner/account navigation and the legacy address alias add
-one more NFT check: 14 checks for NFT and 10 for Karum. The network action
+one more NFT check: 14 checks for NFT and 11 for Karum. The network action
 selector distinguishes the real switch control from the header's theme toggle.
 The initial failed run is retained separately, including its NFT undefined
 address request and the initially ambiguous Karum switch selection.
@@ -52,3 +52,9 @@ absent optional token-name fixture route and three 400 responses from Karum
 collection side endpoints during navigation. Current pins include the NFT
 account-route repair and Karum's captured-address/request-generation fence.
 Both failed browser revisions keep their own results and are not relabelled.
+
+The additional Karum check changes a valid collection route through real
+browser history to an invalid address, requires an explicit settled error and
+removal of the old item card, then returns to the valid item. It requires no
+malformed API request, wallet signing or transaction. There are 25 declared
+page/provider checks across both applications.
