@@ -130,8 +130,12 @@ async function projection(name, filled) {
   for (const id of [1, 2]) {
     await navigate('/item/' + fixture.collection + '/' + id, true)
     await until(id => document.querySelector('main h1')?.textContent.trim() === '#' + id, 'actual signed item page did not render', id)
-    const listed = await page.evaluate(() => [...document.querySelectorAll('main button')].some(b => b.checkVisibility() &&
-      (b.dataset.testid === 'buy' || b.textContent.trim() === 'Buy now')))
+    const listed = await page.evaluate(app => {
+      // Karum renders independently purchasable sibling cards in the same
+      // main element. Only the current item's price-card action is relevant.
+      const buttons = document.querySelectorAll(app === 'karum' ? 'main button[data-testid="buy"]' : 'main button')
+      return [...buttons].some(b => b.checkVisibility() && (app === 'karum' || b.textContent.trim() === 'Buy now'))
+    }, fixture.app)
     assert.equal(listed, id - 1 !== filled, 'actual page fillability differs from executed canonical state')
     const owner = id - 1 === filled ? fixture.buyer : fixture.seller
     assert.ok(await page.evaluate(owner => [...document.querySelectorAll('main a')].some(a =>

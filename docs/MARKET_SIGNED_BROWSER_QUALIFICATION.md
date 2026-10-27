@@ -48,3 +48,9 @@ transaction broadcasting, an unmodified daemon, independent-source verification
 and public-chain settlement remain unqualified. Cancellation/approval-revocation
 integration, complete uint64 timestamp transport and final supported-product
 agreement remain separate original acceptance requirements.
+
+Item fillability is measured at the current item's primary price-card action.
+Karum's independently purchasable sibling cards remain visible and actionable;
+their Buy now buttons must not be mistaken for a listing of the current item.
+The same owner, exact-input, real checker and canonical replacement assertions
+remain required for every item and every phase.
