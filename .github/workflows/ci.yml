@@ -24,8 +24,8 @@ jobs:
       - run: go vet ./...
       - name: Exercise the complete native Go suite with structured results
         run: go test -json -count=1 ./...
-      - name: Check market HTTP rewind cases with the race detector
-        run: go test -race -json -count=1 -run '^TestMarketHTTP(ReorgVisibility|RefusedRewind)$' ./indexer
+      - name: Check market HTTP and executed admission recovery with the race detector
+        run: go test -race -json -count=1 -run '^Test(MarketHTTP(ReorgVisibility|RefusedRewind)|ExecutedMarketAdmissionAndCanonicalRecovery)$' ./indexer ./orderbook
 
   market-browser:
     runs-on: ubuntu-latest

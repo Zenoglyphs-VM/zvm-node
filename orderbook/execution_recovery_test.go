@@ -51,8 +51,9 @@ import (
 
 // This fixture executes the pinned op-geth block builder, validator, state and
 // shipped contract artifacts. Its Engine/eth RPC control plane and unsigned NoM
-// observations are test adapters. No daemon, account manager, wallet, key,
-// signature or public RPC is involved. Reopening after an injected failure is a
+// observations are test adapters. Ordinary recovery profiles use approved orders;
+// the optional market profile uses public-test-key off-chain signatures. No real
+// daemon, account manager, wallet or public RPC is involved. Reopening is a
 // process-boundary model with graceful handle closure, not a power-loss test.
 type executionBackend struct{ chain *core.BlockChain }
 
@@ -371,6 +372,7 @@ type executionScenario struct {
 	seller, buyer            znn.Address
 	factory, exchange, token common.Address
 	orders                   []*Order
+	inputs                   []*Input
 	branches                 [2]map[uint64]*znn.DetailedMomentum
 	validated, buffered      bool
 }
@@ -379,7 +381,21 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 	return newExecutionScenarioProfile(t, false, false)
 }
 
+// Defaults preserve the original recovery scenario and its historical inputs.
+type executionScenarioInputs struct {
+	seller    znn.Address
+	timestamp uint64
+	sign      func(*executionScenario) []*Input
+}
+
 func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profileDir ...string) *executionScenario {
+	t.Helper()
+	return newExecutionScenarioInputs(t, validated, buffered, executionScenarioInputs{
+		seller: znn.Address{19: 161}, timestamp: 1_800_000_000,
+	}, profileDir...)
+}
+
+func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs executionScenarioInputs, profileDir ...string) *executionScenario {
 	t.Helper()
 	arts, err := bench.LoadArtifacts()
 	if err != nil {
@@ -392,9 +408,9 @@ func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profile
 	if err := arts.AddCombined(raw); err != nil {
 		t.Fatal(err)
 	}
-	s := &executionScenario{arts: arts, seller: znn.Address{19: 161}, buyer: znn.Address{19: 162}, validated: validated, buffered: buffered}
+	s := &executionScenario{arts: arts, seller: inputs.seller, buyer: znn.Address{19: 162}, validated: validated, buffered: buffered}
 	s.cfg = &rollup.Config{L1ChainID: 70, L2ChainID: 7340470, Inbox: rollup.Inbox, Vault: znn.Address{19: 163},
-		L1StartHeight: 2, L2GenesisTimestamp: 1_800_000_000, GasLimit: 30_000_000, GasPerPlasma: 1000,
+		L1StartHeight: 2, L2GenesisTimestamp: inputs.timestamp, GasLimit: 30_000_000, GasPerPlasma: 1000,
 		MaxNativeGas: 12_000_000, MaxNativeGasPerBlock: 22_500_000, NativeFloorBP: 2500, NativeCeilBP: 7500,
 		MandatoryShareBP: 200, MaxTxGas: 30_000_000, ChunkTTL: 100, MaxAssembledBytes: 1 << 19, MaxBatchBytes: 1 << 22,
 		FinalityDepth: 100, Forks: &rollup.Forks{Gas: 2, Wire: 2}}
@@ -450,6 +466,20 @@ func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profile
 		s.orders = append(s.orders, &Order{Trader: common.Address(s.seller), Side: SideSell, Collection: s.token,
 			TokenID: U(id), Amount: U(1), Price: B(big.NewInt(250_000_000_000_000_000)), ListingTime: s.cfg.L2GenesisTimestamp,
 			ExpirationTime: s.cfg.L2GenesisTimestamp + 86400, Nonce: U(0), Salt: U(id)})
+	}
+	for _, order := range s.orders {
+		s.inputs = append(s.inputs, &Input{Order: *order, Kind: KindOnChain})
+	}
+	if inputs.sign != nil {
+		s.inputs = inputs.sign(s)
+		if len(s.inputs) != len(s.orders) {
+			t.Fatal("signed scenario input count differs")
+		}
+		for i, input := range s.inputs {
+			if input == nil || input.Order.Hash() != s.orders[i].Hash() {
+				t.Fatal("signed scenario changed the intended order")
+			}
+		}
 	}
 	callData := func(artifact, method string, args ...any) []byte {
 		data, err := arts.MustGet(artifact).Call(method, args...)
@@ -530,14 +560,16 @@ func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profile
 				native(s.seller, &s.token, nil, callData("ZVMCollection", "mintBatch", common.Address(s.seller), []string{"one", "two", "three"}))
 				native(s.seller, &s.token, nil, callData("ZVMCollection", "setApprovalForAll", s.exchange, true))
 			case 7:
-				native(s.seller, &s.exchange, nil, callData("ZVMExchange", "approveOrders", ABIOrders(s.orders)))
+				if inputs.sign == nil {
+					native(s.seller, &s.exchange, nil, callData("ZVMExchange", "approveOrders", ABIOrders(s.orders)))
+				}
 				payload := derive.EncodeCall(derive.Call{To: &s.token, Gas: 500_000, Data: callData("ZVMCollection", "transferFrom", common.Address(s.seller), common.Address(s.buyer), big.NewInt(3))})
 				chunk = send(s.seller, s.cfg.Inbox, 0, append([]byte{derive.MsgChunk}, payload...)).Hash
 				for i := 0; i < 3; i++ {
 					send(s.buyer, s.cfg.Vault, 100_000_000, nil)
 				}
 			case 8:
-				input := &Input{Order: *s.orders[branch], Kind: KindOnChain}
+				input := s.inputs[branch]
 				native(s.buyer, &s.exchange, input.Order.Price.Big(), callData("ZVMExchange", "buy", input.ABI()))
 				send(s.seller, s.cfg.Inbox, 0, derive.EncodeAssemble([]znn.Hash{chunk}))
 			}
