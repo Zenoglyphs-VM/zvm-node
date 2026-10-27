@@ -158,15 +158,11 @@ func (f *ExecutedMarketFixture) Advance(branch int, heights ...uint64) {
 	if branch < 0 || branch >= len(f.r.scenario.branches) || len(heights) == 0 {
 		f.r.t.Fatal("invalid market source horizon")
 	}
-	lastHeight := uint64(9)
-	if f.r.scenario.provider {
-		lastHeight = 11
-		if f.r.scenario.providerAction != "buy" {
-			lastHeight = 14
-		}
-	}
 	for _, height := range heights {
-		if height < 6 || height > lastHeight {
+		// The declared branch is authoritative for each profile's source horizon.
+		// Reject gaps and mismatched records as well as out-of-range heights.
+		source := f.r.scenario.branches[branch][height]
+		if height < 6 || source == nil || source.Momentum == nil || source.Momentum.Height != height {
 			f.r.t.Fatal("market source horizon outside executed fixture")
 		}
 	}
