@@ -58,3 +58,10 @@ browser history to an invalid address, requires an explicit settled error and
 removal of the old item card, then returns to the valid item. It requires no
 malformed API request, wallet signing or transaction. There are 25 declared
 page/provider checks across both applications.
+
+The 25-check revision retained passing main checks but a failed whole run due
+to an item-page sibling read using an undefined address after navigation. The
+next pin includes captured item keys, guarded sibling/royalty reads and early
+block-listener registration with synchronous unmount cleanup. The complete
+browser driver, its 25 checks and its zero-HTTP-failure requirement are
+unchanged; a positive check count alone is not acceptance.
