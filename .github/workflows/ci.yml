@@ -38,14 +38,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: Zenoglyphs-VM/zvm-nft
-          ref: 1eda1f3334f59f8138cf980cbba1fb225247f17b
+          ref: 41f9c94ea5399922c1775bca60fd14eb06f5120a
           path: .market-browser/zvm-nft
           persist-credentials: false
           submodules: true
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: Zenoglyphs-VM/zvm-karum
-          ref: 2d64eac12733505e9d7bfe948057b37e788c2807
+          ref: e9fd8b2077d82c5650d9773ec2961328357ab24a
           path: .market-browser/zvm-karum
           persist-credentials: false
           submodules: true
