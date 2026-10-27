@@ -54,7 +54,7 @@ const executablePath = [process.env.CHROME_BIN, '/usr/bin/google-chrome', '/usr/
 assert.ok(executablePath, 'preinstalled Chrome required; no browser download fallback')
 const profile = await mkdtemp(join(tmpdir(), 'zvm-signed-market-'))
 const result = {app: fixture.app, kind: fixture.kind, action: fixture.action, checks: [], pass: false}
-const signatures = [], posts = [], methods = [], failedHTTP = [], exceptions = [], external = []
+const signatures = [], posts = [], methods = [], failedHTTP = [], exceptions = [], external = [], providerFailures = []
 let browser, context, page, chrome, stopPromise
 const stop = () => stopPromise ??= (async () => {if (browser) await browser.close()})()
 process.once('SIGTERM', () => {void stop()})
@@ -202,6 +202,7 @@ async function preparePage(page) {
     return signature
   })
   await page.exposeFunction('__executedMarketSend', async params => {
+    try {
     assert.equal(params.length, 1)
     const request = structuredClone(params[0])
     const fromBuyer = request.from.toLowerCase() === fixture.buyer.toLowerCase()
@@ -228,6 +229,17 @@ async function preparePage(page) {
     assert.ok(!transactions.includes(hash))
     transactions.push(hash)
     return hash
+    } catch (error) {
+      const causes = []
+      let cause = error
+      for (let i = 0; i < 4 && cause; i++, cause = cause.cause) {
+        causes.push(String(cause.details ?? cause.shortMessage ?? cause.message ?? cause).slice(0, 500))
+      }
+      const failure = {app: fixture.app, kind: fixture.kind, action: fixture.action, causes}
+      if (providerFailures.length < 4) providerFailures.push(failure)
+      console.error('SIGNED-PROVIDER-FAILURE ' + JSON.stringify(failure))
+      throw error
+    }
   })
   await page.evaluateOnNewDocument(inject, fixture)
   await page.setRequestInterception(true)
@@ -306,6 +318,7 @@ try {
   let state = await phase('bind')
   fundedNonce = state.actorNonce
   fundedSellerNonce = state.sellerNonce
+  if (partialBatch) assert.ok(Number.isSafeInteger(fundedSellerNonce) && fundedSellerNonce >= 3)
   assert.ok(Number.isSafeInteger(fundedNonce) && fundedNonce >= 3)
   assert.equal(state.actor.toLowerCase(), fixture.actor.toLowerCase())
   record('real HTTP admission binds actual inputs without changing the derived prefix')
@@ -357,6 +370,13 @@ try {
     else {
       await click('Add 2 to cart')
       await page.waitForSelector('[data-testid="checkout"]', {visible: true, timeout: 12000})
+      await until(() => {
+        const button = document.querySelector('[data-testid="checkout"]')
+        if (!button || button.disabled || !button.checkVisibility()) return false
+        const box = button.getBoundingClientRect()
+        const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+        return box.width > 0 && box.height > 0 && box.x >= 0 && box.right <= innerWidth && box.y >= 0 && box.bottom <= innerHeight && !!hit && button.contains(hit)
+      }, 'the actual cart checkout has not finished entering the visible viewport')
       await page.click('[data-testid="checkout"]')
     }
     record('actual collection sweep selects two real admitted listings')
@@ -555,6 +575,7 @@ try {
   assert.equal(external.length, 0)
   assert.equal(exceptions.length, 0)
   assert.deepEqual(failedHTTP, [])
+  assert.deepEqual(providerFailures, [])
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
   assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch ? 2 : 1)
   record((partialBatch ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
@@ -573,7 +594,7 @@ try {
   await rm(profile, {recursive: true, force: false})
   console.log('EXECUTED-MARKET-BROWSER-QUALIFICATION ' + JSON.stringify({node: process.version, chrome, pins,
     result, SDKVersion: sdk.version, actualTypedDataSignatures: signatures.length, actualOrderPOSTs: posts.length,
-    providerMethods: methods, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
+    providerMethods: methods, providerFailures, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
     actualProductionPageActionsAndGoAdmission: true, actualProviderEVMTransactions: transactions.length,
     actualOfficialRelayerTransport: true, physicalWalletOrPublicNetwork: false,
     signer: 'public scalar-one seller and scalar-two buyer EIP-1193 test signers', browserJoined: !!browser?.process() && browser.process().exitCode !== null}))

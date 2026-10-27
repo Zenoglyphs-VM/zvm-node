@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 	"testing"
 	"time"
@@ -159,8 +160,9 @@ func (p *ExecutedMarketProviderFixture) sendPartialBatch(ctx context.Context, ra
 		tx.To() == nil || *tx.To() != to || tx.Value().Cmp(value) != 0 || !matching ||
 		len(leg.raw) != 0 || p.relayer == "" || p.submissions != index ||
 		(index == 1 && !p.partial.legs[0].bound) {
+		reason := fmt.Errorf("partial-batch validation: leg=%d nonce=%d/%d submitted=%d type=%d chain=%t target=%t value=%t calldata=%t configured=%t funded=%t previous_bound=%t", index, tx.Nonce(), leg.nonce, p.submissions, tx.Type(), tx.ChainId().Cmp(p.f.Rollup().L2ChainIDBig()) == 0, tx.To() != nil && *tx.To() == to, tx.Value().Cmp(value) == 0, matching, p.relayer != "", p.nonceKnown && p.batchBalances.buyer != nil, index == 0 || p.partial.legs[0].bound)
 		p.mu.Unlock()
-		return common.Hash{}, errors.New("partial-batch request changed its exact action or order")
+		return common.Hash{}, reason
 	}
 	leg.raw = append([]byte(nil), raw...)
 	p.submissions++
@@ -397,10 +399,10 @@ func (p *ExecutedMarketProviderFixture) AssertBatchState(t *testing.T, stage int
 		}
 		var cachedStatus, source, checkedHash string
 		var cachedCode, cachedFilled int
-		var checkedEpoch uint64
+		var checkedEpoch, checkedBlock uint64
 		var closedBlock *uint64
-		if err := p.f.DB().QueryRow("SELECT status,code,filled,source,checked_epoch,checked_hash,closed_block FROM nft_orders WHERE hash=?",
-			input.Order.Hash().Hex()).Scan(&cachedStatus, &cachedCode, &cachedFilled, &source, &checkedEpoch, &checkedHash, &closedBlock); err != nil {
+		if err := p.f.DB().QueryRow("SELECT status,code,filled,source,checked_epoch,checked_block,checked_hash,closed_block FROM nft_orders WHERE hash=?",
+			input.Order.Hash().Hex()).Scan(&cachedStatus, &cachedCode, &cachedFilled, &source, &checkedEpoch, &checkedBlock, &checkedHash, &closedBlock); err != nil {
 			t.Fatal(err)
 		}
 		if cachedStatus != status || cachedCode != int(code) || cachedFilled != int(count) || source != "api" {
@@ -416,8 +418,24 @@ func (p *ExecutedMarketProviderFixture) AssertBatchState(t *testing.T, stage int
 				hash = p.BatchCancellationHash()
 			}
 			receipt := p.batchAccountingReceipt(t, hash)
-			if closedBlock == nil || *closedBlock != receipt.BlockNumber.Uint64() {
-				t.Fatal("terminal batch order does not name its exact canonical action block")
+			if closedBlock == nil || *closedBlock < receipt.BlockNumber.Uint64() || *closedBlock > p.f.r.backend.chain.CurrentBlock().Number.Uint64() {
+				t.Fatal("terminal batch order has no canonical action/observation interval")
+			}
+			if cancelled {
+				if *closedBlock != receipt.BlockNumber.Uint64() {
+					t.Fatal("cancellation cursor differs from its exact event block")
+				}
+			} else {
+				// A fill is learned by a hash-bound checkOrder observation,
+				// which may join after its event. Its close cursor is that
+				// observation height, not a fabricated transaction height.
+				p.f.r.backend.mu.Lock()
+				block := p.f.r.backend.chain.GetBlockByNumber(checkedBlock)
+				valid := block != nil && block.Hash().Hex() == checkedHash
+				p.f.r.backend.mu.Unlock()
+				if !valid || checkedEpoch != p.f.Epoch(t) || *closedBlock != checkedBlock {
+					t.Fatal("filled batch cache lost its canonical observation hash epoch or cursor")
+				}
 			}
 		}
 		states = append(states, map[string]any{"status": status, "code": code, "fillable": code == CodeOK,
