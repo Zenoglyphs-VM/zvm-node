@@ -42,12 +42,15 @@ func TestExecutedMarketCreditBrowserRecovery(t *testing.T) {
 		roots[app] = root
 	}
 	for _, app := range []string{"nft", "karum"} {
-		t.Run(app, func(t *testing.T) { executedMarketCreditBrowserProfile(t, roots, app) })
+		t.Run(app, func(t *testing.T) { executedMarketCreditBrowserProfile(t, roots, app, false) })
+	}
+	for _, app := range []string{"nft", "karum"} {
+		t.Run(app+"-mined-revert", func(t *testing.T) { executedMarketCreditBrowserProfile(t, roots, app, true) })
 	}
 }
 
-func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, app string) {
-	f, transport := orderbook.NewExecutedMarketCreditBrowserFixture(t)
+func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, app string, minedRevert bool) {
+	f, transport := orderbook.NewExecutedMarketCreditBrowserFixture(t, minedRevert)
 	f.Advance(0, 6)
 	deployment := filepath.Join(t.TempDir(), "apps.json")
 	if err := (&apps.Deployment{ChainID: f.Rollup().L2ChainID, Exchange: f.Exchange(), CollectionFactory: f.CollectionFactory()}).Save(deployment); err != nil {
@@ -152,7 +155,7 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 	initial := transport.AssertCreditState(t, false)
 	input, err := json.Marshal(map[string]any{"base": web.URL, "token": token, "roots": roots, "app": app,
 		"chainId": f.Rollup().L2ChainID, "wallet": f.CreditWallet().Hex(), "owner": f.Buyer().Hex(),
-		"exchange": f.Exchange().Hex(), "walletABI": f.CreditWalletABI(), "expectedCredit": "5000000000000000"})
+		"exchange": f.Exchange().Hex(), "walletABI": f.CreditWalletABI(), "expectedCredit": "5000000000000000", "minedRevert": minedRevert})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -236,7 +239,7 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 			}
 			transport.AssertCompleted(t)
 			exit := joinRelayer()
-			record := map[string]any{"app": app, "pass": true, "phases": expected, "observations": observations,
+			record := map[string]any{"app": app, "minedRevert": minedRevert, "pass": true, "phases": expected, "observations": observations,
 				"actualProductionCreditPage": true, "actualNodeAPIAndEVMContractState": true,
 				"actualOfficialRelayerProgram": true, "actualRelayerJoined": true, "actualRelayerExit": exit,
 				"ownedCancellationMarkerVerified": true, "ownedBrowserJoined": true,

@@ -637,6 +637,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 			case creditAcceptHeight:
 				if s.credit != nil {
 					data, err := s.credit.abi.Pack("setRejectsNative", false)
+					if s.credit.minedRevert {
+						data, err = s.credit.abi.Pack("setRejectFromBlock", new(big.Int).SetUint64(creditFundingHeight))
+					}
 					if err != nil {
 						t.Fatal(err)
 					}

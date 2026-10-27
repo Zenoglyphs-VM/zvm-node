@@ -34,12 +34,14 @@ type executedCreditSetup struct {
 	abi                                 abi.ABI
 	rawABI                              json.RawMessage
 	sourceSHA, compilerSHA, artifactSHA string
+	minedRevert                         bool
 }
 
 type executedCreditTransfer struct {
 	setup             *executedCreditSetup
 	actorBalance      *big.Int
 	rejectedEstimates int
+	rejectedData      []string
 }
 
 func creditSourceSHA(raw []byte) string {
@@ -126,8 +128,11 @@ func loadCreditWallet(t *testing.T, owner common.Address) *executedCreditSetup {
 // The actual page requests a call from this contract account; its test provider
 // signs an owner EOA outer transaction. The execution adapter never fabricates
 // an EVM transaction whose sender is a contract.
-func NewExecutedMarketCreditBrowserFixture(t *testing.T) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
+func NewExecutedMarketCreditBrowserFixture(t *testing.T, variants ...bool) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
 	t.Helper()
+	if len(variants) > 1 {
+		t.Fatal("one credit receiver variant is required")
+	}
 	keyBytes := make([]byte, 32)
 	keyBytes[31] = 2
 	ownerKey, err := crypto.ToECDSA(keyBytes)
@@ -136,6 +141,7 @@ func NewExecutedMarketCreditBrowserFixture(t *testing.T) (*ExecutedMarketFixture
 	}
 	owner := crypto.PubkeyToAddress(ownerKey.PublicKey)
 	setup := loadCreditWallet(t, owner)
+	setup.minedRevert = len(variants) == 1 && variants[0]
 	sellerKey := executedMarketKey(t)
 	scenario := newExecutionScenarioInputs(t, true, false, executionScenarioInputs{
 		seller: znn.Address(crypto.PubkeyToAddress(sellerKey.PublicKey)), buyer: znn.Address(owner),
@@ -225,7 +231,71 @@ func (p *ExecutedMarketProviderFixture) AssertCreditReceiverRefusal(t *testing.T
 	if rejected < 1 || rejected > 8 || submissions != 0 || publications != 0 || p.f.r.d.Head().Height != creditSaleHeight {
 		t.Fatal("rejecting receiver did not refuse the actual page estimate before a wallet submission")
 	}
+	p.assertCreditRejectionData(t)
 	p.AssertCreditState(t, false)
+}
+
+func (p *ExecutedMarketProviderFixture) assertCreditRejectionData(t *testing.T) {
+	t.Helper()
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	selector := hexutil.Encode(crypto.Keccak256([]byte("PayoutFailed()"))[:4])
+	if len(p.credit.rejectedData) != p.credit.rejectedEstimates || len(p.credit.rejectedData) == 0 {
+		t.Fatal("credit receiver rejection data was not retained")
+	}
+	for _, data := range p.credit.rejectedData {
+		if data != selector {
+			t.Fatal("credit estimate failed for a different reason than recipient payout rejection")
+		}
+	}
+}
+
+func (p *ExecutedMarketProviderFixture) creditAccountingReceipt(t *testing.T) *types.Receipt {
+	t.Helper()
+	hash := p.TransactionHash()
+	p.f.r.backend.mu.Lock()
+	defer p.f.r.backend.mu.Unlock()
+	block, tx, index := (executionEth{p.f.r.backend}).canonicalTransaction(hash)
+	if block == nil || tx == nil {
+		t.Fatal("credit accounting transaction is not canonical")
+	}
+	receipts := p.f.r.backend.chain.GetReceiptsByHash(block.Hash())
+	want := uint64(types.ReceiptStatusSuccessful)
+	if p.credit.setup.minedRevert {
+		want = types.ReceiptStatusFailed
+	}
+	if index >= len(receipts) || receipts[index] == nil || receipts[index].TxHash != hash ||
+		receipts[index].Status != want || receipts[index].Type != types.DynamicFeeTxType ||
+		receipts[index].GasUsed <= 21_000 || receipts[index].GasUsed >= tx.Gas() {
+		t.Fatal("credit receipt status or gas headroom differs from the intended executed outcome")
+	}
+	copy := *receipts[index]
+	return &copy
+}
+
+func (p *ExecutedMarketProviderFixture) assertCreditRevertedCanonical(t *testing.T, included bool) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if included {
+		p.mu.Lock()
+		observed := p.executedReceipts
+		p.mu.Unlock()
+		if observed == 0 {
+			t.Fatal("application did not observe the actual reverted credit receipt")
+		}
+		p.creditAccountingReceipt(t)
+	} else if receipt, err := p.f.r.eth.TransactionReceipt(ctx, p.TransactionHash()); err == nil || receipt != nil {
+		t.Fatal("removed reverted credit transaction still has a canonical receipt")
+	}
+	want := p.ActorNonce()
+	if included {
+		want++
+	}
+	nonce, err := p.f.r.eth.NonceAt(ctx, p.Actor(), nil)
+	if err != nil || nonce != want {
+		t.Fatal("reverted credit transaction did not retain its actual owner nonce semantics")
+	}
 }
 
 // Independent hash-selected code, ABI and native-state reads check every phase.
@@ -258,8 +328,17 @@ func (p *ExecutedMarketProviderFixture) AssertCreditState(t *testing.T, included
 		t.Fatal("credit wallet owner differs")
 	}
 	rejects := new(big.Int).SetBytes(walletCall("rejectsNative")).Sign() != 0
-	if rejects != (f.r.d.Head().Height < creditAcceptHeight) {
+	wantRejects := f.r.d.Head().Height < creditAcceptHeight || (setup.minedRevert && f.r.d.Head().Height > creditFundingHeight)
+	if rejects != wantRejects {
 		t.Fatal("executed credit receiver mode differs from its source phase")
+	}
+	scheduled := new(big.Int).SetBytes(walletCall("rejectFromBlock"))
+	wantScheduled := new(big.Int)
+	if setup.minedRevert && f.r.d.Head().Height >= creditAcceptHeight {
+		wantScheduled.SetUint64(creditFundingHeight)
+	}
+	if scheduled.Cmp(wantScheduled) != 0 {
+		t.Fatal("credit receiver rejection threshold differs from its source call")
 	}
 	data, err := f.r.scenario.arts.MustGet("ZVMExchange").Call("credits", setup.wallet)
 	if err != nil {
@@ -291,7 +370,8 @@ func (p *ExecutedMarketProviderFixture) AssertCreditState(t *testing.T, included
 	contract, exchange, owner := balance(setup.wallet), balance(f.Exchange()), balance(f.Buyer())
 	amount := big.NewInt(5_000_000_000_000_000)
 	wantCredit, wantWallet := new(big.Int).Set(amount), new(big.Int)
-	if included {
+	paid := included && !setup.minedRevert
+	if paid {
 		wantCredit.SetInt64(0)
 		wantWallet.Set(amount)
 	}
@@ -310,24 +390,31 @@ func (p *ExecutedMarketProviderFixture) AssertCreditState(t *testing.T, included
 	if initial != nil {
 		expected := new(big.Int).Set(initial)
 		if included {
-			expected.Sub(expected, batchTransactionFee(t, p.batchAccountingReceipt(t, p.TransactionHash())))
+			expected.Sub(expected, batchTransactionFee(t, p.creditAccountingReceipt(t)))
 		}
 		if owner.Cmp(expected) != 0 {
 			t.Fatal("outer owner debit differs from the executed receipt fee")
 		}
 	}
-	return map[string]any{"canonicalHeader": hash.Hex(), "credit": credit.String(), "exchangeNativeBalance": exchange.String(),
+	header, err := f.r.eth.HeaderByHash(ctx, hash)
+	if err != nil || header == nil {
+		t.Fatal("credit canonical header is unavailable")
+	}
+	return map[string]any{"canonicalHeader": hash.Hex(), "canonicalL2Number": header.Number.String(), "credit": credit.String(), "exchangeNativeBalance": exchange.String(),
 		"recipientNativeBalance": contract.String(), "ownerNativeBalance": owner.String(), "rejectsNative": rejects,
 		"withdrawalIncluded": included, "actualCompiledWalletRuntimeChecked": true, "hashSelectedReads": true,
+		"withdrawalReverted": included && setup.minedRevert, "nativePayoutExecuted": paid, "rejectFromL2Block": scheduled.String(),
 		"sourceSalePreserved": true, "exchangeFeeBps": 200, "directStateOrStorageInsertion": false}
 }
 
 func (p *ExecutedMarketProviderFixture) CreditEvidence(t *testing.T) map[string]any {
 	t.Helper()
+	p.assertCreditRejectionData(t)
 	value := p.Evidence()
 	delete(value, "nativeBuySubstitutions")
 	p.mu.Lock()
 	value["rejectingReceiverStatefulEstimates"] = p.credit.rejectedEstimates
+	value["statefulPayoutRejectionData"] = append([]string(nil), p.credit.rejectedData...)
 	p.mu.Unlock()
 	value["declaredNativeSaleSetupTransactions"] = 1
 	value["setupSaleHeight"], value["acceptingReceiverHeight"] = creditSaleHeight, creditAcceptHeight
@@ -338,5 +425,7 @@ func (p *ExecutedMarketProviderFixture) CreditEvidence(t *testing.T) map[string]
 	value["accountContractSenderFabricated"] = false
 	value["genericSafeUserOperationOrPhysicalWalletQualified"] = false
 	value["expectedCredit"] = "5000000000000000"
+	value["minedRevert"] = p.credit.setup.minedRevert
+	value["expectedPayoutFailedSelector"] = hexutil.Encode(crypto.Keccak256([]byte("PayoutFailed()"))[:4])
 	return value
 }

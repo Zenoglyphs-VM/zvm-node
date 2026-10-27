@@ -5,7 +5,8 @@ pragma solidity 0.8.30;
 // Adapted from the retained PayoutWallet fixture with explicit owner authority.
 contract CreditFixtureWallet {
     address public owner;
-    bool public rejectsNative = true;
+    bool private rejectsPayment = true;
+    uint256 public rejectFromBlock;
 
     event Received(address indexed from, uint256 amount);
 
@@ -16,7 +17,19 @@ contract CreditFixtureWallet {
 
     function setRejectsNative(bool rejects) external {
         require(msg.sender == owner, "fixture owner required");
-        rejectsNative = rejects;
+        rejectsPayment = rejects;
+        rejectFromBlock = 0;
+    }
+
+    function setRejectFromBlock(uint256 from) external {
+        require(msg.sender == owner, "fixture owner required");
+        require(from > block.number, "fixture future block required");
+        rejectsPayment = false;
+        rejectFromBlock = from;
+    }
+
+    function rejectsNative() public view returns (bool) {
+        return rejectsPayment || (rejectFromBlock != 0 && block.number >= rejectFromBlock);
     }
 
     function execute(address destination, bytes calldata input) external returns (bytes memory) {
@@ -27,7 +40,7 @@ contract CreditFixtureWallet {
     }
 
     receive() external payable {
-        require(!rejectsNative, "fixture rejects native");
+        require(!rejectsNative(), "fixture rejects native");
         emit Received(msg.sender, msg.value);
     }
 }

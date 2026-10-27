@@ -17,6 +17,10 @@ assert.equal(base.hostname, '127.0.0.1')
 assert.ok(base.port && /^[a-f0-9]{64}$/.test(fixture.token))
 assert.ok(['nft', 'karum'].includes(fixture.app))
 assert.equal(fixture.expectedCredit, '5000000000000000')
+assert.equal(typeof fixture.minedRevert, 'boolean')
+const minedRevert = fixture.minedRevert
+const finalAmount = minedRevert ? fixture.expectedCredit : '0'
+const finalState = minedRevert ? 'reverted' : 'executed'
 const pins = JSON.parse(await readFile(new URL('./market-browser-pins.json', import.meta.url)))
 const git = (root, ...args) => execFileSync('git', ['--no-replace-objects', ...args], {cwd: root, encoding: 'utf8'}).trim()
 for (const app of ['nft', 'karum']) {
@@ -38,10 +42,11 @@ const key = 'zvm.exchange-credits.v1:' + fixture.chainId + ':' + fixture.exchang
 const executablePath = [process.env.CHROME_BIN, '/usr/bin/google-chrome', '/usr/bin/chromium'].find(name => name && existsSync(name))
 assert.ok(executablePath, 'preinstalled Chrome is required')
 const profile = await mkdtemp(join(tmpdir(), 'zvm-credit-browser-'))
-const result = {app: fixture.app, checks: [], pass: false}
+const result = {app: fixture.app, minedRevert, checks: [], pass: false}
 const methods = [], failedHTTP = [], exceptions = [], external = [], providerFailures = [], transactions = []
 let browser, context, page, stopPromise, rejectWallet = false, walletRejections = 0, requests = 0, actorNonce
 let originalJournal, originalHash, savedBeforeRequest = 0
+let preparationHeader, finalReceipt
 const stop = () => stopPromise ??= (async () => {if (browser) await browser.close()})()
 process.once('SIGTERM', () => {void stop()})
 const record = check => {
@@ -161,6 +166,7 @@ try {
       if (request.chainId !== undefined) assert.equal(BigInt(request.chainId), BigInt(fixture.chainId))
       if (rejectWallet) {rejectWallet = false; walletRejections++; return {rejected: true}}
       assert.equal(transactions.length, 0)
+      preparationHeader = {number: head.number.toString(), hash: head.hash}
       const data = encodeFunctionData({abi: fixture.walletABI, functionName: 'execute', args: [fixture.exchange, withdrawData]})
       const nonce = await chain.getTransactionCount({address: owner.address, blockTag: 'pending'})
       assert.equal(nonce, actorNonce)
@@ -242,19 +248,43 @@ try {
   record('page reload restores the exact pending hash and blocks a duplicate wallet request')
 
   await phase('ordered')
-  await refresh(); await credit('0', 'executed')
-  assert.equal(await disabled(), true)
+  await refresh(); await credit(finalAmount, finalState)
+  assert.equal(await disabled(), !minedRevert)
   const mined = await phase('mined')
   assert.equal(mined.hash, originalHash)
-  assert.equal(mined.state.credit, '0')
-  assert.equal(mined.state.recipientNativeBalance, fixture.expectedCredit)
-  assert.equal(mined.state.exchangeNativeBalance, '0')
-  record('canonical executed withdrawal clears credit and pays the actual contract recipient with receipt-fee accounting')
+  assert.equal(mined.state.credit, finalAmount)
+  assert.equal(mined.state.recipientNativeBalance, minedRevert ? '0' : fixture.expectedCredit)
+  assert.equal(mined.state.exchangeNativeBalance, finalAmount)
+  assert.equal(mined.state.withdrawalReverted, minedRevert)
+  assert.equal(mined.state.nativePayoutExecuted, !minedRevert)
+  record(minedRevert
+    ? 'canonical reverted withdrawal preserves backed credit and recipient balance with actual owner receipt fees'
+    : 'canonical executed withdrawal clears credit and pays the actual contract recipient with receipt-fee accounting')
   const transaction = await chain.getTransaction({hash: originalHash})
+  const receipt = await chain.getTransactionReceipt({hash: originalHash})
+  assert.equal(receipt.status, minedRevert ? 'reverted' : 'success')
+  assert.ok(receipt.gasUsed > 21000n && receipt.gasUsed < transaction.gas)
+  assert.ok(receipt.blockNumber > BigInt(preparationHeader.number))
+  if (minedRevert) {
+    assert.equal(mined.state.rejectFromL2Block, '16')
+    assert.ok(BigInt(preparationHeader.number) < 16n && receipt.blockNumber >= 16n)
+  }
+  finalReceipt = {status: receipt.status, blockNumber: receipt.blockNumber.toString(), blockHash: receipt.blockHash,
+    gasUsed: receipt.gasUsed.toString(), gasLimit: transaction.gas.toString()}
   assert.equal(transaction.from.toLowerCase(), owner.address.toLowerCase())
   assert.equal(transaction.to.toLowerCase(), fixture.wallet.toLowerCase())
   assert.notEqual(transaction.from.toLowerCase(), JSON.parse(originalJournal).records[0].owner)
   record('recovery accepts a wallet-associated outer hash without fabricating a contract transaction sender')
+
+  if (minedRevert) {
+    await click('Withdraw available ZNN')
+    await until(() => document.querySelector('[data-testid="exchange-credits"]')?.textContent.includes('The wallet request ended.'), 'retry against the rejecting recipient did not settle')
+    await credit(fixture.expectedCredit, 'reverted')
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), key), originalJournal)
+    assert.equal(requests, 2)
+    assert.equal(transactions.length, 1)
+    record('new preparation after a mined revert cannot broadcast or replace the original journal hash')
+  }
 
   const replaced = await phase('replacement')
   assert.equal(replaced.state.credit, fixture.expectedCredit)
@@ -273,10 +303,10 @@ try {
   const restored = await phase('restored')
   assert.equal(restored.hash, originalHash)
   assert.deepEqual(restored.state, mined.state)
-  await refresh(); await credit('0', 'executed')
+  await refresh(); await credit(finalAmount, finalState)
   assert.equal(await page.evaluate(key => localStorage.getItem(key), key), originalJournal)
   assert.equal(await page.$eval('[data-testid="credit-withdrawal-hash"]', node => node.textContent.trim()), originalHash)
-  assert.equal(await disabled(), true)
+  assert.equal(await disabled(), !minedRevert)
   assert.equal(requests, 2)
   assert.equal(transactions.length, 1)
   record('restoration recovers the same executed hash balances and immutable journal without re-signing')
@@ -287,7 +317,7 @@ try {
   assert.deepEqual(external, [])
   assert.deepEqual(exceptions, [])
   record('only declared provider methods execute with one explicit rejection one broadcast and no external or failed page requests')
-  assert.equal(result.checks.length, 13)
+  assert.equal(result.checks.length, minedRevert ? 14 : 13)
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 240)
@@ -302,7 +332,7 @@ try {
   console.log('EXECUTED-CREDIT-BROWSER-QUALIFICATION ' + JSON.stringify({result, pins, SDKVersion: sdk.version,
     actualProductionPage: true, knownContractAccountAdapter: true, requests, walletRejections, savedBeforeRequest,
     providerMethods: methods, providerFailures, actualProviderEVMTransactions: transactions.length,
-    signedRawBytes: transactions.map(value => value.rawBytes), originalHash,
+    signedRawBytes: transactions.map(value => value.rawBytes), originalHash, preparationHeader, finalReceipt,
     externalRequests: external.length, failedHTTP, pageExceptions: exceptions.length,
     browserJoined: !!browser?.process() && browser.process().exitCode !== null,
     genericSafeUserOperationOrPhysicalWalletQualified: false, independentNoMOrFullDaemonQualified: false,

@@ -243,13 +243,14 @@ func (s executionEth) EstimateGas(ctx context.Context, args providerGasCall, at 
 	}
 	call := &core.Message{From: args.From, To: args.To, Value: value, Data: data, GasLimit: uint64(args.Gas),
 		GasPrice: new(big.Int), GasFeeCap: new(big.Int), GasTipCap: new(big.Int), SkipNonceChecks: true, SkipTransactionChecks: true}
-	gas, _, err := gasestimator.Estimate(ctx, call, &gasestimator.Options{Config: s.backend.chain.Config(), Chain: s.backend.chain, Header: header, State: state, ErrorRatio: 0.015}, 8_000_000)
+	gas, revertData, err := gasestimator.Estimate(ctx, call, &gasestimator.Options{Config: s.backend.chain.Config(), Chain: s.backend.chain, Header: header, State: state, ErrorRatio: 0.015}, 8_000_000)
 	p := s.backend.provider
 	p.mu.Lock()
 	p.estimates++
 	if p.credit != nil && err != nil && args.From == p.f.CreditWallet() && args.To != nil && *args.To == p.f.Exchange() &&
 		value.Sign() == 0 && bytes.Equal(data, crypto.Keccak256([]byte("withdrawCredits()"))[:4]) {
 		p.credit.rejectedEstimates++
+		p.credit.rejectedData = append(p.credit.rejectedData, hexutil.Encode(revertData))
 	}
 	p.mu.Unlock()
 	return hexutil.Uint64(gas), err
@@ -531,6 +532,10 @@ func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, c
 
 func (p *ExecutedMarketProviderFixture) AssertCanonicalTransaction(t *testing.T, included bool) {
 	t.Helper()
+	if p.credit != nil && p.credit.setup.minedRevert {
+		p.assertCreditRevertedCanonical(t, included)
+		return
+	}
 	if p.partial != nil {
 		p.assertPartialLeg(t, 0, included)
 		p.assertPartialLeg(t, 1, included)

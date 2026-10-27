@@ -244,9 +244,43 @@ balances and immutable journal without re-signing. Runtime bytes, owner and
 receiver mode are checked against the source-bound compiled artifact.
 
 This known contract-account adapter does not qualify generic Safe/ERC-4337
-user-operation mapping or physical wallets. Receiver-rejection coverage here is
-stateful estimation before dispatch; mined-revert withdrawal remains a separate
-case. NoM canonicality/plasma and the custom Engine/eth adapter remain fixture
+user-operation mapping or physical wallets. The initial two profiles cover
+stateful receiver rejection before dispatch. The additional mined-revert
+profiles below retain the same withdrawal and recovery controls. NoM
+canonicality/plasma and the custom Engine/eth adapter remain fixture
 authority. The source sale uses native currency, zero royalties and the declared
 nonzero fee; it is not mixed-currency or ERC-1271 browser acceptance. Full A08,
 independent full-daemon/NoM authority and production acceptance remain open.
+
+## Mined withdrawal failure after successful preparation
+
+One additional profile per interface schedules the test receiver to reject ZNN
+from L2 block 16. This is an owner-authorized call in the declared source setup,
+before any withdrawal request. The actual direct and outer-call gas estimates
+run at L2 block 15 and succeed. The same signed outer transaction is then
+included at block 16, where its payout reverts. No already-derived source byte,
+contract storage, receipt status, caller or checker response is rewritten to
+produce the failure.
+
+The canonical failed receipt must retain gas headroom, consume the owner nonce
+and charge its actual receipt fee while leaving 0.005 ZNN backed credit and
+zero recipient balance. The real page must show a reverted record with the same
+original hash and available credit. A new preparation against the rejecting
+receiver must fail before wallet dispatch and leave the existing journal exact.
+The stateful estimator retains the actual `PayoutFailed()` revert data, so a
+different RPC failure cannot stand in for receiver rejection.
+
+Removing the failed transaction must restore its owner nonce/fee effects and
+make the original journal pending; reload must prevent a duplicate request.
+Returning to the original branch must restore the same failed receipt, fee,
+backed credit and immutable journal without re-signing. The original positive
+profiles retain 13 checks each; the two mined-revert profiles require 14 each.
+Together with the original 24 profiles/520 checks, this is 28 browser profiles
+and 574 named checks. Four actual SDK/time clients and the separate navigation
+checks remain required. One relayer binary and one compiled receiver target
+serve the entire serialized lane within the existing bounds.
+
+This extension qualifies one declared block-dependent receiver policy with a
+known owner-EOA account adapter. Unknown outer-hash recovery, other wallet/user-
+operation mappings, physical wallets, independent NoM authority and the rest of
+the original A08 acceptance remain open.
