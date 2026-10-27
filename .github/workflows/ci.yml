@@ -26,3 +26,56 @@ jobs:
         run: go test -json -count=1 ./...
       - name: Check market HTTP rewind cases with the race detector
         run: go test -race -json -count=1 -run '^TestMarketHTTP(ReorgVisibility|RefusedRewind)$' ./indexer
+
+  market-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: true
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Zenoglyphs-VM/zvm-nft
+          ref: accd8d86c7e67939f484af73a6098754a383bdf0
+          path: .market-browser/zvm-nft
+          persist-credentials: false
+          submodules: true
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Zenoglyphs-VM/zvm-karum
+          ref: 4e76645d3e6310126fdd8fc6aecbe16764b1a780
+          path: .market-browser/zvm-karum
+          persist-credentials: false
+          submodules: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            .market-browser/zvm-nft/package-lock.json
+            .market-browser/zvm-karum/package-lock.json
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - name: Require the preinstalled browser
+        run: google-chrome --version
+      - name: Install each unchanged locked frontend
+        run: |
+          npm ci --ignore-scripts --include=dev --prefix .market-browser/zvm-nft
+          npm ci --ignore-scripts --include=dev --prefix .market-browser/zvm-karum
+      - name: Build the actual production pages for the loopback fixture
+        env:
+          VITE_ZVM_NODE: http://127.0.0.1:18733
+        run: |
+          npm run build --prefix .market-browser/zvm-nft
+          npm run build --prefix .market-browser/zvm-karum
+      - name: Exercise both real pages against the Go market
+        env:
+          ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_NFT_ROOT: ${{ github.workspace }}/.market-browser/zvm-nft
+          ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
+        run: go test -json -count=1 -timeout=6m -run '^TestMarketBrowserHTTP$' ./indexer
+      - name: Refuse tracked source drift
+        run: git diff --exit-code
