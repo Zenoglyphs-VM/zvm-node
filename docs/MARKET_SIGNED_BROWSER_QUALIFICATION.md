@@ -200,8 +200,53 @@ receipt, full/partial native refund, cancellation, nonce, approval and canonical
 replacement/restoration assertions remain required. The original transaction
 and NoM publication counts stay unchanged.
 
-This extension exercises a zero-credit page read. Source-bound execution of a
-positive credit withdrawal with accepting/rejecting recipients and account
-contracts remains a separate required integration lane. The read-only legacy
+This extension exercises a zero-credit page read. Positive credit withdrawal
+with accepting/rejecting recipients uses the separate integration lane below.
+The read-only legacy
 navigation fixture keeps its metadata-only RPC limits and is not used to
 establish EVM credit behavior. Full A08 acceptance remains incomplete.
+
+## Positive credit and contract-account recovery
+
+`TestExecutedMarketCreditBrowserRecovery` adds one serialized profile per
+interface while retaining the 24 existing profiles and every original check.
+The job compiles one self-contained `CreditFixtureWallet` using the same
+byte-count-, digest- and version-pinned Solidity 0.8.30 WASM compiler as the
+retained financial lane. The existing compiler helper is reused unchanged.
+This adds no npm dependency graph, OpenZeppelin archive, browser installation or
+local Go/compiler execution. The compiler download is streamed once with its
+exact 9,591,828-byte cap and SHA-256; output is bounded to 64 KiB in fresh job
+scratch. Each frontend and the official relayer still build once per job. The
+15-minute job and 12-minute serialized test bounds remain required.
+
+The declared source setup deploys an owner-controlled receiver, admits two
+public-test-key orders through the actual HTTP API, and executes a native
+0.25 ZNN sale with a 200-basis-point exchange fee. The rejecting fee recipient
+leaves exactly 0.005 ZNN of backed exchange credit. Source setup is explicitly
+separate from the browser withdrawal and is never replaced by direct SQL,
+contract-storage insertion or a fabricated RPC answer. The actual stateful gas
+estimator observes receiver rejection before wallet dispatch. An executed owner
+call enables receipt; a separate explicit wallet rejection must leave no
+submitted transaction or uncertain recovery record.
+
+The real production account page then requests `withdrawCredits()` from the
+credited contract account. Its declared test provider signs an ordinary owner
+EOA transaction calling the compiled wallet's `execute(exchange, call)` method.
+The original journal must exist before the provider request and its returned
+outer hash must be durable before receipt waiting. The unchanged official
+relayer publishes those exact signed EVM bytes in a verified NoM account block.
+Reload while pending must restore the same hash and prevent a second request.
+Actual canonical execution, recipient/exchange/owner balances and receipt fees
+are checked independently. Source replacement removes only the withdrawal,
+restoring the backed credit and pending record; another reload must retain the
+same hash. Returning to the original branch must recover the same receipt,
+balances and immutable journal without re-signing. Runtime bytes, owner and
+receiver mode are checked against the source-bound compiled artifact.
+
+This known contract-account adapter does not qualify generic Safe/ERC-4337
+user-operation mapping or physical wallets. Receiver-rejection coverage here is
+stateful estimation before dispatch; mined-revert withdrawal remains a separate
+case. NoM canonicality/plasma and the custom Engine/eth adapter remain fixture
+authority. The source sale uses native currency, zero royalties and the declared
+nonzero fee; it is not mixed-currency or ERC-1271 browser acceptance. Full A08,
+independent full-daemon/NoM authority and production acceptance remain open.

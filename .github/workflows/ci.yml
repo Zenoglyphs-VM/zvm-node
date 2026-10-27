@@ -86,12 +86,15 @@ jobs:
         run: |
           npm run build --prefix .market-browser/zvm-nft
           npm run build --prefix .market-browser/zvm-karum
+      - name: Compile the self-contained credit wallet once with the pinned compiler
+        run: node scripts/market-credit-compile.mjs "$RUNNER_TEMP/zvm-market-credit-compiler"
       - name: Exercise production pages signed admission and actual relayer transactions with serialized browsers
         env:
           ZVM_BROWSER_REQUIRED: "1"
           ZVM_BROWSER_RELAYER_BINARY: ${{ runner.temp }}/zvm-market-relayer
           ZVM_BROWSER_NFT_ROOT: ${{ github.workspace }}/.market-browser/zvm-nft
           ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
-        run: go test -json -count=1 -p=1 -timeout=12m -run '^Test(MarketBrowserHTTP|ExecutedMarketBrowserAdmissionAndRecovery|MarketFullWidthTimeClients)$' ./indexer ./orderbook
+          ZVM_BROWSER_CREDIT_WALLET: ${{ runner.temp }}/zvm-market-credit-compiler/wallet.json
+        run: go test -json -count=1 -p=1 -timeout=12m -run '^Test(MarketBrowserHTTP|ExecutedMarketBrowserAdmissionAndRecovery|MarketFullWidthTimeClients|ExecutedMarketCreditBrowserRecovery)$' ./indexer ./orderbook
       - name: Refuse tracked source drift
         run: git diff --exit-code

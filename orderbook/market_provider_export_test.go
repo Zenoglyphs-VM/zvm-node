@@ -41,6 +41,7 @@ type ExecutedMarketProviderFixture struct {
 	nonceKnown                                                                          bool
 	partial                                                                             *executedPartialBatch
 	batchBalances                                                                       *executedBatchBalances
+	credit                                                                              *executedCreditTransfer
 }
 
 func NewExecutedMarketProviderBrowserFixture(t *testing.T, kind string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
@@ -104,6 +105,10 @@ func (p *ExecutedMarketProviderFixture) TransactionHash() common.Hash {
 
 func (p *ExecutedMarketProviderFixture) PinFundedActor(t *testing.T) {
 	t.Helper()
+	if p.credit != nil {
+		p.pinCreditActor(t)
+		return
+	}
 	actor := p.Actor()
 	nonce, err := p.f.r.eth.NonceAt(context.Background(), actor, nil)
 	if err != nil || p.f.r.d.Head().Height != p.FundingHeight() {
@@ -242,6 +247,10 @@ func (s executionEth) EstimateGas(ctx context.Context, args providerGasCall, at 
 	p := s.backend.provider
 	p.mu.Lock()
 	p.estimates++
+	if p.credit != nil && err != nil && args.From == p.f.CreditWallet() && args.To != nil && *args.To == p.f.Exchange() &&
+		value.Sign() == 0 && bytes.Equal(data, crypto.Keccak256([]byte("withdrawCredits()"))[:4]) {
+		p.credit.rejectedEstimates++
+	}
 	p.mu.Unlock()
 	return hexutil.Uint64(gas), err
 }
@@ -583,12 +592,18 @@ func (p *ExecutedMarketProviderFixture) Evidence() map[string]any {
 
 func (p *ExecutedMarketProviderFixture) Action() string { return p.f.r.scenario.providerAction }
 func (p *ExecutedMarketProviderFixture) Actor() common.Address {
+	if p.credit != nil {
+		return p.f.Buyer()
+	}
 	if executedMarketBuyerAction(p.Action()) || p.Action() == "partial-batch" {
 		return p.f.Buyer()
 	}
 	return p.f.Seller()
 }
 func (p *ExecutedMarketProviderFixture) FundingHeight() uint64 {
+	if p.credit != nil {
+		return creditFundingHeight
+	}
 	if executedMarketBuyerAction(p.Action()) {
 		return 9
 	}
@@ -602,6 +617,9 @@ func (p *ExecutedMarketProviderFixture) LastHeight() uint64 {
 	return p.ActionHeight() + 1
 }
 func (p *ExecutedMarketProviderFixture) expectedActionCall() ([]byte, common.Address, *big.Int, error) {
+	if p.credit != nil {
+		return p.creditWalletCall()
+	}
 	artifact, method, to, value := "ZVMExchange", "buy", p.f.Exchange(), new(big.Int)
 	var args []any
 	switch p.Action() {
@@ -634,6 +652,12 @@ func expectedExecutedMarketState(s *executionScenario, branch int, height uint64
 	status, code, filled := StatusOpen, uint8(CodeOK), 0
 	if !s.provider {
 		if height >= 8 && index == branch {
+			return StatusFilled, CodeFilled, 1
+		}
+		return status, code, filled
+	}
+	if s.credit != nil {
+		if height >= creditSaleHeight && index == 0 {
 			return StatusFilled, CodeFilled, 1
 		}
 		return status, code, filled

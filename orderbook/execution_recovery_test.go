@@ -386,6 +386,7 @@ type executionScenario struct {
 	validated, buffered      bool
 	provider                 bool
 	providerAction           string
+	credit                   *executedCreditSetup
 }
 
 func newExecutionScenario(t *testing.T) *executionScenario {
@@ -401,6 +402,7 @@ type executionScenarioInputs struct {
 	timestamp uint64
 	sign      func(*executionScenario) []*Input
 	orders    []*Order
+	credit    *executedCreditSetup
 }
 
 func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profileDir ...string) *executionScenario {
@@ -426,6 +428,7 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	s := &executionScenario{arts: arts, seller: inputs.seller, buyer: znn.Address{19: 162}, validated: validated, buffered: buffered}
 	s.provider = inputs.provider
 	s.providerAction = inputs.action
+	s.credit = inputs.credit
 	if s.provider && s.providerAction == "" {
 		s.providerAction = "buy"
 	}
@@ -527,6 +530,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 			}
 		}
 	}
+	if s.credit != nil {
+		lastHeight, replacementHeight = creditFundingHeight+2, creditFundingHeight+1
+	}
 	for branch := range s.branches {
 		momentums := map[uint64]*znn.DetailedMomentum{1: {Momentum: &znn.Momentum{Height: 1, Hash: znn.Sha3([]byte("declared-native-recovery-genesis")), Timestamp: s.cfg.L2GenesisTimestamp}}}
 		heights := map[znn.Address]uint64{}
@@ -587,6 +593,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 					name, args = "ZVMCollectionFactory", []any{implementation}
 				} else if h == 4 {
 					name, args = "ZVMExchange", []any{common.Address(s.seller), common.Address(s.seller), big.NewInt(0)}
+					if s.credit != nil {
+						args = []any{common.Address(s.seller), s.credit.wallet, big.NewInt(200)}
+					}
 				}
 				init, err := arts.MustGet(name).Deploy(args...)
 				if err != nil {
@@ -595,6 +604,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				native(s.seller, nil, nil, init)
 			case 5:
 				native(s.seller, &s.factory, nil, callData("ZVMCollectionFactory", "createCollection", "Recovery", "REC", "", "", big.NewInt(0)))
+				if s.credit != nil {
+					native(s.buyer, nil, nil, s.credit.init)
+				}
 			case 6:
 				native(s.seller, &s.token, nil, callData("ZVMCollection", "mintBatch", common.Address(s.seller), []string{"one", "two", "three"}))
 				native(s.seller, &s.token, nil, callData("ZVMCollection", "setApprovalForAll", s.exchange, true))
@@ -618,6 +630,18 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 					native(s.buyer, &s.exchange, input.Order.Price.Big(), callData("ZVMExchange", "buy", input.ABI()))
 				}
 				send(s.seller, s.cfg.Inbox, 0, derive.EncodeAssemble([]znn.Hash{chunk}))
+			case creditSaleHeight:
+				if s.credit != nil {
+					native(s.buyer, &s.exchange, s.inputs[0].Order.Price.Big(), callData("ZVMExchange", "buy", s.inputs[0].ABI()))
+				}
+			case creditAcceptHeight:
+				if s.credit != nil {
+					data, err := s.credit.abi.Pack("setRejectsNative", false)
+					if err != nil {
+						t.Fatal(err)
+					}
+					native(s.buyer, &s.credit.wallet, nil, data)
+				}
 			}
 			if validated {
 				sort.Slice(dm.Blocks, func(i, j int) bool {
