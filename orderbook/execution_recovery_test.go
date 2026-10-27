@@ -386,6 +386,7 @@ type executionScenarioInputs struct {
 	seller    znn.Address
 	timestamp uint64
 	sign      func(*executionScenario) []*Input
+	orders    []*Order
 }
 
 func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profileDir ...string) *executionScenario {
@@ -466,6 +467,12 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 		s.orders = append(s.orders, &Order{Trader: common.Address(s.seller), Side: SideSell, Collection: s.token,
 			TokenID: U(id), Amount: U(1), Price: B(big.NewInt(250_000_000_000_000_000)), ListingTime: s.cfg.L2GenesisTimestamp,
 			ExpirationTime: s.cfg.L2GenesisTimestamp + 86400, Nonce: U(0), Salt: U(id)})
+	}
+	if inputs.orders != nil {
+		if len(inputs.orders) != 2 {
+			t.Fatal("executed scenario requires two actual accepted orders")
+		}
+		s.orders = inputs.orders
 	}
 	for _, order := range s.orders {
 		s.inputs = append(s.inputs, &Input{Order: *order, Kind: KindOnChain})
@@ -621,7 +628,7 @@ type executionRun struct {
 // blocks are declared observations, not freshly authenticated NoM blocks.
 func (r *executionRun) nomReply(w http.ResponseWriter, request *http.Request) {
 	r.nomMu.RLock()
-	branch, limit := r.branch, r.limit
+	limit, selectedSource := r.limit, r.scenario.branches[r.branch]
 	r.nomMu.RUnlock()
 	var call struct {
 		ID     json.RawMessage
@@ -635,7 +642,7 @@ func (r *executionRun) nomReply(w http.ResponseWriter, request *http.Request) {
 	var result any
 	switch call.Method {
 	case "ledger.getFrontierMomentum":
-		result = r.scenario.branches[branch][limit].Momentum
+		result = selectedSource[limit].Momentum
 	case "ledger.getDetailedMomentumsByHeight":
 		var start, count uint64
 		if len(call.Params) != 2 || json.Unmarshal(call.Params[0], &start) != nil || json.Unmarshal(call.Params[1], &count) != nil || count > 64 {
@@ -644,7 +651,7 @@ func (r *executionRun) nomReply(w http.ResponseWriter, request *http.Request) {
 		}
 		list := []*znn.DetailedMomentum{}
 		for h := start; h < start+count && h <= limit; h++ {
-			if dm := r.scenario.branches[branch][h]; dm != nil {
+			if dm := selectedSource[h]; dm != nil {
 				list = append(list, dm)
 			}
 		}

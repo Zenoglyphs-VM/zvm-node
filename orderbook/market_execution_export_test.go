@@ -69,10 +69,15 @@ type ExecutedMarketFixture struct {
 
 func NewExecutedMarketFixture(t *testing.T, kind string) *ExecutedMarketFixture {
 	t.Helper()
+	return newExecutedMarketFixtureAt(t, kind, uint64(time.Now().Add(-time.Hour).Unix()))
+}
+
+func newExecutedMarketFixtureAt(t *testing.T, kind string, timestamp uint64) *ExecutedMarketFixture {
+	t.Helper()
 	key := executedMarketKey(t)
 	options := executionScenarioInputs{
 		seller:    znn.Address(crypto.PubkeyToAddress(key.PublicKey)),
-		timestamp: uint64(time.Now().Add(-time.Hour).Unix()),
+		timestamp: timestamp,
 		sign: func(s *executionScenario) []*Input {
 			domain := Domain(s.cfg.L2ChainID, s.exchange)
 			if kind == "bulk" {
