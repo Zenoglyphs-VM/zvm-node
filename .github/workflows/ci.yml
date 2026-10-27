@@ -27,6 +27,7 @@ jobs:
   contract-behavior:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         node: [22, 24]
     steps:
@@ -45,8 +46,8 @@ jobs:
         run: npm ci --ignore-scripts --prefix contracts/test
       - name: Install each exact frontend SDK closure
         run: |
-          npm ci --ignore-scripts --prefix contracts/test/market-runtime/zvm-nft
-          npm ci --ignore-scripts --prefix contracts/test/market-runtime/zvm-karum
+          npm ci --ignore-scripts --include=dev --prefix contracts/test/market-runtime/zvm-nft
+          npm ci --ignore-scripts --include=dev --prefix contracts/test/market-runtime/zvm-karum
       - name: Acquire bounded pinned interface sources
         run: node contracts/test/fetch-market-inputs.mjs
       - name: Acquire bounded pinned compiler inputs

@@ -275,6 +275,8 @@ for (const name of Object.keys(inputs.frontends)) {
     await f.frame({from: f.signer, to: f.exchange, data: encode('approveOrders', [[order]])})
     const input = {order, kind: a.ui.KIND_ONCHAIN, signature: '0x', proof: []}
     assert.deepEqual(await f.read(f.exchange, 'checkOrder', [input]), [0, 1n])
+    const status = await f.frame({to: f.exchange, data: encode('checkOrder', [input]), isStatic: true})
+    assert.deepEqual(a.sdk.decodeFunctionResult({abi: a.ui.exchangeAbi, functionName: 'checkOrder', data: status.returned}), [0, 1n])
     const receiver = await f.deploy('PayoutWallet')
     await f.write(f.owner, receiver, 'configure', [1n, ZERO, '0x'])
     await f.write(f.owner, f.exchange, 'setFee', [receiver, 250n])

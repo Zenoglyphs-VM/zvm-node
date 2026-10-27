@@ -22,12 +22,12 @@
     },
     "zvm-karum": {
       "repository": "Zenoglyphs-VM/zvm-karum",
-      "revision": "96fb9b02a4f1e32db3ce54438558d2a62119757a",
+      "revision": "4e76645d3e6310126fdd8fc6aecbe16764b1a780",
       "files": {
         "src/core/orders.ts": {
           "path": "src/core/orders.ts",
-          "bytes": 13905,
-          "sha256": "a2d47b00bf675e729a7de36c41f499261831ce37929046ab28e15f185c062aff"
+          "bytes": 14148,
+          "sha256": "53bf7d5312a2ca9358db0bc46b2d2d3191b2b0e7d485452aec613298d933bb2d"
         },
         "package-lock.json": {
           "path": "package-lock.json",

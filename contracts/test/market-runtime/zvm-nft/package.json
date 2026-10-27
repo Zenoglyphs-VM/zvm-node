@@ -4,5 +4,8 @@
   "type": "module",
   "dependencies": {
     "viem": "2.56.8"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
   }
 }
