@@ -49,6 +49,13 @@ jobs:
           path: .market-browser/zvm-karum
           persist-credentials: false
           submodules: true
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Zenoglyphs-VM/zvm-relayer
+          ref: 5a72a223dd60d1ae4e974d420cadd85e6f9ee929
+          path: .market-browser/zvm-relayer
+          persist-credentials: false
+          submodules: true
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
@@ -59,6 +66,12 @@ jobs:
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: go.mod
+      - name: Build the pinned relayer program once for all browser profiles
+        run: |
+          test "$(git -C .market-browser/zvm-relayer rev-parse HEAD)" = 5a72a223dd60d1ae4e974d420cadd85e6f9ee929
+          test "$(git -C .market-browser/zvm-relayer/zvm-core rev-parse HEAD)" = 29e6d9b30be94de3772c850c7a1e9811585a8833
+          go -C .market-browser/zvm-relayer build -trimpath -o "$RUNNER_TEMP/zvm-market-relayer" ./cmd/zvm-relayer
+          sha256sum "$RUNNER_TEMP/zvm-market-relayer"
       - name: Require the preinstalled browser
         run: google-chrome --version
       - name: Install each unchanged locked frontend
@@ -71,9 +84,10 @@ jobs:
         run: |
           npm run build --prefix .market-browser/zvm-nft
           npm run build --prefix .market-browser/zvm-karum
-      - name: Exercise production pages and real signed admission with serialized browsers
+      - name: Exercise production pages signed admission and actual relayer transactions with serialized browsers
         env:
           ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_RELAYER_BINARY: ${{ runner.temp }}/zvm-market-relayer
           ZVM_BROWSER_NFT_ROOT: ${{ github.workspace }}/.market-browser/zvm-nft
           ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
         run: go test -json -count=1 -p=1 -timeout=12m -run '^Test(MarketBrowserHTTP|ExecutedMarketBrowserAdmissionAndRecovery)$' ./indexer ./orderbook

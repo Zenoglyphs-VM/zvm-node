@@ -1,6 +1,7 @@
 // Actual production listing controls, real EIP-712 signatures from a public
 // test signer and the real Go node/market/RPC fixture. No market or RPC reply
-// is fabricated here. Native transaction transport remains a separate boundary.
+// is fabricated here. The public buyer signs ordinary EVM transactions for
+// the actual relayer CLI; independent NoM and daemon RPC remain boundaries.
 import assert from 'node:assert/strict'
 import {execFileSync} from 'node:child_process'
 import {existsSync} from 'node:fs'
@@ -33,6 +34,12 @@ const sdk = JSON.parse(await readFile(join(fixture.roots[fixture.app], 'node_mod
 assert.equal(sdk.version, '2.56.8')
 // The scalar-one signer is a deliberately public disposable test identity.
 const signer = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '1')
+const buyerSigner = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '2')
+assert.equal(buyerSigner.address.toLowerCase(), fixture.buyer.toLowerCase())
+const {createPublicClient, http} = requireApp('viem')
+const chain = createPublicClient({transport: http(new URL('/rpc', base).href, {retryCount: 0})})
+const transactions = []
+let fundedNonce
 assert.equal(signer.address.toLowerCase(), fixture.seller.toLowerCase())
 const executablePath = [process.env.CHROME_BIN, '/usr/bin/google-chrome', '/usr/bin/chromium'].find(p => p && existsSync(p))
 assert.ok(executablePath, 'preinstalled Chrome required; no browser download fallback')
@@ -62,6 +69,10 @@ function inject({seller, buyer, chainId}) {
       if (method === 'eth_signTypedData_v4') {
         if (state.accounts[0].toLowerCase() !== seller.toLowerCase()) throw new Error('only the public fixture trader may sign')
         return window.__executedMarketSign(params)
+      }
+      if (method === 'eth_sendTransaction') {
+        if (state.accounts[0].toLowerCase() !== buyer.toLowerCase()) throw new Error('only the public fixture buyer may send')
+        return window.__executedMarketSend(params)
       }
       throw new Error('unsupported fixture wallet method: ' + method)
     },
@@ -166,6 +177,23 @@ try {
     signatures.push({primaryType: typed.primaryType})
     return signature
   })
+  await page.exposeFunction('__executedMarketSend', async params => {
+    assert.equal(params.length, 1)
+    assert.equal(transactions.length, 0)
+    const request = params[0]
+    assert.equal(request.from.toLowerCase(), fixture.buyer.toLowerCase())
+    assert.equal(request.to.toLowerCase(), fixture.exchange.toLowerCase())
+    assert.equal(BigInt(request.value), 250000000000000000n)
+    if (request.chainId !== undefined) assert.equal(BigInt(request.chainId), BigInt(fixture.chainId))
+    const nonce = await chain.getTransactionCount({address: buyerSigner.address, blockTag: 'pending'})
+    assert.equal(nonce, fundedNonce)
+    const serializedTransaction = await buyerSigner.signTransaction({type: 'eip1559', chainId: fixture.chainId,
+      nonce, to: request.to, data: request.data, value: BigInt(request.value), gas: BigInt(request.gas),
+      maxFeePerGas: BigInt(request.maxFeePerGas), maxPriorityFeePerGas: BigInt(request.maxPriorityFeePerGas)})
+    const hash = await chain.sendRawTransaction({serializedTransaction})
+    transactions.push(hash)
+    return hash
+  })
   await page.evaluateOnNewDocument(inject, fixture)
   await page.setRequestInterception(true)
   page.on('request', request => {
@@ -231,12 +259,44 @@ try {
   assert.equal(posts.flat().length, 2)
   record('actual typed-data prompt and HTTP submission cardinality')
   let state = await phase('bind')
+  fundedNonce = state.buyerNonce
+  assert.equal(fundedNonce, 3)
   record('real HTTP admission binds actual inputs without changing the derived prefix')
   await projection('admitted', -1)
-  for (const name of ['filled', 'replacement', 'restored']) {
-    state = await phase(name)
-    await projection(name, state.filled)
-  }
+  await navigate('/item/' + fixture.collection + '/1', true)
+  await connect()
+  if (fixture.app === 'karum') await page.click('main button[data-testid="buy"]')
+  else await click('Buy now')
+  const pendingState = fixture.app === 'karum' ? 'ordered' : 'published'
+  await until(value => !!document.querySelector('main li[data-state="' + value + '"]'), 'actual transaction did not remain pending', pendingState)
+  assert.equal(transactions.length, 1)
+  assert.equal(await page.$('main li[data-state="done"]'), null)
+  record('actual buy control sends one signed transaction and waits without a receipt')
+  state = await phase('ordered')
+  assert.equal(state.transaction, transactions[0])
+  await until(() => !!document.querySelector('main li[data-state="done"]'), 'actual application did not consume the mined receipt')
+  record('actual application consumes the executed receipt before success')
+  state = await phase('mined')
+  const receipt = await chain.getTransactionReceipt({hash: transactions[0]})
+  assert.equal(receipt.status, 'success')
+  assert.equal(receipt.from.toLowerCase(), fixture.buyer.toLowerCase())
+  assert.equal(receipt.to.toLowerCase(), fixture.exchange.toLowerCase())
+  assert.ok(receipt.gasUsed > 21000n)
+  assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+  record('actual typed transaction receipt gas sender target and consumed nonce')
+  await projection('filled', state.filled)
+  state = await phase('replacement')
+  await assert.rejects(chain.getTransactionReceipt({hash: transactions[0]}))
+  assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce)
+  record('orphaned transaction loses its canonical receipt and releases its nonce')
+  await projection('replacement', state.filled)
+  state = await phase('restored')
+  const restoredReceipt = await chain.getTransactionReceipt({hash: transactions[0]})
+  assert.equal(restoredReceipt.blockHash, receipt.blockHash)
+  assert.equal(restoredReceipt.transactionHash, receipt.transactionHash)
+  assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+  record('restored canonical transaction recovers its exact receipt and nonce')
+  await projection('restored', state.filled)
   for (const original of posts.flat()) {
     const id = String(original.order.tokenId)
     const rows = await orderRows()
@@ -260,9 +320,10 @@ try {
   assert.equal(external.length, 0)
   assert.equal(exceptions.length, 0)
   assert.deepEqual(failedHTTP, [])
-  assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4'].includes(m)))
-  record('no transaction method external request page exception or failed HTTP')
-  assert.equal(result.checks.length, 14)
+  assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
+  assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, 1)
+  record('one transaction method and no external request page exception or failed HTTP')
+  assert.equal(result.checks.length, 19)
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 220)
@@ -278,6 +339,7 @@ try {
   console.log('EXECUTED-MARKET-BROWSER-QUALIFICATION ' + JSON.stringify({node: process.version, chrome, pins,
     result, SDKVersion: sdk.version, actualTypedDataSignatures: signatures.length, actualOrderPOSTs: posts.length,
     providerMethods: methods, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
-    actualProductionPageActionsAndGoAdmission: true, physicalWalletOrEVMTransactionTransport: false,
-    signer: 'public scalar-one EIP-1193 test signer', browserJoined: !!browser?.process() && browser.process().exitCode !== null}))
+    actualProductionPageActionsAndGoAdmission: true, actualProviderEVMTransactions: transactions.length,
+    actualOfficialRelayerTransport: true, physicalWalletOrPublicNetwork: false,
+    signer: 'public scalar-one seller and scalar-two buyer EIP-1193 test signers', browserJoined: !!browser?.process() && browser.process().exitCode !== null}))
 }

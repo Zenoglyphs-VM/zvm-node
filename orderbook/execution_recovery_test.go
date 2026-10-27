@@ -69,6 +69,7 @@ type executionEngine struct {
 	lostReply    uint64
 	processPhase string
 	closed       bool
+	provider     *ExecutedMarketProviderFixture
 }
 
 func openExecutionEngine(t *testing.T, path string, genesis *core.Genesis, buffered bool) *executionEngine {
@@ -126,14 +127,14 @@ func (b *executionEngine) ForkchoiceUpdatedV3(ctx context.Context, fc engine.For
 		return result, nil
 	}
 	if !attrs.NoTxPool {
-		return engine.ForkChoiceResponse{}, errors.New("fixture requires the unsigned forced-transaction lane")
+		return engine.ForkChoiceResponse{}, errors.New("fixture requires explicitly supplied transactions and no transaction pool")
 	}
 	txs, err := engine.DecodeTransactions(attrs.Transactions)
 	if err != nil {
 		return engine.ForkChoiceResponse{}, err
 	}
 	for _, tx := range txs {
-		if tx.Type() != types.DepositTxType {
+		if tx.Type() != types.DepositTxType && (b.provider == nil || tx.Type() != types.DynamicFeeTxType) {
 			return engine.ForkChoiceResponse{}, errors.New("signed transaction outside fixture scope")
 		}
 	}
@@ -258,7 +259,15 @@ func (s executionEth) block(selector rpc.BlockNumberOrHash, full bool) (map[stri
 			return nil, err
 		}
 		item["blockHash"], item["blockNumber"], item["transactionIndex"] = block.Hash(), hexutil.Uint64(block.NumberU64()), hexutil.Uint64(i)
-		item["from"] = tx.From()
+		if tx.Type() == types.DepositTxType {
+			item["from"] = tx.From()
+		} else {
+			from, err := types.Sender(types.LatestSignerForChainID(s.backend.chain.Config().ChainID), tx)
+			if err != nil {
+				return nil, err
+			}
+			item["from"] = from
+		}
 		transactions = append(transactions, item)
 	}
 	out["transactions"], out["uncles"], out["withdrawals"] = transactions, []common.Hash{}, block.Withdrawals()
@@ -375,6 +384,7 @@ type executionScenario struct {
 	inputs                   []*Input
 	branches                 [2]map[uint64]*znn.DetailedMomentum
 	validated, buffered      bool
+	provider                 bool
 }
 
 func newExecutionScenario(t *testing.T) *executionScenario {
@@ -383,6 +393,8 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 
 // Defaults preserve the original recovery scenario and its historical inputs.
 type executionScenarioInputs struct {
+	buyer     znn.Address
+	provider  bool
 	seller    znn.Address
 	timestamp uint64
 	sign      func(*executionScenario) []*Input
@@ -410,6 +422,10 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 		t.Fatal(err)
 	}
 	s := &executionScenario{arts: arts, seller: inputs.seller, buyer: znn.Address{19: 162}, validated: validated, buffered: buffered}
+	s.provider = inputs.provider
+	if inputs.buyer != (znn.Address{}) {
+		s.buyer = inputs.buyer
+	}
 	s.cfg = &rollup.Config{L1ChainID: 70, L2ChainID: 7340470, Inbox: rollup.Inbox, Vault: znn.Address{19: 163},
 		L1StartHeight: 2, L2GenesisTimestamp: inputs.timestamp, GasLimit: 30_000_000, GasPerPlasma: 1000,
 		MaxNativeGas: 12_000_000, MaxNativeGasPerBlock: 22_500_000, NativeFloorBP: 2500, NativeCeilBP: 7500,
@@ -576,8 +592,10 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 					send(s.buyer, s.cfg.Vault, 100_000_000, nil)
 				}
 			case 8:
-				input := s.inputs[branch]
-				native(s.buyer, &s.exchange, input.Order.Price.Big(), callData("ZVMExchange", "buy", input.ABI()))
+				if !inputs.provider {
+					input := s.inputs[branch]
+					native(s.buyer, &s.exchange, input.Order.Price.Big(), callData("ZVMExchange", "buy", input.ABI()))
+				}
 				send(s.seller, s.cfg.Inbox, 0, derive.EncodeAssemble([]znn.Hash{chunk}))
 			}
 			if validated {

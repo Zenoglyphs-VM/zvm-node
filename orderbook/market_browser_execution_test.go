@@ -42,8 +42,8 @@ func (b *executedBrowserOutput) Write(raw []byte) (int, error) {
 // This opt-in lane uses actual production pages and their EIP-1193 request,
 // real signatures from a public test signer, the real node HTTP handler and
 // exchange-backed admission. It does not intercept or fabricate market/RPC
-// replies in the browser. Native forced-transaction transport and unsigned
-// synthetic NoM source authority remain explicit test boundaries.
+// replies in the browser. The actual pinned relayer CLI posts signed EVM
+// transactions; NoM authority and the execution RPC adapter remain fixtures.
 func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 	if os.Getenv("ZVM_BROWSER_REQUIRED") != "1" {
 		t.Skip("requires the explicit pinned-frontend browser CI lane")
@@ -68,7 +68,7 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 }
 
 func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind string) {
-	f := orderbook.NewExecutedMarketBrowserFixture(t, kind)
+	f, transport := orderbook.NewExecutedMarketProviderBrowserFixture(t, kind)
 	f.Advance(0, 6)
 	var count int
 	if err := f.DB().QueryRow("SELECT count(*) FROM nft_orders").Scan(&count); err != nil || count != 0 {
@@ -87,6 +87,9 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	token := hex.EncodeToString(tokenBytes)
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
+	relayerURL, joinRelayer := startProductionMarketRelayer(t, ctx, f, transport.SourceURL())
+	defer joinRelayer()
+	transport.UseRelayer(t, relayerURL)
 	type phaseRequest struct {
 		name   string
 		result chan map[string]any
@@ -141,7 +144,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	}
 	handler := api.New(api.Config{Rollup: f.Rollup(), DB: f.Store(), Eth: f.ExecutionClient(),
 		L1: znn.NewClient(f.SourceURL()), Deriver: f.Deriver(), EthURL: f.ExecutionURL(), L1URL: f.SourceURL(),
-		Extensions: []api.Extension{service}, UI: ui}).Handler()
+		Extensions: []api.Extension{service}, Relayer: relayerURL, UI: ui}).Handler()
 	var requestMu sync.Mutex
 	var submitted []*orderbook.Input
 	posts := 0
@@ -200,7 +203,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			t.Error("owned signed-browser driver was not joined")
 		}
 	}()
-	expectedPhases := []string{"bind", "filled", "replacement", "restored"}
+	expectedPhases := []string{"bind", "ordered", "mined", "replacement", "restored"}
 	phaseIndex := 0
 	var inputs []*orderbook.Input
 	var reference map[string]any
@@ -228,19 +231,27 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				}
 				f.BindAcceptedBrowserInputs(t, captured)
 				inputs = f.Inputs(t)
-			case "filled":
-				f.Advance(0, 7, 8, 9)
+				f.Advance(0, 7)
+				transport.PinFundedBuyer(t)
+			case "ordered":
+				transport.BindPublishedTransaction(t, ctx)
+				f.Advance(0, 8, 9)
 				filled = 0
 				referenceHash, epoch = f.HeadHash().Hex(), f.Epoch(t)
+			case "mined":
+				transport.AssertCanonicalTransaction(t, true)
+				filled = 0
 			case "replacement":
 				f.Advance(1, 8, 9)
-				filled = 1
+				filled = -1
+				transport.AssertCanonicalTransaction(t, false)
 				if f.HeadHash().Hex() == referenceHash || f.Epoch(t) <= epoch {
 					t.Fatal("browser source replacement did not select and recheck a new canonical branch")
 				}
 				epoch = f.Epoch(t)
 			case "restored":
 				f.Advance(0, 8, 9)
+				transport.AssertCanonicalTransaction(t, true)
 				filled = 0
 				if f.HeadHash().Hex() != referenceHash || f.Epoch(t) <= epoch {
 					t.Fatal("browser source restoration did not select its original canonical branch")
@@ -248,7 +259,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			}
 			f.AssertNoOrderApprovalLogs(t)
 			projection := executedMarketProjection(t, f, web.URL, inputs, filled)
-			if request.name == "filled" {
+			if request.name == "mined" {
 				reference = projection
 			}
 			if request.name == "restored" && !reflect.DeepEqual(projection, reference) {
@@ -256,7 +267,8 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			}
 			hashes := []string{inputs[0].Order.Hash().Hex(), inputs[1].Order.Hash().Hex()}
 			request.result <- map[string]any{"phase": request.name, "hashes": hashes, "filled": filled,
-				"actualAcceptedBrowserInputs": true, "alreadyDerivedSourcePrefixPreserved": true}
+				"actualAcceptedBrowserInputs": true, "alreadyDerivedSourcePrefixPreserved": true,
+				"transaction": transport.TransactionHash().Hex(), "buyerNonce": transport.BuyerNonce()}
 		case err := <-finished:
 			t.Log(strings.TrimSpace(stdout.raw.String()))
 			if err != nil {
@@ -269,13 +281,16 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			if successful < 3 || failed != 0 || headers < 3 {
 				t.Fatalf("signed-browser checker accounting: successful=%d failed=%d headers=%d", successful, failed, headers)
 			}
+			joinRelayer()
+			transport.AssertCompleted(t)
 			record := map[string]any{"app": app, "kind": kind, "pass": true, "phases": expectedPhases,
 				"actualNodeAPIAndExchangeCheckedBook": true, "actualAcceptedBrowserInputs": 2,
 				"alreadyDerivedSourcePrefixPreserved": true, "inputBytesPreservedAcrossBothReplacements": true,
 				"successfulExchangeChecks": successful, "unexpectedExchangeRPCErrors": failed,
 				"cancelledJoinedExchangeCalls": f.RPCCancellations(), "distinctExecutedCheckHeaders": headers,
 				"manualSQLOrderOrCacheControls": 0, "manualIndexOrBookSteps": 0, "ownedDriverJoined": true,
-				"unsignedSourceAndNativeTransportFixture": true, "realWalletOrPublicNetworkOperations": 0}
+				"unsignedSourceAndExecutionRPCFixture": true, "actualOfficialRelayerProgram": true, "actualRelayerJoined": true,
+				"actualProviderEVMTransaction": transport.Evidence(), "realWalletOrPublicNetworkOperations": 0}
 			raw, err := json.Marshal(record)
 			if err != nil {
 				t.Fatal(err)

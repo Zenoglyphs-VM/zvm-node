@@ -74,8 +74,14 @@ func NewExecutedMarketFixture(t *testing.T, kind string) *ExecutedMarketFixture 
 
 func newExecutedMarketFixtureAt(t *testing.T, kind string, timestamp uint64) *ExecutedMarketFixture {
 	t.Helper()
+	return newExecutedMarketFixtureProfile(t, kind, timestamp, znn.Address{}, false)
+}
+
+func newExecutedMarketFixtureProfile(t *testing.T, kind string, timestamp uint64, buyer znn.Address, provider bool) *ExecutedMarketFixture {
+	t.Helper()
 	key := executedMarketKey(t)
 	options := executionScenarioInputs{
+		buyer: buyer, provider: provider,
 		seller:    znn.Address(crypto.PubkeyToAddress(key.PublicKey)),
 		timestamp: timestamp,
 		sign: func(s *executionScenario) []*Input {
