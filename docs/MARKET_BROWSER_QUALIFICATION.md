@@ -15,7 +15,8 @@ must remain byte-for-byte unchanged.
 
 Canonical collection-to-item navigation adds one check per application. Three
 additional NFT checks cover legacy item/collection bookmarks and generated
-explore/create links: 13 checks for NFT and 10 for Karum. The network action
+explore/create links. Owner/account navigation and the legacy address alias add
+one more NFT check: 14 checks for NFT and 10 for Karum. The network action
 selector distinguishes the real switch control from the header's theme toggle.
 The initial failed run is retained separately, including its NFT undefined
 address request and the initially ambiguous Karum switch selection.
@@ -28,6 +29,9 @@ op-reth. Explicit IndexBlock/Rewind calls are not automatic canonical selection.
 The backend is the running Go implementation, not browser-intercepted API JSON.
 Page requests are confined to the owned loopback origin. No arbitrary node URL
 or faucet is accepted. The standalone Karum trade verifier is not invoked.
+The optional token-name and verified-name endpoints return explicit empty
+metadata controls. Account, collection, item and order data come from the real
+Go market. The external node explorer is linked, not rendered by this test.
 
 The ordinary Go suite reports this test as skipped when its explicit browser
 prerequisites are absent. In the browser job, missing prerequisites are errors;
@@ -41,3 +45,10 @@ not complete the original A08 acceptance: full signing/settlement and real RPC
 recheck coupling, automatic canonical recovery, supported-product agreement and
 full-width timestamp transport retain their separate requirements. Earlier
 Go/TypeScript/Solidity vectors and contract results keep their own source pins.
+
+
+A subsequent failed source revision retained an NFT owner-link failure, an
+absent optional token-name fixture route and three 400 responses from Karum
+collection side endpoints during navigation. Current pins include the NFT
+account-route repair and Karum's captured-address/request-generation fence.
+Both failed browser revisions keep their own results and are not relabelled.

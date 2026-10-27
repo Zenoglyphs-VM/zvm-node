@@ -97,9 +97,10 @@ function record(result, name) {
 try {
   for (const app of ['nft', 'karum']) {
     const result = {app, checks: [], pass: false}, context = await browser.createBrowserContext(), providerMethods = []
+    let page
     results.push(result)
     try {
-      const page = await context.newPage()
+      page = await context.newPage()
       await page.setViewport({width: 1360, height: 1000})
       await page.setRequestInterception(true)
       page.on('request', request => {
@@ -109,7 +110,11 @@ try {
       })
       page.on('pageerror', () => problems.push({app, kind: 'page-exception'}))
       page.on('response', response => {
-        if (response.status() >= 400) failedHTTP.push({app, path: new URL(response.url()).pathname, status: response.status()})
+        if (response.status() >= 400 && failedHTTP.length < 64) {
+          const url = new URL(response.url())
+          failedHTTP.push({app, path: url.pathname, query: Object.fromEntries([...url.searchParams]
+            .filter(([key]) => ['collection', 'limit', 'sort', 'offset', 'collectionOnly'].includes(key))), status: response.status()})
+        }
       })
       await page.evaluateOnNewDocument(inject, buyer)
       const url = new URL('/zvm-' + app + '/item/' + fixture.collection + '/1', base)
@@ -142,6 +147,21 @@ try {
       await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'collection card did not return to the actual item')
       record(result, 'canonical collection and item links navigate the actual pages')
       if (app === 'nft') {
+        const accountPath = '/zvm-nft/account/' + fixture.alice
+        await follow(accountPath)
+        await page.waitForFunction(path => [...document.querySelectorAll('main a')]
+          .some(a => a.getAttribute('href') === path), {timeout: 12000}, itemPath)
+        const explorer = await page.evaluate(() => [...document.querySelectorAll('main a')]
+          .find(a => a.textContent.trim() === 'Explorer view')?.href)
+        assert.equal(new URL(explorer).origin, base.origin)
+        assert.equal(new URL(explorer).pathname, '/address/' + fixture.alice)
+        await follow(itemPath)
+        const legacyAccount = new URL('/zvm-nft/address/' + fixture.alice, base)
+        legacyAccount.searchParams.set('rpc', new URL('/rpc', base).href)
+        await page.goto(legacyAccount.href, {waitUntil: 'networkidle0', timeout: 20000})
+        await follow(itemPath)
+        await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'account item link did not navigate')
+        record(result, 'owner account links and the legacy address alias preserve the item')
         const legacyItem = new URL('/zvm-nft/nft/' + fixture.collection + '/1', base)
         legacyItem.searchParams.set('rpc', new URL('/rpc', base).href)
         await page.goto(legacyItem.href, {waitUntil: 'networkidle0', timeout: 20000})
@@ -196,6 +216,11 @@ try {
       result.pass = true
     } catch (error) {
       result.failure = error.code === 'ERR_ASSERTION' ? 'browser assertion failed: ' + error.message.split('\n')[0] : error.message.split('\n')[0].slice(0, 160)
+      if (page && !page.isClosed()) {
+        result.page = await page.evaluate(() => ({path: location.pathname,
+          heading: document.querySelector('main h1')?.textContent.trim().slice(0, 80),
+          links: [...document.querySelectorAll('main a')].slice(0, 16).map(a => new URL(a.href).pathname)})).catch(() => null)
+      }
     } finally {
       delete result.currentPhase
       await context.close()
@@ -212,5 +237,5 @@ try {
     exchangeRPCChecksAndChainMetadata: 'declared controls; not execution or full-client evidence',
     actualTransactionsOrSignatures: 0, browserJoined: browser.process()?.exitCode !== null}))
 }
-assert.ok(results.length === 2 && results.every(r => r.pass && r.checks.length === (r.app === 'nft' ? 13 : 10)), 'both real page paths must pass every declared check')
+assert.ok(results.length === 2 && results.every(r => r.pass && r.checks.length === (r.app === 'nft' ? 14 : 10)), 'both real page paths must pass every declared check')
 assert.equal(failedHTTP.length, 0, 'actual page HTTP failures observed')

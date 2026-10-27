@@ -118,6 +118,9 @@ func TestMarketBrowserHTTP(t *testing.T) {
 		writeJSON(w, map[string]any{"enabled": false, "tokens": map[string]any{}, "stale": true})
 	})
 	mux.HandleFunc("/api/contracts/verified", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, map[string]any{}) })
+	// Optional address labels are an explicit empty metadata control. NFT
+	// ownership, collections, orders and rewinds still use the live market.
+	mux.HandleFunc("/api/tokens/names", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, map[string]any{}) })
 	mux.HandleFunc("POST /rpc", func(w http.ResponseWriter, r *http.Request) {
 		// Only page transport metadata is declared here. This is not an EVM
 		// exchange checker or transaction broadcaster.
