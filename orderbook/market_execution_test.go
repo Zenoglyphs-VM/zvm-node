@@ -261,11 +261,12 @@ func TestExecutedMarketAdmissionAndCanonicalRecovery(t *testing.T) {
 			}
 			calls, failures, hashes := f.RPCCounts()
 			if calls < 3 || failures != 0 || hashes < 3 {
-				t.Fatal("canonical phases lack successful hash-bound checker executions")
+				t.Fatalf("canonical checker accounting: successful=%d failures=%d headers=%d joined_cancelled=%d", calls, failures, hashes, f.RPCCancellations())
 			}
 			checks = append(checks, "returning branch converges to original HTTP state", "every original signature and proof survives both replacements", "all owned production workers joined")
 			record := map[string]any{"profile": kind, "checks": checks, "checkCount": len(checks),
 				"hashBoundExchangeCalls": calls, "exchangeRPCFailures": failures, "distinctCheckHeaders": hashes,
+				"cancelledJoinedExchangeCalls": f.RPCCancellations(), "totalExchangeCallAttempts": calls + failures + f.RPCCancellations(),
 				"signedInputs": 2, "SQLOrderInsertsByTest": 0, "manualIndexOrBookSteps": 0,
 				"realWalletOrPublicNetworkOperations": 0, "unsignedNoMObservationAdapter": true,
 				"customLoopbackEngineRPCAdapter": true, "workersJoined": true, "pass": true}

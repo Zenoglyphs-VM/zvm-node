@@ -37,3 +37,10 @@ hardware wallet, browser provider signing, public-chain settlement or physical
 power-loss recovery. The separately pinned real-browser qualification retains
 its own explicit cached-order/provider controls; this test does not relabel
 those browser actions as executions of the signed market fixture.
+
+The checker observer records completed successful calls, unexpected RPC errors
+and calls canceled by their joined worker context separately. A canceled attempt
+never counts as a successful exchange check or a distinct accepted header. The
+zero-unexpected-error requirement, canonical-hash assertions and original-input
+checks remain in force. Shutdown cancellations are reported explicitly rather
+than treated as completed execution failures or silently discarded.

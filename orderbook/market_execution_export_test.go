@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"math/big"
 	"sync"
 	"testing"
@@ -35,9 +36,9 @@ func executedMarketKey(t *testing.T) *ecdsa.PrivateKey {
 
 type executedMarketRPC struct {
 	*ethclient.Client
-	mu              sync.Mutex
-	calls, failures int
-	hashes          map[common.Hash]int
+	mu                         sync.Mutex
+	calls, failures, cancelled int
+	hashes                     map[common.Hash]int
 }
 
 // Observe, then delegate the complete call to ethclient. No ABI answer, check
@@ -47,8 +48,13 @@ func (p *executedMarketRPC) CallContractAtHash(ctx context.Context, call ethereu
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.calls++
-	p.hashes[hash]++
-	if err != nil {
+	if err == nil {
+		p.hashes[hash]++
+	} else if errors.Is(err, context.Canceled) && errors.Is(ctx.Err(), context.Canceled) {
+		// The worker owns this context and has joined cancellation. Preserve
+		// these attempts separately; never count them as successful checks.
+		p.cancelled++
+	} else {
 		p.failures++
 	}
 	return raw, err
@@ -149,7 +155,15 @@ func (f *ExecutedMarketFixture) Advance(branch int, heights ...uint64) {
 func (f *ExecutedMarketFixture) RPCCounts() (int, int, int) {
 	f.probe.mu.Lock()
 	defer f.probe.mu.Unlock()
-	return f.probe.calls, f.probe.failures, len(f.probe.hashes)
+	return f.probe.calls - f.probe.failures - f.probe.cancelled, f.probe.failures, len(f.probe.hashes)
+}
+
+// Canceled attempts are retained even though stable accepted observations must
+// still come from completed successful calls at the executed canonical hash.
+func (f *ExecutedMarketFixture) RPCCancellations() int {
+	f.probe.mu.Lock()
+	defer f.probe.mu.Unlock()
+	return f.probe.cancelled
 }
 
 func (f *ExecutedMarketFixture) Epoch(t *testing.T) uint64 {
