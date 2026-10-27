@@ -77,7 +77,7 @@ func newExecutedMarketFixtureAt(t *testing.T, kind string, timestamp uint64) *Ex
 	return newExecutedMarketFixtureProfile(t, kind, timestamp, znn.Address{}, false)
 }
 
-func newExecutedMarketFixtureProfile(t *testing.T, kind string, timestamp uint64, buyer znn.Address, provider bool) *ExecutedMarketFixture {
+func newExecutedMarketFixtureProfile(t *testing.T, kind string, timestamp uint64, buyer znn.Address, provider bool, actions ...string) *ExecutedMarketFixture {
 	t.Helper()
 	key := executedMarketKey(t)
 	options := executionScenarioInputs{
@@ -106,6 +106,12 @@ func newExecutedMarketFixtureProfile(t *testing.T, kind string, timestamp uint64
 			}
 			return inputs
 		},
+	}
+	if len(actions) > 1 {
+		t.Fatal("one provider action is required")
+	}
+	if len(actions) == 1 {
+		options.action = actions[0]
 	}
 	scenario := newExecutionScenarioInputs(t, true, false, options)
 	r := newExecutionRun(t, scenario)
@@ -155,6 +161,9 @@ func (f *ExecutedMarketFixture) Advance(branch int, heights ...uint64) {
 	lastHeight := uint64(9)
 	if f.r.scenario.provider {
 		lastHeight = 11
+		if f.r.scenario.providerAction != "buy" {
+			lastHeight = 14
+		}
 	}
 	for _, height := range heights {
 		if height < 6 || height > lastHeight {

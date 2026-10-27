@@ -385,6 +385,7 @@ type executionScenario struct {
 	branches                 [2]map[uint64]*znn.DetailedMomentum
 	validated, buffered      bool
 	provider                 bool
+	providerAction           string
 }
 
 func newExecutionScenario(t *testing.T) *executionScenario {
@@ -395,6 +396,7 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 type executionScenarioInputs struct {
 	buyer     znn.Address
 	provider  bool
+	action    string
 	seller    znn.Address
 	timestamp uint64
 	sign      func(*executionScenario) []*Input
@@ -423,6 +425,10 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	}
 	s := &executionScenario{arts: arts, seller: inputs.seller, buyer: znn.Address{19: 162}, validated: validated, buffered: buffered}
 	s.provider = inputs.provider
+	s.providerAction = inputs.action
+	if s.provider && s.providerAction == "" {
+		s.providerAction = "buy"
+	}
 	if inputs.buyer != (znn.Address{}) {
 		s.buyer = inputs.buyer
 	}
@@ -514,6 +520,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	lastHeight, replacementHeight := uint64(9), uint64(8)
 	if inputs.provider {
 		lastHeight, replacementHeight = 11, 10
+		if s.providerAction != "buy" {
+			lastHeight, replacementHeight = 14, 13
+		}
 	}
 	for branch := range s.branches {
 		momentums := map[uint64]*znn.DetailedMomentum{1: {Momentum: &znn.Momentum{Height: 1, Hash: znn.Sha3([]byte("declared-native-recovery-genesis")), Timestamp: s.cfg.L2GenesisTimestamp}}}
@@ -594,6 +603,11 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				chunk = send(s.seller, s.cfg.Inbox, 0, append([]byte{derive.MsgChunk}, payload...)).Hash
 				for i := 0; i < 3; i++ {
 					send(s.buyer, s.cfg.Vault, 100_000_000, nil)
+				}
+				if s.provider && s.providerAction != "buy" {
+					for i := 0; i < 3; i++ {
+						send(s.seller, s.cfg.Vault, 100_000_000, nil)
+					}
 				}
 			case 8:
 				if !inputs.provider {

@@ -107,7 +107,7 @@ func (f *ExecutedMarketFixture) BindAcceptedBrowserInputs(t *testing.T, submitte
 	orders := []*Order{&accepted[0].Order, &accepted[1].Order}
 	original := f.r.scenario
 	future := newExecutionScenarioInputs(t, true, false, executionScenarioInputs{
-		seller: original.seller, buyer: original.buyer, provider: original.provider, timestamp: original.cfg.L2GenesisTimestamp, orders: orders,
+		seller: original.seller, buyer: original.buyer, provider: original.provider, action: original.providerAction, timestamp: original.cfg.L2GenesisTimestamp, orders: orders,
 		sign: func(*executionScenario) []*Input { return accepted },
 	})
 	if future.cfg.L2GenesisHash != original.cfg.L2GenesisHash || future.exchange != original.exchange || future.token != original.token {

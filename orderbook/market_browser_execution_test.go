@@ -62,13 +62,25 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 	}
 	for _, app := range []string{"nft", "karum"} {
 		for _, kind := range []string{"single", "bulk"} {
-			t.Run(app+"-"+kind, func(t *testing.T) { executedMarketBrowserProfile(t, roots, app, kind) })
+			for _, action := range []string{"buy", "cancel", "nonce", "approval"} {
+				name := app + "-" + kind
+				if action != "buy" {
+					name += "-" + action
+				}
+				t.Run(name, func(t *testing.T) { executedMarketBrowserProfile(t, roots, app, kind, action) })
+			}
 		}
 	}
 }
 
-func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind string) {
-	f, transport := orderbook.NewExecutedMarketProviderBrowserFixture(t, kind)
+func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind, action string) {
+	var f *orderbook.ExecutedMarketFixture
+	var transport *orderbook.ExecutedMarketProviderFixture
+	if action == "buy" {
+		f, transport = orderbook.NewExecutedMarketProviderBrowserFixture(t, kind)
+	} else {
+		f, transport = orderbook.NewExecutedMarketOwnerBrowserFixture(t, kind, action)
+	}
 	f.Advance(0, 6)
 	var count int
 	if err := f.DB().QueryRow("SELECT count(*) FROM nft_orders").Scan(&count); err != nil || count != 0 {
@@ -182,7 +194,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	defer web.Close()
 	input, err := json.Marshal(map[string]any{"base": web.URL, "token": token, "roots": roots,
 		"app": app, "kind": kind, "collection": f.Collection().Hex(), "exchange": f.Exchange().Hex(),
-		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID})
+		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,6 +229,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			}
 			phaseIndex++
 			filled := -1
+			included := false
 			switch request.name {
 			case "bind":
 				requestMu.Lock()
@@ -231,18 +244,28 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				}
 				f.BindAcceptedBrowserInputs(t, captured)
 				inputs = f.Inputs(t)
-				f.Advance(0, 7, 8, 9)
-				transport.PinFundedBuyer(t)
+				heights := []uint64{}
+				for h := uint64(7); h <= transport.FundingHeight(); h++ {
+					heights = append(heights, h)
+				}
+				f.Advance(0, heights...)
+				transport.PinFundedActor(t)
 			case "ordered":
 				transport.BindPublishedTransaction(t, ctx)
-				f.Advance(0, 10, 11)
-				filled = 0
+				f.Advance(0, transport.ActionHeight(), transport.LastHeight())
+				included = true
+				if action == "buy" {
+					filled = 0
+				}
 				referenceHash, epoch = f.HeadHash().Hex(), f.Epoch(t)
 			case "mined":
 				transport.AssertCanonicalTransaction(t, true)
-				filled = 0
+				included = true
+				if action == "buy" {
+					filled = 0
+				}
 			case "replacement":
-				f.Advance(1, 10, 11)
+				f.Advance(1, transport.ActionHeight(), transport.LastHeight())
 				filled = -1
 				transport.AssertCanonicalTransaction(t, false)
 				if f.HeadHash().Hex() == referenceHash || f.Epoch(t) <= epoch {
@@ -250,15 +273,23 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				}
 				epoch = f.Epoch(t)
 			case "restored":
-				f.Advance(0, 10, 11)
+				f.Advance(0, transport.ActionHeight(), transport.LastHeight())
 				transport.AssertCanonicalTransaction(t, true)
-				filled = 0
+				included = true
+				if action == "buy" {
+					filled = 0
+				}
 				if f.HeadHash().Hex() != referenceHash || f.Epoch(t) <= epoch {
 					t.Fatal("browser source restoration did not select its original canonical branch")
 				}
 			}
 			f.AssertNoOrderApprovalLogs(t)
-			projection := executedMarketProjection(t, f, web.URL, inputs, filled)
+			var projection map[string]any
+			if action == "buy" {
+				projection = executedMarketProjection(t, f, web.URL, inputs, filled)
+			} else {
+				projection = executedOwnerMarketProjection(t, f, transport, web.URL, inputs, included)
+			}
 			if request.name == "mined" {
 				reference = projection
 			}
@@ -268,7 +299,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			hashes := []string{inputs[0].Order.Hash().Hex(), inputs[1].Order.Hash().Hex()}
 			request.result <- map[string]any{"phase": request.name, "hashes": hashes, "filled": filled,
 				"actualAcceptedBrowserInputs": true, "alreadyDerivedSourcePrefixPreserved": true,
-				"transaction": transport.TransactionHash().Hex(), "buyerNonce": transport.BuyerNonce()}
+				"transaction": transport.TransactionHash().Hex(), "actorNonce": transport.ActorNonce(), "actor": transport.Actor().Hex(), "ownerModel": projection, "included": included}
 		case err := <-finished:
 			t.Log(strings.TrimSpace(stdout.raw.String()))
 			if err != nil {
@@ -283,7 +314,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			}
 			relayerExit := joinRelayer()
 			transport.AssertCompleted(t)
-			record := map[string]any{"app": app, "kind": kind, "pass": true, "phases": expectedPhases,
+			record := map[string]any{"app": app, "kind": kind, "action": action, "pass": true, "phases": expectedPhases,
 				"actualNodeAPIAndExchangeCheckedBook": true, "actualAcceptedBrowserInputs": 2,
 				"alreadyDerivedSourcePrefixPreserved": true, "inputBytesPreservedAcrossBothReplacements": true,
 				"successfulExchangeChecks": successful, "unexpectedExchangeRPCErrors": failed,

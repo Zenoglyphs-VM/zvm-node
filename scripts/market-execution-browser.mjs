@@ -21,6 +21,7 @@ assert.equal(base.protocol, 'http:')
 assert.equal(base.hostname, '127.0.0.1')
 assert.ok(base.port && /^[a-f0-9]{64}$/.test(fixture.token))
 assert.ok(['nft', 'karum'].includes(fixture.app) && ['single', 'bulk'].includes(fixture.kind))
+assert.ok(['buy', 'cancel', 'nonce', 'approval'].includes(fixture.action))
 const pins = JSON.parse(await readFile(new URL('./market-browser-pins.json', import.meta.url)))
 const git = (root, ...args) => execFileSync('git', ['--no-replace-objects', ...args], {cwd: root, encoding: 'utf8'}).trim()
 for (const app of ['nft', 'karum']) {
@@ -39,18 +40,21 @@ assert.equal(buyerSigner.address.toLowerCase(), fixture.buyer.toLowerCase())
 const {createPublicClient, http} = requireApp('viem')
 const chain = createPublicClient({transport: http(new URL('/rpc', base).href, {retryCount: 0})})
 const transactions = []
+const actorSigner = fixture.action === 'buy' ? buyerSigner : signer
+assert.equal(actorSigner.address.toLowerCase(), fixture.actor.toLowerCase())
+const targetAddress = fixture.action === 'approval' ? fixture.collection : fixture.exchange
 let fundedNonce
 assert.equal(signer.address.toLowerCase(), fixture.seller.toLowerCase())
 const executablePath = [process.env.CHROME_BIN, '/usr/bin/google-chrome', '/usr/bin/chromium'].find(p => p && existsSync(p))
 assert.ok(executablePath, 'preinstalled Chrome required; no browser download fallback')
 const profile = await mkdtemp(join(tmpdir(), 'zvm-signed-market-'))
-const result = {app: fixture.app, kind: fixture.kind, checks: [], pass: false}
+const result = {app: fixture.app, kind: fixture.kind, action: fixture.action, checks: [], pass: false}
 const signatures = [], posts = [], methods = [], failedHTTP = [], exceptions = [], external = []
 let browser, context, page, chrome, stopPromise
 const stop = () => stopPromise ??= (async () => {if (browser) await browser.close()})()
 process.once('SIGTERM', () => {void stop()})
 
-function inject({seller, buyer, chainId}) {
+function inject({seller, buyer, chainId, actor}) {
   const viewer = new URL(location.href).searchParams.get('__viewer') === 'buyer'
   const state = {accounts: [viewer ? buyer : seller], chain: '0x' + BigInt(chainId).toString(16)}
   const listeners = new Map()
@@ -71,7 +75,7 @@ function inject({seller, buyer, chainId}) {
         return window.__executedMarketSign(params)
       }
       if (method === 'eth_sendTransaction') {
-        if (state.accounts[0].toLowerCase() !== buyer.toLowerCase()) throw new Error('only the public fixture buyer may send')
+        if (state.accounts[0].toLowerCase() !== actor.toLowerCase()) throw new Error('only the selected public fixture actor may send')
         return window.__executedMarketSend(params)
       }
       throw new Error('unsupported fixture wallet method: ' + method)
@@ -181,14 +185,14 @@ try {
     assert.equal(params.length, 1)
     assert.equal(transactions.length, 0)
     const request = params[0]
-    assert.equal(request.from.toLowerCase(), fixture.buyer.toLowerCase())
-    assert.equal(request.to.toLowerCase(), fixture.exchange.toLowerCase())
-    assert.equal(BigInt(request.value), 250000000000000000n)
+    assert.equal(request.from.toLowerCase(), fixture.actor.toLowerCase())
+    assert.equal(request.to.toLowerCase(), targetAddress.toLowerCase())
+    assert.equal(BigInt(request.value ?? '0x0'), fixture.action === 'buy' ? 250000000000000000n : 0n)
     if (request.chainId !== undefined) assert.equal(BigInt(request.chainId), BigInt(fixture.chainId))
-    const nonce = await chain.getTransactionCount({address: buyerSigner.address, blockTag: 'pending'})
+    const nonce = await chain.getTransactionCount({address: actorSigner.address, blockTag: 'pending'})
     assert.equal(nonce, fundedNonce)
-    const serializedTransaction = await buyerSigner.signTransaction({type: 'eip1559', chainId: fixture.chainId,
-      nonce, to: request.to, data: request.data, value: BigInt(request.value), gas: BigInt(request.gas),
+    const serializedTransaction = await actorSigner.signTransaction({type: 'eip1559', chainId: fixture.chainId,
+      nonce, to: request.to, data: request.data, value: BigInt(request.value ?? '0x0'), gas: BigInt(request.gas),
       maxFeePerGas: BigInt(request.maxFeePerGas), maxPriorityFeePerGas: BigInt(request.maxPriorityFeePerGas)})
     const hash = await chain.sendRawTransaction({serializedTransaction})
     transactions.push(hash)
@@ -259,10 +263,12 @@ try {
   assert.equal(posts.flat().length, 2)
   record('actual typed-data prompt and HTTP submission cardinality')
   let state = await phase('bind')
-  fundedNonce = state.buyerNonce
-  assert.equal(fundedNonce, 3)
+  fundedNonce = state.actorNonce
+  assert.ok(Number.isSafeInteger(fundedNonce) && fundedNonce >= 3)
+  assert.equal(state.actor.toLowerCase(), fixture.actor.toLowerCase())
   record('real HTTP admission binds actual inputs without changing the derived prefix')
   await projection('admitted', -1)
+  if (fixture.action === 'buy') {
   await navigate('/item/' + fixture.collection + '/1', true)
   await connect()
   if (fixture.app === 'karum') await page.click('main button[data-testid="buy"]')
@@ -279,24 +285,92 @@ try {
   state = await phase('mined')
   const receipt = await chain.getTransactionReceipt({hash: transactions[0]})
   assert.equal(receipt.status, 'success')
-  assert.equal(receipt.from.toLowerCase(), fixture.buyer.toLowerCase())
+  assert.equal(receipt.from.toLowerCase(), fixture.actor.toLowerCase())
   assert.equal(receipt.to.toLowerCase(), fixture.exchange.toLowerCase())
   assert.ok(receipt.gasUsed > 21000n)
-  assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
   record('actual typed transaction receipt gas sender target and consumed nonce')
   await projection('filled', state.filled)
   state = await phase('replacement')
   await assert.rejects(chain.getTransactionReceipt({hash: transactions[0]}))
-  assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce)
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce)
   record('orphaned transaction loses its canonical receipt and releases its nonce')
   await projection('replacement', state.filled)
   state = await phase('restored')
   const restoredReceipt = await chain.getTransactionReceipt({hash: transactions[0]})
   assert.equal(restoredReceipt.blockHash, receipt.blockHash)
   assert.equal(restoredReceipt.transactionHash, receipt.transactionHash)
-  assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
   record('restored canonical transaction recovers its exact receipt and nonce')
   await projection('restored', state.filled)
+  } else {
+  async function permissionState(expected) {
+    await until((collection, value) => [...document.querySelectorAll('[data-testid="collection-permission"]')]
+      .some(row => row.dataset.collection.toLowerCase() === collection.toLowerCase() && row.dataset.approval === value),
+      'actual permission view differs from executed approval', fixture.collection, expected)
+  }
+  async function permissionPage(expected) {
+    await navigate('/account/' + fixture.seller)
+    await connect()
+    await permissionState(expected)
+  }
+  async function ownerProjection(name, included) {
+    for (const id of [1, 2]) {
+      await navigate('/item/' + fixture.collection + '/' + id, true)
+      await until(id => document.querySelector('main h1')?.textContent.trim() === '#' + id, 'actual owner-action item page did not render', id)
+      const visible = await page.evaluate(app => [...document.querySelectorAll(app === 'karum' ? 'main button[data-testid="buy"]' : 'main button')]
+        .some(button => button.checkVisibility() && (app === 'karum' || button.textContent.trim() === 'Buy now')), fixture.app)
+      const valid = !included || (fixture.action === 'cancel' && id === 2)
+      assert.equal(visible, valid, 'actual page offered an invalidated order or lost an unaffected listing')
+      assert.ok(await page.evaluate(owner => [...document.querySelectorAll('main a')].some(a =>
+        a.getAttribute('href')?.toLowerCase().includes('/account/' + owner.toLowerCase())), fixture.seller))
+      record(name + ' actual item ' + id + ' owner and invalidation')
+    }
+  }
+  if (fixture.action === 'approval') await permissionPage('granted')
+  else {await navigate(fixture.action === 'cancel' ? '/item/' + fixture.collection + '/1' : '/account/' + fixture.seller); await connect()}
+  if (fixture.action === 'approval') await page.click('[data-testid="revoke-exchange"]')
+  else if (fixture.action === 'cancel') await click(fixture.app === 'nft' ? 'Take off sale' : 'Cancel listing')
+  else await click(fixture.app === 'nft' ? 'Cancel all 2 orders' : 'Cancel all orders')
+  const pendingState = fixture.app === 'karum' ? 'ordered' : 'published'
+  await until(value => !!document.querySelector('main li[data-state="' + value + '"]'), 'owner transaction did not remain pending', pendingState)
+  assert.equal(transactions.length, 1)
+  assert.equal(await page.$('main li[data-state="done"]'), null)
+  record('actual owner control sends one signed transaction and waits without a receipt')
+  state = await phase('ordered')
+  assert.equal(state.transaction, transactions[0])
+  await until(() => !!document.querySelector('main li[data-state="done"]'), 'actual owner application did not consume the mined receipt')
+  record('actual owner application consumes the executed receipt before success')
+  if (fixture.action === 'approval') await permissionState('removed')
+  else if (fixture.action === 'cancel') await until(() => [...document.querySelectorAll('main button')].some(b => b.checkVisibility() && b.textContent.trim() === 'List for sale'), 'cancelled item stayed listed after its receipt')
+  else await until(() => ![...document.querySelectorAll('main button')].some(b => b.checkVisibility() && /^Cancel all /.test(b.textContent.trim())), 'old signed orders stayed available after the nonce receipt')
+  record('actual current page refreshes its owner action after the real receipt')
+  state = await phase('mined')
+  const receipt = await chain.getTransactionReceipt({hash: transactions[0]})
+  assert.equal(receipt.status, 'success')
+  assert.equal(receipt.from.toLowerCase(), fixture.actor.toLowerCase())
+  assert.equal(receipt.to.toLowerCase(), targetAddress.toLowerCase())
+  assert.ok(receipt.gasUsed > 21000n)
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
+  record('actual owner receipt gas sender target and consumed account nonce')
+  await ownerProjection('invalidated', true)
+  if (fixture.action === 'approval') await permissionPage('removed')
+  state = await phase('replacement')
+  await assert.rejects(chain.getTransactionReceipt({hash: transactions[0]}))
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce)
+  record('orphaned owner transaction loses its canonical receipt and releases its account nonce')
+  if (fixture.action === 'approval') {await permissionState('granted'); record('live permission view restores the orphaned approval without navigation')}
+  await ownerProjection('replacement', false)
+  if (fixture.action === 'approval') await permissionPage('granted')
+  state = await phase('restored')
+  const restoredReceipt = await chain.getTransactionReceipt({hash: transactions[0]})
+  assert.equal(restoredReceipt.blockHash, receipt.blockHash)
+  assert.equal(restoredReceipt.transactionHash, receipt.transactionHash)
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
+  record('restored owner transaction recovers its exact receipt and account nonce')
+  if (fixture.action === 'approval') {await permissionState('removed'); record('live permission view reapplies restored revocation without navigation')}
+  await ownerProjection('restored', true)
+  }
   for (const original of posts.flat()) {
     const id = String(original.order.tokenId)
     const rows = await orderRows()
@@ -323,7 +397,7 @@ try {
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
   assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, 1)
   record('one transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, 19)
+  assert.equal(result.checks.length, fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20)
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 220)

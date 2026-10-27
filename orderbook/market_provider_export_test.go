@@ -43,13 +43,30 @@ type ExecutedMarketProviderFixture struct {
 
 func NewExecutedMarketProviderBrowserFixture(t *testing.T, kind string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
 	t.Helper()
+	return newExecutedMarketActionBrowserFixture(t, kind, "buy")
+}
+
+func NewExecutedMarketOwnerBrowserFixture(t *testing.T, kind, action string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
+	t.Helper()
+	if action != "cancel" && action != "nonce" && action != "approval" {
+		t.Fatal("unsupported owner action")
+	}
+	return newExecutedMarketActionBrowserFixture(t, kind, action)
+}
+
+func newExecutedMarketActionBrowserFixture(t *testing.T, kind, action string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
+	t.Helper()
 	key := make([]byte, 32)
 	key[31] = 2 // Deliberately public scalar-two test buyer.
 	buyer, err := crypto.ToECDSA(key)
 	if err != nil {
 		t.Fatal(err)
 	}
-	f := newExecutedMarketFixtureProfile(t, kind, uint64(time.Now().Add(-2*time.Minute).Unix()), znn.Address(crypto.PubkeyToAddress(buyer.PublicKey)), true)
+	age := 2 * time.Minute
+	if action != "buy" {
+		age = 4 * time.Minute
+	}
+	f := newExecutedMarketFixtureProfile(t, kind, uint64(time.Now().Add(-age).Unix()), znn.Address(crypto.PubkeyToAddress(buyer.PublicKey)), true, action)
 	p := &ExecutedMarketProviderFixture{f: f}
 	f.r.backend.provider = p
 	p.source = httptest.NewServer(http.HandlerFunc(p.sourceRPC))
@@ -80,11 +97,32 @@ func (p *ExecutedMarketProviderFixture) TransactionHash() common.Hash {
 	return tx.Hash()
 }
 
-func (p *ExecutedMarketProviderFixture) PinFundedBuyer(t *testing.T) {
+func (p *ExecutedMarketProviderFixture) PinFundedActor(t *testing.T) {
 	t.Helper()
-	nonce, err := p.f.r.eth.NonceAt(context.Background(), p.f.Buyer(), nil)
-	if err != nil || p.f.r.d.Head().Height != 9 || nonce != 3 {
-		t.Fatalf("funding queue not drained: source=%d nonce=%d expected=3 error=%v", p.f.r.d.Head().Height, nonce, err)
+	actor := p.Actor()
+	nonce, err := p.f.r.eth.NonceAt(context.Background(), actor, nil)
+	if err != nil || p.f.r.d.Head().Height != p.FundingHeight() {
+		t.Fatal("funding source horizon is not joined")
+	}
+	p.f.r.backend.mu.Lock()
+	chain := p.f.r.backend.chain
+	genesis, err := chain.StateAt(chain.GetBlockByNumber(0).Root())
+	if err != nil {
+		p.f.r.backend.mu.Unlock()
+		t.Fatal(err)
+	}
+	want := genesis.GetNonce(actor)
+	for n := uint64(1); n <= chain.CurrentBlock().Number.Uint64(); n++ {
+		for _, tx := range chain.GetBlockByNumber(n).Transactions() {
+			if tx.Type() == types.DepositTxType && tx.From() == actor {
+				want++
+			}
+		}
+	}
+	p.f.r.backend.mu.Unlock()
+	balance, err := p.f.r.eth.BalanceAt(context.Background(), actor, nil)
+	if err != nil || balance.Cmp(big.NewInt(3_000_000_000_000_000_000)) < 0 || nonce != want {
+		t.Fatal("executed funding balance and account nonce do not match the canonical prefix")
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -94,7 +132,7 @@ func (p *ExecutedMarketProviderFixture) PinFundedBuyer(t *testing.T) {
 	p.initialNonce, p.nonceKnown = nonce, true
 }
 
-func (p *ExecutedMarketProviderFixture) BuyerNonce() uint64 {
+func (p *ExecutedMarketProviderFixture) ActorNonce() uint64 {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.initialNonce
@@ -116,14 +154,14 @@ func (s executionEth) SendRawTransaction(ctx context.Context, raw hexutil.Bytes)
 	p.mu.Lock()
 	initialNonce, nonceKnown := p.initialNonce, p.nonceKnown
 	p.mu.Unlock()
-	expected, err := p.f.r.scenario.arts.MustGet("ZVMExchange").Call("buy", p.f.r.scenario.inputs[0].ABI())
+	expected, to, value, err := p.expectedActionCall()
 	if err != nil {
 		return common.Hash{}, err
 	}
 	if tx.Type() != types.DynamicFeeTxType || tx.ChainId().Cmp(p.f.Rollup().L2ChainIDBig()) != 0 ||
-		from != p.f.Buyer() || !nonceKnown || tx.Nonce() != initialNonce || tx.To() == nil || *tx.To() != p.f.Exchange() ||
-		tx.Value().Cmp(p.f.r.scenario.inputs[0].Order.Price.Big()) != 0 || !bytes.Equal(tx.Data(), expected) {
-		return common.Hash{}, errors.New("provider did not sign the actual admitted buy call")
+		from != p.Actor() || !nonceKnown || tx.Nonce() != initialNonce || tx.To() == nil || *tx.To() != to ||
+		tx.Value().Cmp(value) != 0 || !bytes.Equal(tx.Data(), expected) {
+		return common.Hash{}, errors.New("provider did not sign the exact intended market action")
 	}
 	p.mu.Lock()
 	if p.submissions != 0 || p.relayer == "" {
@@ -305,7 +343,7 @@ func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http
 	var result any
 	var failure error
 	p.mu.Lock()
-	confirmed := p.published != nil && p.bound && branch == 0 && limit >= 10
+	confirmed := p.published != nil && p.bound && branch == 0 && limit >= p.ActionHeight()
 	switch call.Method {
 	case "embedded.plasma.get":
 		result = &znn.PlasmaInfo{CurrentPlasma: 10_500_000, MaxPlasma: 10_500_000, QsrAmount: znn.BigIntFromUint64(500_000_000_000)}
@@ -313,7 +351,7 @@ func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http
 		if p.published != nil {
 			copy := *p.published
 			if confirmed {
-				copy.ConfirmationDetail = &znn.ConfirmationDetail{NumConfirmations: limit - 9, MomentumHeight: 10, MomentumHash: source[10].Momentum.Hash, MomentumTimestamp: source[10].Momentum.Timestamp}
+				copy.ConfirmationDetail = &znn.ConfirmationDetail{NumConfirmations: limit - p.ActionHeight() + 1, MomentumHeight: p.ActionHeight(), MomentumHash: source[p.ActionHeight()].Momentum.Hash, MomentumTimestamp: source[p.ActionHeight()].Momentum.Timestamp}
 			}
 			result = &copy
 		}
@@ -348,7 +386,7 @@ func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http
 		}
 		if block.Address != devnet.RelayerKey(0).Address || block.ToAddress != p.f.Rollup().Inbox || block.ChainIdentifier != p.f.Rollup().L1ChainID ||
 			block.BlockType != znn.BlockTypeUserSend || block.Height != 1 || block.PreviousHash != (znn.Hash{}) || block.AmountBig().Sign() != 0 ||
-			block.TokenStandard != znn.ZeroTokenStandard || block.MomentumAcknowledged.Height != 9 || block.MomentumAcknowledged.Hash != source[9].Momentum.Hash ||
+			block.TokenStandard != znn.ZeroTokenStandard || block.MomentumAcknowledged.Height != p.FundingHeight() || block.MomentumAcknowledged.Hash != source[p.FundingHeight()].Momentum.Hash ||
 			len(block.Data) < 2 || block.Data[0] != derive.MsgBatch {
 			failure = errors.New("actual relayer published an unexpected source block")
 			break
@@ -408,15 +446,15 @@ func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, c
 		case <-ticker.C:
 		}
 	}
-	if p.f.r.d.Head().Height != 9 {
-		t.Fatal("provider transaction must bind at the joined height-nine horizon")
+	if p.f.r.d.Head().Height != p.FundingHeight() {
+		t.Fatal("provider transaction must bind at the joined funding horizon")
 	}
-	if nonce, err := p.f.r.eth.NonceAt(ctx, p.f.Buyer(), nil); err != nil || nonce != p.BuyerNonce() {
+	if nonce, err := p.f.r.eth.NonceAt(ctx, p.Actor(), nil); err != nil || nonce != p.ActorNonce() {
 		t.Fatal("pending provider transaction already consumed a canonical nonce")
 	}
 	p.f.r.nomMu.Lock()
 	defer p.f.r.nomMu.Unlock()
-	if p.f.r.limit != 9 {
+	if p.f.r.limit != p.FundingHeight() {
 		t.Fatal("provider source is already beyond its binding horizon")
 	}
 	var future [2]map[uint64]*znn.DetailedMomentum
@@ -432,7 +470,7 @@ func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, c
 				t.Fatal(err)
 			}
 			future[branch][height] = &copy
-			if height <= 9 {
+			if height <= p.FundingHeight() {
 				after, err := json.Marshal(&copy)
 				if err != nil || !bytes.Equal(raw, after) {
 					t.Fatal("provider source prefix changed")
@@ -440,7 +478,7 @@ func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, c
 			}
 		}
 	}
-	dm := future[0][10]
+	dm := future[0][p.ActionHeight()]
 	dm.Blocks = append(dm.Blocks, block)
 	sort.Slice(dm.Blocks, func(i, j int) bool {
 		a, b := dm.Blocks[i], dm.Blocks[j]
@@ -472,7 +510,7 @@ func (p *ExecutedMarketProviderFixture) AssertCanonicalTransaction(t *testing.T,
 		}
 	}
 	receipt, err := p.f.r.eth.TransactionReceipt(ctx, p.TransactionHash())
-	want := p.BuyerNonce()
+	want := p.ActorNonce()
 	if included {
 		want++
 		if err != nil || receipt == nil || receipt.Status != types.ReceiptStatusSuccessful || receipt.Type != types.DynamicFeeTxType || receipt.GasUsed <= 21_000 ||
@@ -482,7 +520,7 @@ func (p *ExecutedMarketProviderFixture) AssertCanonicalTransaction(t *testing.T,
 	} else if receipt != nil || err == nil {
 		t.Fatal("orphaned transaction still has a canonical receipt")
 	}
-	nonce, err := p.f.r.eth.NonceAt(ctx, p.f.Buyer(), nil)
+	nonce, err := p.f.r.eth.NonceAt(ctx, p.Actor(), nil)
 	if err != nil || nonce != want {
 		t.Fatalf("canonical buyer nonce=%d want=%d error=%v", nonce, want, err)
 	}
@@ -500,10 +538,82 @@ func (p *ExecutedMarketProviderFixture) AssertCompleted(t *testing.T) {
 func (p *ExecutedMarketProviderFixture) Evidence() map[string]any {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return map[string]any{"signedSubmissions": p.submissions, "verifiedNoMPublications": p.publications, "statefulGasEstimates": p.estimates,
+	return map[string]any{"action": p.Action(), "actor": p.Actor().Hex(), "signedSubmissions": p.submissions, "verifiedNoMPublications": p.publications, "statefulGasEstimates": p.estimates,
 		"absentCanonicalReceiptObservations": p.missingReceipts, "executedCanonicalReceiptObservations": p.executedReceipts,
-		"unexpectedSourceErrors": p.unexpected, "signedRawBytes": len(p.raw), "alreadyDerivedSourceHeightsPreserved": 9,
+		"unexpectedSourceErrors": p.unexpected, "signedRawBytes": len(p.raw), "alreadyDerivedSourceHeightsPreserved": p.FundingHeight(),
 		"actualRelayerSource": "5a72a223dd60d1ae4e974d420cadd85e6f9ee929", "actualNoMAccountSignatureVerified": true,
-		"fundingDepositNonce": p.initialNonce, "fundingDepositNoncePinnedFromExecutedState": p.nonceKnown,
+		"fundingActorNonce": p.initialNonce, "fundingActorNoncePinnedFromExecutedState": p.nonceKnown,
 		"exactProviderRawTransactionBytesPreserved": true, "nativeBuySubstitutions": 0, "sourceBoundBeforeDerivation": p.bound}
+}
+
+func (p *ExecutedMarketProviderFixture) Action() string { return p.f.r.scenario.providerAction }
+func (p *ExecutedMarketProviderFixture) Actor() common.Address {
+	if p.Action() == "buy" {
+		return p.f.Buyer()
+	}
+	return p.f.Seller()
+}
+func (p *ExecutedMarketProviderFixture) FundingHeight() uint64 {
+	if p.Action() == "buy" {
+		return 9
+	}
+	return 12
+}
+func (p *ExecutedMarketProviderFixture) ActionHeight() uint64 { return p.FundingHeight() + 1 }
+func (p *ExecutedMarketProviderFixture) LastHeight() uint64   { return p.ActionHeight() + 1 }
+func (p *ExecutedMarketProviderFixture) expectedActionCall() ([]byte, common.Address, *big.Int, error) {
+	artifact, method, to, value := "ZVMExchange", "buy", p.f.Exchange(), new(big.Int)
+	var args []any
+	switch p.Action() {
+	case "buy":
+		args = []any{p.f.r.scenario.inputs[0].ABI()}
+		value = p.f.r.scenario.inputs[0].Order.Price.Big()
+	case "cancel":
+		method = "cancelOrders"
+		args = []any{ABIOrders([]*Order{&p.f.r.scenario.inputs[0].Order})}
+	case "nonce":
+		method = "incrementNonce"
+	case "approval":
+		artifact, method, to = "ZVMCollection", "setApprovalForAll", p.f.Collection()
+		args = []any{p.f.Exchange(), false}
+	default:
+		return nil, to, value, errors.New("unsupported provider action")
+	}
+	data, err := p.f.r.scenario.arts.MustGet(artifact).Call(method, args...)
+	return data, to, value, err
+}
+
+// Expected state derives from the exact source action. It never injects an
+// order or controls a checker response; execution and HTTP assertions remain
+// independent of this worker-convergence predicate.
+func expectedExecutedMarketState(s *executionScenario, branch int, height uint64, index int) (string, uint8, int) {
+	status, code, filled := StatusOpen, uint8(CodeOK), 0
+	if !s.provider {
+		if height >= 8 && index == branch {
+			return StatusFilled, CodeFilled, 1
+		}
+		return status, code, filled
+	}
+	actionHeight := uint64(10)
+	if s.providerAction != "buy" {
+		actionHeight = 13
+	}
+	if branch != 0 || height < actionHeight {
+		return status, code, filled
+	}
+	switch s.providerAction {
+	case "buy":
+		if index == 0 {
+			return StatusFilled, CodeFilled, 1
+		}
+	case "cancel":
+		if index == 0 {
+			return StatusCancelled, CodeCancelled, 0
+		}
+	case "nonce":
+		return StatusCancelled, CodeStaleNonce, 0
+	case "approval":
+		return StatusOpen, CodeNotHeld, 0
+	}
+	return status, code, filled
 }

@@ -99,14 +99,10 @@ func (r *executionRun) workerStages(stages ...uint64) {
 						ready = false
 						break
 					}
-					wantFilled := height >= 8 && i == r.branch
-					if r.scenario.provider {
-						wantFilled = height >= 10 && r.branch == 0 && i == 0
-					}
-					if wantFilled {
-						ready = ready && status == StatusFilled && filled == 1 && code == int(CodeFilled)
-					} else {
-						ready = ready && status == StatusOpen && filled == 0 && code == int(CodeOK) && checkedHash == head.L2Hash.Hex()
+					wantStatus, wantCode, wantFilled := expectedExecutedMarketState(r.scenario, r.branch, height, i)
+					ready = ready && status == wantStatus && filled == wantFilled && code == int(wantCode)
+					if wantStatus == StatusOpen {
+						ready = ready && checkedHash == head.L2Hash.Hex()
 					}
 				}
 			}

@@ -3,15 +3,16 @@
 The `market-browser` CI job exercises the actual built NFT and Karum pages,
 their own locked Viem clients, the real node API and exchange-backed book,
 the official relayer program and the pinned op-geth execution engine. The
-four serialized profiles are each application's single and bulk listing flow,
-followed by a purchase from its actual item page.
+sixteen serialized profiles cover each application's single and bulk listing
+flow, followed separately by a purchase, one-order cancellation, exchange nonce
+invalidation, or collection permission removal through its actual controls.
 
 ## Exact inputs
 
 | Subject | Source |
 | --- | --- |
-| NFT production application | `9d6b43d016026d5b684398b0ce96fea5387be71d` |
-| Karum production application | `b3d4375427d382583541f5de737f08576a98cb85` |
+| NFT production application | `4f0c9cc1c663baecc9aee2c13aba2d9f51622056` |
+| Karum production application | `e30edefb2d0a0dd2626182c658c78411603e0480` |
 | Official relayer program | `5a72a223dd60d1ae4e974d420cadd85e6f9ee929` |
 | Shared Core | `29e6d9b30be94de3772c850c7a1e9811585a8833` |
 | Application Viem | `2.56.8`, separately installed from each unchanged lock |
@@ -19,7 +20,7 @@ followed by a purchase from its actual item page.
 
 The existing browser pin file binds the complete frontend revisions. The
 workflow checks the relayer and Core revisions, builds that unmodified program
-once, and reuses its executable for all four profiles. Each profile records
+once, and reuses its executable for all sixteen profiles. Each profile records
 the executable digest and actual Go version. Each browser records its actual
 Node, Chrome and SDK versions. No browser download fallback is allowed.
 
@@ -83,7 +84,7 @@ or a deadline is refused. All endpoints and
 signer transports are loopback; external browser requests, page exceptions and
 failed HTTP responses refuse qualification.
 
-Passing requires all four profiles, every named browser check, the independent
+Passing requires all sixteen profiles, every named browser check, the independent
 Go state/input/receipt oracles and successful child joins at the new exact node
 revision. An older run or an unchanged file tree does not qualify that revision.
 The separate backend admission/recovery tests retain the original native-lane
@@ -92,6 +93,54 @@ scenario and their own source and authority boundaries.
 The Engine and eth RPC adapter, synthetic NoM canonicality and declared plasma
 allocation remain fixture authority. This lane does not qualify the unmodified
 full execution daemon, independently authenticated NoM consensus/finality,
-physical wallets, public-chain settlement or production operation. General
-application cancellation, nonce invalidation, approval revocation, full-width
-uint64 timestamps and final supported-product agreement remain open.
+physical wallets, public-chain settlement or production operation. The selected owner-action matrix below extends cancellation, nonce and approval
+coverage. Remaining batch/refund/currency/royalty/ERC-1271 browser paths,
+full-width uint64 timestamps and final supported-product agreement remain open.
+
+
+## Actual owner invalidation controls
+
+The original four buyer cases retain their source horizon and gas policy.
+Twelve owner cases additionally exercise single-order cancellation, exchange
+order-nonce invalidation and collection permission removal, for single and bulk
+inputs in each application. Each fresh owner profile funds both public fixture
+actors with three actual deposits each, then drains the unchanged production
+mandatory queue through source height twelve. The actor's account nonce must
+match the canonical genesis nonce plus all executed deposits/native calls from
+that actor; the balance is read from executed state. The extra horizon is not
+a relaxed gas budget or a fabricated balance/nonce. Source heights one through
+twelve remain byte-identical; height thirteen receives the real relayer block.
+
+Each owner action uses one real signed EIP-1559 transaction and one verified
+signed NoM publication through the unchanged official relayer. Cancellations
+must void the selected order while retaining its unaffected sibling, including
+a sibling using the same bulk root signature. Exchange nonce invalidation must
+void both orders while preserving the distinction between the exchange's order
+nonce and the actor's Ethereum account nonce. Permission removal must leave
+owners and signatures intact while the real collection approval and exchange
+check prevent both listings from being offered. Direct hash-bound views check
+approval, exchange nonce, cancellation mappings and exact checkOrder code and
+remaining amounts independently of worker readiness and cached HTTP results.
+There must be no sale, owner transfer, SQL order/cache control, manual index
+step, replacement input or substitute native transaction.
+
+Every owner transaction is removed by a canonical replacement and restored
+again. The actual receipt, account nonce, direct contract state, book/HTTP
+views and original input bytes must agree at every stable phase. Permission
+removal is also observed in the actual account component: it reads the changed
+approval after the receipt, restores permission after the orphan, and removes
+it after restoration without navigating or reloading the component. Its
+bounded four-at-a-time reads, five-second visible-page refresh, disposed timer and stale-result fences
+are separate from the preserved RPC, worker and browser ownership controls.
+
+Both applications expose permission removal only for the matching connected
+account and node network. A guard is checked before estimation and again after
+asynchronous preparation before asking the wallet to send. Three small
+standard-Node controls in each frontend independently exercise immediate
+context refusal, a change during an awaited estimate, and unguarded legacy
+receipt waiting. Their synthetic capabilities are not browser or settlement
+proof; the sixteen actual browser/relayer profiles qualify that separate path.
+Existing SDK locks, complete order modules and Go/Solidity vector inputs remain
+unchanged. Full-width timestamps, all remaining batch/refund/currency/royalty/
+ERC-1271 browser paths, independent NoM/full-daemon qualification and final
+supported-product agreement remain open.
