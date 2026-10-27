@@ -128,6 +128,42 @@ try {
       await phase('prefix')
       await projection(true)
       record(result, 'actual item route and current listing')
+      const itemPath = '/zvm-' + app + '/item/' + fixture.collection + '/1'
+      const collectionPath = '/zvm-' + app + '/collection/' + fixture.collection
+      const follow = async path => {
+        await page.waitForFunction(path => [...document.querySelectorAll('main a')]
+          .some(a => a.checkVisibility() && a.getAttribute('href') === path), {timeout: 12000}, path)
+        await page.evaluate(path => [...document.querySelectorAll('main a')]
+          .find(a => a.checkVisibility() && a.getAttribute('href') === path).click(), path)
+        await page.waitForFunction(path => location.pathname === path, {timeout: 12000}, path)
+      }
+      await follow(collectionPath)
+      await follow(itemPath)
+      await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'collection card did not return to the actual item')
+      record(result, 'canonical collection and item links navigate the actual pages')
+      if (app === 'nft') {
+        const legacyItem = new URL('/zvm-nft/nft/' + fixture.collection + '/1', base)
+        legacyItem.searchParams.set('rpc', new URL('/rpc', base).href)
+        await page.goto(legacyItem.href, {waitUntil: 'networkidle0', timeout: 20000})
+        await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'legacy item bookmark did not render')
+        record(result, 'legacy NFT item bookmark resolves the same item')
+        const legacyCollection = new URL('/zvm-nft/nft/' + fixture.collection, base)
+        legacyCollection.searchParams.set('rpc', new URL('/rpc', base).href)
+        await page.goto(legacyCollection.href, {waitUntil: 'networkidle0', timeout: 20000})
+        await follow(itemPath)
+        await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'legacy collection card did not navigate')
+        record(result, 'legacy NFT collection bookmark generates a canonical item link')
+        const home = new URL('/zvm-nft/', base)
+        home.searchParams.set('rpc', new URL('/rpc', base).href)
+        await page.goto(home.href, {waitUntil: 'networkidle0', timeout: 20000})
+        assert.equal(await page.evaluate(() => [...document.querySelectorAll('main a')]
+          .some(a => a.getAttribute('href')?.startsWith('/zvm-nft/nft/'))), false)
+        await follow('/zvm-nft/create')
+        await until(page, () => document.querySelector('main h1')?.textContent.trim() === 'Create' &&
+          document.querySelector('main')?.textContent.includes('Not available on this node'), 'actual guarded create page did not render')
+        record(result, 'explore generates canonical collection and create links')
+        await projection(true)
+      }
       await click(page, 'Connect wallet')
       await click(page, 'Fixture wallet')
       await until(page, () => window.__marketFixture.state.calls.some(c => c.method === 'eth_requestAccounts') &&
@@ -140,7 +176,7 @@ try {
       await page.evaluate(account => window.__marketFixture.emit('accountsChanged', [account]), buyer)
       record(result, 'provider account change updates page ownership actions')
       await page.evaluate(() => window.__marketFixture.emit('chainChanged', '0x2'))
-      await click(page, 'Switch', true)
+      await click(page, app === 'nft' ? 'Switch network' : 'Switch to ', app === 'karum')
       await until(page, () => window.__marketFixture.state.calls.filter(c => c.method === 'wallet_switchEthereumChain').length === 2,
         'actual switch action did not restore fixture chain')
       record(result, 'provider chain event and visible network switch')
@@ -176,5 +212,5 @@ try {
     exchangeRPCChecksAndChainMetadata: 'declared controls; not execution or full-client evidence',
     actualTransactionsOrSignatures: 0, browserJoined: browser.process()?.exitCode !== null}))
 }
-assert.ok(results.length === 2 && results.every(r => r.pass && r.checks.length === 9), 'both real page paths must pass all nine checks')
+assert.ok(results.length === 2 && results.every(r => r.pass && r.checks.length === (r.app === 'nft' ? 13 : 10)), 'both real page paths must pass every declared check')
 assert.equal(failedHTTP.length, 0, 'actual page HTTP failures observed')

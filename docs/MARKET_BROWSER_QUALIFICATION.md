@@ -7,11 +7,18 @@ browser download fallback or new frontend dependency.
 
 `TestMarketBrowserHTTP` runs the actual Go Market.Register routes, NFT plugin,
 SQLite index and shared order-book rewind transaction. Both real item pages
-read the same running fixture. Nine checks per application cover item/listing
+read the same running fixture. The original nine checks per application cover item/listing
 rendering, EIP-6963 discovery, EIP-1193 connect, account and network events,
 disconnect, an orphan ownership transfer, unchecked rewind, a declared current
 observation and a replacement approval revocation. Original stored order intent
 must remain byte-for-byte unchanged.
+
+Canonical collection-to-item navigation adds one check per application. Three
+additional NFT checks cover legacy item/collection bookmarks and generated
+explore/create links: 13 checks for NFT and 10 for Karum. The network action
+selector distinguishes the real switch control from the header's theme toggle.
+The initial failed run is retained separately, including its NFT undefined
+address request and the initially ambiguous Karum switch selection.
 
 The provider is an injected stand-in with no signing or sending capability.
 Chain metadata, zero balances, optional royalty/name reads and stored exchange
