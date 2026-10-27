@@ -83,8 +83,8 @@ func (p *ExecutedMarketProviderFixture) TransactionHash() common.Hash {
 func (p *ExecutedMarketProviderFixture) PinFundedBuyer(t *testing.T) {
 	t.Helper()
 	nonce, err := p.f.r.eth.NonceAt(context.Background(), p.f.Buyer(), nil)
-	if err != nil || p.f.r.d.Head().Height != 7 || nonce != 3 {
-		t.Fatal("the three executed funding deposits must determine the buyer nonce")
+	if err != nil || p.f.r.d.Head().Height != 9 || nonce != 3 {
+		t.Fatalf("funding queue not drained: source=%d nonce=%d expected=3 error=%v", p.f.r.d.Head().Height, nonce, err)
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -305,7 +305,7 @@ func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http
 	var result any
 	var failure error
 	p.mu.Lock()
-	confirmed := p.published != nil && p.bound && branch == 0 && limit >= 8
+	confirmed := p.published != nil && p.bound && branch == 0 && limit >= 10
 	switch call.Method {
 	case "embedded.plasma.get":
 		result = &znn.PlasmaInfo{CurrentPlasma: 10_500_000, MaxPlasma: 10_500_000, QsrAmount: znn.BigIntFromUint64(500_000_000_000)}
@@ -313,7 +313,7 @@ func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http
 		if p.published != nil {
 			copy := *p.published
 			if confirmed {
-				copy.ConfirmationDetail = &znn.ConfirmationDetail{NumConfirmations: limit - 7, MomentumHeight: 8, MomentumHash: source[8].Momentum.Hash, MomentumTimestamp: source[8].Momentum.Timestamp}
+				copy.ConfirmationDetail = &znn.ConfirmationDetail{NumConfirmations: limit - 9, MomentumHeight: 10, MomentumHash: source[10].Momentum.Hash, MomentumTimestamp: source[10].Momentum.Timestamp}
 			}
 			result = &copy
 		}
@@ -348,7 +348,7 @@ func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http
 		}
 		if block.Address != devnet.RelayerKey(0).Address || block.ToAddress != p.f.Rollup().Inbox || block.ChainIdentifier != p.f.Rollup().L1ChainID ||
 			block.BlockType != znn.BlockTypeUserSend || block.Height != 1 || block.PreviousHash != (znn.Hash{}) || block.AmountBig().Sign() != 0 ||
-			block.TokenStandard != znn.ZeroTokenStandard || block.MomentumAcknowledged.Height != 7 || block.MomentumAcknowledged.Hash != source[7].Momentum.Hash ||
+			block.TokenStandard != znn.ZeroTokenStandard || block.MomentumAcknowledged.Height != 9 || block.MomentumAcknowledged.Hash != source[9].Momentum.Hash ||
 			len(block.Data) < 2 || block.Data[0] != derive.MsgBatch {
 			failure = errors.New("actual relayer published an unexpected source block")
 			break
@@ -408,15 +408,15 @@ func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, c
 		case <-ticker.C:
 		}
 	}
-	if p.f.r.d.Head().Height != 7 {
-		t.Fatal("provider transaction must bind at the joined height-seven horizon")
+	if p.f.r.d.Head().Height != 9 {
+		t.Fatal("provider transaction must bind at the joined height-nine horizon")
 	}
 	if nonce, err := p.f.r.eth.NonceAt(ctx, p.f.Buyer(), nil); err != nil || nonce != p.BuyerNonce() {
 		t.Fatal("pending provider transaction already consumed a canonical nonce")
 	}
 	p.f.r.nomMu.Lock()
 	defer p.f.r.nomMu.Unlock()
-	if p.f.r.limit != 7 {
+	if p.f.r.limit != 9 {
 		t.Fatal("provider source is already beyond its binding horizon")
 	}
 	var future [2]map[uint64]*znn.DetailedMomentum
@@ -432,7 +432,7 @@ func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, c
 				t.Fatal(err)
 			}
 			future[branch][height] = &copy
-			if height <= 7 {
+			if height <= 9 {
 				after, err := json.Marshal(&copy)
 				if err != nil || !bytes.Equal(raw, after) {
 					t.Fatal("provider source prefix changed")
@@ -440,7 +440,7 @@ func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, c
 			}
 		}
 	}
-	dm := future[0][8]
+	dm := future[0][10]
 	dm.Blocks = append(dm.Blocks, block)
 	sort.Slice(dm.Blocks, func(i, j int) bool {
 		a, b := dm.Blocks[i], dm.Blocks[j]
@@ -502,7 +502,7 @@ func (p *ExecutedMarketProviderFixture) Evidence() map[string]any {
 	defer p.mu.Unlock()
 	return map[string]any{"signedSubmissions": p.submissions, "verifiedNoMPublications": p.publications, "statefulGasEstimates": p.estimates,
 		"absentCanonicalReceiptObservations": p.missingReceipts, "executedCanonicalReceiptObservations": p.executedReceipts,
-		"unexpectedSourceErrors": p.unexpected, "signedRawBytes": len(p.raw), "alreadyDerivedSourceHeightsPreserved": 7,
+		"unexpectedSourceErrors": p.unexpected, "signedRawBytes": len(p.raw), "alreadyDerivedSourceHeightsPreserved": 9,
 		"actualRelayerSource": "5a72a223dd60d1ae4e974d420cadd85e6f9ee929", "actualNoMAccountSignatureVerified": true,
 		"fundingDepositNonce": p.initialNonce, "fundingDepositNoncePinnedFromExecutedState": p.nonceKnown,
 		"exactProviderRawTransactionBytesPreserved": true, "nativeBuySubstitutions": 0, "sourceBoundBeforeDerivation": p.bound}

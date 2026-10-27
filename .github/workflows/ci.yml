@@ -72,6 +72,8 @@ jobs:
           test "$(git -C .market-browser/zvm-relayer/zvm-core rev-parse HEAD)" = 29e6d9b30be94de3772c850c7a1e9811585a8833
           go -C .market-browser/zvm-relayer build -trimpath -o "$RUNNER_TEMP/zvm-market-relayer" ./cmd/zvm-relayer
           sha256sum "$RUNNER_TEMP/zvm-market-relayer"
+          git -C .market-browser/zvm-relayer diff --exit-code
+          git -C .market-browser/zvm-relayer/zvm-core diff --exit-code
       - name: Require the preinstalled browser
         run: google-chrome --version
       - name: Install each unchanged locked frontend

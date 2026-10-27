@@ -1,12 +1,12 @@
 package orderbook_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"debug/buildinfo"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"io"
 	"net"
 	"net/http"
@@ -25,7 +25,7 @@ import (
 // All endpoints are this profile's loopback fixtures and the program uses only
 // Core's deliberately public devnet relayer account. No external daemon or
 // public RPC can be selected by the page or the signer.
-func startProductionMarketRelayer(t *testing.T, parent context.Context, f *orderbook.ExecutedMarketFixture, source string) (string, func()) {
+func startProductionMarketRelayer(t *testing.T, parent context.Context, f *orderbook.ExecutedMarketFixture, source string) (string, func() int) {
 	t.Helper()
 	binary := os.Getenv("ZVM_BROWSER_RELAYER_BINARY")
 	if !filepath.IsAbs(binary) {
@@ -78,20 +78,32 @@ func startProductionMarketRelayer(t *testing.T, parent context.Context, f *order
 	}
 	go func() { finished <- cmd.Wait() }()
 	var once sync.Once
-	join := func() {
+	exitCode := -1
+	join := func() int {
 		once.Do(func() {
+			select {
+			case err := <-finished:
+				t.Errorf("actual relayer exited before its owned stop: %v", err)
+				return
+			default:
+			}
 			cancel()
 			select {
 			case err := <-finished:
-				if err != nil && !errors.Is(err, context.Canceled) {
-					t.Errorf("actual relayer did not stop cleanly: %v; bounded stderr=%s", err, stderr.raw.String())
+				if exited, ok := err.(*exec.ExitError); ok && exited.ExitCode() == 1 && parent.Err() == nil && ctx.Err() == context.Canceled &&
+					bytes.HasSuffix(bytes.TrimSpace(stderr.raw.Bytes()), []byte("zvm-relayer relayer: context canceled")) &&
+					!bytes.Contains(stderr.raw.Bytes(), []byte("level=ERROR")) && !bytes.Contains(stderr.raw.Bytes(), []byte("level=WARN")) {
+					exitCode = 1 // main reports Run's joined context cancellation as exit 1.
+				} else {
+					t.Errorf("actual relayer has an unexpected stop: %v; bounded stderr=%s", err, stderr.raw.String())
 				}
 			case <-time.After(5 * time.Second):
 				t.Error("owned actual relayer process was not joined")
 			}
 		})
+		return exitCode
 	}
-	t.Cleanup(join)
+	t.Cleanup(func() { join() })
 	url := "http://" + address
 	deadline := time.Now().Add(10 * time.Second)
 	client := &http.Client{Timeout: 200 * time.Millisecond}

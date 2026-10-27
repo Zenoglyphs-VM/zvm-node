@@ -100,6 +100,9 @@ func (r *executionRun) workerStages(stages ...uint64) {
 						break
 					}
 					wantFilled := height >= 8 && i == r.branch
+					if r.scenario.provider {
+						wantFilled = height >= 10 && r.branch == 0 && i == 0
+					}
 					if wantFilled {
 						ready = ready && status == StatusFilled && filled == 1 && code == int(CodeFilled)
 					} else {

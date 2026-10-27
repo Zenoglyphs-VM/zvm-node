@@ -36,7 +36,8 @@ Node, Chrome and SDK versions. No browser download fallback is allowed.
    Exact order, signature, proof and kind bytes are retained.
 3. Accepted inputs bind only future source calldata. The already derived
    source heights one through six stay byte-identical. Three actual ZNN
-   deposit transactions then fund the public scalar-two buyer. The executed
+   deposit transactions drain through the unchanged mandatory gas budget across
+   source heights seven through nine, then fund the public scalar-two buyer. The executed
    state, including their consumed account nonces, determines its next nonce.
 4. The actual item's Buy now button invokes the application's stateful gas
    estimate and base-fee calculation. The pinned op-geth gas estimator runs
@@ -50,8 +51,8 @@ Node, Chrome and SDK versions. No browser download fallback is allowed.
    The fixture verifies that account signature, source context and exact
    decoded signed transaction bytes. No native buy is substituted.
 6. The application must display its actual pending step while the canonical
-   receipt is absent. Only future source height eight receives the published
-   account block; heights one through seven remain byte-identical. Production
+   receipt is absent. Only future source height ten receives the published
+   account block; heights one through nine remain byte-identical. Production
    derivation, op-geth building/validation, canonical indexing and book workers
    execute it. The application must consume the real successful receipt before
    showing success. Gas usage, sender, target and consumed nonce are checked.
@@ -74,7 +75,11 @@ The Go command uses `-p=1`; subcases do not run in parallel. The two production
 bundles and the relayer executable are built once per job. Each fixture retains
 the bounded 16 MiB engine-cache settings. The browser child has a 90-second
 owned context, 16 KiB stdin, 1 MiB stdout and 128 KiB stderr caps. The relayer
-child has bounded output and an explicit joined shutdown. All endpoints and
+child has bounded output and an explicit joined shutdown. The unmodified
+program returns exit 1 with `zvm-relayer relayer: context canceled` after its
+owned SIGTERM cancellation; the test records that actual exit and requires the
+exact terminal marker, no WARN/ERROR output, and a joined process. An early exit
+or a deadline is refused. All endpoints and
 signer transports are loopback; external browser requests, page exceptions and
 failed HTTP responses refuse qualification.
 

@@ -152,8 +152,12 @@ func (f *ExecutedMarketFixture) Advance(branch int, heights ...uint64) {
 	if branch < 0 || branch >= len(f.r.scenario.branches) || len(heights) == 0 {
 		f.r.t.Fatal("invalid market source horizon")
 	}
+	lastHeight := uint64(9)
+	if f.r.scenario.provider {
+		lastHeight = 11
+	}
 	for _, height := range heights {
-		if height < 6 || height > 9 {
+		if height < 6 || height > lastHeight {
 			f.r.t.Fatal("market source horizon outside executed fixture")
 		}
 	}

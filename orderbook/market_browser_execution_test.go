@@ -231,18 +231,18 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				}
 				f.BindAcceptedBrowserInputs(t, captured)
 				inputs = f.Inputs(t)
-				f.Advance(0, 7)
+				f.Advance(0, 7, 8, 9)
 				transport.PinFundedBuyer(t)
 			case "ordered":
 				transport.BindPublishedTransaction(t, ctx)
-				f.Advance(0, 8, 9)
+				f.Advance(0, 10, 11)
 				filled = 0
 				referenceHash, epoch = f.HeadHash().Hex(), f.Epoch(t)
 			case "mined":
 				transport.AssertCanonicalTransaction(t, true)
 				filled = 0
 			case "replacement":
-				f.Advance(1, 8, 9)
+				f.Advance(1, 10, 11)
 				filled = -1
 				transport.AssertCanonicalTransaction(t, false)
 				if f.HeadHash().Hex() == referenceHash || f.Epoch(t) <= epoch {
@@ -250,7 +250,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				}
 				epoch = f.Epoch(t)
 			case "restored":
-				f.Advance(0, 8, 9)
+				f.Advance(0, 10, 11)
 				transport.AssertCanonicalTransaction(t, true)
 				filled = 0
 				if f.HeadHash().Hex() != referenceHash || f.Epoch(t) <= epoch {
@@ -281,7 +281,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			if successful < 3 || failed != 0 || headers < 3 {
 				t.Fatalf("signed-browser checker accounting: successful=%d failed=%d headers=%d", successful, failed, headers)
 			}
-			joinRelayer()
+			relayerExit := joinRelayer()
 			transport.AssertCompleted(t)
 			record := map[string]any{"app": app, "kind": kind, "pass": true, "phases": expectedPhases,
 				"actualNodeAPIAndExchangeCheckedBook": true, "actualAcceptedBrowserInputs": 2,
@@ -289,7 +289,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				"successfulExchangeChecks": successful, "unexpectedExchangeRPCErrors": failed,
 				"cancelledJoinedExchangeCalls": f.RPCCancellations(), "distinctExecutedCheckHeaders": headers,
 				"manualSQLOrderOrCacheControls": 0, "manualIndexOrBookSteps": 0, "ownedDriverJoined": true,
-				"unsignedSourceAndExecutionRPCFixture": true, "actualOfficialRelayerProgram": true, "actualRelayerJoined": true,
+				"unsignedSourceAndExecutionRPCFixture": true, "actualOfficialRelayerProgram": true, "actualRelayerJoined": true, "actualRelayerExit": relayerExit, "ownedCancellationMarkerVerified": true,
 				"actualProviderEVMTransaction": transport.Evidence(), "realWalletOrPublicNetworkOperations": 0}
 			raw, err := json.Marshal(record)
 			if err != nil {

@@ -511,14 +511,18 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 		}
 		return data
 	}
+	lastHeight, replacementHeight := uint64(9), uint64(8)
+	if inputs.provider {
+		lastHeight, replacementHeight = 11, 10
+	}
 	for branch := range s.branches {
 		momentums := map[uint64]*znn.DetailedMomentum{1: {Momentum: &znn.Momentum{Height: 1, Hash: znn.Sha3([]byte("declared-native-recovery-genesis")), Timestamp: s.cfg.L2GenesisTimestamp}}}
 		heights := map[znn.Address]uint64{}
 		previous := map[znn.Address]znn.Hash{}
 		var chunk znn.Hash
-		for h := uint64(2); h <= 9; h++ {
+		for h := uint64(2); h <= lastHeight; h++ {
 			variant := byte(0)
-			if h >= 8 {
+			if h >= replacementHeight {
 				variant = byte(branch)
 			}
 			dm := &znn.DetailedMomentum{Momentum: &znn.Momentum{Height: h, Hash: znn.Sha3([]byte{byte(h), variant}),
