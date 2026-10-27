@@ -350,7 +350,7 @@ func (b *Book) insert(tx *sql.Tx, in *Input, exchange common.Address, c check, a
 		ON CONFLICT(hash) DO NOTHING`,
 		o.Hash().Hex(), exchange.Hex(), o.Trader.Hex(), o.Side, o.Collection.Hex(), tokenID, amount,
 		0, o.PaymentToken.Hex(), o.Price.Big().String(), b.priceNum(tx, o.PaymentToken, o.Price.Big()),
-		o.ListingTime, o.ExpirationTime, o.Nonce.Big().String(), in.Kind, root, string(raw),
+		TimeValue(o.ListingTime), TimeValue(o.ExpirationTime), o.Nonce.Big().String(), in.Kind, root, string(raw),
 		StatusOpen, CodeUnchecked, at.head.Number.Int64(), at.head.Time, 0, source)
 	if err != nil {
 		return false, err

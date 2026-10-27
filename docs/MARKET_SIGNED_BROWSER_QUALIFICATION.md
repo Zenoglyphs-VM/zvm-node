@@ -11,8 +11,8 @@ invalidation, or collection permission removal through its actual controls.
 
 | Subject | Source |
 | --- | --- |
-| NFT production application | `4f0c9cc1c663baecc9aee2c13aba2d9f51622056` |
-| Karum production application | `e30edefb2d0a0dd2626182c658c78411603e0480` |
+| NFT production application | `1eda1f3334f59f8138cf980cbba1fb225247f17b` |
+| Karum production application | `2d64eac12733505e9d7bfe948057b37e788c2807` |
 | Official relayer program | `5a72a223dd60d1ae4e974d420cadd85e6f9ee929` |
 | Shared Core | `29e6d9b30be94de3772c850c7a1e9811585a8833` |
 | Application Viem | `2.56.8`, separately installed from each unchanged lock |
@@ -94,8 +94,9 @@ The Engine and eth RPC adapter, synthetic NoM canonicality and declared plasma
 allocation remain fixture authority. This lane does not qualify the unmodified
 full execution daemon, independently authenticated NoM consensus/finality,
 physical wallets, public-chain settlement or production operation. The selected owner-action matrix below extends cancellation, nonce and approval
-coverage. Remaining batch/refund/currency/royalty/ERC-1271 browser paths,
-full-width uint64 timestamps and final supported-product agreement remain open.
+coverage. The separate full-width timestamp codec/client lane is specified in
+[MARKET_TIME_WIRE.md](MARKET_TIME_WIRE.md). Remaining batch/refund/currency/royalty/
+ERC-1271 browser paths and final supported-product agreement remain open.
 
 
 ## Actual owner invalidation controls
@@ -140,7 +141,9 @@ standard-Node controls in each frontend independently exercise immediate
 context refusal, a change during an awaited estimate, and unguarded legacy
 receipt waiting. Their synthetic capabilities are not browser or settlement
 proof; the sixteen actual browser/relayer profiles qualify that separate path.
-Existing SDK locks, complete order modules and Go/Solidity vector inputs remain
-unchanged. Full-width timestamps, all remaining batch/refund/currency/royalty/
-ERC-1271 browser paths, independent NoM/full-daemon qualification and final
-supported-product agreement remain open.
+Existing SDK locks and Go/Solidity golden inputs remain unchanged. The newly
+pinned order modules add exact numeric/string timestamp transport. Their
+separate real-SDK/Go/Solidity time-wire lane does not turn earlier complete
+financial adapter campaigns into fresh executions. Remaining batch/refund/
+currency/royalty/ERC-1271 browser paths, independent NoM/full-daemon
+qualification and final supported-product agreement remain open.
