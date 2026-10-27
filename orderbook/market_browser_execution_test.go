@@ -62,7 +62,7 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 	}
 	for _, app := range []string{"nft", "karum"} {
 		for _, kind := range []string{"single", "bulk"} {
-			for _, action := range []string{"buy", "cancel", "nonce", "approval"} {
+			for _, action := range []string{"buy", "cancel", "nonce", "approval", "batch", "partial-batch"} {
 				name := app + "-" + kind
 				if action != "buy" {
 					name += "-" + action
@@ -76,7 +76,9 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind, action string) {
 	var f *orderbook.ExecutedMarketFixture
 	var transport *orderbook.ExecutedMarketProviderFixture
-	if action == "buy" {
+	if action == "batch" || action == "partial-batch" {
+		f, transport = orderbook.NewExecutedMarketBatchBrowserFixture(t, kind, action)
+	} else if action == "buy" {
 		f, transport = orderbook.NewExecutedMarketProviderBrowserFixture(t, kind)
 	} else {
 		f, transport = orderbook.NewExecutedMarketOwnerBrowserFixture(t, kind, action)
@@ -216,6 +218,10 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 		}
 	}()
 	expectedPhases := []string{"bind", "ordered", "mined", "replacement", "restored"}
+	batch := action == "batch" || action == "partial-batch"
+	if action == "partial-batch" {
+		expectedPhases = []string{"bind", "cancel-ordered", "cancel-mined", "ordered", "mined", "replacement", "restored"}
+	}
 	phaseIndex := 0
 	var inputs []*orderbook.Input
 	var reference map[string]any
@@ -228,7 +234,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				t.Fatal("unexpected signed-browser phase ordering")
 			}
 			phaseIndex++
-			filled := -1
+			filled, batchStage := -1, 0
 			included := false
 			switch request.name {
 			case "bind":
@@ -250,10 +256,27 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				}
 				f.Advance(0, heights...)
 				transport.PinFundedActor(t)
+				if batch {
+					transport.PinBatchBalances(t)
+				}
+			case "cancel-ordered":
+				transport.BindBatchCancellation(t, ctx)
+				f.Advance(0, transport.ActionHeight())
+				batchStage = 1
+			case "cancel-mined":
+				transport.AssertBatchCancellation(t)
+				batchStage = 1
 			case "ordered":
 				transport.BindPublishedTransaction(t, ctx)
-				f.Advance(0, transport.ActionHeight(), transport.LastHeight())
+				heights := []uint64{transport.ActionHeight(), transport.LastHeight()}
+				if action == "partial-batch" {
+					heights = []uint64{transport.ActionHeight() + 1, transport.LastHeight()}
+				}
+				f.Advance(0, heights...)
 				included = true
+				if batch {
+					batchStage = 2
+				}
 				if action == "buy" {
 					filled = 0
 				}
@@ -261,6 +284,9 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			case "mined":
 				transport.AssertCanonicalTransaction(t, true)
 				included = true
+				if batch {
+					batchStage = 2
+				}
 				if action == "buy" {
 					filled = 0
 				}
@@ -273,9 +299,13 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				}
 				epoch = f.Epoch(t)
 			case "restored":
-				f.Advance(0, transport.ActionHeight(), transport.LastHeight())
+				heights := []uint64{transport.ActionHeight(), transport.LastHeight()}
+				f.Advance(0, heights...)
 				transport.AssertCanonicalTransaction(t, true)
 				included = true
+				if batch {
+					batchStage = 2
+				}
 				if action == "buy" {
 					filled = 0
 				}
@@ -285,7 +315,9 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			}
 			f.AssertNoOrderApprovalLogs(t)
 			var projection map[string]any
-			if action == "buy" {
+			if batch {
+				projection = executedBatchMarketProjection(t, f, transport, web.URL, inputs, batchStage)
+			} else if action == "buy" {
 				projection = executedMarketProjection(t, f, web.URL, inputs, filled)
 			} else {
 				projection = executedOwnerMarketProjection(t, f, transport, web.URL, inputs, included)
@@ -299,7 +331,8 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			hashes := []string{inputs[0].Order.Hash().Hex(), inputs[1].Order.Hash().Hex()}
 			request.result <- map[string]any{"phase": request.name, "hashes": hashes, "filled": filled,
 				"actualAcceptedBrowserInputs": true, "alreadyDerivedSourcePrefixPreserved": true,
-				"transaction": transport.TransactionHash().Hex(), "actorNonce": transport.ActorNonce(), "actor": transport.Actor().Hex(), "ownerModel": projection, "included": included}
+				"transaction": transport.TransactionHash().Hex(), "actorNonce": transport.ActorNonce(), "actor": transport.Actor().Hex(), "ownerModel": projection, "included": included,
+				"batchStage": batchStage, "sellerNonce": transport.BatchSellerNonce(), "cancellation": transport.BatchCancellationHash().Hex()}
 		case err := <-finished:
 			t.Log(strings.TrimSpace(stdout.raw.String()))
 			if err != nil {

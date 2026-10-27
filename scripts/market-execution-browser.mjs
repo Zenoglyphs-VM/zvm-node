@@ -21,7 +21,9 @@ assert.equal(base.protocol, 'http:')
 assert.equal(base.hostname, '127.0.0.1')
 assert.ok(base.port && /^[a-f0-9]{64}$/.test(fixture.token))
 assert.ok(['nft', 'karum'].includes(fixture.app) && ['single', 'bulk'].includes(fixture.kind))
-assert.ok(['buy', 'cancel', 'nonce', 'approval'].includes(fixture.action))
+assert.ok(['buy', 'cancel', 'nonce', 'approval', 'batch', 'partial-batch'].includes(fixture.action))
+const batchMode = ['batch', 'partial-batch'].includes(fixture.action)
+const partialBatch = fixture.action === 'partial-batch'
 const pins = JSON.parse(await readFile(new URL('./market-browser-pins.json', import.meta.url)))
 const git = (root, ...args) => execFileSync('git', ['--no-replace-objects', ...args], {cwd: root, encoding: 'utf8'}).trim()
 for (const app of ['nft', 'karum']) {
@@ -37,13 +39,16 @@ assert.equal(sdk.version, '2.56.8')
 const signer = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '1')
 const buyerSigner = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '2')
 assert.equal(buyerSigner.address.toLowerCase(), fixture.buyer.toLowerCase())
-const {createPublicClient, http} = requireApp('viem')
+const {createPublicClient, http, decodeEventLog, keccak256, parseAbi, stringToHex} = requireApp('viem')
 const chain = createPublicClient({transport: http(new URL('/rpc', base).href, {retryCount: 0})})
 const transactions = []
-const actorSigner = fixture.action === 'buy' ? buyerSigner : signer
+const actorSigner = fixture.action === 'buy' || batchMode ? buyerSigner : signer
 assert.equal(actorSigner.address.toLowerCase(), fixture.actor.toLowerCase())
 const targetAddress = fixture.action === 'approval' ? fixture.collection : fixture.exchange
-let fundedNonce
+let fundedNonce, fundedSellerNonce
+let releaseBuyer, heldBuyerReadyResolve
+const buyerGate = new Promise(resolve => {releaseBuyer = resolve})
+const heldBuyerReady = new Promise(resolve => {heldBuyerReadyResolve = resolve})
 assert.equal(signer.address.toLowerCase(), fixture.seller.toLowerCase())
 const executablePath = [process.env.CHROME_BIN, '/usr/bin/google-chrome', '/usr/bin/chromium'].find(p => p && existsSync(p))
 assert.ok(executablePath, 'preinstalled Chrome required; no browser download fallback')
@@ -54,7 +59,7 @@ let browser, context, page, chrome, stopPromise
 const stop = () => stopPromise ??= (async () => {if (browser) await browser.close()})()
 process.once('SIGTERM', () => {void stop()})
 
-function inject({seller, buyer, chainId, actor}) {
+function inject({seller, buyer, chainId, actor, action}) {
   const viewer = new URL(location.href).searchParams.get('__viewer') === 'buyer'
   const state = {accounts: [viewer ? buyer : seller], chain: '0x' + BigInt(chainId).toString(16)}
   const listeners = new Map()
@@ -75,7 +80,7 @@ function inject({seller, buyer, chainId, actor}) {
         return window.__executedMarketSign(params)
       }
       if (method === 'eth_sendTransaction') {
-        if (state.accounts[0].toLowerCase() !== actor.toLowerCase()) throw new Error('only the selected public fixture actor may send')
+        if (state.accounts[0].toLowerCase() !== actor.toLowerCase() && !(action === 'partial-batch' && state.accounts[0].toLowerCase() === seller.toLowerCase())) throw new Error('only the selected public fixture actors may send')
         return window.__executedMarketSend(params)
       }
       throw new Error('unsupported fixture wallet method: ' + method)
@@ -159,13 +164,28 @@ async function projection(name, filled) {
   }
 }
 
-try {
-  browser = await puppeteer.launch({executablePath, headless: true, userDataDir: profile,
-    args: ['--no-sandbox', '--disable-gpu', '--disable-background-networking', '--disable-component-update',
-      '--disable-sync', '--no-first-run', '--proxy-server=http://127.0.0.1:9', '--proxy-bypass-list=127.0.0.1;localhost']})
-  chrome = await browser.version()
-  context = await browser.createBrowserContext()
-  page = await context.newPage()
+async function batchProjection(name, stage) {
+  for (const id of [1, 2]) {
+    await navigate('/item/' + fixture.collection + '/' + id, true)
+    await until(id => document.querySelector('main h1')?.textContent.trim() === '#' + id, 'batch item page did not render', id)
+    const available = await page.evaluate(app => [...document.querySelectorAll(app === 'karum' ? 'main button[data-testid="buy"]' : 'main button')]
+      .some(button => button.checkVisibility() && (app === 'karum' || button.textContent.trim() === 'Buy now')), fixture.app)
+    assert.equal(available, stage === 0 || (partialBatch && stage === 1 && id === 2))
+    const owner = stage === 2 && (!partialBatch || id === 2) ? fixture.buyer : fixture.seller
+    assert.ok(await page.evaluate(owner => [...document.querySelectorAll('main a')].some(link =>
+      link.getAttribute('href')?.toLowerCase().includes('/account/' + owner.toLowerCase())), owner))
+    record(name + ' actual batch item ' + id + ' owner and listing')
+  }
+}
+
+async function boundedReady(promise, label) {
+  let timer
+  try {
+    await Promise.race([promise, new Promise((_, reject) => {timer = setTimeout(() => reject(new Error(label)), 12000)})])
+  } finally {clearTimeout(timer)}
+}
+
+async function preparePage(page) {
   await page.setViewport({width: 1360, height: 1000})
   await page.exposeFunction('__executedMarketMethod', method => {assert.ok(methods.length < 128); methods.push(method)})
   await page.exposeFunction('__executedMarketSign', async params => {
@@ -183,18 +203,29 @@ try {
   })
   await page.exposeFunction('__executedMarketSend', async params => {
     assert.equal(params.length, 1)
-    assert.equal(transactions.length, 0)
-    const request = params[0]
-    assert.equal(request.from.toLowerCase(), fixture.actor.toLowerCase())
+    const request = structuredClone(params[0])
+    const fromBuyer = request.from.toLowerCase() === fixture.buyer.toLowerCase()
+    assert.ok(request.from.toLowerCase() === fixture.actor.toLowerCase() ||
+      (partialBatch && request.from.toLowerCase() === fixture.seller.toLowerCase()))
     assert.equal(request.to.toLowerCase(), targetAddress.toLowerCase())
-    assert.equal(BigInt(request.value ?? '0x0'), fixture.action === 'buy' ? 250000000000000000n : 0n)
+    const value = fromBuyer && batchMode ? 500000000000000000n : fixture.action === 'buy' ? 250000000000000000n : 0n
+    assert.equal(BigInt(request.value ?? '0x0'), value)
     if (request.chainId !== undefined) assert.equal(BigInt(request.chainId), BigInt(fixture.chainId))
-    const nonce = await chain.getTransactionCount({address: actorSigner.address, blockTag: 'pending'})
-    assert.equal(nonce, fundedNonce)
-    const serializedTransaction = await actorSigner.signTransaction({type: 'eip1559', chainId: fixture.chainId,
-      nonce, to: request.to, data: request.data, value: BigInt(request.value ?? '0x0'), gas: BigInt(request.gas),
+    if (partialBatch && fromBuyer) {
+      assert.equal(transactions.length, 0)
+      heldBuyerReadyResolve()
+      await buyerGate
+      assert.equal(transactions.length, 1)
+    } else assert.equal(transactions.length, 0)
+    const account = partialBatch && !fromBuyer ? signer : actorSigner
+    const nonce = await chain.getTransactionCount({address: account.address, blockTag: 'pending'})
+    assert.equal(nonce, partialBatch && !fromBuyer ? fundedSellerNonce : fundedNonce)
+    if (request.nonce !== undefined) assert.equal(BigInt(request.nonce), BigInt(nonce))
+    const serializedTransaction = await account.signTransaction({type: 'eip1559', chainId: fixture.chainId,
+      nonce, to: request.to, data: request.data, value, gas: BigInt(request.gas),
       maxFeePerGas: BigInt(request.maxFeePerGas), maxPriorityFeePerGas: BigInt(request.maxPriorityFeePerGas)})
     const hash = await chain.sendRawTransaction({serializedTransaction})
+    assert.ok(!transactions.includes(hash))
     transactions.push(hash)
     return hash
   })
@@ -223,6 +254,16 @@ try {
   page.on('response', response => {
     if (response.status() >= 400 && failedHTTP.length < 32) failedHTTP.push({path: new URL(response.url()).pathname, status: response.status()})
   })
+}
+
+try {
+  browser = await puppeteer.launch({executablePath, headless: true, userDataDir: profile,
+    args: ['--no-sandbox', '--disable-gpu', '--disable-background-networking', '--disable-component-update',
+      '--disable-sync', '--no-first-run', '--proxy-server=http://127.0.0.1:9', '--proxy-bypass-list=127.0.0.1;localhost']})
+  chrome = await browser.version()
+  context = await browser.createBrowserContext()
+  page = await context.newPage()
+  await preparePage(page)
   await navigate(fixture.kind === 'bulk' ? '/account/' + fixture.seller : '/item/' + fixture.collection + '/1')
   await connect()
   record('actual production page and EIP-1193 connection')
@@ -264,6 +305,7 @@ try {
   record('actual typed-data prompt and HTTP submission cardinality')
   let state = await phase('bind')
   fundedNonce = state.actorNonce
+  fundedSellerNonce = state.sellerNonce
   assert.ok(Number.isSafeInteger(fundedNonce) && fundedNonce >= 3)
   assert.equal(state.actor.toLowerCase(), fixture.actor.toLowerCase())
   record('real HTTP admission binds actual inputs without changing the derived prefix')
@@ -303,6 +345,125 @@ try {
   assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
   record('restored canonical transaction recovers its exact receipt and nonce')
   await projection('restored', state.filled)
+  } else if (batchMode) {
+    const buyerBalanceBefore = await chain.getBalance({address: buyerSigner.address})
+    await navigate('/collection/' + fixture.collection, true)
+    await connect()
+    const sweepInput = 'input[aria-label="How many to sweep"]'
+    await page.waitForSelector(sweepInput, {visible: true, timeout: 12000})
+    if (fixture.app === 'karum') await until(selector => Number(document.querySelector(selector)?.max) >= 2, 'two real floor listings are unavailable', sweepInput)
+    await page.$eval(sweepInput, input => {input.value = '2'; input.dispatchEvent(new Event('input', {bubbles: true}))})
+    if (fixture.app === 'nft') await click('Sweep the floor')
+    else {
+      await click('Add 2 to cart')
+      await page.waitForSelector('[data-testid="checkout"]', {visible: true, timeout: 12000})
+      await page.click('[data-testid="checkout"]')
+    }
+    record('actual collection sweep selects two real admitted listings')
+    if (partialBatch) {
+      await boundedReady(heldBuyerReady, 'the prepared buyer request did not reach the public test wallet')
+      assert.equal(transactions.length, 0)
+      record('prepared two-input buyer request waits before signing or publication')
+      const buyerPage = page
+      page = await context.newPage()
+      await preparePage(page)
+      await navigate('/item/' + fixture.collection + '/1')
+      await connect()
+      await click(fixture.app === 'nft' ? 'Take off sale' : 'Cancel listing')
+      const pendingState = fixture.app === 'karum' ? 'ordered' : 'published'
+      await until(value => !!document.querySelector('main li[data-state="' + value + '"]'), 'independent seller cancellation is not pending', pendingState)
+      assert.equal(transactions.length, 1)
+      assert.equal(await page.$('main li[data-state="done"]'), null)
+      record('independent production seller cancellation waits for its own receipt')
+      state = await phase('cancel-ordered')
+      assert.equal(state.cancellation, transactions[0])
+      await until(() => !!document.querySelector('main li[data-state="done"]'), 'seller page did not consume its actual cancellation receipt')
+      await until(() => [...document.querySelectorAll('main button')].some(button => button.checkVisibility() && button.textContent.trim() === 'List for sale'), 'seller page did not refresh the cancelled listing')
+      state = await phase('cancel-mined')
+      assert.equal(state.batchStage, 1)
+      const cancellation = await chain.getTransactionReceipt({hash: transactions[0]})
+      assert.equal(cancellation.status, 'success')
+      assert.equal(cancellation.from.toLowerCase(), fixture.seller.toLowerCase())
+      assert.equal(await chain.getTransactionCount({address: signer.address}), fundedSellerNonce + 1)
+      await page.close()
+      page = buyerPage
+      releaseBuyer()
+      record('independent seller cancellation executes before the original buyer request is released')
+    }
+    const scope = fixture.app === 'karum' ? 'aside[aria-label="Cart"] ' : 'main '
+    const pendingState = fixture.app === 'karum' ? 'ordered' : 'published'
+    await until((scope, value) => !!document.querySelector(scope + 'li[data-state="' + value + '"]'), 'actual batch did not remain pending', scope, pendingState)
+    assert.equal(transactions.length, partialBatch ? 2 : 1)
+    assert.equal(await page.$(scope + 'li[data-state="done"]'), null)
+    record('actual batch checkout publishes its original signed request and waits for a receipt')
+    state = await phase('ordered')
+    const buyerHash = transactions.at(-1)
+    assert.equal(state.transaction, buyerHash)
+    await until(() => !!document.querySelector('[data-batch-outcome]'), 'actual batch page did not reconcile its executed receipt')
+    const outcome = await page.$eval('[data-batch-outcome]', element => element.textContent.trim())
+    assert.ok(outcome.startsWith(partialBatch ? 'Bought 1 of 2 items.' : 'Bought 2 of 2 items.'))
+    if (partialBatch) assert.ok(outcome.includes('0.25 ZNN unspent (returned or recorded as exchange credit).'))
+    else assert.ok(!outcome.includes('unspent'))
+    if (fixture.app === 'karum') {
+      await until((chainId, partial, cancelledHash) => {
+        const items = (JSON.parse(localStorage.getItem('karum.cart') ?? '{}')[String(chainId)] ?? [])
+        return items.length === (partial ? 1 : 0) && (!partial ||
+          (String(items[0].tokenId) === '1' && items[0].hash.toLowerCase() === cancelledHash.toLowerCase()))
+      }, 'checkout cleared skipped entries or retained purchased entries', fixture.chainId, partialBatch, state.hashes[0])
+    }
+    record('actual batch result counts executed fills and preserves skipped cart entries')
+    state = await phase('mined')
+    assert.equal(state.batchStage, 2)
+    const receipts = await Promise.all(transactions.map(hash => chain.getTransactionReceipt({hash})))
+    const receipt = receipts.at(-1)
+    assert.equal(receipt.status, 'success')
+    assert.equal(receipt.from.toLowerCase(), fixture.buyer.toLowerCase())
+    assert.equal(receipt.to.toLowerCase(), fixture.exchange.toLowerCase())
+    assert.ok(receipt.gasUsed > 21000n)
+    const filledAbi = parseAbi(['event OrderFilled(bytes32 indexed orderHash, address indexed maker, address indexed taker, uint8 side, address collection, uint256 tokenId, address paymentToken, uint256 price, uint256 royalty, uint256 fee)'])
+    const filledTopic = keccak256(stringToHex('OrderFilled(bytes32,address,address,uint8,address,uint256,address,uint256,uint256,uint256)'))
+    const fills = receipt.logs.filter(log => log.address.toLowerCase() === fixture.exchange.toLowerCase() && log.topics[0] === filledTopic)
+      .map(log => decodeEventLog({abi: filledAbi, data: log.data, topics: log.topics, strict: true}).args)
+    assert.equal(fills.length, partialBatch ? 1 : 2)
+    assert.deepEqual(fills.map(fill => String(fill.tokenId)).sort(), partialBatch ? ['2'] : ['1', '2'])
+    for (const fill of fills) {
+      assert.equal(fill.orderHash.toLowerCase(), state.hashes[Number(fill.tokenId) - 1].toLowerCase())
+      assert.equal(fill.maker.toLowerCase(), fixture.seller.toLowerCase())
+      assert.equal(fill.taker.toLowerCase(), fixture.buyer.toLowerCase())
+      assert.equal(fill.side, 0)
+      assert.equal(fill.price, 250000000000000000n)
+      assert.equal(fill.royalty, 0n)
+      assert.equal(fill.fee, 0n)
+    }
+    const spent = partialBatch ? 250000000000000000n : 500000000000000000n
+    const unused = 500000000000000000n - spent
+    const accounting = state.ownerModel.executed
+    assert.equal(accounting.nativeSpent, spent.toString())
+    assert.equal(accounting.nativeUnspent, unused.toString())
+    assert.equal(accounting.nativeCredit, '0')
+    assert.equal(buyerBalanceBefore - await chain.getBalance({address: buyerSigner.address}), spent + BigInt(accounting.buyerReceiptFee))
+    assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+    result.batch = {requested: 2, bought: fills.length, nativeUnused: unused.toString(), actualCanonicalBalanceRefundChecked: true,
+      actualIndependentSellerPageCancellation: partialBatch, originalBuyerRequestRetained: true}
+    record('actual batch receipt and balances prove exact fill count payment and native refund')
+    await batchProjection('filled', 2)
+    state = await phase('replacement')
+    for (const hash of transactions) await assert.rejects(chain.getTransactionReceipt({hash}))
+    assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce)
+    if (partialBatch) assert.equal(await chain.getTransactionCount({address: signer.address}), fundedSellerNonce)
+    assert.equal(await chain.getBalance({address: buyerSigner.address}), buyerBalanceBefore)
+    record('orphaned batch and cancellation lose their receipts nonces and balance effects')
+    await batchProjection('replacement', 0)
+    state = await phase('restored')
+    for (const [i, hash] of transactions.entries()) {
+      const restored = await chain.getTransactionReceipt({hash})
+      assert.equal(restored.blockHash, receipts[i].blockHash)
+      assert.equal(restored.transactionHash, receipts[i].transactionHash)
+    }
+    assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+    if (partialBatch) assert.equal(await chain.getTransactionCount({address: signer.address}), fundedSellerNonce + 1)
+    record('restored batch and cancellation recover their exact receipts and account nonces')
+    await batchProjection('restored', 2)
   } else {
   async function permissionState(expected) {
     await until((collection, value) => [...document.querySelectorAll('[data-testid="collection-permission"]')]
@@ -395,9 +556,9 @@ try {
   assert.equal(exceptions.length, 0)
   assert.deepEqual(failedHTTP, [])
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
-  assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, 1)
-  record('one transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20)
+  assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch ? 2 : 1)
+  record((partialBatch ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
+  assert.equal(result.checks.length, batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20)
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 220)

@@ -147,3 +147,43 @@ separate real-SDK/Go/Solidity time-wire lane does not turn earlier complete
 financial adapter campaigns into fresh executions. Remaining batch/refund/
 currency/royalty/ERC-1271 browser paths, independent NoM/full-daemon
 qualification and final supported-product agreement remain open.
+
+
+## Batch fills and native refunds
+
+The same opt-in production-browser lane also runs full and partial two-item
+checkouts for both applications and both single/bulk listing signatures. This
+adds eight profiles to the existing sixteen owner/buyer profiles. The four SDK
+full-width-time profiles remain separate from browser execution.
+
+A full batch sends one exact provider `buyMany` transaction. The partial profile
+holds the buyer's already prepared EIP-1193 request before signing or publication.
+An independent production seller page cancels the first listing through its own
+real signed transaction and the unmodified relayer. Once the seller page consumes
+that executed receipt, the original buyer request is released with both original
+inputs and the full 0.5 ZNN value. The exchange must buy only the second item and
+return the unused 0.25 ZNN. No cancellation, fill, refund, order row or checker
+reply is substituted by the controller.
+
+The relayer signs two successive NoM account blocks in the partial case. The
+source adapter verifies each signature, account height, previous hash, exact EVM
+bytes and acknowledged source frontier. It binds cancellation at source height
+13, then the buyer at 14, preserving prefixes through 12 and 13 respectively.
+Height 15 is quiet. The adapter's NoM authority remains synthetic.
+
+Independent hash-bound contract views, executed native balances and receipt fees
+check filled/cancelled mappings, owners, remaining amounts, direct refund, zero
+exchange credits and zero retained exchange native balance. This isolated EOA
+profile admits no operator fee; L1 receipt fees are included when present. HTTP
+orders, item listings and sales must agree. The application must display the
+actual count and unused amount; Karum must keep the skipped cart entry. Internal
+accounting receipt reads do not count as application receipt observations.
+
+The replacement branch excludes both signed actions. Both receipts and account
+nonce effects must disappear, the original balances and two listings must return,
+and restoration must recover the exact original receipts, native accounting and
+HTTP model. Original API signatures and proofs remain unchanged. Existing tests
+continue to build each pinned frontend and the official relayer once per job and
+serialize profiles. Passing these fixture profiles does not establish mixed
+currencies, nonzero royalties/fees, ERC-1271, rejecting refund receivers, the full
+market acceptance matrix or production readiness.

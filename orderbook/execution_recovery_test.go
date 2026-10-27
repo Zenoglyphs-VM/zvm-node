@@ -520,8 +520,11 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	lastHeight, replacementHeight := uint64(9), uint64(8)
 	if inputs.provider {
 		lastHeight, replacementHeight = 11, 10
-		if s.providerAction != "buy" {
+		if !executedMarketBuyerAction(s.providerAction) {
 			lastHeight, replacementHeight = 14, 13
+			if s.providerAction == "partial-batch" {
+				lastHeight = 15
+			}
 		}
 	}
 	for branch := range s.branches {
@@ -604,7 +607,7 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				for i := 0; i < 3; i++ {
 					send(s.buyer, s.cfg.Vault, 100_000_000, nil)
 				}
-				if s.provider && s.providerAction != "buy" {
+				if s.provider && !executedMarketBuyerAction(s.providerAction) {
 					for i := 0; i < 3; i++ {
 						send(s.seller, s.cfg.Vault, 100_000_000, nil)
 					}

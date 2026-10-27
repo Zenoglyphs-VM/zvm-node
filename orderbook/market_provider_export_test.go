@@ -39,6 +39,8 @@ type ExecutedMarketProviderFixture struct {
 	bound                                                                               bool
 	initialNonce                                                                        uint64
 	nonceKnown                                                                          bool
+	partial                                                                             *executedPartialBatch
+	batchBalances                                                                       *executedBatchBalances
 }
 
 func NewExecutedMarketProviderBrowserFixture(t *testing.T, kind string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
@@ -63,7 +65,7 @@ func newExecutedMarketActionBrowserFixture(t *testing.T, kind, action string) (*
 		t.Fatal(err)
 	}
 	age := 2 * time.Minute
-	if action != "buy" {
+	if !executedMarketBuyerAction(action) {
 		age = 4 * time.Minute
 	}
 	f := newExecutedMarketFixtureProfile(t, kind, uint64(time.Now().Add(-age).Unix()), znn.Address(crypto.PubkeyToAddress(buyer.PublicKey)), true, action)
@@ -90,6 +92,9 @@ func (p *ExecutedMarketProviderFixture) UseRelayer(t *testing.T, url string) {
 func (p *ExecutedMarketProviderFixture) TransactionHash() common.Hash {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	if p.partial != nil {
+		return p.partial.legs[1].hash()
+	}
 	var tx types.Transaction
 	if tx.UnmarshalBinary(p.raw) != nil {
 		return common.Hash{}
@@ -151,6 +156,9 @@ func (s executionEth) SendRawTransaction(ctx context.Context, raw hexutil.Bytes)
 	if err != nil {
 		return common.Hash{}, err
 	}
+	if p.partial != nil {
+		return p.sendPartialBatch(ctx, raw, &tx, from)
+	}
 	p.mu.Lock()
 	initialNonce, nonceKnown := p.initialNonce, p.nonceKnown
 	p.mu.Unlock()
@@ -158,9 +166,13 @@ func (s executionEth) SendRawTransaction(ctx context.Context, raw hexutil.Bytes)
 	if err != nil {
 		return common.Hash{}, err
 	}
+	matchingCall := bytes.Equal(tx.Data(), expected)
+	if p.Action() == "batch" {
+		matchingCall = p.exactBatchCall(tx.Data())
+	}
 	if tx.Type() != types.DynamicFeeTxType || tx.ChainId().Cmp(p.f.Rollup().L2ChainIDBig()) != 0 ||
 		from != p.Actor() || !nonceKnown || tx.Nonce() != initialNonce || tx.To() == nil || *tx.To() != to ||
-		tx.Value().Cmp(value) != 0 || !bytes.Equal(tx.Data(), expected) {
+		tx.Value().Cmp(value) != 0 || !matchingCall {
 		return common.Hash{}, errors.New("provider did not sign the exact intended market action")
 	}
 	p.mu.Lock()
@@ -289,7 +301,10 @@ func (s executionEth) GetTransactionReceipt(_ context.Context, hash common.Hash)
 	s.backend.mu.Lock()
 	defer s.backend.mu.Unlock()
 	block, tx, index := s.canonicalTransaction(hash)
-	if p := s.backend.provider; p != nil && p.TransactionHash() == hash {
+	if p := s.backend.provider; p != nil && p.partial != nil {
+		p.observePartialReceipt(hash, tx != nil)
+	}
+	if p := s.backend.provider; p != nil && p.partial == nil && p.TransactionHash() == hash {
 		p.mu.Lock()
 		if tx == nil {
 			p.missingReceipts++
@@ -322,6 +337,10 @@ func (s executionEth) GetTransactionReceipt(_ context.Context, hash common.Hash)
 }
 
 func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http.Request) {
+	if p.partial != nil {
+		p.partialSourceRPC(w, r)
+		return
+	}
 	raw, err := io.ReadAll(io.LimitReader(r.Body, (64<<10)+1))
 	if err != nil || len(raw) > 64<<10 {
 		http.Error(w, "bounded source request required", 400)
@@ -425,6 +444,10 @@ func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http
 
 func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, ctx context.Context) {
 	t.Helper()
+	if p.partial != nil {
+		p.bindPartialLeg(t, ctx, 1)
+		return
+	}
 	deadline, cancel := context.WithTimeout(ctx, 12*time.Second)
 	defer cancel()
 	ticker := time.NewTicker(20 * time.Millisecond)
@@ -499,6 +522,11 @@ func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, c
 
 func (p *ExecutedMarketProviderFixture) AssertCanonicalTransaction(t *testing.T, included bool) {
 	t.Helper()
+	if p.partial != nil {
+		p.assertPartialLeg(t, 0, included)
+		p.assertPartialLeg(t, 1, included)
+		return
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if included {
@@ -528,6 +556,10 @@ func (p *ExecutedMarketProviderFixture) AssertCanonicalTransaction(t *testing.T,
 
 func (p *ExecutedMarketProviderFixture) AssertCompleted(t *testing.T) {
 	t.Helper()
+	if p.partial != nil {
+		p.assertPartialCompleted(t)
+		return
+	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.submissions != 1 || p.publications != 1 || p.estimates < 1 || p.missingReceipts < 1 || p.executedReceipts < 1 || p.unexpected != 0 || !p.bound {
@@ -536,6 +568,9 @@ func (p *ExecutedMarketProviderFixture) AssertCompleted(t *testing.T) {
 }
 
 func (p *ExecutedMarketProviderFixture) Evidence() map[string]any {
+	if p.partial != nil {
+		return p.partialEvidence()
+	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return map[string]any{"action": p.Action(), "actor": p.Actor().Hex(), "signedSubmissions": p.submissions, "verifiedNoMPublications": p.publications, "statefulGasEstimates": p.estimates,
@@ -548,19 +583,24 @@ func (p *ExecutedMarketProviderFixture) Evidence() map[string]any {
 
 func (p *ExecutedMarketProviderFixture) Action() string { return p.f.r.scenario.providerAction }
 func (p *ExecutedMarketProviderFixture) Actor() common.Address {
-	if p.Action() == "buy" {
+	if executedMarketBuyerAction(p.Action()) || p.Action() == "partial-batch" {
 		return p.f.Buyer()
 	}
 	return p.f.Seller()
 }
 func (p *ExecutedMarketProviderFixture) FundingHeight() uint64 {
-	if p.Action() == "buy" {
+	if executedMarketBuyerAction(p.Action()) {
 		return 9
 	}
 	return 12
 }
 func (p *ExecutedMarketProviderFixture) ActionHeight() uint64 { return p.FundingHeight() + 1 }
-func (p *ExecutedMarketProviderFixture) LastHeight() uint64   { return p.ActionHeight() + 1 }
+func (p *ExecutedMarketProviderFixture) LastHeight() uint64 {
+	if p.Action() == "partial-batch" {
+		return p.ActionHeight() + 2
+	}
+	return p.ActionHeight() + 1
+}
 func (p *ExecutedMarketProviderFixture) expectedActionCall() ([]byte, common.Address, *big.Int, error) {
 	artifact, method, to, value := "ZVMExchange", "buy", p.f.Exchange(), new(big.Int)
 	var args []any
@@ -568,6 +608,10 @@ func (p *ExecutedMarketProviderFixture) expectedActionCall() ([]byte, common.Add
 	case "buy":
 		args = []any{p.f.r.scenario.inputs[0].ABI()}
 		value = p.f.r.scenario.inputs[0].Order.Price.Big()
+	case "batch":
+		method = "buyMany"
+		args = []any{[]ABIInput{p.f.r.scenario.inputs[0].ABI(), p.f.r.scenario.inputs[1].ABI()}}
+		value.Add(p.f.r.scenario.inputs[0].Order.Price.Big(), p.f.r.scenario.inputs[1].Order.Price.Big())
 	case "cancel":
 		method = "cancelOrders"
 		args = []any{ABIOrders([]*Order{&p.f.r.scenario.inputs[0].Order})}
@@ -595,13 +639,22 @@ func expectedExecutedMarketState(s *executionScenario, branch int, height uint64
 		return status, code, filled
 	}
 	actionHeight := uint64(10)
-	if s.providerAction != "buy" {
+	if !executedMarketBuyerAction(s.providerAction) {
 		actionHeight = 13
 	}
 	if branch != 0 || height < actionHeight {
 		return status, code, filled
 	}
 	switch s.providerAction {
+	case "batch":
+		return StatusFilled, CodeFilled, 1
+	case "partial-batch":
+		if index == 0 {
+			return StatusCancelled, CodeCancelled, 0
+		}
+		if height >= 14 {
+			return StatusFilled, CodeFilled, 1
+		}
 	case "buy":
 		if index == 0 {
 			return StatusFilled, CodeFilled, 1
@@ -617,3 +670,6 @@ func expectedExecutedMarketState(s *executionScenario, branch int, height uint64
 	}
 	return status, code, filled
 }
+
+// A full batch has one buyer transaction; the partial race also funds a seller cancellation.
+func executedMarketBuyerAction(action string) bool { return action == "buy" || action == "batch" }
