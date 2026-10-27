@@ -276,8 +276,15 @@ try {
   context = await browser.createBrowserContext()
   page = await context.newPage()
   await preparePage(page)
-  await navigate(fixture.kind === 'bulk' ? '/account/' + fixture.seller : '/item/' + fixture.collection + '/1')
+  await navigate('/account/' + fixture.seller)
   await connect()
+  await until(() => {
+    const credit = document.querySelector('[data-testid="exchange-credits"]')
+    const withdraw = credit?.querySelector('[data-testid="withdraw-exchange-credit"]')
+    return credit?.getAttribute('data-credit-amount') === '0' && withdraw?.disabled === true
+  }, 'actual zero exchange credit and disabled withdrawal did not become visible')
+  record('actual zero exchange credit is read and cannot open a withdrawal request')
+  if (fixture.kind === 'single') {await navigate('/item/' + fixture.collection + '/1'); await connect()}
   record('actual production page and EIP-1193 connection')
   if (fixture.kind === 'single') {
     for (const id of [1, 2]) {
@@ -579,7 +586,7 @@ try {
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
   assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch ? 2 : 1)
   record((partialBatch ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20)
+  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20))
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 220)

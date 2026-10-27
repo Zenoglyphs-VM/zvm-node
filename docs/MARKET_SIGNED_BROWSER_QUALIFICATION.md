@@ -187,3 +187,21 @@ continue to build each pinned frontend and the official relayer once per job and
 serialize profiles. Passing these fixture profiles does not establish mixed
 currencies, nonzero royalties/fees, ERC-1271, rejecting refund receivers, the full
 market acceptance matrix or production readiness.
+
+
+## Credit interface read regression
+
+The retained 24 serialized page/provider/relayer profiles now begin on the real
+seller account page. Each profile waits for the new exchange-credit component
+to read an exact zero balance from the executed fixture RPC and verifies that
+its withdrawal action is disabled. One additional named assertion per profile
+brings the retained matrix to 520 named checks. All original signing, admission,
+receipt, full/partial native refund, cancellation, nonce, approval and canonical
+replacement/restoration assertions remain required. The original transaction
+and NoM publication counts stay unchanged.
+
+This extension exercises a zero-credit page read. Source-bound execution of a
+positive credit withdrawal with accepting/rejecting recipients and account
+contracts remains a separate required integration lane. The read-only legacy
+navigation fixture keeps its metadata-only RPC limits and is not used to
+establish EVM credit behavior. Full A08 acceptance remains incomplete.
