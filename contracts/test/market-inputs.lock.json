@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "frontends": {
+    "zvm-nft": {
+      "repository": "Zenoglyphs-VM/zvm-nft",
+      "revision": "accd8d86c7e67939f484af73a6098754a383bdf0",
+      "files": {
+        "src/core/orders.ts": {
+          "path": "src/core/orders.ts",
+          "bytes": 13606,
+          "sha256": "d610d9206960a2deecf66915a5d3c460eac4dff981898ae4eb3703d2860eeb24"
+        },
+        "package-lock.json": {
+          "path": "package-lock.json",
+          "bytes": 79211,
+          "sha256": "812001c52e7333e5298ef74585656ebbb24e8cdd3a27179362c064f35909bcb3"
+        }
+      },
+      "sdkGraphSha256": "6affb1a5992b787f48eb6992a00c6f1880839a19a861824f140e413b91c38847",
+      "runtimeDirectory": "market-runtime/zvm-nft",
+      "sourceRepository": "edgepillar/zvm-nft"
+    },
+    "zvm-karum": {
+      "repository": "Zenoglyphs-VM/zvm-karum",
+      "revision": "96fb9b02a4f1e32db3ce54438558d2a62119757a",
+      "files": {
+        "src/core/orders.ts": {
+          "path": "src/core/orders.ts",
+          "bytes": 13905,
+          "sha256": "a2d47b00bf675e729a7de36c41f499261831ce37929046ab28e15f185c062aff"
+        },
+        "package-lock.json": {
+          "path": "package-lock.json",
+          "bytes": 91065,
+          "sha256": "964e489ec0ac76a5870e890086825a0861f37b1f2d98ec593a63df1cd049f75e"
+        }
+      },
+      "sdkGraphSha256": "e267ff52818642b9f5894e33753a06f015899e7f4b86dacec205d210be69f878",
+      "runtimeDirectory": "market-runtime/zvm-karum",
+      "sourceRepository": "edgepillar/zvm-karum"
+    }
+  },
+  "core": {
+    "repository": "Zenoglyphs-VM/zvm-core",
+    "revision": "29e6d9b30be94de3772c850c7a1e9811585a8833",
+    "files": {
+      "vectors/vectors.json": {
+        "path": "vectors/vectors.json",
+        "bytes": 18070,
+        "sha256": "47c1a3dd7ae040e19bdbd5ea7811c95e0d78dafd97fc1e3294761cbe993a5c85"
+      }
+    }
+  },
+  "sdkGraphSha256ByUI": {
+    "zvm-nft": "6affb1a5992b787f48eb6992a00c6f1880839a19a861824f140e413b91c38847",
+    "zvm-karum": "e267ff52818642b9f5894e33753a06f015899e7f4b86dacec205d210be69f878"
+  },
+  "runtimeVersion": "2.56.8",
+  "maxFileBytes": 131072,
+  "maxTotalBytes": 393216,
+  "limits": "Real UI order modules and exact locked SDK closure; no browser or real wallet authority is implied."
+}

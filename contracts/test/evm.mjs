@@ -21,8 +21,8 @@ const errors = [...new Map([...compiled.values()].flatMap((c) => c.abi.filter((a
 export function errorName(bytes) {return decodeErrorResult({abi: errors, data: bytes}).errorName}
 export function random(seed) {let s = seed >>> 0; return () => {s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return s >>> 0}}
 
-export async function world() {
-  const common = createCustomCommon({chainId: 7340469}, Mainnet, {hardfork: Hardfork.Osaka}), vm = await createVM({common})
+export async function world({chainId = 7340469} = {}) {
+  const common = createCustomCommon({chainId}, Mainnet, {hardfork: Hardfork.Osaka}), vm = await createVM({common})
   const actors = [...Array.from({length: 8}, (_, i) => getAddress('0x' + (0x10000n + BigInt(i)).toString(16).padStart(40, '0'))), signer.address]
   const [owner, alice, bob, carol, dan, royalty, revenue, outsider] = actors
   const address = createAddressFromString, abis = new Map(), inventory = new Set([...actors, ZERO, BURN, SYSTEM].map((a) => a.toLowerCase()))
@@ -120,7 +120,7 @@ export async function world() {
       assert.equal(sum, await read(t, 'totalSupply'), 'known ERC20 inventory equals actual supply')
     }
   }
-  return {vm, actors, owner, alice, bob, carol, dan, royalty, revenue, outsider, signer: signer.address, root, balance, mine, frame,
+  return {vm, chainId, actors, owner, alice, bob, carol, dan, royalty, revenue, outsider, signer: signer.address, root, balance, mine, frame,
     register, deploy, calldata, write, read, events, forward, token, installBridge, collection, dex, conserved,
     get now() {return now}, get number() {return number}}
 }

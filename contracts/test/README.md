@@ -40,3 +40,11 @@ keys are read. No RPC, NoM transaction, real funds or canonical transaction
 signing is used. Canonical fees/inclusion, the accepted ZVM engines and release
 bindings, browser/Go-engine integration, arbitrary economic configurations,
 custody/governance and real deployment remain separate acceptance gates.
+
+## Actual marketplace adapter lane
+
+The same process also executes pinned NFT/Karum order adapters against fresh
+Solidity. Install both `market-runtime/zvm-nft` and `market-runtime/zvm-karum`
+locks with `npm ci --ignore-scripts --prefix` before running the suite.
+See [MARKET_INTERFACES.md](MARKET_INTERFACES.md) for exact inputs, bounds,
+coverage and remaining browser/indexer qualification.

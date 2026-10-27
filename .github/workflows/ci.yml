@@ -37,9 +37,18 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-          cache-dependency-path: contracts/test/package-lock.json
+          cache-dependency-path: |
+            contracts/test/package-lock.json
+            contracts/test/market-runtime/zvm-nft/package-lock.json
+            contracts/test/market-runtime/zvm-karum/package-lock.json
       - name: Install the locked EVM test toolchain
         run: npm ci --ignore-scripts --prefix contracts/test
+      - name: Install each exact frontend SDK closure
+        run: |
+          npm ci --ignore-scripts --prefix contracts/test/market-runtime/zvm-nft
+          npm ci --ignore-scripts --prefix contracts/test/market-runtime/zvm-karum
+      - name: Acquire bounded pinned interface sources
+        run: node contracts/test/fetch-market-inputs.mjs
       - name: Acquire bounded pinned compiler inputs
         run: node contracts/test/fetch-inputs.mjs
       - name: Exercise freshly compiled contract behavior

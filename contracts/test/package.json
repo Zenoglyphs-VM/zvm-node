@@ -6,7 +6,7 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "test": "node --test --test-concurrency=1 behavior.test.mjs"
+    "test": "node --experimental-vm-modules --test --test-reporter=tap --test-concurrency=1 behavior.test.mjs"
   },
   "devDependencies": {
     "@ethereumjs/block": "10.1.3",

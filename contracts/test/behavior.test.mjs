@@ -5,6 +5,7 @@ import {artifacts, INITIAL, MAX, world, ZERO} from './evm.mjs'
 import './bridge-fees.mjs'
 import './collection-exchange.mjs'
 import './farm-strategy.mjs'
+import './market-interfaces.mjs'
 
 test('fresh Solidity 0.8.30 compilation matches all 79 original exports with metadata retained', (t) => {
   assert.equal(verifyExports(), 79)
