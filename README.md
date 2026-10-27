@@ -37,3 +37,10 @@ submodule here.
 
 MIT licence; GPL-3.0 files are listed in [NOTICE.md](NOTICE.md). The full
 guide, with how it works and why: [docs/GUIDE.md](docs/GUIDE.md).
+
+## Upstream predeploy source reconstruction
+
+See [the locked upstream build guide](contracts/UPSTREAM_PREDEPLOY_BUILD.md)
+for offline compiler/source reconstruction of eight embedded predeploys.
+Complete runtime matches and declared immutable templates are reported separately.
+Constructor, genesis and signed release acceptance retain their own gates.

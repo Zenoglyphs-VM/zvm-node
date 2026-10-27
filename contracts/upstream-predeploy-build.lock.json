@@ -1,0 +1,1090 @@
+{
+  "schema": 1,
+  "kind": "upstream-predeploy-source-reconstruction",
+  "compilerRepository": "argotorg/solc-bin",
+  "compilerCommit": "c04c6cdc827bbdcc7bd65689fa76b63a238b223f",
+  "dependencySourceLock": {
+    "repository": "eth-infinitism/account-abstraction",
+    "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+    "path": "yarn.lock",
+    "blob": "66e2482fb1d7c4e7ab9679d3d2ff87c18a5ce893",
+    "sha256": "d708ccb4f8db5fa16b584fec5e0e0868876d2b7aed74e905b58401e503c9ac30"
+  },
+  "groups": [
+    {
+      "name": "multicall",
+      "compiler": {
+        "version": "0.8.12+commit.f00d7308.Emscripten.clang",
+        "bytes": 8396944,
+        "sha256": "c2c4738c96ad329cbb9baea615ed50ffb5a53d93fed8e00785e47242581d3c60",
+        "arguments": 3,
+        "reset": true
+      },
+      "compilerSource": {
+        "path": "bin/soljson-v0.8.12+commit.f00d7308.js",
+        "blob": "a69b92919ed694b85a8613b99bf0a95990f2f4d6"
+      },
+      "language": "Solidity",
+      "settings": {
+        "optimizer": {
+          "enabled": true,
+          "runs": 10000000
+        },
+        "evmVersion": "london",
+        "viaIR": false,
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode",
+              "evm.deployedBytecode"
+            ]
+          }
+        }
+      },
+      "inputSha256": "5fab309f3e930530fe78e5dac0b65986a7515c35fab5b19fe37e281abe5cd9a2",
+      "outputContractsSha256": "81df9379158db4f14d836c150b15768f3fc0e54318b44613572c1a73d65fdeb8",
+      "sources": [
+        {
+          "unit": "Multicall3.sol",
+          "bytes": 9610,
+          "sha256": "2054218939d3fa0f52f8ce1a33658d570a550671f63197356ee5744f7e188b1e",
+          "origin": {
+            "kind": "git",
+            "repository": "mds1/multicall3",
+            "commit": "b667d67ecfa5361a81e8f110234ce242613b0012",
+            "path": "src/Multicall3.sol",
+            "blob": "7582ea960ca347a151b3ad3af067fa7b09ed3b78"
+          },
+          "equivalentOrigins": []
+        }
+      ],
+      "targets": [
+        {
+          "name": "Multicall3",
+          "unit": "Multicall3.sol",
+          "contract": "Multicall3",
+          "address": "0xca11bde05977b3631167028862be2a173976ca11",
+          "coreRuntime": "l2/predeploys/Multicall3.hex",
+          "coreFileSha256": "0fb6a9dbcc4e17098c35d4b821bfc8cc404ab2dbd195d75bee6ce914979ddbfd",
+          "creationBytes": 3840,
+          "creationSha256": "41f4c4606c13455caa606658c42beb060f3fee3a3ccbb2f18ff242f5dcd13ab6",
+          "runtimeTemplateBytes": 3808,
+          "runtimeTemplateSha256": "2756d7c52baee85cacb504f6ee1df7aad6809ac8d94a4a111d76991f90d36d6e",
+          "runtimeSha256": "2756d7c52baee85cacb504f6ee1df7aad6809ac8d94a4a111d76991f90d36d6e",
+          "abiSha256": "2407bc7c0820a63c0b5221e3344b86d28de2f2166b78a098361cab65d5506c4e",
+          "metadataSha256": "642979b4496bfd21868a5fb59dc4511854824e665f776615d912be3493d96696",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8",
+          "immutableReferences": {},
+          "immutableWords": {},
+          "historicalContext": null
+        }
+      ]
+    },
+    {
+      "name": "op",
+      "compiler": {
+        "version": "0.8.15+commit.e14f2714.Emscripten.clang",
+        "bytes": 8479007,
+        "sha256": "71135e459d691767ce3453bab4564ef4a640dd50182da36517cbc1f96c1d4c7c",
+        "arguments": 3,
+        "reset": true
+      },
+      "compilerSource": {
+        "path": "bin/soljson-v0.8.15+commit.e14f2714.js",
+        "blob": "0741432bb9a78db8dba9cad33b48f0253824d6b5"
+      },
+      "language": "Solidity",
+      "settings": {
+        "optimizer": {
+          "enabled": true,
+          "runs": 999999
+        },
+        "evmVersion": "london",
+        "viaIR": false,
+        "metadata": {
+          "bytecodeHash": "none"
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode",
+              "evm.deployedBytecode"
+            ]
+          }
+        }
+      },
+      "inputSha256": "80cd3d242c1a1311f53164fc36a017064a62b850547aff6db1ca731da5824ac5",
+      "outputContractsSha256": "d83322808e097fc86263fd78b22347a1c2d282b285c9b8a500348131abc91c3e",
+      "sources": [
+        {
+          "unit": "interfaces/L1/IResourceMetering.sol",
+          "bytes": 680,
+          "sha256": "33d1370dfac9bedcbe7920e413553605204498aa0fd6260c9a4e2d1426f4695c",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/interfaces/L1/IResourceMetering.sol",
+            "blob": "1c5a5174b33303149664fcea58c740c5ed00209a"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "interfaces/legacy/IAddressManager.sol",
+          "bytes": 521,
+          "sha256": "5c58f940752abb1441f1b2f58b524641ebea878d0d613de528d7c23ecd15ab39",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/interfaces/legacy/IAddressManager.sol",
+            "blob": "e925fac5847f96257bf8b5c28c9e55f0a4142513"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "interfaces/universal/IOwnable.sol",
+          "bytes": 686,
+          "sha256": "4e4a10c40db05d09b301d010134103dc194a0fe5900eaafb58c8f4f3073c7a09",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/interfaces/universal/IOwnable.sol",
+            "blob": "78a2a0632a326622276314189114b8d985cf264e"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "interfaces/universal/IProxyAdmin.sol",
+          "bytes": 1624,
+          "sha256": "3e6135cfbb9c075bddc38130c352f81a323fd7a6a92ee9a32e28a0aed50b5e4a",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/interfaces/universal/IProxyAdmin.sol",
+            "blob": "09688257b925c3359dbfb16dbf0c4ad88ab20205"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "interfaces/universal/ISemver.sol",
+          "bytes": 519,
+          "sha256": "f99418bb0e92ae42b2148222cde9332c19656a48b5077e6d226598b7b728f122",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/interfaces/universal/ISemver.sol",
+            "blob": "22a5ddebdaf180987d07338e51c8f6b9adfa339b"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/L2/L1Block.sol",
+          "bytes": 11516,
+          "sha256": "52400220db6411a37f24fc4395a0092806ecd2355c14af70e21c087ae9839f23",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/L2/L1Block.sol",
+            "blob": "393f051dbb7e2311a6b08d593866bb71da4581ff"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/L2/L2ToL1MessagePasser.sol",
+          "bytes": 4520,
+          "sha256": "8833896e407f3653b74d14cdb51fb7e76ac01fbc5abe594ab978dec03b0e9298",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/L2/L2ToL1MessagePasser.sol",
+            "blob": "682b5ac1b2ccbff06ae8fa9156c0d06c164b4c76"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/Burn.sol",
+          "bytes": 964,
+          "sha256": "80d2554db986103727f6e7e7337d86310777466b5830139743c2f484d18d0f06",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/libraries/Burn.sol",
+            "blob": "8e92a1b9f8727f12797af460db5a1037bc7835c8"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/Constants.sol",
+          "bytes": 4369,
+          "sha256": "74f36b727a234f8782e8a6b0037192dc40ec3a5b10c9e3cab28191f2b0b801ca",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/libraries/Constants.sol",
+            "blob": "33c927732c27aa045ac3a762110baf0615a2e30d"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/Encoding.sol",
+          "bytes": 13545,
+          "sha256": "d0dc53ef106a651024a1c143f3061ab20f3f6a35cb9567d4705e25bf49476a71",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/libraries/Encoding.sol",
+            "blob": "483efc5bdcf8b34d8b9d7c82519ac450a10f46e8"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/Hashing.sol",
+          "bytes": 6840,
+          "sha256": "35966dc33b1199b69260a3aaef1e910dc40aa2c147f98f4d3cc19fb2efff4518",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/libraries/Hashing.sol",
+            "blob": "782bbbe4f99601d1204503a476e75cd19730a95c"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/L1BlockErrors.sol",
+          "bytes": 395,
+          "sha256": "619dddea4e90d13b28093abe524033f635e6e624dd6a678c51ce90220bad15e0",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/libraries/L1BlockErrors.sol",
+            "blob": "93d4d09ecd4109a4dce8b99341ff9488d41e50a9"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/Storage.sol",
+          "bytes": 3471,
+          "sha256": "b090c231f8f29ce5f9764590504fea3c579ec281c744424024aa59792fe46d60",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/libraries/Storage.sol",
+            "blob": "ac46a327c801f19e09f1f0de2c7b0a7d7d575853"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/Types.sol",
+          "bytes": 4226,
+          "sha256": "100f2f7f3183837fe114f26b24c41fc8c50786d274699bd1330796fc97e93bd9",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/libraries/Types.sol",
+            "blob": "3c18c4e1bc1511614d0049777bd524c4756f582b"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/rlp/RLPWriter.sol",
+          "bytes": 5670,
+          "sha256": "a4abc51a710512f27b742fcd04c7a3a7f6e5d2ab1774bb92fd936710b808d6e4",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/libraries/rlp/RLPWriter.sol",
+            "blob": "510887ad897c114384daeeae5df5bbdd1db2dc2f"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/universal/ProxyAdminOwnedBase.sol",
+          "bytes": 5041,
+          "sha256": "3ab06c07d580ee7a1bc0f68ae3e66c05f8b86a0fb89b09043ed8fa217c462818",
+          "origin": {
+            "kind": "git",
+            "repository": "ethereum-optimism/optimism",
+            "commit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+            "path": "packages/contracts-bedrock/src/universal/ProxyAdminOwnedBase.sol",
+            "blob": "b23ce019c367aaf026175048236377599b8e59c1"
+          },
+          "equivalentOrigins": []
+        }
+      ],
+      "targets": [
+        {
+          "name": "L1Block",
+          "unit": "src/L2/L1Block.sol",
+          "contract": "L1Block",
+          "address": "0x4200000000000000000000000000000000000015",
+          "coreRuntime": "l2/predeploys/L1Block.hex",
+          "coreFileSha256": "54af054e9675459839d58bc9f30e10ec20cf1adb3026cb7799ba4d3bba369a9d",
+          "creationBytes": 3245,
+          "creationSha256": "7c810dffa4f4cb845893d36daaf4aef9ebaf85df4ad3062612f496452347604b",
+          "runtimeTemplateBytes": 3213,
+          "runtimeTemplateSha256": "d160217d2016f4a1c8b3581fc67c71ae3615a54a7573d2864de282c147ae2f6a",
+          "runtimeSha256": "d160217d2016f4a1c8b3581fc67c71ae3615a54a7573d2864de282c147ae2f6a",
+          "abiSha256": "b53e1bca37a3d73ad456145e7332275c610cfd16433bb7f7a154be7c1a436edf",
+          "metadataSha256": "21de8b5efae287b3c8d9899c366563b86abb625c6fadaa0ff1fd734ecf468b8e",
+          "storageLayoutSha256": "939b03532a86063668e57b7ea376c585fc7142b5cf14b5d604d9383ab2b3cdc5",
+          "immutableReferences": {},
+          "immutableWords": {},
+          "historicalContext": null
+        },
+        {
+          "name": "L2ToL1MessagePasser",
+          "unit": "src/L2/L2ToL1MessagePasser.sol",
+          "contract": "L2ToL1MessagePasser",
+          "address": "0x4200000000000000000000000000000000000016",
+          "coreRuntime": "l2/predeploys/L2ToL1MessagePasser.hex",
+          "coreFileSha256": "6d03889f3d77382cc8b7b1e57c7c5db007f51e2b13fa7ca661c22ee9bf06050c",
+          "creationBytes": 1769,
+          "creationSha256": "58b56b26b4fb6baf6c240f7998f2a2dc8dfac114244f2b4b400de212623a1ff4",
+          "runtimeTemplateBytes": 1737,
+          "runtimeTemplateSha256": "adcae629c180039fbe6ed6f9bced1035606e78ae12865423f692e63c2480e105",
+          "runtimeSha256": "adcae629c180039fbe6ed6f9bced1035606e78ae12865423f692e63c2480e105",
+          "abiSha256": "536d8d7fc068655c9df3e4eedb4aed47fdac660c88cdc96229ff081b779e4daa",
+          "metadataSha256": "4175619507d770936a3430897d4ec6fe2f7dd8afb3b7fe9619652e5a527b7bfb",
+          "storageLayoutSha256": "623d4a44bc2baae585956708605802c5ba1ba7b7ba8778456203b86fedf2b4c0",
+          "immutableReferences": {},
+          "immutableWords": {},
+          "historicalContext": null
+        }
+      ]
+    },
+    {
+      "name": "permit2",
+      "compiler": {
+        "version": "0.8.17+commit.8df45f5f.Emscripten.clang",
+        "bytes": 8468401,
+        "sha256": "617828e63be485c7cc2dbcbdd5a22b582b40fafaa41016ad595637b83c90656c",
+        "arguments": 3,
+        "reset": true
+      },
+      "compilerSource": {
+        "path": "bin/soljson-v0.8.17+commit.8df45f5f.js",
+        "blob": "d84b01586bf3d7c63f3faae9f25200332317c5e9"
+      },
+      "language": "Solidity",
+      "settings": {
+        "optimizer": {
+          "enabled": true,
+          "runs": 1000000
+        },
+        "evmVersion": "london",
+        "viaIR": true,
+        "metadata": {
+          "bytecodeHash": "none"
+        },
+        "libraries": {},
+        "remappings": [
+          "solmate/=lib/solmate/"
+        ],
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode",
+              "evm.deployedBytecode"
+            ]
+          }
+        }
+      },
+      "inputSha256": "0d31a21038832b86794338ed081c8cfabbf001506b2552e1372e6e8d9b25cf07",
+      "outputContractsSha256": "13b3c5008e0eeaae4e70ad1aca306144ca9a82dddb580163ab6394d493a19a7e",
+      "sources": [
+        {
+          "unit": "lib/solmate/src/tokens/ERC20.sol",
+          "bytes": 6812,
+          "sha256": "a3a7e839f42762ef24623581542a916e838f3c7c0bef647963d1fdad0f9d208a",
+          "origin": {
+            "kind": "git",
+            "repository": "transmissions11/solmate",
+            "commit": "8d910d876f51c3b2585c9109409d601f600e68e1",
+            "path": "src/tokens/ERC20.sol",
+            "blob": "965704466c0dbd8038d77a72482d82d21413625a"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "lib/solmate/src/utils/SafeTransferLib.sol",
+          "bytes": 5955,
+          "sha256": "cb02c2a5b1b1c66b8ba3d700a47b400684483d96d93606ed71d0e63c0b6100bf",
+          "origin": {
+            "kind": "git",
+            "repository": "transmissions11/solmate",
+            "commit": "8d910d876f51c3b2585c9109409d601f600e68e1",
+            "path": "src/utils/SafeTransferLib.sol",
+            "blob": "7080fd835daa220575d41e26a4a100799ab66fc5"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/AllowanceTransfer.sol",
+          "bytes": 6209,
+          "sha256": "7be95b655a59352a3007147a1b79f211fc819b9a615a92017acf7257ecb88276",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/AllowanceTransfer.sol",
+            "blob": "56c4cce0138fa0159a72a41172705e3f939ac588"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/EIP712.sol",
+          "bytes": 1926,
+          "sha256": "cbb7df63c5839a3fbec78142222886da1614a4c7fcddcd8ba5ea176f9549d859",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/EIP712.sol",
+            "blob": "971a03db287fdfa8b566669e2583851500081a32"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/Permit2.sol",
+          "bytes": 538,
+          "sha256": "a19dd81d4edafe3bba0178abfc9063886c2981b4711a4cbbf3fac19370defc9a",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/Permit2.sol",
+            "blob": "7249e40a813980c099f5a95f6fb584339b3ff50c"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/PermitErrors.sol",
+          "bytes": 454,
+          "sha256": "0919679c5bb58466d3a06d9d3297ec4946ba5d135330f10f4fb080067586afad",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/PermitErrors.sol",
+            "blob": "2c42e2d1a6ec2de1ddd5ed159693b700d03dff50"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/SignatureTransfer.sol",
+          "bytes": 6546,
+          "sha256": "234effebbe1e7ad7a3c791ea2b411f8e90993b758479817eb32c8767ea62ee8d",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/SignatureTransfer.sol",
+            "blob": "c026553aea0075e78594a78733684e8747b627d8"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/interfaces/IAllowanceTransfer.sol",
+          "bytes": 7703,
+          "sha256": "a31c712c5cc8d171818a4225c09011f9ba86b2d5edf6045ac812bab93b6bbb87",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/interfaces/IAllowanceTransfer.sol",
+            "blob": "712aa9d8b885df5d34ef3c73fdf811267d32d67b"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/interfaces/IEIP712.sol",
+          "bytes": 144,
+          "sha256": "e386407da496dbe874c10a81801c55744fb2922a51389a51c79001422e81e0cd",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/interfaces/IEIP712.sol",
+            "blob": "355c443f7a9bf436a315b8255c628366f6232814"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/interfaces/IERC1271.sol",
+          "bytes": 464,
+          "sha256": "ec69c9c80939d613cda408fd05424e0dfa7b1fd76168a1fb6593f4b26b3b3d7b",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/interfaces/IERC1271.sol",
+            "blob": "a3c1cbac7153dcf40e840d1b157cfea66dfec134"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/interfaces/ISignatureTransfer.sol",
+          "bytes": 6875,
+          "sha256": "8e7f355d7751cf96e81069c17fb97a3ec973c9391fbbb58ad3fb6e75be5cb19b",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/interfaces/ISignatureTransfer.sol",
+            "blob": "63297c3bbc32cddf4c9f570e10382f008c37f519"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/Allowance.sol",
+          "bytes": 1905,
+          "sha256": "6c7d1edc74a9dca9940fa835db09302ed1a35019d69f4188351466e9a3fff458",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/libraries/Allowance.sol",
+            "blob": "671c9724f446332caa18619f4c6363e49fd30933"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/PermitHash.sol",
+          "bytes": 5771,
+          "sha256": "23f89633dbd02d8b52a33de3a915af5af73ff25e31f88b6cf994358f802efa60",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/libraries/PermitHash.sol",
+            "blob": "32d4a83f90a4fdeb764403f327a873b2f840154e"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "src/libraries/SignatureVerification.sol",
+          "bytes": 1812,
+          "sha256": "1804b3d7b1183225419ec8ee45daf89174ff3668315d71d28111d5fcc179f8e4",
+          "origin": {
+            "kind": "git",
+            "repository": "Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "path": "src/libraries/SignatureVerification.sol",
+            "blob": "904dfcd2ff1f870d0bf9e25a9dbedb4b8b929849"
+          },
+          "equivalentOrigins": []
+        }
+      ],
+      "targets": [
+        {
+          "name": "Permit2",
+          "unit": "src/Permit2.sol",
+          "contract": "Permit2",
+          "address": "0x000000000022d473030f116ddee9f6b43ac78ba3",
+          "coreRuntime": "l2/predeploys/Permit2.hex",
+          "coreFileSha256": "977d1ac2e903b0628b330b9e73308f0553e3af495e34a40ca04f5cd3d6052716",
+          "creationBytes": 9345,
+          "creationSha256": "061c1d230d740e10d9e7ff23c3bc1f918abd20c3d017188697ba205d61c666ff",
+          "runtimeTemplateBytes": 9152,
+          "runtimeTemplateSha256": "0138d7a3a8d11b824ac3a7bf309c4f44a42f4e1ef2484451f0c3f4db6a03a298",
+          "runtimeSha256": "5b4c4aeff7672fe4493c30120610318a79c1c3129e8d0ecc7861d4867c481a3b",
+          "abiSha256": "a4eeaa141c0e97c8ce05ad3fb64f05e7b29f3767644764dae544feac67a148c4",
+          "metadataSha256": "8b2b368db39d5e57abb58b3953b192cee785f0524b2c2cb4c31a5ee2537ec672",
+          "storageLayoutSha256": "df8084e14212b262abdada2b454a6a8091661458d9406a26528fbb40d6bc92ca",
+          "immutableReferences": {
+            "1030": [
+              {
+                "length": 32,
+                "start": 6983
+              }
+            ],
+            "1032": [
+              {
+                "length": 32,
+                "start": 6945
+              }
+            ]
+          },
+          "immutableWords": {
+            "1032": "000000000000000000000000000000000000000000000000000000000000000a",
+            "1030": "3c1b4b0682de90d9bc6435f35e24487dca850cf87201701cc3d3ebacf9cbd92d"
+          },
+          "historicalContext": {
+            "chainId": 10,
+            "address": "0x000000000022d473030f116ddee9f6b43ac78ba3",
+            "domainType": "EIP712Domain(string name,uint256 chainId,address verifyingContract)",
+            "name": "Permit2"
+          }
+        }
+      ]
+    },
+    {
+      "name": "entrypoint",
+      "compiler": {
+        "version": "0.8.23+commit.f704f362.Emscripten.clang",
+        "bytes": 8656105,
+        "sha256": "9c681b165c8647867589c0a5ecdc8692637a935928a2b1bbea2ff4a1f4976985",
+        "arguments": 3,
+        "reset": true
+      },
+      "compilerSource": {
+        "path": "bin/soljson-v0.8.23+commit.f704f362.js",
+        "blob": "6601adbe572f118b69a0df07958f5015cf8300ef"
+      },
+      "language": "Solidity",
+      "settings": {
+        "optimizer": {
+          "enabled": true,
+          "runs": 1000000
+        },
+        "evmVersion": "paris",
+        "viaIR": true,
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode",
+              "evm.deployedBytecode"
+            ]
+          }
+        }
+      },
+      "inputSha256": "b9d83ce5ac5ba2d28a603886b6c2d7c5cb922125cc013c2aadc6eba65e8cacf5",
+      "outputContractsSha256": "f72a51b34f1bd40a595876ddd73168925dbed1680e0946ed51fba5eb3120ac6c",
+      "sources": [
+        {
+          "unit": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+          "bytes": 3240,
+          "sha256": "8d0bac508a25133c9ff80206f65164cef959ec084645d1e7b06050c2971ae0fc",
+          "origin": {
+            "kind": "npm",
+            "package": "@openzeppelin/contracts",
+            "version": "5.0.0",
+            "member": "package/utils/ReentrancyGuard.sol",
+            "archiveSha256": "ad26e76e016825d34887c339cf4f47fccb84ba79e42ead14c7eb5bee1fda159e",
+            "archiveBytes": 197500,
+            "integrity": "sha512-bv2sdS6LKqVVMLI5+zqnNrNU/CA+6z6CmwFXm/MzmOPBRSO5reEJN7z0Gbzvs0/bv/MZZXNklubpwy3v2+azsw=="
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+          "bytes": 911,
+          "sha256": "99348354365cbdeb90157e2903334b861a00d69faab7720ae542d911d5c70d87",
+          "origin": {
+            "kind": "npm",
+            "package": "@openzeppelin/contracts",
+            "version": "5.0.0",
+            "member": "package/utils/introspection/ERC165.sol",
+            "archiveSha256": "ad26e76e016825d34887c339cf4f47fccb84ba79e42ead14c7eb5bee1fda159e",
+            "archiveBytes": 197500,
+            "integrity": "sha512-bv2sdS6LKqVVMLI5+zqnNrNU/CA+6z6CmwFXm/MzmOPBRSO5reEJN7z0Gbzvs0/bv/MZZXNklubpwy3v2+azsw=="
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+          "bytes": 869,
+          "sha256": "07ae1ac964ab74dedada999e2dfc642031a6495469cffc0bf715daa4f1e4f904",
+          "origin": {
+            "kind": "npm",
+            "package": "@openzeppelin/contracts",
+            "version": "5.0.0",
+            "member": "package/utils/introspection/IERC165.sol",
+            "archiveSha256": "ad26e76e016825d34887c339cf4f47fccb84ba79e42ead14c7eb5bee1fda159e",
+            "archiveBytes": 197500,
+            "integrity": "sha512-bv2sdS6LKqVVMLI5+zqnNrNU/CA+6z6CmwFXm/MzmOPBRSO5reEJN7z0Gbzvs0/bv/MZZXNklubpwy3v2+azsw=="
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/core/EntryPoint.sol",
+          "bytes": 31135,
+          "sha256": "ddad73961da5bad85f0656d9c8e6e729d36a02854198765d335fb59205a55b9e",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/core/EntryPoint.sol",
+            "blob": "44501524df76c23eef6e60fda97dd9440fad01b7"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/core/Helpers.sol",
+          "bytes": 3359,
+          "sha256": "4ec549dbe1685def37cbe8699eb5376ce4466dcd0c6ffffd7c0d7e0f7a5b89a3",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/core/Helpers.sol",
+            "blob": "8579008613a5b9f73a791e3cdf388d09fd094b4f"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/core/NonceManager.sol",
+          "bytes": 1425,
+          "sha256": "fbb29dadcaaa4df16a38d5bbe642737034b2a3b8318a7d8c75b4936892b10366",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/core/NonceManager.sol",
+            "blob": "7bef62e99ddbad7d6195bcf77bf22161395ac638"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/core/SenderCreator.sol",
+          "bytes": 1232,
+          "sha256": "84b46309bf6d890c13362c9c449ff927fa72465741517fc405c8c24baae2d1a3",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/core/SenderCreator.sol",
+            "blob": "43ea80367eff0d026136260c4eb4db5dc87e0274"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/core/StakeManager.sol",
+          "bytes": 5150,
+          "sha256": "56ef93b31c8fb80d1806c69aad5d65f86951df0b145664b5c49018958239b644",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/core/StakeManager.sol",
+            "blob": "f90210b7e38f907a5ad801c84efe7678d17472cd"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/core/UserOperationLib.sol",
+          "bytes": 4997,
+          "sha256": "43faeb07191dea518fe9dd1111b775911af572427c6d6a51bfa6cc4c5b08c9aa",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/core/UserOperationLib.sol",
+            "blob": "dcf5740cc284d5eb39468455ebd4317878a16658"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/interfaces/IAccount.sol",
+          "bytes": 2604,
+          "sha256": "0c44401dd9df8d5b02d6a03170e163f2ca3434c382d41a31e022ceb789cf95ef",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/interfaces/IAccount.sol",
+            "blob": "e3b355fbc2799194cc83bba06b463e189cdbe80b"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/interfaces/IAccountExecute.sol",
+          "bytes": 710,
+          "sha256": "a96aabf8dcfa68a83325678e23200956c667a91ce448f2d63efb10ca947edc3e",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/interfaces/IAccountExecute.sol",
+            "blob": "4433c80ce3e9e83a8f7d031cd8b699c80149687b"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/interfaces/IAggregator.sol",
+          "bytes": 1871,
+          "sha256": "bc6df43d690bcaf2da8255748070e880eb7390e74ea98f6e36eb0a9f4b128ac1",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/interfaces/IAggregator.sol",
+            "blob": "070d8f27a2cef16127a4bbf7b93ceb5b81a67cde"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/interfaces/IEntryPoint.sol",
+          "bytes": 9185,
+          "sha256": "06f97dfe27d09b478a1e82855ab57485b11ea68e3804b03e879f184bbc667fb7",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/interfaces/IEntryPoint.sol",
+            "blob": "28c26f98e6cbaf0fbb2e7ff623e7d5c9cb6d2eae"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/interfaces/INonceManager.sol",
+          "bytes": 1112,
+          "sha256": "4a600598dca29462afaebf27de758c83344d9d9871a53c1cdbe448510491d0e3",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/interfaces/INonceManager.sol",
+            "blob": "2f993f6875ca974cc62364f98e260d5bfd677b79"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/interfaces/IPaymaster.sol",
+          "bytes": 3300,
+          "sha256": "14bfb45b3ade4fad4ae09a19c5270e00c75ed0d9d0bf15e0dd499371a111cd23",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/interfaces/IPaymaster.sol",
+            "blob": "9176a0b242a513c2f74c9d296c50b015ec014b3f"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/interfaces/IStakeManager.sol",
+          "bytes": 3616,
+          "sha256": "6334881d2273350b92fd4b0ecabbed9a844ef5d114832097ecd2b631010b6033",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/interfaces/IStakeManager.sol",
+            "blob": "69083e93f5af0225ac2717426c6e04b7d558eff4"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/interfaces/PackedUserOperation.sol",
+          "bytes": 1469,
+          "sha256": "40fcd99da0814312f0353417de64f70805f4cd7ec4cb4573c8b4c4d48540f562",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/interfaces/PackedUserOperation.sol",
+            "blob": "fe20de56573fe205a20f7133734b577d5255f321"
+          },
+          "equivalentOrigins": []
+        },
+        {
+          "unit": "contracts/utils/Exec.sol",
+          "bytes": 2043,
+          "sha256": "8ccaa8a5230a7e7722d25f070ab6e1ce9ada315d9649da34cce3a061c1b985cc",
+          "origin": {
+            "kind": "git",
+            "repository": "eth-infinitism/account-abstraction",
+            "commit": "7af70c8993a6f42973f520ae0752386a5032abe7",
+            "path": "contracts/utils/Exec.sol",
+            "blob": "ee8d71ac0d8b227b644b8282705814fea79782ec"
+          },
+          "equivalentOrigins": []
+        }
+      ],
+      "targets": [
+        {
+          "name": "EntryPoint_v07",
+          "unit": "contracts/core/EntryPoint.sol",
+          "contract": "EntryPoint",
+          "address": "0x0000000071727de22e5e9d8baf0edac6f37da032",
+          "coreRuntime": "l2/predeploys/EntryPoint_v07.hex",
+          "coreFileSha256": "4dcad467095cd9af58006b270475ac7591c6946bca08552f6789727097b51eae",
+          "creationBytes": 16650,
+          "creationSha256": "a227a5ba81844120bf91c337dca44002b26f51878f4a8acd9b7b3fb6a64ed054",
+          "runtimeTemplateBytes": 16035,
+          "runtimeTemplateSha256": "0f237f5057e819802badb3ade32fffe60289c2111912c5d9fc5febcd26d6b6d6",
+          "runtimeSha256": "674d73ee2acf6d72a5b32b6e05150b9ddcfcee0429a0e7914929faccbc2bf4d5",
+          "abiSha256": "ecef33ca823407d084969e2ac6e6233df52b086ab9bad0205da06e59d99e3984",
+          "metadataSha256": "3f5f02fa77b0af1bb538833438f2b033803d692d44bf9b40d9f6ff13baa4d474",
+          "storageLayoutSha256": "4c24b4dd185fbe23c85e3bb2d60b77a421d5808fd478b4e54e6bf3cadd47781a",
+          "immutableReferences": {
+            "140": [
+              {
+                "length": 32,
+                "start": 3362
+              },
+              {
+                "length": 32,
+                "start": 12875
+              }
+            ]
+          },
+          "immutableWords": {
+            "140": "000000000000000000000000efc2c1444ebcc4db75e7613d20c6a62ff67a167c"
+          },
+          "historicalContext": {
+            "parentAddress": "0x0000000071727de22e5e9d8baf0edac6f37da032",
+            "childNonce": 1,
+            "childAddress": "0xefc2c1444ebcc4db75e7613d20c6a62ff67a167c"
+          }
+        },
+        {
+          "name": "SenderCreator_v07",
+          "unit": "contracts/core/SenderCreator.sol",
+          "contract": "SenderCreator",
+          "address": "0xefc2c1444ebcc4db75e7613d20c6a62ff67a167c",
+          "coreRuntime": "l2/predeploys/SenderCreator_v07.hex",
+          "coreFileSha256": "2c945b394a11f309829ce5dad9863d98d0e583fd4537dfe2660046d0c52d8e6b",
+          "creationBytes": 479,
+          "creationSha256": "49fc85af868f93fa986e5e4ec92d5e513af82b3b46d9c3cce6456c07505345ca",
+          "runtimeTemplateBytes": 451,
+          "runtimeTemplateSha256": "46ce0a80a81a08523313640038083c3941ebb67909ec13b6ba257b0d3dc4a1db",
+          "runtimeSha256": "46ce0a80a81a08523313640038083c3941ebb67909ec13b6ba257b0d3dc4a1db",
+          "abiSha256": "783b6d73d971e6449c6a1102260bbc61250e65ff3385efa1bbd8b2bb94e06aec",
+          "metadataSha256": "c7ff2c5eaf33a1c7a5d94f71548ccd678c432714062b6452b14401e58cdf33dd",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8",
+          "immutableReferences": {},
+          "immutableWords": {},
+          "historicalContext": null
+        }
+      ]
+    },
+    {
+      "name": "factory",
+      "compiler": {
+        "version": "0.5.8+commit.23d335f2.Emscripten.clang",
+        "bytes": 7478654,
+        "sha256": "25cfdd733e9c780ab85373268fde7bfa2e4b22093af57422ca3b586c7af7cd60",
+        "arguments": 2,
+        "reset": false
+      },
+      "compilerSource": {
+        "path": "wasm/soljson-v0.5.8+commit.23d335f2.js",
+        "blob": "e7390b2b9b9e1a061ae4a00b5b5aaf676b5db2cc"
+      },
+      "language": "Yul",
+      "settings": {
+        "optimizer": {
+          "enabled": true,
+          "details": {
+            "yul": true
+          }
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "evm.bytecode.object",
+              "evm.deployedBytecode.object",
+              "evm.gasEstimates"
+            ]
+          }
+        }
+      },
+      "inputSha256": "53cb0ca822430fdf01987fed73fa733c2593e0c7fd1d8f021b1633059ae88927",
+      "outputContractsSha256": "6daecd2553b932dee90ef76fae34b2bd05ac1d2a4178fead96e5006d40ccd827",
+      "sources": [
+        {
+          "unit": "deterministic-deployment-proxy.yul",
+          "bytes": 408,
+          "sha256": "b0fcc3ec91d5df4a0ae0b4d969ab54d0e297cadb5e4ac4da3aeed53130c6d4b9",
+          "origin": {
+            "kind": "git",
+            "repository": "Arachnid/deterministic-deployment-proxy",
+            "commit": "be3c5974db5028d502537209329ff2e730ed336c",
+            "path": "source/deterministic-deployment-proxy.yul",
+            "blob": "6bd082e340b3bd5c2a25b324be73ff39f1a3f5fc"
+          },
+          "equivalentOrigins": [
+            {
+              "kind": "git",
+              "repository": "safe-fndn/safe-singleton-factory",
+              "commit": "a7be0bbaeda0846e5f328f43669a6a91e942396c",
+              "path": "source/deterministic-deployment-proxy.yul",
+              "blob": "6bd082e340b3bd5c2a25b324be73ff39f1a3f5fc"
+            }
+          ]
+        }
+      ],
+      "targets": [
+        {
+          "name": "Create2Deployer_Arachnid",
+          "unit": "deterministic-deployment-proxy.yul",
+          "contract": "Proxy",
+          "address": "0x4e59b44847b379578588920ca78fbf26c0b4956c",
+          "coreRuntime": "l2/predeploys/Create2Deployer_Arachnid.hex",
+          "coreFileSha256": "39a247af89b4f14ba4077268c3e7a7aedaf86dabb32bcbf3f8be44178953eb40",
+          "creationBytes": 83,
+          "creationSha256": "f7f1288767311cf94fd1a92f93a8f7f411f6d5293ca3e414163a7bb7f5d3d9e1",
+          "runtimeTemplateBytes": 69,
+          "runtimeTemplateSha256": "e0af82ad2e5188285db8ba0b2ae054d13f0fd4fe325c48c7f2dace48454404b9",
+          "runtimeSha256": "e0af82ad2e5188285db8ba0b2ae054d13f0fd4fe325c48c7f2dace48454404b9",
+          "abiSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "metadataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "immutableReferences": {},
+          "immutableWords": {},
+          "historicalContext": null
+        },
+        {
+          "name": "SafeSingletonFactory",
+          "unit": "deterministic-deployment-proxy.yul",
+          "contract": "Proxy",
+          "address": "0x914d7fec6aac8cd542e72bca78b30650d45643d7",
+          "coreRuntime": "l2/predeploys/SafeSingletonFactory.hex",
+          "coreFileSha256": "39a247af89b4f14ba4077268c3e7a7aedaf86dabb32bcbf3f8be44178953eb40",
+          "creationBytes": 83,
+          "creationSha256": "f7f1288767311cf94fd1a92f93a8f7f411f6d5293ca3e414163a7bb7f5d3d9e1",
+          "runtimeTemplateBytes": 69,
+          "runtimeTemplateSha256": "e0af82ad2e5188285db8ba0b2ae054d13f0fd4fe325c48c7f2dace48454404b9",
+          "runtimeSha256": "e0af82ad2e5188285db8ba0b2ae054d13f0fd4fe325c48c7f2dace48454404b9",
+          "abiSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "metadataSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "immutableReferences": {},
+          "immutableWords": {},
+          "historicalContext": null
+        }
+      ]
+    }
+  ]
+}
