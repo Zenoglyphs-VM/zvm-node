@@ -3,12 +3,12 @@
   "frontends": {
     "zvm-nft": {
       "repository": "Zenoglyphs-VM/zvm-nft",
-      "revision": "accd8d86c7e67939f484af73a6098754a383bdf0",
+      "revision": "41f9c94ea5399922c1775bca60fd14eb06f5120a",
       "files": {
         "src/core/orders.ts": {
           "path": "src/core/orders.ts",
-          "bytes": 13606,
-          "sha256": "d610d9206960a2deecf66915a5d3c460eac4dff981898ae4eb3703d2860eeb24"
+          "bytes": 13475,
+          "sha256": "87a593c6c768ad086b017f2ea69cba2178ac7e3e99e01c44c2324c87c0294393"
         },
         "package-lock.json": {
           "path": "package-lock.json",
@@ -22,12 +22,12 @@
     },
     "zvm-karum": {
       "repository": "Zenoglyphs-VM/zvm-karum",
-      "revision": "4e76645d3e6310126fdd8fc6aecbe16764b1a780",
+      "revision": "e9fd8b2077d82c5650d9773ec2961328357ab24a",
       "files": {
         "src/core/orders.ts": {
           "path": "src/core/orders.ts",
-          "bytes": 14148,
-          "sha256": "53bf7d5312a2ca9358db0bc46b2d2d3191b2b0e7d485452aec613298d933bb2d"
+          "bytes": 14017,
+          "sha256": "a33db08e83b951e02942c4a58cf1692bbbf54c8ed2f5e26769706eac3de7150f"
         },
         "package-lock.json": {
           "path": "package-lock.json",
