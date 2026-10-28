@@ -110,7 +110,7 @@ func (p *ExecutedMarketProviderFixture) PinBatchBalances(t *testing.T) {
 			t.Fatal("seller nonce differs from the actually executed funding prefix")
 		}
 		p.mu.Lock()
-		p.partial.legs[0].nonce, p.partial.legs[1].nonce = nonce, p.initialNonce
+		p.providerLegs()[0].nonce, p.providerLegs()[1].nonce = nonce, p.initialNonce
 		p.mu.Unlock()
 	}
 	p.mu.Lock()
@@ -124,7 +124,7 @@ func (p *ExecutedMarketProviderFixture) BatchSellerNonce() uint64 {
 	if p.partial == nil {
 		return 0
 	}
-	return p.partial.legs[0].nonce
+	return p.providerLegs()[0].nonce
 }
 
 func (p *ExecutedMarketProviderFixture) BatchCancellationHash() common.Hash {
@@ -133,7 +133,7 @@ func (p *ExecutedMarketProviderFixture) BatchCancellationHash() common.Hash {
 	if p.partial == nil {
 		return common.Hash{}
 	}
-	return p.partial.legs[0].hash()
+	return p.providerLegs()[0].hash()
 }
 
 func (p *ExecutedMarketProviderFixture) sendPartialBatch(ctx context.Context, raw hexutil.Bytes, tx *types.Transaction, from common.Address) (common.Hash, error) {
@@ -157,13 +157,13 @@ func (p *ExecutedMarketProviderFixture) sendPartialBatch(ctx context.Context, ra
 		}
 	}
 	p.mu.Lock()
-	leg := &p.partial.legs[index]
+	leg := &p.providerLegs()[index]
 	if !p.nonceKnown || p.batchBalances.buyer == nil || tx.Type() != types.DynamicFeeTxType ||
 		tx.ChainId().Cmp(p.f.Rollup().L2ChainIDBig()) != 0 || tx.Nonce() != leg.nonce ||
 		tx.To() == nil || *tx.To() != to || tx.Value().Cmp(value) != 0 || !matching ||
 		len(leg.raw) != 0 || p.relayer == "" || p.submissions != index ||
-		(index == 1 && !p.partial.legs[0].bound) {
-		reason := fmt.Errorf("partial-batch validation: leg=%d nonce=%d/%d submitted=%d type=%d chain=%t target=%t value=%t calldata=%t configured=%t funded=%t previous_bound=%t", index, tx.Nonce(), leg.nonce, p.submissions, tx.Type(), tx.ChainId().Cmp(p.f.Rollup().L2ChainIDBig()) == 0, tx.To() != nil && *tx.To() == to, tx.Value().Cmp(value) == 0, matching, p.relayer != "", p.nonceKnown && p.batchBalances.buyer != nil, index == 0 || p.partial.legs[0].bound)
+		(index == 1 && !p.providerLegs()[0].bound) {
+		reason := fmt.Errorf("partial-batch validation: leg=%d nonce=%d/%d submitted=%d type=%d chain=%t target=%t value=%t calldata=%t configured=%t funded=%t previous_bound=%t", index, tx.Nonce(), leg.nonce, p.submissions, tx.Type(), tx.ChainId().Cmp(p.f.Rollup().L2ChainIDBig()) == 0, tx.To() != nil && *tx.To() == to, tx.Value().Cmp(value) == 0, matching, p.relayer != "", p.nonceKnown && p.batchBalances.buyer != nil, index == 0 || p.providerLegs()[0].bound)
 		p.mu.Unlock()
 		return common.Hash{}, reason
 	}
@@ -186,11 +186,11 @@ func (p *ExecutedMarketProviderFixture) sendPartialBatch(ctx context.Context, ra
 	return hash, nil
 }
 
-func (p *ExecutedMarketProviderFixture) observePartialReceipt(hash common.Hash, included bool) {
+func (p *ExecutedMarketProviderFixture) observeProviderLegReceipt(hash common.Hash, included bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	for i := range p.partial.legs {
-		leg := &p.partial.legs[i]
+	for i := range p.providerLegs() {
+		leg := &p.providerLegs()[i]
 		if hash != (common.Hash{}) && leg.hash() == hash {
 			if included {
 				leg.mined++
@@ -208,7 +208,7 @@ func (p *ExecutedMarketProviderFixture) BindBatchCancellation(t *testing.T, ctx 
 	if p.partial == nil {
 		t.Fatal("cancellation binding requires the partial-batch profile")
 	}
-	p.bindPartialLeg(t, ctx, 0)
+	p.bindProviderLeg(t, ctx, 0)
 }
 
 func (p *ExecutedMarketProviderFixture) AssertBatchCancellation(t *testing.T) {
@@ -225,8 +225,20 @@ func (p *ExecutedMarketProviderFixture) AssertBatchCancellation(t *testing.T) {
 
 func (p *ExecutedMarketProviderFixture) assertPartialLeg(t *testing.T, index int, included bool) {
 	t.Helper()
+	actor, want := p.f.Buyer(), p.providerLegs()[index].nonce
+	if index == 0 {
+		actor = p.f.Seller()
+	}
+	if included {
+		want++
+	}
+	p.assertProviderLeg(t, index, included, actor, want)
+}
+
+func (p *ExecutedMarketProviderFixture) assertProviderLeg(t *testing.T, index int, included bool, actor common.Address, wantNonce uint64) {
+	t.Helper()
 	p.mu.Lock()
-	leg := p.partial.legs[index]
+	leg := p.providerLegs()[index]
 	raw := append([]byte(nil), leg.raw...)
 	p.mu.Unlock()
 	if included && leg.mined == 0 {
@@ -239,12 +251,7 @@ func (p *ExecutedMarketProviderFixture) assertPartialLeg(t *testing.T, index int
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	receipt, err := p.f.r.eth.TransactionReceipt(ctx, hash)
-	actor, wantNonce := p.f.Buyer(), leg.nonce
-	if index == 0 {
-		actor = p.f.Seller()
-	}
 	if included {
-		wantNonce++
 		if err != nil || receipt == nil || receipt.Status != types.ReceiptStatusSuccessful ||
 			receipt.Type != types.DynamicFeeTxType || receipt.GasUsed <= 21_000 {
 			t.Fatal("partial-batch leg has no successful executed EIP-1559 receipt")
@@ -276,7 +283,7 @@ func (p *ExecutedMarketProviderFixture) assertPartialCompleted(t *testing.T) {
 	if p.submissions != 2 || p.publications != 2 || p.estimates < 2 || p.unexpected != 0 || !p.bound {
 		t.Fatal("partial-batch provider/relayer cardinality differs")
 	}
-	for _, leg := range p.partial.legs {
+	for _, leg := range p.providerLegs() {
 		if !leg.bound || leg.published == nil || leg.missing == 0 || leg.mined == 0 {
 			t.Fatal("partial-batch per-transaction evidence is incomplete")
 		}
@@ -288,7 +295,7 @@ func (p *ExecutedMarketProviderFixture) partialEvidence() map[string]any {
 	defer p.mu.Unlock()
 	legs := []map[string]any{}
 	size := 0
-	for i, leg := range p.partial.legs {
+	for i, leg := range p.providerLegs() {
 		size += len(leg.raw)
 		legs = append(legs, map[string]any{"transaction": leg.hash().Hex(), "signedRawBytes": len(leg.raw),
 			"fundedNonce": leg.nonce, "sourceHeight": p.FundingHeight() + 1 + uint64(i),
@@ -303,7 +310,7 @@ func (p *ExecutedMarketProviderFixture) partialEvidence() map[string]any {
 		"actualRelayerSource": "5a72a223dd60d1ae4e974d420cadd85e6f9ee929", "actualNoMAccountSignatureVerified": true,
 		"fundingActorNonce": p.initialNonce, "fundingActorNoncePinnedFromExecutedState": p.nonceKnown,
 		"exactProviderRawTransactionBytesPreserved": true, "nativeBuySubstitutions": 0, "sourceBoundBeforeDerivation": p.bound,
-		"independentProductionSellerCancellation": true, "accountBlockHeightAndPreviousHashSequenceVerified": true, "legs": legs}
+		"independentProductionSellerCancellation": p.partial != nil, "actualProviderTokenApproval": p.tokenApproval != nil, "accountBlockHeightAndPreviousHashSequenceVerified": true, "legs": legs}
 }
 
 // Receipt-derived transaction fees and independent canonical balances establish
@@ -454,6 +461,9 @@ func (p *ExecutedMarketProviderFixture) AssertBatchState(t *testing.T, stage int
 	if p.partial != nil && stage >= 1 {
 		receipt := p.batchAccountingReceipt(t, p.BatchCancellationHash())
 		sellerFee = batchTransactionFee(t, receipt)
+	}
+	if p.tokenApproval != nil && (stage == 2 || p.f.r.d.Head().Height == p.ActionHeight()) {
+		buyerFee.Add(buyerFee, p.tokenApprovalGas(t))
 	}
 	wantBuyer := new(big.Int).Sub(p.batchBalances.buyer, spent)
 	wantBuyer.Sub(wantBuyer, buyerFee)

@@ -6,6 +6,8 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
   const token = fixture.tokenPayment.token, zero = '0x' + '0'.repeat(40)
   assert.equal(token.toLowerCase(), '0x4200000000000000000000000000000000000101')
   const partial = fixture.action === 'partial-batch'
+  const requiresApproval = fixture.tokenPayment.approvalRequired === true
+  const approvalAmount = BigInt(fixture.tokenPayment.approvalAmount)
   const expected = id => fixture.tokenPayment.orders[String(id)]
   const actors = {buyer: fixture.buyer, seller: fixture.seller, feeRecipient: fixture.payouts.feeRecipient, royaltyRecipient: fixture.payouts.royaltyRecipient}
   assert.equal(new Set(Object.values(actors).map(x => x.toLowerCase())).size, 4)
@@ -50,7 +52,7 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
       assert.equal(qsr.buyer, 100000000n)
       assert.equal(qsr.seller, 0n); assert.equal(qsr.feeRecipient, 0n); assert.equal(qsr.royaltyRecipient, 0n)
       const total = [1, 2].filter(id => expected(id).paymentToken.toLowerCase() === token.toLowerCase()).reduce((sum, id) => sum + BigInt(expected(id).price), 0n)
-      assert.equal(allowance, total)
+      assert.equal(allowance, requiresApproval ? 0n : total)
       const fees = parseAbi(['function feeBps() view returns (uint256)', 'function feeRecipient() view returns (address)'])
       assert.equal(await at(fixture.exchange, fees, 'feeBps', [], hash), 200n)
       assert.equal((await at(fixture.exchange, fees, 'feeRecipient', [], hash)).toLowerCase(), actors.feeRecipient.toLowerCase())
@@ -72,7 +74,8 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
     assert.equal(qsr.seller, before.qsr.seller + qsrGross - qsrRoyalty - qsrFee)
     assert.equal(qsr.feeRecipient, before.qsr.feeRecipient + qsrFee)
     assert.equal(qsr.royaltyRecipient, before.qsr.royaltyRecipient + qsrRoyalty)
-    assert.equal(allowance, before.allowance - qsrGross)
+    const granted = requiresApproval && (value.included || name === 'approval-ordered' || name === 'approval-mined')
+    assert.equal(allowance, (granted ? approvalAmount : before.allowance) - qsrGross)
     if (name === 'mined') mined = structuredClone(p)
     if (name === 'replacement') assert.deepEqual({native, qsr, allowance}, before)
     if (name === 'restored') {
@@ -97,7 +100,18 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
     const raw = await chain.request({method: 'eth_getTransactionReceipt', params: [receipt.transactionHash]})
     assert.equal(raw.blockHash, receipt.blockHash)
     const fee = BigInt(raw.gasUsed) * BigInt(raw.effectiveGasPrice) + BigInt(raw.l1Fee ?? '0x0')
-    assert.equal(fee.toString(), value.payouts.buyerReceiptFee)
+    assert.equal(fee.toString(), value.payouts.buyerPurchaseReceiptFee)
+    let approvalFee = 0n
+    if (requiresApproval) {
+      const approval = await chain.request({method: 'eth_getTransactionReceipt', params: [value.approval]})
+      assert.equal(approval.transactionHash, value.approval); assert.equal(approval.status, '0x1')
+      assert.equal(approval.from.toLowerCase(), fixture.buyer.toLowerCase())
+      assert.equal(approval.to.toLowerCase(), token.toLowerCase())
+      approvalFee = BigInt(approval.gasUsed) * BigInt(approval.effectiveGasPrice) + BigInt(approval.l1Fee ?? '0x0')
+      assert.ok(approvalFee > 0n)
+    }
+    assert.equal(approvalFee.toString(), value.payouts.buyerApprovalReceiptFee)
+    assert.equal((fee + approvalFee).toString(), value.payouts.buyerReceiptFee)
     if (partial) {
       const seller = await chain.request({method: 'eth_getTransactionReceipt', params: [value.cancellation]})
       assert.equal(seller.transactionHash, value.cancellation)
@@ -116,7 +130,7 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
   const summary = passed => ({pass: !!passed && !!before && !!mined && receiptChecked && restored,
     configuration: fixture.payouts, tokenPayment: fixture.tokenPayment, canonicalMinedState: mined,
     independentHashSelectedSDKReads: true, actualBridgePredeploy: true,
-    finiteExecutedAllowanceBeforeBuying: true, missingAllowanceApprovalPathQualified: false,
-    actualAdditionalProviderTransactions: 0, additionalApprovalProviderTransactions: 0, mockedProductAPIOrRPCReplies: 0})
+    finiteExecutedAllowanceBeforeBuying: !requiresApproval, actualProviderApprovalBeforeBuying: !!passed && requiresApproval, missingAllowanceApprovalPathQualified: !!passed && requiresApproval,
+    actualAdditionalProviderTransactions: requiresApproval ? 1 : 0, additionalApprovalProviderTransactions: requiresApproval ? 1 : 0, mockedProductAPIOrRPCReplies: 0})
   return {state, receipt, summary}
 }

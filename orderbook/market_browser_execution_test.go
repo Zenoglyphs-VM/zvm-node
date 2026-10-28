@@ -77,6 +77,10 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 	t.Run("karum-single-mixed-partial-batch", func(t *testing.T) {
 		executedMarketBrowserProfile(t, roots, "karum", "single", "partial-batch", "mixed")
 	})
+	t.Run("nft-single-qsr-missing-allowance", func(t *testing.T) { executedMarketBrowserProfile(t, roots, "nft", "single", "buy", "qsr-approval") })
+	t.Run("karum-single-mixed-missing-allowance", func(t *testing.T) {
+		executedMarketBrowserProfile(t, roots, "karum", "single", "batch", "mixed-approval")
+	})
 }
 
 func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind, action string, payment ...string) {
@@ -86,7 +90,8 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 		t.Fatal("one token payment profile is required")
 	}
 	if len(payment) == 1 {
-		if kind != "single" || !((app == "nft" && action == "buy" && payment[0] == "qsr") || (app == "karum" && (action == "batch" || action == "partial-batch") && payment[0] == "mixed")) {
+		basePayment := strings.TrimSuffix(payment[0], "-approval")
+		if kind != "single" || !((app == "nft" && action == "buy" && basePayment == "qsr") || (app == "karum" && (action == "batch" || action == "partial-batch") && basePayment == "mixed")) {
 			t.Fatal("undeclared token browser profile")
 		}
 		f, transport = orderbook.NewExecutedMarketTokenBrowserFixture(t, payment[0], action)
@@ -240,6 +245,9 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	if action == "partial-batch" {
 		expectedPhases = []string{"bind", "cancel-ordered", "cancel-mined", "ordered", "mined", "replacement", "restored"}
 	}
+	if f.TokenApprovalRequired() {
+		expectedPhases = []string{"bind", "approval-ordered", "approval-mined", "ordered", "mined", "replacement", "restored"}
+	}
 	phaseIndex := 0
 	var inputs []*orderbook.Input
 	var reference map[string]any
@@ -278,6 +286,11 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				if batch {
 					transport.PinBatchBalances(t)
 				}
+			case "approval-ordered":
+				transport.BindTokenApproval(t, ctx)
+				f.Advance(0, transport.ActionHeight())
+			case "approval-mined":
+				transport.AssertTokenApproval(t)
 			case "cancel-ordered":
 				transport.BindBatchCancellation(t, ctx)
 				f.Advance(0, transport.ActionHeight())
@@ -288,7 +301,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			case "ordered":
 				transport.BindPublishedTransaction(t, ctx)
 				heights := []uint64{transport.ActionHeight(), transport.LastHeight()}
-				if action == "partial-batch" {
+				if action == "partial-batch" || f.TokenApprovalRequired() {
 					heights = []uint64{transport.ActionHeight() + 1, transport.LastHeight()}
 				}
 				f.Advance(0, heights...)
@@ -352,7 +365,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			request.result <- map[string]any{"phase": request.name, "hashes": hashes, "filled": filled,
 				"actualAcceptedBrowserInputs": true, "alreadyDerivedSourcePrefixPreserved": true,
 				"transaction": transport.TransactionHash().Hex(), "actorNonce": transport.ActorNonce(), "actor": transport.Actor().Hex(), "ownerModel": projection, "included": included,
-				"batchStage": batchStage, "sellerNonce": transport.BatchSellerNonce(), "cancellation": transport.BatchCancellationHash().Hex(), "payouts": payouts}
+				"batchStage": batchStage, "sellerNonce": transport.BatchSellerNonce(), "cancellation": transport.BatchCancellationHash().Hex(), "approval": transport.TokenApprovalHash().Hex(), "payouts": payouts}
 		case err := <-finished:
 			t.Log(strings.TrimSpace(stdout.raw.String()))
 			if err != nil {
@@ -382,6 +395,9 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			marker := "EXECUTED-MARKET-BROWSER-GO "
 			if f.TokenPaymentProfile() != "" {
 				marker = "EXECUTED-TOKEN-PAYMENT-BROWSER-GO "
+				if f.TokenApprovalRequired() {
+					marker = "EXECUTED-TOKEN-APPROVAL-BROWSER-GO "
+				}
 			}
 			t.Log(marker + string(raw))
 			return

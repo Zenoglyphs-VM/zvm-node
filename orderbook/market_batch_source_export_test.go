@@ -18,10 +18,10 @@ import (
 
 // This fixture supplies source authority only. The unmodified relayer chooses,
 // signs and publishes both actual account blocks and the predecessor chain.
-func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, r *http.Request) {
+func (p *ExecutedMarketProviderFixture) sequencedSourceRPC(w http.ResponseWriter, r *http.Request) {
 	raw, err := io.ReadAll(io.LimitReader(r.Body, (64<<10)+1))
 	if err != nil || len(raw) > 64<<10 {
-		http.Error(w, "bounded partial-batch source request required", 400)
+		http.Error(w, "bounded sequenced provider source request required", 400)
 		return
 	}
 	var call struct {
@@ -30,7 +30,7 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 		Params []json.RawMessage
 	}
 	if json.Unmarshal(raw, &call) != nil {
-		http.Error(w, "invalid partial-batch source request", 400)
+		http.Error(w, "invalid sequenced provider source request", 400)
 		return
 	}
 	if call.Method == "ledger.getFrontierMomentum" || call.Method == "ledger.getDetailedMomentumsByHeight" {
@@ -46,7 +46,7 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 	var failure error
 	p.mu.Lock()
 	copyBlock := func(index int) *znn.AccountBlock {
-		leg := &p.partial.legs[index]
+		leg := &p.providerLegs()[index]
 		if leg.published == nil {
 			return nil
 		}
@@ -62,7 +62,7 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 	case "embedded.plasma.get":
 		result = &znn.PlasmaInfo{CurrentPlasma: 10_500_000, MaxPlasma: 10_500_000, QsrAmount: znn.BigIntFromUint64(500_000_000_000)}
 	case "ledger.getFrontierAccountBlock":
-		for i := range p.partial.legs {
+		for i := range p.providerLegs() {
 			if block := copyBlock(i); block != nil {
 				result = block
 			}
@@ -73,7 +73,7 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 			failure = errors.New("exact account hash required")
 			break
 		}
-		for i := range p.partial.legs {
+		for i := range p.providerLegs() {
 			if block := copyBlock(i); block != nil && block.Hash == hash {
 				result = block
 			}
@@ -85,7 +85,7 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 			failure = errors.New("bounded account-block height range required")
 			break
 		}
-		for i := range p.partial.legs {
+		for i := range p.providerLegs() {
 			if block := copyBlock(i); block != nil && block.Height >= start && block.Height-start < count && (call.Method != "ledger.getUnconfirmedBlocksByAddress" || block.ConfirmationDetail == nil) {
 				list = append(list, block)
 			}
@@ -94,7 +94,7 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 	case "ledger.getMomentumsByHeight":
 		var start, count uint64
 		if len(call.Params) != 2 || json.Unmarshal(call.Params[0], &start) != nil || json.Unmarshal(call.Params[1], &count) != nil || count > 64 {
-			failure = errors.New("undeclared partial-batch source range")
+			failure = errors.New("undeclared sequenced provider source range")
 			break
 		}
 		list := []*znn.Momentum{}
@@ -107,22 +107,22 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 	case "ledger.publishRawTransaction":
 		index := p.publications
 		var block znn.AccountBlock
-		if index < 0 || index >= len(p.partial.legs) || len(call.Params) != 1 || json.Unmarshal(call.Params[0], &block) != nil {
-			failure = errors.New("unexpected partial-batch publication")
+		if index < 0 || index >= len(p.providerLegs()) || len(call.Params) != 1 || json.Unmarshal(call.Params[0], &block) != nil {
+			failure = errors.New("unexpected sequenced provider publication")
 			break
 		}
 		if err := block.Verify(); err != nil {
 			failure = err
 			break
 		}
-		leg := &p.partial.legs[index]
+		leg := &p.providerLegs()[index]
 		var previous znn.Hash
 		if index == 1 {
-			if p.partial.legs[0].published == nil || !p.partial.legs[0].bound {
-				failure = errors.New("the cancellation account block is not confirmed")
+			if p.providerLegs()[0].published == nil || !p.providerLegs()[0].bound {
+				failure = errors.New("the first account block is not confirmed")
 				break
 			}
-			previous = p.partial.legs[0].published.Hash
+			previous = p.providerLegs()[0].published.Hash
 		}
 		ack := p.FundingHeight() + uint64(index)
 		if branch != 0 || limit != ack || block.Address != devnet.RelayerKey(0).Address || block.ToAddress != p.f.Rollup().Inbox ||
@@ -131,18 +131,18 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 			block.TokenStandard != znn.ZeroTokenStandard || block.MomentumAcknowledged.Height != ack ||
 			block.MomentumAcknowledged.Hash != source[ack].Momentum.Hash || len(block.Data) < 2 ||
 			block.Data[0] != derive.MsgBatch || leg.published != nil || len(leg.raw) == 0 || p.submissions != index+1 {
-			failure = errors.New("relayer changed the partial-batch source ordering or account chain")
+			failure = errors.New("relayer changed the sequenced provider source ordering or account chain")
 			break
 		}
 		txs, err := derive.DecodeBatch(block.Data[1:], p.f.Rollup().MaxBatchBytes, true)
 		if err != nil || len(txs) != 1 || !bytes.Equal(txs[0], leg.raw) {
-			failure = errors.New("relayer changed the exact partial-batch provider bytes")
+			failure = errors.New("relayer changed the exact sequenced provider provider bytes")
 			break
 		}
 		leg.published = &block
 		p.publications++
 	default:
-		failure = errors.New("undeclared partial-batch source operation: " + call.Method)
+		failure = errors.New("undeclared sequenced provider source operation: " + call.Method)
 	}
 	if failure != nil {
 		p.unexpected++
@@ -157,7 +157,7 @@ func (p *ExecutedMarketProviderFixture) partialSourceRPC(w http.ResponseWriter, 
 	json.NewEncoder(w).Encode(envelope)
 }
 
-func (p *ExecutedMarketProviderFixture) bindPartialLeg(t *testing.T, ctx context.Context, index int) {
+func (p *ExecutedMarketProviderFixture) bindProviderLeg(t *testing.T, ctx context.Context, index int) {
 	t.Helper()
 	deadline, cancel := context.WithTimeout(ctx, 12*time.Second)
 	defer cancel()
@@ -166,7 +166,7 @@ func (p *ExecutedMarketProviderFixture) bindPartialLeg(t *testing.T, ctx context
 	var block *znn.AccountBlock
 	for block == nil {
 		p.mu.Lock()
-		leg := &p.partial.legs[index]
+		leg := &p.providerLegs()[index]
 		if leg.published != nil && leg.missing > 0 && !leg.bound && p.unexpected == 0 {
 			copy := *leg.published
 			block = &copy
@@ -177,7 +177,7 @@ func (p *ExecutedMarketProviderFixture) bindPartialLeg(t *testing.T, ctx context
 		}
 		select {
 		case <-deadline.Done():
-			t.Fatal("the actual partial-batch publication and pending application receipt were not observed")
+			t.Fatal("the actual sequenced provider publication and pending application receipt were not observed")
 		case <-ticker.C:
 		}
 	}
@@ -186,16 +186,19 @@ func (p *ExecutedMarketProviderFixture) bindPartialLeg(t *testing.T, ctx context
 	if index == 1 {
 		actor, nonce = p.f.Buyer(), p.ActorNonce()
 	}
+	if p.tokenApproval != nil {
+		actor, nonce = p.f.Buyer(), p.ActorNonce()+uint64(index)
+	}
 	if p.f.r.d.Head().Height != prefix {
-		t.Fatal("partial-batch source prefix is not joined")
+		t.Fatal("sequenced provider source prefix is not joined")
 	}
 	if got, err := p.f.r.eth.NonceAt(ctx, actor, nil); err != nil || got != nonce {
-		t.Fatal("pending partial-batch leg consumed a nonce")
+		t.Fatal("pending sequenced provider leg consumed a nonce")
 	}
 	p.f.r.nomMu.Lock()
 	defer p.f.r.nomMu.Unlock()
 	if p.f.r.limit != prefix || p.f.r.branch != 0 {
-		t.Fatal("partial-batch binding crossed its exact source horizon")
+		t.Fatal("sequenced provider binding crossed its exact source horizon")
 	}
 	var future [2]map[uint64]*znn.DetailedMomentum
 	for branch, old := range p.f.r.scenario.branches {
@@ -212,7 +215,7 @@ func (p *ExecutedMarketProviderFixture) bindPartialLeg(t *testing.T, ctx context
 			if height <= prefix {
 				after, err := json.Marshal(&copy)
 				if err != nil || !bytes.Equal(raw, after) {
-					t.Fatal("partial-batch binding changed an already-derived source byte")
+					t.Fatal("sequenced provider binding changed an already-derived source byte")
 				}
 			}
 			future[branch][height] = &copy
@@ -233,7 +236,7 @@ func (p *ExecutedMarketProviderFixture) bindPartialLeg(t *testing.T, ctx context
 	}
 	p.f.r.scenario.branches = future
 	p.mu.Lock()
-	p.partial.legs[index].bound = true
-	p.bound = p.partial.legs[0].bound && p.partial.legs[1].bound
+	p.providerLegs()[index].bound = true
+	p.bound = p.providerLegs()[0].bound && p.providerLegs()[1].bound
 	p.mu.Unlock()
 }

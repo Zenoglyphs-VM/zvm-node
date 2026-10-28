@@ -429,3 +429,25 @@ bridge deposit and finite allowance prefix. Missing-allowance approval, generic
 wallets, ERC-1271, independent NoM authority and full-daemon execution remain
 separate requirements. Source assertions and parser checks alone do not establish
 hosted execution success; historical CI remains bound to its original revision.
+
+### Missing-allowance approval and original purchase profiles
+
+`nft-single-qsr-missing-allowance` and
+`karum-single-mixed-missing-allowance` start with exactly zero QSR allowance.
+The actual item/cart controls prepare a finite approval for 20,000,001 base
+units and the original purchase. The first approval executes through the same
+official relayer and source derivation as the purchase. Only after the actual
+page consumes its canonical approval receipt may its second wallet request
+reach the declared public fixture signer; that request is briefly held before
+signing/publication so independent allowance, Approval-log and nonce assertions
+can run. No product API/RPC reply or gas estimate is replaced.
+
+Both original buyer transactions have consecutive actual nonces and separate
+signature-verified NoM account blocks. Independent Go and SDK oracles account
+for each receipt's gas, exact native and QSR payouts and the remaining finite
+allowance. Canonical removal must remove both receipts/nonces, allowance and
+balance effects; restoration must recover the original transaction bytes,
+hashes, receipts and account blocks. All previous profiles remain. These cases
+do not establish general wallet, ERC-1271, independent NoM/full-daemon or
+production acceptance. Current-source hosted execution must qualify the new
+profiles; historical CI retains its original revision.

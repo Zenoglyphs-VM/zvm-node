@@ -43,6 +43,7 @@ type ExecutedMarketProviderFixture struct {
 	batchBalances                                                                       *executedBatchBalances
 	credit                                                                              *executedCreditTransfer
 	tokenPayment                                                                        *executedTokenPayment
+	tokenApproval                                                                       *executedTokenApproval
 }
 
 func NewExecutedMarketProviderBrowserFixture(t *testing.T, kind string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
@@ -98,8 +99,8 @@ func (p *ExecutedMarketProviderFixture) UseRelayer(t *testing.T, url string) {
 func (p *ExecutedMarketProviderFixture) TransactionHash() common.Hash {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.partial != nil {
-		return p.partial.legs[1].hash()
+	if p.hasProviderLegs() {
+		return p.providerLegs()[1].hash()
 	}
 	var tx types.Transaction
 	if tx.UnmarshalBinary(p.raw) != nil {
@@ -145,6 +146,9 @@ func (p *ExecutedMarketProviderFixture) PinFundedActor(t *testing.T) {
 		t.Fatal("buyer funding nonce was already pinned")
 	}
 	p.initialNonce, p.nonceKnown = nonce, true
+	if p.tokenApproval != nil {
+		p.tokenApproval.legs[0].nonce, p.tokenApproval.legs[1].nonce = nonce, nonce+1
+	}
 }
 
 func (p *ExecutedMarketProviderFixture) ActorNonce() uint64 {
@@ -165,6 +169,9 @@ func (s executionEth) SendRawTransaction(ctx context.Context, raw hexutil.Bytes)
 	from, err := types.Sender(types.LatestSignerForChainID(p.f.Rollup().L2ChainIDBig()), &tx)
 	if err != nil {
 		return common.Hash{}, err
+	}
+	if p.tokenApproval != nil {
+		return p.sendTokenApprovalPurchase(ctx, raw, &tx, from)
 	}
 	if p.partial != nil {
 		return p.sendPartialBatch(ctx, raw, &tx, from)
@@ -316,10 +323,10 @@ func (s executionEth) GetTransactionReceipt(_ context.Context, hash common.Hash)
 	s.backend.mu.Lock()
 	defer s.backend.mu.Unlock()
 	block, tx, index := s.canonicalTransaction(hash)
-	if p := s.backend.provider; p != nil && p.partial != nil {
-		p.observePartialReceipt(hash, tx != nil)
+	if p := s.backend.provider; p != nil && p.hasProviderLegs() {
+		p.observeProviderLegReceipt(hash, tx != nil)
 	}
-	if p := s.backend.provider; p != nil && p.partial == nil && p.TransactionHash() == hash {
+	if p := s.backend.provider; p != nil && !p.hasProviderLegs() && p.TransactionHash() == hash {
 		p.mu.Lock()
 		if tx == nil {
 			p.missingReceipts++
@@ -357,8 +364,8 @@ func (s executionEth) GetTransactionReceipt(_ context.Context, hash common.Hash)
 }
 
 func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http.Request) {
-	if p.partial != nil {
-		p.partialSourceRPC(w, r)
+	if p.hasProviderLegs() {
+		p.sequencedSourceRPC(w, r)
 		return
 	}
 	raw, err := io.ReadAll(io.LimitReader(r.Body, (64<<10)+1))
@@ -464,8 +471,8 @@ func (p *ExecutedMarketProviderFixture) sourceRPC(w http.ResponseWriter, r *http
 
 func (p *ExecutedMarketProviderFixture) BindPublishedTransaction(t *testing.T, ctx context.Context) {
 	t.Helper()
-	if p.partial != nil {
-		p.bindPartialLeg(t, ctx, 1)
+	if p.hasProviderLegs() {
+		p.bindProviderLeg(t, ctx, 1)
 		return
 	}
 	deadline, cancel := context.WithTimeout(ctx, 12*time.Second)
@@ -546,6 +553,10 @@ func (p *ExecutedMarketProviderFixture) AssertCanonicalTransaction(t *testing.T,
 		p.assertCreditRevertedCanonical(t, included)
 		return
 	}
+	if p.tokenApproval != nil {
+		p.assertTokenApprovalCanonical(t, included)
+		return
+	}
 	if p.partial != nil {
 		p.assertPartialLeg(t, 0, included)
 		p.assertPartialLeg(t, 1, included)
@@ -580,7 +591,7 @@ func (p *ExecutedMarketProviderFixture) AssertCanonicalTransaction(t *testing.T,
 
 func (p *ExecutedMarketProviderFixture) AssertCompleted(t *testing.T) {
 	t.Helper()
-	if p.partial != nil {
+	if p.hasProviderLegs() {
 		p.assertPartialCompleted(t)
 		return
 	}
@@ -592,7 +603,7 @@ func (p *ExecutedMarketProviderFixture) AssertCompleted(t *testing.T) {
 }
 
 func (p *ExecutedMarketProviderFixture) Evidence() map[string]any {
-	if p.partial != nil {
+	if p.hasProviderLegs() {
 		return p.partialEvidence()
 	}
 	p.mu.Lock()
@@ -626,7 +637,7 @@ func (p *ExecutedMarketProviderFixture) FundingHeight() uint64 {
 }
 func (p *ExecutedMarketProviderFixture) ActionHeight() uint64 { return p.FundingHeight() + 1 }
 func (p *ExecutedMarketProviderFixture) LastHeight() uint64 {
-	if p.Action() == "partial-batch" {
+	if p.hasProviderLegs() {
 		return p.ActionHeight() + 2
 	}
 	return p.ActionHeight() + 1
@@ -691,6 +702,9 @@ func expectedExecutedMarketState(s *executionScenario, branch int, height uint64
 	actionHeight := uint64(10)
 	if !executedMarketBuyerAction(s.providerAction) {
 		actionHeight = 13
+	}
+	if tokenNeedsApproval(s.payment) {
+		actionHeight++
 	}
 	if branch != 0 || height < actionHeight {
 		return status, code, filled

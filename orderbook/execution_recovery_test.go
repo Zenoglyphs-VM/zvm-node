@@ -433,8 +433,11 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	s.providerAction = inputs.action
 	s.payment = inputs.payment
 	if s.payment != "" && (!inputs.provider || inputs.credit != nil ||
-		(s.payment != "qsr" || s.providerAction != "buy") && (s.payment != "mixed" || (s.providerAction != "batch" && s.providerAction != "partial-batch"))) {
+		(tokenPaymentBase(s.payment) != "qsr" || s.providerAction != "buy") && (tokenPaymentBase(s.payment) != "mixed" || (s.providerAction != "batch" && s.providerAction != "partial-batch"))) {
 		t.Fatal("unsupported token payment scenario")
+	}
+	if tokenNeedsApproval(s.payment) && s.providerAction == "partial-batch" {
+		t.Fatal("approval and seller-cancellation profiles remain separate")
 	}
 	s.credit = inputs.credit
 	if s.provider && s.providerAction == "" {
@@ -506,7 +509,7 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	}
 	if s.payment != "" {
 		for i, order := range s.orders {
-			if s.payment == "qsr" || i == 1 {
+			if tokenPaymentBase(s.payment) == "qsr" || i == 1 {
 				order.PaymentToken, order.Price = rollup.QSRTokenAddr, U(20_000_001)
 			}
 		}
@@ -541,6 +544,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	lastHeight, replacementHeight := uint64(9), uint64(8)
 	if inputs.provider {
 		lastHeight, replacementHeight = 11, 10
+		if tokenNeedsApproval(s.payment) {
+			lastHeight = 12
+		}
 		if !executedMarketBuyerAction(s.providerAction) {
 			lastHeight, replacementHeight = 14, 13
 			if s.providerAction == "partial-batch" {
@@ -645,7 +651,7 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 					send(s.seller, s.cfg.Inbox, 0, derive.EncodeCall(derive.Call{To: &s.token, Gas: 500_000,
 						Data: callData("ZVMCollection", "setRoyalty", s.payouts.royaltyRecipient, new(big.Int).SetUint64(s.payouts.royaltyBps))}))
 				}
-				if s.payment != "" {
+				if s.payment != "" && !tokenNeedsApproval(s.payment) {
 					allowance := new(big.Int)
 					for _, order := range s.orders {
 						if order.PaymentToken == rollup.QSRTokenAddr {

@@ -26,6 +26,8 @@ assert.ok(['buy', 'cancel', 'nonce', 'approval', 'batch', 'partial-batch'].inclu
 const batchMode = ['batch', 'partial-batch'].includes(fixture.action)
 const partialBatch = fixture.action === 'partial-batch'
 const tokenProfile = fixture.tokenPayment?.profile ?? null
+const approvalRequired = fixture.tokenPayment?.approvalRequired === true
+assert.ok(!approvalRequired || !partialBatch)
 assert.ok(tokenProfile === null || (tokenProfile === 'qsr' && fixture.app === 'nft' && fixture.kind === 'single' && fixture.action === 'buy') || (tokenProfile === 'mixed' && fixture.app === 'karum' && fixture.kind === 'single' && batchMode))
 const payoutProfile = !tokenProfile && ['buy', 'batch', 'partial-batch'].includes(fixture.action)
 assert.equal(!!fixture.payouts, payoutProfile || !!tokenProfile)
@@ -74,6 +76,9 @@ let fundedNonce, fundedSellerNonce
 let releaseBuyer, heldBuyerReadyResolve
 const buyerGate = new Promise(resolve => {releaseBuyer = resolve})
 const heldBuyerReady = new Promise(resolve => {heldBuyerReadyResolve = resolve})
+let releaseApprovalBuyer, heldApprovalBuyerReadyResolve
+const approvalBuyerGate = new Promise(resolve => {releaseApprovalBuyer = resolve})
+const heldApprovalBuyerReady = new Promise(resolve => {heldApprovalBuyerReadyResolve = resolve})
 assert.equal(signer.address.toLowerCase(), fixture.seller.toLowerCase())
 const executablePath = [process.env.CHROME_BIN, '/usr/bin/google-chrome', '/usr/bin/chromium'].find(p => p && existsSync(p))
 assert.ok(executablePath, 'preinstalled Chrome required; no browser download fallback')
@@ -166,6 +171,43 @@ async function phase(name) {
   if (payoutProfile) await checkPayoutState(name, state)
   if (tokenProfile) await tokenChecks.state(name, state)
   return state
+}
+
+async function awaitTokenApproval(scope) {
+  const pendingState = fixture.app === 'karum' ? 'ordered' : 'published'
+  await until((scope, pending) => !!document.querySelector(scope + 'li[data-state="' + pending + '"]'),
+    'the actual token approval did not remain pending', scope, pendingState)
+  assert.equal(transactions.length, 1)
+  assert.equal(await page.$$eval(scope + 'li[data-state="done"]', rows => rows.length), 0)
+  record('production purchase waits for its actual finite token approval receipt')
+  const ordered = await phase('approval-ordered')
+  assert.equal(ordered.approval, transactions[0])
+  await boundedReady(heldApprovalBuyerReady, 'the real purchase request did not follow the approval receipt')
+  await until(scope => document.querySelectorAll(scope + 'li[data-state="done"]').length === 1,
+    'the actual approval step did not consume its executed receipt', scope)
+  assert.equal(transactions.length, 1)
+  assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+  record('actual approval receipt is consumed before the second original wallet request is signed')
+  const approval = await chain.getTransactionReceipt({hash: transactions[0]})
+  assert.equal(approval.status, 'success')
+  assert.equal(approval.from.toLowerCase(), fixture.buyer.toLowerCase())
+  assert.equal(approval.to.toLowerCase(), fixture.tokenPayment.token.toLowerCase())
+  const abi = parseAbi(['event Approval(address indexed owner, address indexed spender, uint256 value)'])
+  const topic = keccak256(stringToHex('Approval(address,address,uint256)'))
+  const logs = approval.logs.filter(row => row.address.toLowerCase() === fixture.tokenPayment.token.toLowerCase() && row.topics[0] === topic)
+    .map(row => decodeEventLog({abi, data: row.data, topics: row.topics, strict: true}).args)
+  assert.equal(logs.length, 1)
+  assert.equal(logs[0].owner.toLowerCase(), fixture.buyer.toLowerCase())
+  assert.equal(logs[0].spender.toLowerCase(), fixture.exchange.toLowerCase())
+  assert.equal(logs[0].value, BigInt(fixture.tokenPayment.approvalAmount))
+  assert.equal(logs[0].value, 20000001n)
+  const mined = await phase('approval-mined')
+  assert.equal(mined.approval, transactions[0])
+  assert.equal(mined.payouts.qsrAllowance, fixture.tokenPayment.approvalAmount)
+  assert.equal(mined.payouts.qsrBalances.buyer, '100000000')
+  assert.equal(mined.payouts.nativeGross, '0'); assert.equal(mined.payouts.qsrGross, '0')
+  record('actual finite Approval event and independently read allowance precede every purchase balance effect')
+  releaseApprovalBuyer()
 }
 
 async function checkPayoutState(phaseName, state) {
@@ -322,11 +364,25 @@ async function preparePage(page) {
     const fromBuyer = request.from.toLowerCase() === fixture.buyer.toLowerCase()
     assert.ok(request.from.toLowerCase() === fixture.actor.toLowerCase() ||
       (partialBatch && request.from.toLowerCase() === fixture.seller.toLowerCase()))
-    assert.equal(request.to.toLowerCase(), targetAddress.toLowerCase())
-    const value = fromBuyer && batchMode ? totalNativePayment : fixture.action === 'buy' ? nativePayment(1) : 0n
+    const isTokenApproval = approvalRequired && transactions.length === 0
+    assert.equal(request.to.toLowerCase(), (isTokenApproval ? fixture.tokenPayment.token : targetAddress).toLowerCase())
+    const value = isTokenApproval ? 0n : fromBuyer && batchMode ? totalNativePayment : fixture.action === 'buy' ? nativePayment(1) : 0n
+    if (isTokenApproval) {
+      const exact = encodeFunctionData({abi: parseAbi(['function approve(address,uint256) returns (bool)']), functionName: 'approve',
+        args: [fixture.exchange, BigInt(fixture.tokenPayment.approvalAmount)]})
+      assert.equal(request.data.toLowerCase(), exact.toLowerCase())
+    }
     assert.equal(BigInt(request.value ?? '0x0'), value)
     if (request.chainId !== undefined) assert.equal(BigInt(request.chainId), BigInt(fixture.chainId))
-    if (partialBatch && fromBuyer) {
+    if (approvalRequired) {
+      assert.ok(fromBuyer)
+      if (!isTokenApproval) {
+        assert.equal(transactions.length, 1)
+        heldApprovalBuyerReadyResolve()
+        await approvalBuyerGate
+        assert.equal(transactions.length, 1)
+      }
+    } else if (partialBatch && fromBuyer) {
       assert.equal(transactions.length, 0)
       heldBuyerReadyResolve()
       await buyerGate
@@ -334,7 +390,7 @@ async function preparePage(page) {
     } else assert.equal(transactions.length, 0)
     const account = partialBatch && !fromBuyer ? signer : actorSigner
     const nonce = await chain.getTransactionCount({address: account.address, blockTag: 'pending'})
-    assert.equal(nonce, partialBatch && !fromBuyer ? fundedSellerNonce : fundedNonce)
+    assert.equal(nonce, partialBatch && !fromBuyer ? fundedSellerNonce : fundedNonce + (approvalRequired ? transactions.length : 0))
     if (request.nonce !== undefined) assert.equal(BigInt(request.nonce), BigInt(nonce))
     const serializedTransaction = await account.signTransaction({type: 'eip1559', chainId: fixture.chainId,
       nonce, to: request.to, data: request.data, value, gas: BigInt(request.gas),
@@ -488,35 +544,39 @@ try {
   await connect()
   if (fixture.app === 'karum') await page.click('main button[data-testid="buy"]')
   else await click('Buy now')
+  if (approvalRequired) await awaitTokenApproval('main ')
   const pendingState = fixture.app === 'karum' ? 'ordered' : 'published'
   await until(value => !!document.querySelector('main li[data-state="' + value + '"]'), 'actual transaction did not remain pending', pendingState)
-  assert.equal(transactions.length, 1)
-  assert.equal(await page.$('main li[data-state="done"]'), null)
-  record('actual buy control sends one signed transaction and waits without a receipt')
+  assert.equal(transactions.length, approvalRequired ? 2 : 1)
+  assert.equal(await page.$$eval('main li[data-state="done"]', rows => rows.length), approvalRequired ? 1 : 0)
+  record('actual buy control publishes the original purchase and waits for its own receipt')
   state = await phase('ordered')
-  assert.equal(state.transaction, transactions[0])
-  await until(() => !!document.querySelector('main li[data-state="done"]'), 'actual application did not consume the mined receipt')
+  assert.equal(state.transaction, transactions.at(-1))
+  await until(count => document.querySelectorAll('main li[data-state="done"]').length === count, 'actual application did not consume the mined purchase receipt', approvalRequired ? 2 : 1)
   record('actual application consumes the executed receipt before success')
   state = await phase('mined')
-  const receipt = await chain.getTransactionReceipt({hash: transactions[0]})
+  const purchaseReceipts = await Promise.all(transactions.map(hash => chain.getTransactionReceipt({hash})))
+  const receipt = purchaseReceipts.at(-1)
   assert.equal(receipt.status, 'success')
   assert.equal(receipt.from.toLowerCase(), fixture.actor.toLowerCase())
   assert.equal(receipt.to.toLowerCase(), fixture.exchange.toLowerCase())
   assert.ok(receipt.gasUsed > 21000n)
-  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + (approvalRequired ? 2 : 1))
   await checkPayoutReceipt(receipt, state)
   record('actual typed transaction receipt gas sender target and consumed nonce')
   await projection('filled', state.filled)
   state = await phase('replacement')
-  await assert.rejects(chain.getTransactionReceipt({hash: transactions[0]}))
+  for (const hash of transactions) await assert.rejects(chain.getTransactionReceipt({hash}))
   assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce)
   record('orphaned transaction loses its canonical receipt and releases its nonce')
   await projection('replacement', state.filled)
   state = await phase('restored')
-  const restoredReceipt = await chain.getTransactionReceipt({hash: transactions[0]})
-  assert.equal(restoredReceipt.blockHash, receipt.blockHash)
-  assert.equal(restoredReceipt.transactionHash, receipt.transactionHash)
-  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
+  for (const [index, hash] of transactions.entries()) {
+    const restoredReceipt = await chain.getTransactionReceipt({hash})
+    assert.equal(restoredReceipt.blockHash, purchaseReceipts[index].blockHash)
+    assert.equal(restoredReceipt.transactionHash, purchaseReceipts[index].transactionHash)
+  }
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + (approvalRequired ? 2 : 1))
   record('restored canonical transaction recovers its exact receipt and nonce')
   await projection('restored', state.filled)
   } else if (batchMode) {
@@ -584,9 +644,10 @@ try {
     }
     const scope = fixture.app === 'karum' ? 'aside[aria-label="Cart"] ' : 'main '
     const pendingState = fixture.app === 'karum' ? 'ordered' : 'published'
+    if (approvalRequired) await awaitTokenApproval(scope)
     await until((scope, value) => !!document.querySelector(scope + 'li[data-state="' + value + '"]'), 'actual batch did not remain pending', scope, pendingState)
-    assert.equal(transactions.length, partialBatch ? 2 : 1)
-    assert.equal(await page.$(scope + 'li[data-state="done"]'), null)
+    assert.equal(transactions.length, partialBatch || approvalRequired ? 2 : 1)
+    assert.equal(await page.$$eval(scope + 'li[data-state="done"]', rows => rows.length), approvalRequired ? 1 : 0)
     record('actual batch checkout publishes its original signed request and waits for a receipt')
     state = await phase('ordered')
     const buyerHash = transactions.at(-1)
@@ -636,7 +697,7 @@ try {
     assert.equal(accounting.nativeUnspent, unused.toString())
     assert.equal(accounting.nativeCredit, '0')
     assert.equal(buyerBalanceBefore - await chain.getBalance({address: buyerSigner.address}), spent + BigInt(accounting.buyerReceiptFee))
-    assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+    assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + (approvalRequired ? 2 : 1))
     result.batch = {requested: 2, bought: fills.length, nativeUnused: unused.toString(), actualCanonicalBalanceRefundChecked: true,
       actualIndependentSellerPageCancellation: partialBatch, originalBuyerRequestRetained: true}
     record('actual batch receipt and balances prove exact fill count payment and native refund')
@@ -654,7 +715,7 @@ try {
       assert.equal(restored.blockHash, receipts[i].blockHash)
       assert.equal(restored.transactionHash, receipts[i].transactionHash)
     }
-    assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + 1)
+    assert.equal(await chain.getTransactionCount({address: buyerSigner.address}), fundedNonce + (approvalRequired ? 2 : 1))
     if (partialBatch) assert.equal(await chain.getTransactionCount({address: signer.address}), fundedSellerNonce + 1)
     record('restored batch and cancellation recover their exact receipts and account nonces')
     await batchProjection('restored', 2)
@@ -693,7 +754,7 @@ try {
   assert.equal(await page.$('main li[data-state="done"]'), null)
   record('actual owner control sends one signed transaction and waits without a receipt')
   state = await phase('ordered')
-  assert.equal(state.transaction, transactions[0])
+  assert.equal(state.transaction, transactions.at(-1))
   await until(() => !!document.querySelector('main li[data-state="done"]'), 'actual owner application did not consume the mined receipt')
   record('actual owner application consumes the executed receipt before success')
   if (fixture.action === 'approval') await permissionState('removed')
@@ -701,27 +762,30 @@ try {
   else await until(() => ![...document.querySelectorAll('main button')].some(b => b.checkVisibility() && /^Cancel all /.test(b.textContent.trim())), 'old signed orders stayed available after the nonce receipt')
   record('actual current page refreshes its owner action after the real receipt')
   state = await phase('mined')
-  const receipt = await chain.getTransactionReceipt({hash: transactions[0]})
+  const purchaseReceipts = await Promise.all(transactions.map(hash => chain.getTransactionReceipt({hash})))
+  const receipt = purchaseReceipts.at(-1)
   assert.equal(receipt.status, 'success')
   assert.equal(receipt.from.toLowerCase(), fixture.actor.toLowerCase())
   assert.equal(receipt.to.toLowerCase(), targetAddress.toLowerCase())
   assert.ok(receipt.gasUsed > 21000n)
-  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + (approvalRequired ? 2 : 1))
   record('actual owner receipt gas sender target and consumed account nonce')
   await ownerProjection('invalidated', true)
   if (fixture.action === 'approval') await permissionPage('removed')
   state = await phase('replacement')
-  await assert.rejects(chain.getTransactionReceipt({hash: transactions[0]}))
+  for (const hash of transactions) await assert.rejects(chain.getTransactionReceipt({hash}))
   assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce)
   record('orphaned owner transaction loses its canonical receipt and releases its account nonce')
   if (fixture.action === 'approval') {await permissionState('granted'); record('live permission view restores the orphaned approval without navigation')}
   await ownerProjection('replacement', false)
   if (fixture.action === 'approval') await permissionPage('granted')
   state = await phase('restored')
-  const restoredReceipt = await chain.getTransactionReceipt({hash: transactions[0]})
-  assert.equal(restoredReceipt.blockHash, receipt.blockHash)
-  assert.equal(restoredReceipt.transactionHash, receipt.transactionHash)
-  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
+  for (const [index, hash] of transactions.entries()) {
+    const restoredReceipt = await chain.getTransactionReceipt({hash})
+    assert.equal(restoredReceipt.blockHash, purchaseReceipts[index].blockHash)
+    assert.equal(restoredReceipt.transactionHash, purchaseReceipts[index].transactionHash)
+  }
+  assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + (approvalRequired ? 2 : 1))
   record('restored owner transaction recovers its exact receipt and account nonce')
   if (fixture.action === 'approval') {await permissionState('removed'); record('live permission view reapplies restored revocation without navigation')}
   await ownerProjection('restored', true)
@@ -751,9 +815,9 @@ try {
   assert.deepEqual(failedHTTP, [])
   assert.deepEqual(providerFailures, [])
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
-  assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch ? 2 : 1)
-  record((partialBatch ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0))
+  assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch || approvalRequired ? 2 : 1)
+  record((partialBatch || approvalRequired ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
+  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0) + (approvalRequired ? 3 : 0))
   if (quoteProfile) {assert.ok(quoteAccountRefusal && quoteEdited && quoteSignedSnapshot); assert.equal(quoteHeldRequests, 2)}
   if (payoutProfile) assert.ok(payoutBaseline && payoutMined && payoutReceiptChecked && payoutReorgChecked)
   if (tokenProfile) assert.ok(tokenChecks.summary(true).pass)
@@ -766,12 +830,13 @@ try {
     message: document.querySelector('main')?.textContent.slice(-700)})).catch(() => null)
   process.exitCode = 1
 } finally {
+  releaseApprovalBuyer()
   quoteArmed = false
   if (heldQuoteRequest) {const request = heldQuoteRequest; heldQuoteRequest = null; await request.continue().catch(() => {})}
   if (context) await context.close()
   await stop()
   await rm(profile, {recursive: true, force: false})
-  console.log((tokenProfile ? 'EXECUTED-TOKEN-PAYMENT-BROWSER-QUALIFICATION ' : 'EXECUTED-MARKET-BROWSER-QUALIFICATION ') + JSON.stringify({node: process.version, chrome, pins,
+  console.log((approvalRequired ? 'EXECUTED-TOKEN-APPROVAL-BROWSER-QUALIFICATION ' : tokenProfile ? 'EXECUTED-TOKEN-PAYMENT-BROWSER-QUALIFICATION ' : 'EXECUTED-MARKET-BROWSER-QUALIFICATION ') + JSON.stringify({node: process.version, chrome, pins,
     result, SDKVersion: sdk.version, actualTypedDataSignatures: signatures.length, actualOrderPOSTs: posts.length,
     providerMethods: methods, providerFailures, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
     actualProductionPageActionsAndGoAdmission: true, actualProviderEVMTransactions: transactions.length,

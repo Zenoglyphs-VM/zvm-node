@@ -31,7 +31,9 @@ func tokenPaymentCall(signature string, args ...*big.Int) []byte {
 	}
 	return data
 }
-func (f *ExecutedMarketFixture) TokenPaymentProfile() string         { return f.r.scenario.payment }
+func (f *ExecutedMarketFixture) TokenPaymentProfile() string {
+	return tokenPaymentBase(f.r.scenario.payment)
+}
 func (f *ExecutedMarketFixture) TokenPaymentAddress() common.Address { return rollup.QSRTokenAddr }
 func (f *ExecutedMarketFixture) TokenPaymentDescription() map[string]any {
 	if f.TokenPaymentProfile() == "" {
@@ -41,14 +43,14 @@ func (f *ExecutedMarketFixture) TokenPaymentDescription() map[string]any {
 	for _, order := range f.r.scenario.orders {
 		orders[order.TokenID.Big().String()] = map[string]any{"price": order.Price.Big().String(), "paymentToken": order.PaymentToken.Hex()}
 	}
-	return map[string]any{"profile": f.TokenPaymentProfile(), "token": rollup.QSRTokenAddr.Hex(), "orders": orders}
+	return map[string]any{"profile": f.TokenPaymentProfile(), "token": rollup.QSRTokenAddr.Hex(), "orders": orders, "approvalRequired": f.TokenApprovalRequired(), "approvalAmount": f.TokenApprovalAmount().String()}
 }
 func NewExecutedMarketTokenBrowserFixture(t *testing.T, profile string, actions ...string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
 	t.Helper()
 	action := "buy"
-	if profile == "mixed" {
+	if tokenPaymentBase(profile) == "mixed" {
 		action = "batch"
-	} else if profile != "qsr" {
+	} else if tokenPaymentBase(profile) != "qsr" {
 		t.Fatal("unsupported token profile")
 	}
 	if len(actions) > 1 {
@@ -57,7 +59,7 @@ func NewExecutedMarketTokenBrowserFixture(t *testing.T, profile string, actions 
 	if len(actions) == 1 {
 		action = actions[0]
 	}
-	if (profile == "qsr" && action != "buy") || (profile == "mixed" && action != "batch" && action != "partial-batch") {
+	if (tokenPaymentBase(profile) == "qsr" && action != "buy") || (tokenPaymentBase(profile) == "mixed" && action != "batch" && action != "partial-batch") || (tokenNeedsApproval(profile) && action == "partial-batch") {
 		t.Fatal("unsupported token browser action")
 	}
 	f, p := newExecutedMarketActionPaymentBrowserFixture(t, "single", action, profile)
@@ -66,6 +68,9 @@ func NewExecutedMarketTokenBrowserFixture(t *testing.T, profile string, actions 
 	}
 	if action == "partial-batch" {
 		p.partial = &executedPartialBatch{}
+	}
+	if tokenNeedsApproval(profile) {
+		p.tokenApproval = &executedTokenApproval{}
 	}
 	return f, p
 }
@@ -115,6 +120,9 @@ func (p *ExecutedMarketProviderFixture) pinTokenPayment(t *testing.T) {
 		if input.Order.PaymentToken == rollup.QSRTokenAddr {
 			wanted.Add(wanted, input.Order.Price.Big())
 		}
+	}
+	if p.tokenApproval != nil {
+		wanted.SetInt64(0)
 	}
 	if state.allowance.Cmp(wanted) != 0 {
 		t.Fatal("finite executed QSR allowance differs from the intended orders")
@@ -171,10 +179,15 @@ func (p *ExecutedMarketProviderFixture) assertTokenPayments(t *testing.T, phase 
 	}
 	nativeProceeds := new(big.Int).Sub(new(big.Int).Sub(new(big.Int).Set(nativeGross), nativeRoyalty), nativeFee)
 	tokenProceeds := new(big.Int).Sub(new(big.Int).Sub(new(big.Int).Set(tokenGross), tokenRoyalty), tokenFee)
-	gas := new(big.Int)
+	purchaseGas, approvalGas := new(big.Int), new(big.Int)
 	if included {
-		gas = batchTransactionFee(t, p.batchAccountingReceipt(t, p.TransactionHash()))
+		purchaseGas = batchTransactionFee(t, p.batchAccountingReceipt(t, p.TransactionHash()))
 	}
+	approvalVisible := p.tokenApproval != nil && (included || phase == "approval-ordered" || phase == "approval-mined")
+	if approvalVisible {
+		approvalGas = p.tokenApprovalGas(t)
+	}
+	gas := new(big.Int).Add(purchaseGas, approvalGas)
 	sellerGas := new(big.Int)
 	if p.partial != nil && (included || phase == "cancel-ordered" || phase == "cancel-mined") {
 		sellerGas = batchTransactionFee(t, p.batchAccountingReceipt(t, p.BatchCancellationHash()))
@@ -206,13 +219,17 @@ func (p *ExecutedMarketProviderFixture) assertTokenPayments(t *testing.T, phase 
 		nativeBalances[name], tokenBalances[name] = got.String(), qsr.String()
 	}
 	allowance := p.tokenPaymentScalar(t, "allowance(address,address)", tokenPaymentAddress(p.f.Buyer()), tokenPaymentAddress(p.f.Exchange()))
-	if allowance.Cmp(new(big.Int).Sub(new(big.Int).Set(token.allowance), tokenGross)) != 0 {
+	wantAllowance := new(big.Int).Set(token.allowance)
+	if approvalVisible {
+		wantAllowance = p.f.TokenApprovalAmount()
+	}
+	if allowance.Cmp(new(big.Int).Sub(wantAllowance, tokenGross)) != 0 {
 		t.Fatal("canonical QSR allowance differs from exact transfers")
 	}
 	value := map[string]any{"pass": true, "canonicalHash": p.f.HeadHash().Hex(), "expectedFills": fills,
 		"nativeGross": nativeGross.String(), "nativeRoyalty": nativeRoyalty.String(), "nativeProtocolFee": nativeFee.String(), "nativeSellerProceeds": nativeProceeds.String(),
 		"qsrGross": tokenGross.String(), "qsrRoyalty": tokenRoyalty.String(), "qsrProtocolFee": tokenFee.String(), "qsrSellerProceeds": tokenProceeds.String(),
-		"buyerReceiptFee": gas.String(), "sellerReceiptFee": sellerGas.String(), "balances": nativeBalances, "qsrBalances": tokenBalances,
+		"buyerReceiptFee": gas.String(), "buyerPurchaseReceiptFee": purchaseGas.String(), "buyerApprovalReceiptFee": approvalGas.String(), "sellerReceiptFee": sellerGas.String(), "balances": nativeBalances, "qsrBalances": tokenBalances,
 		"qsrAllowance": allowance.String(), "qsrAllowanceBefore": token.allowance.String(), "qsrCodeHash": token.codeHash.Hex(), "qsrDecimals": 8,
 		"hashBoundContractAndBalanceReads": true, "allPayoutCreditsZero": true}
 	setup.observations = append(setup.observations, map[string]any{"phase": phase, "state": value})
@@ -222,7 +239,7 @@ func (p *ExecutedMarketProviderFixture) tokenPaymentEvidence(t *testing.T) map[s
 	t.Helper()
 	setup := p.f.r.scenario.payouts
 	expectedPhases := 5
-	if p.partial != nil {
+	if p.partial != nil || p.tokenApproval != nil {
 		expectedPhases = 7
 	}
 	if setup == nil || p.tokenPayment == nil || len(setup.observations) != expectedPhases {
@@ -230,5 +247,5 @@ func (p *ExecutedMarketProviderFixture) tokenPaymentEvidence(t *testing.T) map[s
 	}
 	return map[string]any{"pass": true, "configuration": p.f.MarketPayoutConfig(), "tokenPayment": p.f.TokenPaymentDescription(),
 		"phases": setup.observations, "distinctRecipients": true, "nativeOnly": false, "QSRPredeployMatchesExecutedGenesis": true,
-		"allowanceWasExecutedBeforeBuying": true, "missingAllowanceApprovalPathQualified": false, "directStateOrStorageInsertion": 0, "realWalletOrPublicNetwork": false}
+		"allowanceWasExecutedBeforeBuying": true, "missingAllowanceApprovalPathQualified": p.tokenApproval != nil, "allowanceWasExecutedInSourcePrefix": p.tokenApproval == nil, "directStateOrStorageInsertion": 0, "realWalletOrPublicNetwork": false}
 }
