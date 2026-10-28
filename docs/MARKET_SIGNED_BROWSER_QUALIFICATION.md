@@ -593,21 +593,31 @@ complete source-bound hosted evidence is required before acceptance.
 
 ## Request-identity navigation accounting
 
-The quiet observer uses the pinned Puppeteer request identifier and retains
-known aliases. Response, finished, failed and identified cache-served events
-complete a request once. The public cache event is documented to indicate that
-a request loaded from cache; its occasional undefined payload cannot release
-any pending request. Late duplicate/redirect notifications cannot erase the
-current operation. Missing or conflicting identities fail closed. A successful
-navigation must observe actual document request events. Deadline diagnostics
-are a separate bounded stdout record with paths but no URL queries.
+The navigation observer uses one isolated Chrome DevTools Protocol Network
+session per page. It subscribes before Network.enable and observes every
+Network.requestWillBeSent type. Request identifiers and protocol timestamps
+bind response, finished and failed events to the current operation; redirects
+replace their prior leg once. Cache provenance alone cannot complete a request.
+Duplicate, unmatched or older completion notifications cannot release another
+operation. Missing/conflicting identities and overflow fail closed.
 
-DOMContentLoaded and the complete 100-ms zero-request quiet window share the
-original 20000-ms deadline. No request type is filtered. Active tracking is
-capped at 256. Twelve SDK/browser-free controls cover identity, aliases,
-redirects, cache notifications including unknown payloads, late activity,
-isolated pages, closure, overflow, privacy and the original budget. The original
-25-check legacy browser group runs once, earlier, under a one-minute package
-bound and is excluded from the later selector. All other original package/job
-limits, assertions, profiles and transactions remain. Actual qualification
-requires the complete retained and ERC-1271 hosted matrix.
+The pinned [Puppeteer NetworkManager source](https://github.com/puppeteer/puppeteer/blob/puppeteer-v25.11.0/packages/puppeteer-core/src/cdp/NetworkManager.ts)
+also dispatches interception callbacks for operations without a Network request
+identifier. The protocol observer counts actual Network requests while existing
+interception, origin, DOM, HTTP/error, signing, receipt, payout and reorg controls
+continue separately. It does not change replies, cache settings or interception.
+
+Observer setup, DOMContentLoaded and a complete 100-ms zero-request quiet window
+share the original overall 20000-ms deadline. The observer must see a document
+request for each successful navigation. All request types remain observed;
+active tracking is capped at 256 and diagnostics contain bounded paths without
+URL queries or payloads. Sixteen SDK/browser-free controls cover protocol
+identity, redirects, duplicates, cache provenance, late activity, isolated
+pages, closure, overflow, privacy, setup failure, interception-only callbacks
+and the original budget.
+
+The original 25-check legacy navigation group still runs once under its separate
+one-minute package bound. Native signatures run once before production profiles;
+the four new profiles retain their two-minute bound. Existing twelve-minute
+package and fifteen-minute job bounds remain. Qualification requires the whole
+retained and ERC-1271 matrix; a failed predecessor retains its actual outcome.

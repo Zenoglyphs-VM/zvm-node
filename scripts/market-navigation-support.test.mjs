@@ -1,120 +1,144 @@
-// SDK/browser-free event and deadline controls; actual pages require hosted CI.
+// Pure event controls use Node standard libraries and no browser or SDK.
 import assert from 'node:assert/strict'
 import {performance} from 'node:perf_hooks'
 import {EventEmitter} from 'node:events'
-import {observeNavigationRequests, boundedNavigation} from './market-navigation-support.mjs'
+import {createNavigationRequestTracker, observeNavigationRequests, boundedNavigation} from './market-navigation-support.mjs'
 
+class Session extends EventEmitter {
+  detached = false
+  signal(type, value) {this.emit('*', type, value)}
+  async send(method, params, options) {this.options = options; assert.equal(method, 'Network.enable'); await this.setup?.()}
+  async detach() {this.detached = true}
+}
 class Page extends EventEmitter {
-  signal(type, event) {this.emit('*', type, event)}
+  session = new Session()
+  async createCDPSession() {return this.session}
   async goto(href, options) {
     this.options = options
-    const item = request('navigation-'+String(this.sequence = (this.sequence ?? 0)+1), '/document')
-    this.signal('request', item); await this.loading?.()
-    this.signal('response', {request: () => item}); this.signal('requestfinished', item)
+    const id = 'document-'+String(this.sequence = (this.sequence ?? 0)+1)
+    this.session.signal('Network.requestWillBeSent', request(id, new URL(href).pathname, 'Document'))
+    await this.loading?.()
+    this.session.signal('Network.loadingFinished', terminal(id))
     return {href}
   }
 }
-const request = (id = 'same', path = '/rpc?private=fixture-secret') => ({id,
-  url: () => 'http://127.0.0.1:1'+path, method: () => 'POST'})
-const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
+let timestamp = 1
+const request = (requestId = 'one', path = '/rpc?private=fixture-secret', type = 'Fetch') => ({requestId, timestamp: timestamp++, type,
+  request: {url: 'http://127.0.0.1:1'+path, method: 'POST'}})
+const terminal = (requestId = 'one', time = 1e9) => ({requestId, timestamp: time})
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+const fixture = () => {const session = new Session(); return {session, tracker: createNavigationRequestTracker(session)}}
 let controls = 0
 
 {
-  const page = new Page(), tracker = observeNavigationRequests(page), first = request('one'), second = request('two')
-  page.signal('request', first); page.signal('request', first); page.signal('request', second)
-  page.signal('response', {request: () => request('one')}); page.signal('requestfinished', first)
+  const {session, tracker} = fixture(), first = request('one'), second = request('two')
+  session.signal('Network.requestWillBeSent', first); session.signal('Network.requestWillBeSent', first)
+  session.signal('Network.requestWillBeSent', second); session.signal('Network.responseReceived', terminal('one'))
+  session.signal('Network.loadingFinished', terminal('one'))
   assert.equal(tracker.diagnostic().activeRequests, 1)
-  await assert.rejects(tracker.wait(performance.now()+20), /original navigation deadline elapsed/)
-  page.signal('requestfailed', second)
-  await tracker.wait(performance.now()+500)
+  await assert.rejects(tracker.wait(performance.now()+15), /original navigation deadline elapsed/)
+  session.signal('Network.loadingFailed', terminal('two')); await tracker.wait(performance.now()+500)
   assert.equal(tracker.diagnostic().completed, 2); controls++
 }
 {
-  const page = new Page(), tracker = observeNavigationRequests(page), pending = request()
-  page.signal('request', pending)
+  const {session, tracker} = fixture(); session.signal('Network.requestWillBeSent', request())
   let message = ''
-  try {await tracker.wait(performance.now()+20)} catch (error) {message = error.message}
+  try {await tracker.wait(performance.now()+15)} catch (error) {message = error.message}
   assert.match(message, /activeRequests":1/); assert.match(message, /"path":"\/rpc"/)
   assert.ok(!message.includes('fixture-secret') && !message.includes('?private=')); controls++
 }
 {
-  const page = new Page(), tracker = observeNavigationRequests(page), pending = request()
-  const began = performance.now(), waiting = tracker.wait(began+700)
-  setTimeout(() => page.signal('request', pending), 40)
-  setTimeout(() => page.signal('response', {request: () => pending}), 70)
-  await waiting
-  assert.ok(performance.now()-began >= 165); controls++
+  const {session, tracker} = fixture(), began = performance.now(), waiting = tracker.wait(began+700)
+  setTimeout(() => session.signal('Network.requestWillBeSent', request()), 40)
+  setTimeout(() => session.signal('Network.loadingFinished', terminal()), 70)
+  await waiting; assert.ok(performance.now()-began >= 165); controls++
 }
 {
-  const page = new Page(), tracker = observeNavigationRequests(page), done = request()
-  page.signal('request', done); page.signal('response', {request: () => done})
-  const began = performance.now()
-  const noise = setInterval(() => page.signal('requestfinished', done), 10)
+  const {session, tracker} = fixture(); session.signal('Network.requestWillBeSent', request())
+  session.signal('Network.loadingFinished', terminal())
+  const began = performance.now(), noise = setInterval(() => session.signal('Network.loadingFinished', terminal()), 10)
   try {await tracker.wait(began+500)} finally {clearInterval(noise)}
   assert.ok(performance.now()-began >= 95 && tracker.diagnostic().unmatchedCompletionSignals > 0); controls++
 }
 {
-  const first = new Page(), second = new Page(), a = observeNavigationRequests(first), b = observeNavigationRequests(second)
-  first.signal('request', request())
-  await b.wait(performance.now()+500)
-  assert.equal(a.diagnostic().activeRequests, 1); assert.equal(b.diagnostic().activeRequests, 0)
-  const waiting = a.wait(performance.now()+500); first.signal('close')
+  const a = fixture(), b = fixture(); a.session.signal('Network.requestWillBeSent', request())
+  await b.tracker.wait(performance.now()+500); assert.equal(a.tracker.diagnostic().activeRequests, 1)
+  const waiting = a.tracker.wait(performance.now()+500); a.tracker.close()
   await assert.rejects(waiting, /page closed/); controls++
 }
 {
-  const page = new Page(), tracker = observeNavigationRequests(page)
-  for (let i=0; i<257; i++) page.signal('request', request(String(i)))
+  const {session, tracker} = fixture()
+  for (let i=0; i<257; i++) session.signal('Network.requestWillBeSent', request(String(i)))
   assert.equal(tracker.diagnostic().activeRequests, 256)
   await assert.rejects(tracker.wait(performance.now()+500), /tracking limit exceeded/); controls++
 }
 {
   const page = new Page(), navigation = boundedNavigation('http://127.0.0.1:1')
-  page.loading = () => delay(25)
+  page.session.setup = () => delay(20); page.loading = () => delay(25)
   const began = performance.now(); await navigation.goto(page, 'http://127.0.0.1:1/account/test')
-  assert.ok(performance.now()-began >= 120)
-  assert.deepEqual(page.options, {waitUntil: 'domcontentloaded', timeout: 20000})
-  const value = navigation.summary()
-  assert.equal(value.attempts, 1); assert.equal(value.completed, 1); assert.equal(value.failed, 0)
+  assert.ok(performance.now()-began >= 140)
+  assert.equal(page.options.waitUntil, 'domcontentloaded'); assert.ok(page.options.timeout <= 19990 && page.options.timeout > 19000)
+  const value = navigation.summary(); assert.equal(value.completed, 1); assert.equal(value.failed, 0)
   assert.equal(value.quietMilliseconds, 100); assert.equal(value.maximumInflightRequests, 0)
   await assert.rejects(navigation.goto(page, 'https://example.invalid/'), /Expected values/); controls++
 }
 {
-  const page = new Page(), tracker = observeNavigationRequests(page)
-  const began = performance.now(); await delay(25)
+  const {tracker} = fixture(), began = performance.now(); await delay(25)
   await assert.rejects(tracker.wait(began+40), /original navigation deadline elapsed/)
   assert.ok(performance.now()-began < 400); controls++
 }
 {
-  const page = new Page(), tracker = observeNavigationRequests(page)
-  const first = request('redirect', '/before'), next = request('redirect', '/after')
-  page.signal('request', first); page.signal('response', {request: () => first})
-  page.signal('request', next); page.signal('requestfinished', first)
+  const {session, tracker} = fixture(), first = request('redirect', '/before'), next = request('redirect', '/after')
+  session.signal('Network.requestWillBeSent', first)
+  session.signal('Network.requestWillBeSent', {...next, redirectResponse: {url: first.request.url}})
+  session.signal('Network.loadingFinished', terminal('redirect', first.timestamp))
+  session.signal('Network.responseReceived', {...terminal('redirect'), response: {url: first.request.url}})
   assert.equal(tracker.diagnostic().activeRequests, 1)
-  page.signal('response', {request: () => request('redirect', '/after')})
-  await tracker.wait(performance.now()+500)
+  session.signal('Network.loadingFinished', terminal('redirect')); await tracker.wait(performance.now()+500)
   assert.equal(tracker.diagnostic().completed, 2); controls++
 }
 {
-  const page = new Page(), navigation = boundedNavigation('http://127.0.0.1:1')
-  page.goto = async () => ({})
-  await assert.rejects(navigation.goto(page, 'http://127.0.0.1:1/document'), /request events were not observed/)
+  const page = new Page(), navigation = boundedNavigation('http://127.0.0.1:1'); page.goto = async () => ({})
+  await assert.rejects(navigation.goto(page, 'http://127.0.0.1:1/document'), /document request events were not observed/)
   assert.equal(navigation.summary().failed, 1); controls++
 }
 {
-  const page = new Page(), tracker = observeNavigationRequests(page), cached = request('cached', '/asset.js')
-  page.signal('request', cached); page.signal('requestservedfromcache', request('cached', '/asset.js'))
-  page.signal('requestfinished', cached)
-  await tracker.wait(performance.now()+500)
-  assert.equal(tracker.diagnostic().activeRequests, 0); assert.equal(tracker.diagnostic().completed, 1); controls++
+  const {session, tracker} = fixture(); session.signal('Network.requestWillBeSent', request('cached', '/asset.js', 'Script'))
+  session.signal('Network.requestServedFromCache', {requestId: 'cached'}); assert.equal(tracker.diagnostic().activeRequests, 1)
+  session.signal('Network.responseReceived', terminal('cached')); await tracker.wait(performance.now()+500)
+  assert.equal(tracker.diagnostic().completed, 1); assert.equal(tracker.diagnostic().cacheSignals, 1); controls++
 }
 {
-  const page = new Page(), tracker = observeNavigationRequests(page), pending = request('pending')
-  page.signal('request', pending); page.signal('requestservedfromcache', undefined)
-  assert.equal(tracker.diagnostic().activeRequests, 1)
-  await assert.rejects(tracker.wait(performance.now()+20), /original navigation deadline elapsed/)
-  page.signal('requestfailed', pending); controls++
+  const {session, tracker} = fixture(); session.signal('Network.requestWillBeSent', request())
+  session.signal('Network.requestServedFromCache', {requestId: 'other'}); assert.equal(tracker.diagnostic().activeRequests, 1)
+  await assert.rejects(tracker.wait(performance.now()+15), /original navigation deadline elapsed/); controls++
 }
-assert.equal(controls, 12)
+{
+  const page = new Page(), tracker = await observeNavigationRequests(page)
+  page.emit('request', {id: 'interception-only', url: () => 'http://127.0.0.1:1/rpc'})
+  await tracker.wait(performance.now()+500); assert.equal(tracker.diagnostic().started, 0)
+  page.emit('close'); assert.ok(page.session.detached); controls++
+}
+{
+  const {session, tracker} = fixture()
+  for (const type of ['Document', 'Script', 'Image', 'Fetch', 'XHR', 'Other']) session.signal('Network.requestWillBeSent', request(type, '/'+type, type))
+  assert.equal(tracker.diagnostic().activeRequests, 6)
+  for (const type of ['Document', 'Script', 'Image', 'Fetch', 'XHR', 'Other']) session.signal('Network.loadingFinished', terminal(type))
+  await tracker.wait(performance.now()+500); assert.equal(tracker.diagnostic().completed, 6); controls++
+}
+{
+  const {session, tracker} = fixture(); session.signal('Network.requestWillBeSent', request('conflict', '/first'))
+  session.signal('Network.requestWillBeSent', request('conflict', '/different'))
+  await assert.rejects(tracker.wait(performance.now()+500), /identity reused while active/); controls++
+}
+{
+  const page = new Page(); page.session.setup = () => {throw new Error('fixture setup refusal')}
+  await assert.rejects(observeNavigationRequests(page), /fixture setup refusal/)
+  assert.ok(page.session.detached); assert.equal(page.session.listenerCount('*'), 0); controls++
+}
+assert.equal(controls, 16)
 console.log('NAVIGATION-IDENTITY-CONTROLS '+JSON.stringify({controls, pass: true, SDKOrBrowserExecutions: 0,
   overallNavigationDeadlineMilliseconds: 20000, quietMilliseconds: 100, maximumInflightRequests: 0,
-  duplicateAndRedirectIdentityControls: true, originalBudgetPreserved: true, diagnosticQueryValuesOmitted: true}))
+  requestTracking: 'cdp-network-request-identities', originalBudgetPreserved: true,
+  protocolSessionsIsolated: true, interceptionOnlySignalsCountedAsNetworkRequests: false,
+  cacheProvenanceAloneCompletesRequest: false, diagnosticQueryValuesOmitted: true}))
