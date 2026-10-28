@@ -99,7 +99,12 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	if len(payment) > 1 {
 		t.Fatal("one token payment profile is required")
 	}
-	if len(payment) == 1 && payment[0] == "external-royalty" {
+	if len(payment) == 1 && payment[0] == "erc1271" {
+		if action != "batch" {
+			t.Fatal("undeclared ERC-1271 action")
+		}
+		f, transport = orderbook.NewExecutedContractSignatureBrowserFixture(t, kind)
+	} else if len(payment) == 1 && payment[0] == "external-royalty" {
 		if kind != "single" || action != "batch" {
 			t.Fatal("undeclared external royalty browser profile")
 		}
@@ -234,7 +239,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	defer web.Close()
 	input, err := json.Marshal(map[string]any{"base": web.URL, "token": token, "roots": roots,
 		"app": app, "kind": kind, "collection": f.Collection().Hex(), "exchange": f.Exchange().Hex(),
-		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex(), "payouts": f.MarketPayoutConfig(), "tokenPayment": f.TokenPaymentDescription(), "externalRoyalty": f.ExternalRoyaltyDescription()})
+		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex(), "payouts": f.MarketPayoutConfig(), "tokenPayment": f.TokenPaymentDescription(), "externalRoyalty": f.ExternalRoyaltyDescription(), "contractSeller": f.ContractSignatureDescription()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -406,6 +411,9 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			if value := f.ExternalRoyaltyDescription(); value != nil {
 				record["externalRoyalty"] = value
 			}
+			if evidence := f.ContractSignatureEvidence(t); evidence != nil {
+				record["actualERC1271Inputs"] = evidence
+			}
 			raw, err := json.Marshal(record)
 			if err != nil {
 				t.Fatal(err)
@@ -413,6 +421,9 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			marker := "EXECUTED-MARKET-BROWSER-GO "
 			if f.ExternalRoyaltyDescription() != nil {
 				marker = "EXECUTED-EXTERNAL-ROYALTY-BROWSER-GO "
+			}
+			if f.ContractSignatureDescription() != nil {
+				marker = "EXECUTED-ERC1271-BROWSER-GO "
 			}
 			if f.TokenPaymentProfile() != "" {
 				marker = "EXECUTED-TOKEN-PAYMENT-BROWSER-GO "

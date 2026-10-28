@@ -85,9 +85,10 @@ func (f *ExecutedMarketFixture) BindAcceptedBrowserInputs(t *testing.T, submitte
 			t.Fatal("HTTP admission changed the actual browser order/signature/proof")
 		}
 		signer, ok := Recover(Domain(f.Rollup().L2ChainID, f.Exchange()), current)
-		if !ok || signer != f.Seller() {
+		if !ok || signer != f.SigningOwner() {
 			t.Fatal("accepted browser signature does not recover the fixture trader")
 		}
+		f.AssertContractSignatureInput(t, current)
 		order := &current.Order
 		if order.Collection != f.Collection() || order.Trader != f.Seller() || order.Side != SideSell || !order.TokenID.Big().IsInt64() {
 			t.Fatal("browser input names an unexpected market asset")
@@ -96,7 +97,7 @@ func (f *ExecutedMarketFixture) BindAcceptedBrowserInputs(t *testing.T, submitte
 		if id < 1 || id > 2 || accepted[id-1] != nil {
 			t.Fatal("browser inputs must name the two distinct selected tokens")
 		}
-		if f.TokenPaymentProfile() != "" || f.r.scenario.royalty != nil {
+		if f.TokenPaymentProfile() != "" || f.r.scenario.royalty != nil || f.r.scenario.contractSignature != nil {
 			want := f.r.scenario.orders[id-1]
 			if order.PaymentToken != want.PaymentToken || order.Price.Big().Cmp(want.Price.Big()) != 0 {
 				t.Fatal("token listing changed its original currency or exact base units")
@@ -113,7 +114,7 @@ func (f *ExecutedMarketFixture) BindAcceptedBrowserInputs(t *testing.T, submitte
 	orders := []*Order{&accepted[0].Order, &accepted[1].Order}
 	original := f.r.scenario
 	future := newExecutionScenarioInputs(t, true, false, executionScenarioInputs{
-		seller: original.seller, buyer: original.buyer, provider: original.provider, action: original.providerAction, payment: original.payment, timestamp: original.cfg.L2GenesisTimestamp, orders: orders, royalty: original.royalty,
+		seller: original.seller, buyer: original.buyer, provider: original.provider, action: original.providerAction, payment: original.payment, timestamp: original.cfg.L2GenesisTimestamp, orders: orders, royalty: original.royalty, contractSignature: original.contractSignature,
 		sign: func(*executionScenario) []*Input { return accepted },
 	})
 	if future.cfg.L2GenesisHash != original.cfg.L2GenesisHash || future.exchange != original.exchange || future.token != original.token {

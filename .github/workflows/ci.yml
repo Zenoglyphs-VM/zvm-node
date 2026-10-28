@@ -68,6 +68,13 @@ jobs:
           go-version-file: go.mod
       - name: Check bounded immutable snapshot reuse without SDK or network
         run: node --test --test-reporter=tap scripts/market-snapshot-read-cache.test.mjs
+      - name: Compile the self-contained credit wallet once with the pinned compiler
+        run: node scripts/market-credit-compile.mjs "$RUNNER_TEMP/zvm-market-credit-compiler"
+      - name: Check actual ERC-1271 native signatures and canonical recovery before production pages
+        env:
+          ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_CONTRACT_SIGNATURE_WALLET: ${{ runner.temp }}/zvm-market-credit-compiler/signature-wallet.json
+        run: go test -json -count=1 -p=1 -failfast -timeout=1m -run '^TestExecutedERC1271NativeSignaturesAndRecovery$' ./orderbook
       - name: Build the pinned relayer program once for all browser profiles
         run: |
           test "$(git -C .market-browser/zvm-relayer rev-parse HEAD)" = 5a72a223dd60d1ae4e974d420cadd85e6f9ee929
@@ -88,8 +95,14 @@ jobs:
         run: |
           npm run build --prefix .market-browser/zvm-nft
           npm run build --prefix .market-browser/zvm-karum
-      - name: Compile the self-contained credit wallet once with the pinned compiler
-        run: node scripts/market-credit-compile.mjs "$RUNNER_TEMP/zvm-market-credit-compiler"
+      - name: Check actual ERC-1271 production listings and purchases before the retained matrix
+        env:
+          ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_RELAYER_BINARY: ${{ runner.temp }}/zvm-market-relayer
+          ZVM_BROWSER_NFT_ROOT: ${{ github.workspace }}/.market-browser/zvm-nft
+          ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
+          ZVM_BROWSER_CONTRACT_SIGNATURE_WALLET: ${{ runner.temp }}/zvm-market-credit-compiler/signature-wallet.json
+        run: go test -json -count=1 -p=1 -failfast -timeout=2m -run '^TestExecutedERC1271ProductionMarketplaces$' ./orderbook
       - name: Exercise production pages signed admission and actual relayer transactions with serialized browsers
         env:
           ZVM_BROWSER_REQUIRED: "1"

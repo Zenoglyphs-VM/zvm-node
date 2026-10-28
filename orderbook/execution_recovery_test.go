@@ -390,6 +390,7 @@ type executionScenario struct {
 	credit                   *executedCreditSetup
 	payouts                  *executedMarketPayouts
 	royalty                  *executedRoyaltySetup
+	contractSignature        *executedContractSignatureSetup
 }
 
 func newExecutionScenario(t *testing.T) *executionScenario {
@@ -398,16 +399,17 @@ func newExecutionScenario(t *testing.T) *executionScenario {
 
 // Defaults preserve the original recovery scenario and its historical inputs.
 type executionScenarioInputs struct {
-	buyer     znn.Address
-	provider  bool
-	action    string
-	payment   string
-	seller    znn.Address
-	timestamp uint64
-	sign      func(*executionScenario) []*Input
-	orders    []*Order
-	credit    *executedCreditSetup
-	royalty   *executedRoyaltySetup
+	buyer             znn.Address
+	provider          bool
+	action            string
+	payment           string
+	seller            znn.Address
+	timestamp         uint64
+	sign              func(*executionScenario) []*Input
+	orders            []*Order
+	credit            *executedCreditSetup
+	royalty           *executedRoyaltySetup
+	contractSignature *executedContractSignatureSetup
 }
 
 func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profileDir ...string) *executionScenario {
@@ -456,6 +458,17 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 		}
 		s.payouts = newExecutedMarketPayouts()
 		s.payouts.royaltyBps = 5000
+	}
+	s.contractSignature = inputs.contractSignature
+	if setup := s.contractSignature; setup != nil {
+		if inputs.credit != nil || inputs.royalty != nil || inputs.payment != "" || inputs.sign == nil || setup.mode > 3 ||
+			(inputs.provider && (inputs.action != "batch" || setup.mode != 0 || setup.revokeBeforeFill)) || (!inputs.provider && inputs.orders != nil) {
+			t.Fatal("contract-signature setup requires its declared native or production batch scope")
+		}
+		if setup.owner != common.Address(s.seller) {
+			t.Fatal("contract-signature owner differs from its source actor")
+		}
+		s.payouts = newExecutedMarketPayouts()
 	}
 	if inputs.buyer != (znn.Address{}) {
 		s.buyer = inputs.buyer
@@ -513,8 +526,17 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	s.factory = crypto.CreateAddress(common.Address(s.seller), offset+1)
 	s.exchange = crypto.CreateAddress(common.Address(s.seller), offset+2)
 	s.token = crypto.CreateAddress(s.factory, 1)
+	listingTrader := common.Address(s.seller)
+	if setup := s.contractSignature; setup != nil {
+		wallet := crypto.CreateAddress(common.Address(s.seller), offset+4)
+		if setup.wallet != (common.Address{}) && setup.wallet != wallet {
+			t.Fatal("contract-signature wallet address changed")
+		}
+		setup.wallet = wallet
+		listingTrader = wallet
+	}
 	for id := int64(1); id <= 2; id++ {
-		s.orders = append(s.orders, &Order{Trader: common.Address(s.seller), Side: SideSell, Collection: s.token,
+		s.orders = append(s.orders, &Order{Trader: listingTrader, Side: SideSell, Collection: s.token,
 			TokenID: U(id), Amount: U(1), Price: B(big.NewInt(250_000_000_000_000_000)), ListingTime: s.cfg.L2GenesisTimestamp,
 			ExpirationTime: s.cfg.L2GenesisTimestamp + 86400, Nonce: U(0), Salt: U(id)})
 	}
@@ -576,6 +598,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	}
 	if s.credit != nil {
 		lastHeight, replacementHeight = creditFundingHeight+2, creditFundingHeight+1
+	}
+	if setup := s.contractSignature; setup != nil && !inputs.provider && setup.revokeBeforeFill {
+		lastHeight, replacementHeight = 11, 9
 	}
 	for branch := range s.branches {
 		momentums := map[uint64]*znn.DetailedMomentum{1: {Momentum: &znn.Momentum{Height: 1, Hash: znn.Sha3([]byte("declared-native-recovery-genesis")), Timestamp: s.cfg.L2GenesisTimestamp}}}
@@ -665,9 +690,21 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				if s.credit != nil {
 					native(s.buyer, nil, nil, s.credit.init)
 				}
+				if setup := s.contractSignature; setup != nil {
+					native(s.seller, nil, nil, setup.init)
+				}
 			case 6:
-				native(s.seller, &s.token, nil, callData("ZVMCollection", "mintBatch", common.Address(s.seller), []string{"one", "two", "three"}))
-				native(s.seller, &s.token, nil, callData("ZVMCollection", "setApprovalForAll", s.exchange, true))
+				native(s.seller, &s.token, nil, callData("ZVMCollection", "mintBatch", listingTrader, []string{"one", "two", "three"}))
+				approvalTarget := s.token
+				approvalData := callData("ZVMCollection", "setApprovalForAll", s.exchange, true)
+				if setup := s.contractSignature; setup != nil {
+					approvalTarget = setup.wallet
+					approvalData = setup.call(t, "execute", s.token, approvalData)
+				}
+				native(s.seller, &approvalTarget, nil, approvalData)
+				if setup := s.contractSignature; setup != nil && setup.mode != 0 {
+					send(s.seller, s.cfg.Inbox, 0, derive.EncodeCall(derive.Call{To: &setup.wallet, Gas: 500_000, Data: setup.call(t, "setSignatureMode", setup.mode)}))
+				}
 				if s.payouts != nil {
 					// Mint and approval already reserve 16M gas in this momentum.
 					// Bound the simple setter without widening the native ceiling.
@@ -689,7 +726,13 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				if inputs.sign == nil {
 					native(s.seller, &s.exchange, nil, callData("ZVMExchange", "approveOrders", ABIOrders(s.orders)))
 				}
-				payload := derive.EncodeCall(derive.Call{To: &s.token, Gas: 500_000, Data: callData("ZVMCollection", "transferFrom", common.Address(s.seller), common.Address(s.buyer), big.NewInt(3))})
+				transferTarget := s.token
+				transferData := callData("ZVMCollection", "transferFrom", listingTrader, common.Address(s.buyer), big.NewInt(3))
+				if setup := s.contractSignature; setup != nil {
+					transferTarget = setup.wallet
+					transferData = setup.call(t, "execute", s.token, transferData)
+				}
+				payload := derive.EncodeCall(derive.Call{To: &transferTarget, Gas: 500_000, Data: transferData})
 				chunk = send(s.seller, s.cfg.Inbox, 0, append([]byte{derive.MsgChunk}, payload...)).Hash
 				for i := 0; i < 3; i++ {
 					send(s.buyer, s.cfg.Vault, 100_000_000, nil)
@@ -701,7 +744,11 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				}
 			case 8:
 				if !inputs.provider {
-					if s.royalty != nil {
+					if setup := s.contractSignature; setup != nil {
+						if branch == 0 && !setup.revokeBeforeFill {
+							native(s.buyer, &s.exchange, s.inputs[0].Order.Price.Big(), callData("ZVMExchange", "buy", s.inputs[0].ABI()))
+						}
+					} else if s.royalty != nil {
 						if branch == 0 {
 							value := new(big.Int).Add(s.inputs[0].Order.Price.Big(), s.inputs[1].Order.Price.Big())
 							native(s.buyer, &s.exchange, value, callData("ZVMExchange", "buyMany", []ABIInput{s.inputs[0].ABI(), s.inputs[1].ABI()}))
@@ -712,6 +759,14 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 					}
 				}
 				send(s.seller, s.cfg.Inbox, 0, derive.EncodeAssemble([]znn.Hash{chunk}))
+			case 9:
+				if setup := s.contractSignature; setup != nil && !inputs.provider && setup.revokeBeforeFill && branch == 0 {
+					send(s.seller, s.cfg.Inbox, 0, derive.EncodeCall(derive.Call{To: &setup.wallet, Gas: 500_000, Data: setup.call(t, "setSignatureMode", uint8(2))}))
+				}
+			case 10:
+				if setup := s.contractSignature; setup != nil && !inputs.provider && setup.revokeBeforeFill && branch == 0 {
+					native(s.buyer, &s.exchange, s.inputs[0].Order.Price.Big(), callData("ZVMExchange", "buy", s.inputs[0].ABI()))
+				}
 			case creditSaleHeight:
 				if s.credit != nil {
 					native(s.buyer, &s.exchange, s.inputs[0].Order.Price.Big(), callData("ZVMExchange", "buy", s.inputs[0].ABI()))

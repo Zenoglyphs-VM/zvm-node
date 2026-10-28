@@ -86,10 +86,14 @@ func newExecutedMarketFixturePaymentProfile(t *testing.T, kind string, timestamp
 }
 
 func newExecutedMarketFixtureRoyaltyProfile(t *testing.T, kind string, timestamp uint64, buyer znn.Address, provider bool, payment string, royalty *executedRoyaltySetup, actions ...string) *ExecutedMarketFixture {
+	return newExecutedMarketFixtureContractSignatureProfile(t, kind, timestamp, buyer, provider, payment, royalty, nil, actions...)
+}
+
+func newExecutedMarketFixtureContractSignatureProfile(t *testing.T, kind string, timestamp uint64, buyer znn.Address, provider bool, payment string, royalty *executedRoyaltySetup, contractSignature *executedContractSignatureSetup, actions ...string) *ExecutedMarketFixture {
 	t.Helper()
 	key := executedMarketKey(t)
 	options := executionScenarioInputs{
-		buyer: buyer, provider: provider, payment: payment, royalty: royalty,
+		buyer: buyer, provider: provider, payment: payment, royalty: royalty, contractSignature: contractSignature,
 		seller:    znn.Address(crypto.PubkeyToAddress(key.PublicKey)),
 		timestamp: timestamp,
 		sign: func(s *executionScenario) []*Input {
@@ -133,8 +137,13 @@ func (f *ExecutedMarketFixture) Book() *Book                { return f.r.book }
 func (f *ExecutedMarketFixture) Rollup() *rollup.Config     { return f.r.scenario.cfg }
 func (f *ExecutedMarketFixture) Exchange() common.Address   { return f.r.scenario.exchange }
 func (f *ExecutedMarketFixture) Collection() common.Address { return f.r.scenario.token }
-func (f *ExecutedMarketFixture) Seller() common.Address     { return common.Address(f.r.scenario.seller) }
-func (f *ExecutedMarketFixture) Buyer() common.Address      { return common.Address(f.r.scenario.buyer) }
+func (f *ExecutedMarketFixture) Seller() common.Address {
+	if setup := f.r.scenario.contractSignature; setup != nil {
+		return setup.wallet
+	}
+	return common.Address(f.r.scenario.seller)
+}
+func (f *ExecutedMarketFixture) Buyer() common.Address { return common.Address(f.r.scenario.buyer) }
 
 func (f *ExecutedMarketFixture) Inputs(t *testing.T) []*Input {
 	t.Helper()

@@ -560,3 +560,32 @@ adding these profiles alone is not a qualification claim. NoM authority, full
 daemon integration, generic/physical wallets, ERC-1271 and complete A08 product
 acceptance remain separate gates. No public-chain or real-wallet operation is
 performed.
+
+
+## Contract-trader signatures
+
+The candidate adds an owner-authorized ERC-1271/ERC-721-receiver fixture.
+Its signing EOA and NFT-owning contract are distinct. All account deployment,
+minting, approval, mode changes and purchases execute actual EVM calls, with
+no inserted code/storage or fabricated product RPC response. Single orders and
+bulk roots cover valid-owner, wrong-signer, wrong-magic, reverting-wallet,
+short-magic and revoked-before-fill scenarios. Native observations bind code,
+signature replies, checkOrder, fills, ownership, balances and actual successful
+or reverted receipts across replacement, restoration and database reopening.
+
+Four additional production profiles use both listing kinds in both NFT and
+Karum. The real pages request owner signatures for a contract trader and submit
+their exact orders/proofs to the node API. Independent SDK and executed Go
+calls check the deployed wallet's ERC-1271 response at a canonical block hash.
+Actual batch checkout and the pinned relayer retain receipt, balance, ownership
+and reorg controls. The provider is an explicit owner-signing contract-account
+adapter; generic/physical wallet compatibility and independent NoM authority
+remain separate gates.
+
+One compiler transport compiles all three self-contained targets. The new
+native group runs before frontend preparation, and the new production group
+runs before the retained matrix. Each group executes once; all earlier
+profiles and controls remain. The existing 12-minute package and 15-minute
+job limits remain. The new groups have 1-minute and 2-minute bounds. Source
+presence and local syntax checks do not establish runtime qualification; the
+complete source-bound hosted evidence is required before acceptance.

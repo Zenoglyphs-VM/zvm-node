@@ -46,9 +46,11 @@ try {
 
 const source = readRegular(fileURLToPath(new URL('../orderbook/testdata/CreditFixtureWallet.sol', import.meta.url)), 16 << 10)
 const royaltySource = readRegular(fileURLToPath(new URL('../orderbook/testdata/RoyaltyFixtureCollection.sol', import.meta.url)), 16 << 10)
+const signatureSource = readRegular(fileURLToPath(new URL('../orderbook/testdata/ContractSignatureFixtureWallet.sol', import.meta.url)), 16 << 10)
 const compiler = loadCompiler(compilerPath, SOLC)
 const result = compiler.compile({language: 'Solidity', sources: {'CreditFixtureWallet.sol': {content: source.toString('utf8')},
-  'RoyaltyFixtureCollection.sol': {content: royaltySource.toString('utf8')}},
+  'RoyaltyFixtureCollection.sol': {content: royaltySource.toString('utf8')},
+  'ContractSignatureFixtureWallet.sol': {content: signatureSource.toString('utf8')}},
   settings: {optimizer: {enabled: true, runs: 200}, evmVersion: 'prague', viaIR: false,
     outputSelection: {'*': {'*': ['abi', 'evm.bytecode.object', 'evm.deployedBytecode.object']}}}})
 compiler.verify()
@@ -81,5 +83,21 @@ const royaltyOutput = await open(path.join(directory, 'royalty.json'), 'wx', 0o6
 try {await royaltyOutput.writeFile(royaltyRaw); await royaltyOutput.sync()} finally {await royaltyOutput.close()}
 console.log('EXTERNAL-ROYALTY-COMPILER ' + JSON.stringify({sourceSha256: royaltyArtifact.sourceSha256,
   compilerVersion: SOLC.version, compilerSha256: SOLC.sha256, supportSha256: royaltyArtifact.supportSha256,
-  artifactSha256: sha256(royaltyRaw), artifactBytes: royaltyRaw.length, compilerTransports: 1, totalTargets: 2,
+  artifactSha256: sha256(royaltyRaw), artifactBytes: royaltyRaw.length, compilerTransports: 1, totalTargets: 3,
+  dependencyOrBrowserInstallations: 0}))
+
+
+const signatureWallet = result.output.contracts['ContractSignatureFixtureWallet.sol'].ContractSignatureFixtureWallet
+assert.ok(signatureWallet && signatureWallet.evm.bytecode.object.length > 0 && signatureWallet.evm.bytecode.object.length <= 16 << 10)
+assert.ok(signatureWallet.evm.deployedBytecode.object.length > 0 && signatureWallet.evm.deployedBytecode.object.length <= 16 << 10)
+const signatureArtifact = {schema: 1, sourceName: 'ContractSignatureFixtureWallet.sol', sourceSha256: sha256(signatureSource),
+  compilerVersion: SOLC.version, compilerSha256: SOLC.sha256, supportSha256: artifact.supportSha256,
+  abi: signatureWallet.abi, bytecode: '0x' + signatureWallet.evm.bytecode.object, deployedBytecode: '0x' + signatureWallet.evm.deployedBytecode.object}
+const signatureRaw = Buffer.from(JSON.stringify(signatureArtifact) + '\n')
+assert.ok(signatureRaw.length <= 64 << 10, 'compiled contract-signature artifact exceeds its bound')
+const signatureOutput = await open(path.join(directory, 'signature-wallet.json'), 'wx', 0o600)
+try {await signatureOutput.writeFile(signatureRaw); await signatureOutput.sync()} finally {await signatureOutput.close()}
+console.log('ERC1271-WALLET-COMPILER ' + JSON.stringify({sourceSha256: signatureArtifact.sourceSha256,
+  compilerVersion: SOLC.version, compilerSha256: SOLC.sha256, supportSha256: signatureArtifact.supportSha256,
+  artifactSha256: sha256(signatureRaw), artifactBytes: signatureRaw.length, compilerTransports: 1, totalTargets: 3,
   dependencyOrBrowserInstallations: 0}))

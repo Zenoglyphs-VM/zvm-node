@@ -31,6 +31,9 @@ const batchMode = ['batch', 'partial-batch'].includes(fixture.action)
 const partialBatch = fixture.action === 'partial-batch'
 const tokenProfile = fixture.tokenPayment?.profile ?? null
 const externalRoyalty = fixture.externalRoyalty?.profile === 'cap-and-revert'
+const contractSeller = fixture.contractSeller?.profile === 'owner-signed-erc1271'
+assert.ok(!contractSeller || (!tokenProfile && !externalRoyalty && fixture.action === 'batch'))
+const contractSignatures = []
 assert.ok(!externalRoyalty || (!tokenProfile && fixture.kind === 'single' && fixture.action === 'batch'))
 const approvalRequired = fixture.tokenPayment?.approvalRequired === true
 assert.ok(!approvalRequired || !partialBatch)
@@ -57,7 +60,7 @@ assert.equal(sdk.version, '2.56.8')
 const signer = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '1')
 const buyerSigner = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '2')
 assert.equal(buyerSigner.address.toLowerCase(), fixture.buyer.toLowerCase())
-const {createPublicClient, http, decodeEventLog, encodeFunctionData, hashStruct, concat, keccak256, parseAbi, stringToHex} = requireApp('viem')
+const {createPublicClient, http, decodeEventLog, encodeFunctionData, hashStruct, hashTypedData, concat, keccak256, parseAbi, stringToHex} = requireApp('viem')
 const chain = createPublicClient({transport: http(new URL('/rpc', base).href, {retryCount: 0})})
 const transactions = []
 const actorSigner = fixture.action === 'buy' || batchMode ? buyerSigner : signer
@@ -85,7 +88,8 @@ const heldBuyerReady = new Promise(resolve => {heldBuyerReadyResolve = resolve})
 let releaseApprovalBuyer, heldApprovalBuyerReadyResolve
 const approvalBuyerGate = new Promise(resolve => {releaseApprovalBuyer = resolve})
 const heldApprovalBuyerReady = new Promise(resolve => {heldApprovalBuyerReadyResolve = resolve})
-assert.equal(signer.address.toLowerCase(), fixture.seller.toLowerCase())
+assert.equal(signer.address.toLowerCase(), (contractSeller ? fixture.contractSeller.owner : fixture.seller).toLowerCase())
+if (contractSeller) assert.notEqual(fixture.contractSeller.owner.toLowerCase(), fixture.seller.toLowerCase())
 const executablePath = [process.env.CHROME_BIN, '/usr/bin/google-chrome', '/usr/bin/chromium'].find(p => p && existsSync(p))
 assert.ok(executablePath, 'preinstalled Chrome required; no browser download fallback')
 const profile = await mkdtemp(join(tmpdir(), 'zvm-signed-market-'))
@@ -370,6 +374,26 @@ async function preparePage(page) {
     }
     const signature = await signer.signTypedData({...typed, domain: {...typed.domain, chainId: Number(BigInt(typed.domain.chainId))}})
     if (tokenProfile && fixture.kind === 'bulk') tokenBulkSignature = signature
+    if (contractSeller) {
+      if (fixture.kind === 'single') {
+        assert.equal(typed.message.trader.toLowerCase(), fixture.seller.toLowerCase())
+        assert.equal(BigInt(typed.message.price), 250000000000000000n)
+        assert.equal(typed.message.paymentToken.toLowerCase(), zeroPayment)
+      } else assert.match(typed.message.root, /^0x[0-9a-f]{64}$/i)
+      const signed = {...typed, domain: {...typed.domain, chainId: Number(BigInt(typed.domain.chainId))}}
+      const digest = hashTypedData(signed)
+      const header = await chain.request({method: 'eth_getBlockByNumber', params: ['latest', false]})
+      const abi = parseAbi(['function isValidSignature(bytes32,bytes) view returns (bytes4)'])
+      const data = encodeFunctionData({abi, functionName: 'isValidSignature', args: [digest, signature]})
+      const raw = await chain.request({method: 'eth_call', params: [{to: fixture.seller, data}, {blockHash: header.hash, requireCanonical: true}]})
+      assert.equal(raw.toLowerCase(), '0x1626ba7e' + '0'.repeat(56))
+      const code = await chain.request({method: 'eth_getCode', params: [fixture.seller, {blockHash: header.hash, requireCanonical: true}]})
+      assert.equal(keccak256(code).toLowerCase(), fixture.contractSeller.runtimeCodeHash.toLowerCase())
+      const canonical = await chain.request({method: 'eth_getBlockByNumber', params: [header.number, false]})
+      assert.equal(canonical.hash, header.hash)
+      contractSignatures.push({digest, hash: header.hash, owner: fixture.contractSeller.owner, trader: fixture.seller,
+        magic: '0x1626ba7e', signatureBytes: (signature.length - 2) / 2, actualHashSelectedContractCall: true})
+    }
     signatures.push({primaryType: typed.primaryType})
     return signature
   })
@@ -552,6 +576,11 @@ try {
   assert.equal(signatures.length, expected)
   assert.equal(posts.length, expected)
   assert.equal(posts.flat().length, 2)
+  if (contractSeller) {
+    assert.equal(contractSignatures.length, expected)
+    assert.equal(new Set(contractSignatures.map(row => row.digest)).size, expected)
+    record('actual contract-trader listings retain owner EOA signatures and executed hash-selected ERC-1271 magic')
+  }
   record('actual typed-data prompt and HTTP submission cardinality')
   if (tokenProfile && fixture.kind === 'bulk') {
     assert.ok(tokenBulkTypedData); assert.equal(signatures.length, 1); assert.equal(posts.length, 1)
@@ -857,7 +886,7 @@ try {
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
   assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch || approvalRequired ? 2 : 1)
   record((partialBatch || approvalRequired ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0) + (approvalRequired ? 3 : 0) + (tokenProfile && fixture.kind === 'bulk' ? 1 : 0) + (saleChecks ? 1 : 0))
+  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0) + (approvalRequired ? 3 : 0) + (tokenProfile && fixture.kind === 'bulk' ? 1 : 0) + (saleChecks ? 1 : 0) + (contractSeller ? 1 : 0))
   if (quoteProfile) {assert.ok(quoteAccountRefusal && quoteEdited && quoteSignedSnapshot); assert.equal(quoteHeldRequests, 2)}
   if (payoutProfile && !externalRoyalty) assert.ok(payoutBaseline && payoutMined && payoutReceiptChecked && payoutReorgChecked)
   if (externalRoyalty) assert.ok(royaltyChecks.summary(true).pass)
@@ -877,11 +906,12 @@ try {
   if (context) await context.close()
   await stop()
   await rm(profile, {recursive: true, force: false})
-  console.log((externalRoyalty ? 'EXECUTED-EXTERNAL-ROYALTY-BROWSER-QUALIFICATION ' : approvalRequired ? 'EXECUTED-TOKEN-APPROVAL-BROWSER-QUALIFICATION ' : tokenProfile ? 'EXECUTED-TOKEN-PAYMENT-BROWSER-QUALIFICATION ' : 'EXECUTED-MARKET-BROWSER-QUALIFICATION ') + JSON.stringify({node: process.version, chrome, pins,
+  console.log((contractSeller ? 'EXECUTED-ERC1271-BROWSER-QUALIFICATION ' : externalRoyalty ? 'EXECUTED-EXTERNAL-ROYALTY-BROWSER-QUALIFICATION ' : approvalRequired ? 'EXECUTED-TOKEN-APPROVAL-BROWSER-QUALIFICATION ' : tokenProfile ? 'EXECUTED-TOKEN-PAYMENT-BROWSER-QUALIFICATION ' : 'EXECUTED-MARKET-BROWSER-QUALIFICATION ') + JSON.stringify({node: process.version, chrome, pins,
     result, SDKVersion: sdk.version, boundedNavigation: navigation.summary(), actualTypedDataSignatures: signatures.length, actualOrderPOSTs: posts.length,
     providerMethods: methods, providerFailures, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
     actualProductionPageActionsAndGoAdmission: true, actualProviderEVMTransactions: transactions.length,
     actualOfficialRelayerTransport: true, physicalWalletOrPublicNetwork: false,
+    actualContractSignatures: contractSeller ? {pass: result.pass && contractSignatures.length === (fixture.kind === 'bulk' ? 1 : 2), configuration: fixture.contractSeller, signatures: contractSignatures, actualProductionPagesAndContractTrader: true, genericOrPhysicalWalletQualified: false, authenticatedNoMQualified: false} : null,
     actualExternalRoyalties: royaltyChecks ? royaltyChecks.summary(result.pass) : null,
     actualNonzeroPayouts: externalRoyalty ? royaltyChecks.summary(result.pass) : payoutProfile ? {pass: result.pass && payoutReceiptChecked && payoutReorgChecked,
       configuration: fixture.payouts, canonicalMinedState: payoutMined, independentSDKBalanceReads: true,
