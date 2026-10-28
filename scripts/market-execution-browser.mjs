@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict'
 import {createTokenPaymentChecks} from './market-token-payment-support.mjs'
 import {createSaleProceedsChecks} from './market-sale-proceeds-support.mjs'
+import {createExternalRoyaltyChecks} from './market-external-royalty-support.mjs'
 import {execFileSync} from 'node:child_process'
 import {existsSync} from 'node:fs'
 import {readFile, mkdtemp, rm} from 'node:fs/promises'
@@ -27,13 +28,15 @@ assert.ok(['buy', 'cancel', 'nonce', 'approval', 'batch', 'partial-batch'].inclu
 const batchMode = ['batch', 'partial-batch'].includes(fixture.action)
 const partialBatch = fixture.action === 'partial-batch'
 const tokenProfile = fixture.tokenPayment?.profile ?? null
+const externalRoyalty = fixture.externalRoyalty?.profile === 'cap-and-revert'
+assert.ok(!externalRoyalty || (!tokenProfile && fixture.kind === 'single' && fixture.action === 'batch'))
 const approvalRequired = fixture.tokenPayment?.approvalRequired === true
 assert.ok(!approvalRequired || !partialBatch)
 assert.ok(tokenProfile === null || (tokenProfile === 'qsr' && ((fixture.app === 'nft' && fixture.action === 'buy') || (fixture.app === 'karum' && fixture.kind === 'bulk' && fixture.action === 'batch'))) || (tokenProfile === 'mixed' && fixture.app === 'karum' && fixture.kind === 'single' && batchMode))
 const payoutProfile = !tokenProfile && ['buy', 'batch', 'partial-batch'].includes(fixture.action)
 assert.equal(!!fixture.payouts, payoutProfile || !!tokenProfile)
 const zeroPayment = '0x' + '0'.repeat(40)
-const expectedPayment = id => tokenProfile ? fixture.tokenPayment.orders[String(id)] : {price: '250000000000000000', paymentToken: zeroPayment}
+const expectedPayment = id => tokenProfile ? fixture.tokenPayment.orders[String(id)] : {price: externalRoyalty ? fixture.externalRoyalty.price : '250000000000000000', paymentToken: zeroPayment}
 const nativePayment = id => expectedPayment(id).paymentToken.toLowerCase() === zeroPayment ? BigInt(expectedPayment(id).price) : 0n
 const totalNativePayment = nativePayment(1) + nativePayment(2)
 let payoutBaseline, payoutMined, payoutReceiptChecked = false, payoutReorgChecked = false
@@ -134,7 +137,8 @@ const record = name => {
   console.log('SIGNED-BROWSER-EVENT ' + JSON.stringify({app: fixture.app, kind: fixture.kind, check: name, pass: true}))
 }
 const tokenChecks = tokenProfile ? createTokenPaymentChecks({fixture, chain, viem: requireApp('viem'), record}) : null
-const saleChecks = fixture.app === 'karum' ? createSaleProceedsChecks({fixture, page: () => page, chain, viem: requireApp('viem'), expectedPayment, record}) : null
+const royaltyChecks = externalRoyalty ? createExternalRoyaltyChecks({fixture, page: () => page, chain, viem: requireApp('viem'), record}) : null
+const saleChecks = fixture.app === 'karum' ? (royaltyChecks?.preview ?? createSaleProceedsChecks({fixture, page: () => page, chain, viem: requireApp('viem'), expectedPayment, record})) : null
 async function until(fn, name, ...args) {
   await page.waitForFunction(fn, {timeout: 12000, polling: 100}, ...args).catch(() => {throw new Error(name)})
 }
@@ -215,6 +219,7 @@ async function awaitTokenApproval(scope) {
 }
 
 async function checkPayoutState(phaseName, state) {
+  if (externalRoyalty) return royaltyChecks.state(phaseName, state)
   const value = state.payouts
   assert.ok(value?.pass && value.hashBoundContractAndBalanceReads && value.allPayoutCreditsZero)
   const expectedFills = state.included ? (fixture.action === 'batch' ? 2 : 1) : 0
@@ -259,6 +264,7 @@ async function checkPayoutState(phaseName, state) {
 }
 
 async function checkPayoutReceipt(receipt, state) {
+  if (externalRoyalty) return royaltyChecks.receipt(receipt, state)
   if (tokenProfile) return tokenChecks.receipt(receipt, state)
   const abi = parseAbi(['event OrderFilled(bytes32 indexed orderHash, address indexed maker, address indexed taker, uint8 side, address collection, uint256 tokenId, address paymentToken, uint256 price, uint256 royalty, uint256 fee)'])
   const topic = keccak256(stringToHex('OrderFilled(bytes32,address,address,uint8,address,uint256,address,uint256,uint256,uint256)'))
@@ -341,7 +347,7 @@ async function preparePage(page) {
     assert.equal(typed.domain.verifyingContract.toLowerCase(), fixture.exchange.toLowerCase())
     assert.equal(typed.primaryType, fixture.kind === 'bulk' ? 'OrderRoot' : 'Order')
     assert.ok(signatures.length < 2)
-    if (tokenProfile && fixture.kind === 'single') {
+    if ((tokenProfile || externalRoyalty) && fixture.kind === 'single') {
       const wanted = expectedPayment(typed.message.tokenId)
       assert.ok(wanted); assert.equal(BigInt(typed.message.price), BigInt(wanted.price))
       assert.equal(typed.message.paymentToken.toLowerCase(), wanted.paymentToken.toLowerCase())
@@ -455,6 +461,7 @@ async function preparePage(page) {
   })
   page.on('pageerror', () => exceptions.push('page-exception'))
   page.on('response', response => {
+    royaltyChecks?.observeResponse(response)
     if (response.status() >= 400 && failedHTTP.length < 32) failedHTTP.push({path: new URL(response.url()).pathname, status: response.status()})
   })
 }
@@ -488,7 +495,7 @@ try {
         if (fixture.app === 'nft') await page.select('select[aria-label="Currency"]', 'qsr')
         else await click('QSR')
       }
-      await page.type(selector, tokenProfile && wanted.paymentToken.toLowerCase() !== zeroPayment ? '0.20000001' : '0.25')
+      await page.type(selector, externalRoyalty ? '0.200000000000000018' : tokenProfile && wanted.paymentToken.toLowerCase() !== zeroPayment ? '0.20000001' : '0.25')
       if (saleChecks && !(quoteProfile && id === 1)) await saleChecks.verify([id])
       if (quoteProfile && id === 1) {
         await click('1 hour')
@@ -716,7 +723,7 @@ try {
       assert.equal(fill.side, 0)
       assert.equal(fill.price, BigInt(expectedPayment(fill.tokenId).price))
       assert.equal(fill.paymentToken.toLowerCase(), expectedPayment(fill.tokenId).paymentToken.toLowerCase())
-      assert.equal(fill.royalty, fill.price * 375n / 10000n)
+      assert.equal(fill.royalty, externalRoyalty ? (fill.tokenId === 1n ? fill.price * 1000n / 10000n : 0n) : fill.price * 375n / 10000n)
       assert.equal(fill.fee, fill.price * 200n / 10000n)
     }
     await checkPayoutReceipt(receipt, state)
@@ -850,7 +857,8 @@ try {
   record((partialBatch || approvalRequired ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
   assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0) + (approvalRequired ? 3 : 0) + (tokenProfile && fixture.kind === 'bulk' ? 1 : 0) + (saleChecks ? 1 : 0))
   if (quoteProfile) {assert.ok(quoteAccountRefusal && quoteEdited && quoteSignedSnapshot); assert.equal(quoteHeldRequests, 2)}
-  if (payoutProfile) assert.ok(payoutBaseline && payoutMined && payoutReceiptChecked && payoutReorgChecked)
+  if (payoutProfile && !externalRoyalty) assert.ok(payoutBaseline && payoutMined && payoutReceiptChecked && payoutReorgChecked)
+  if (externalRoyalty) assert.ok(royaltyChecks.summary(true).pass)
   if (tokenProfile) assert.ok(tokenChecks.summary(true).pass)
   result.pass = true
 } catch (error) {
@@ -867,12 +875,13 @@ try {
   if (context) await context.close()
   await stop()
   await rm(profile, {recursive: true, force: false})
-  console.log((approvalRequired ? 'EXECUTED-TOKEN-APPROVAL-BROWSER-QUALIFICATION ' : tokenProfile ? 'EXECUTED-TOKEN-PAYMENT-BROWSER-QUALIFICATION ' : 'EXECUTED-MARKET-BROWSER-QUALIFICATION ') + JSON.stringify({node: process.version, chrome, pins,
+  console.log((externalRoyalty ? 'EXECUTED-EXTERNAL-ROYALTY-BROWSER-QUALIFICATION ' : approvalRequired ? 'EXECUTED-TOKEN-APPROVAL-BROWSER-QUALIFICATION ' : tokenProfile ? 'EXECUTED-TOKEN-PAYMENT-BROWSER-QUALIFICATION ' : 'EXECUTED-MARKET-BROWSER-QUALIFICATION ') + JSON.stringify({node: process.version, chrome, pins,
     result, SDKVersion: sdk.version, actualTypedDataSignatures: signatures.length, actualOrderPOSTs: posts.length,
     providerMethods: methods, providerFailures, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
     actualProductionPageActionsAndGoAdmission: true, actualProviderEVMTransactions: transactions.length,
     actualOfficialRelayerTransport: true, physicalWalletOrPublicNetwork: false,
-    actualNonzeroPayouts: payoutProfile ? {pass: result.pass && payoutReceiptChecked && payoutReorgChecked,
+    actualExternalRoyalties: royaltyChecks ? royaltyChecks.summary(result.pass) : null,
+    actualNonzeroPayouts: externalRoyalty ? royaltyChecks.summary(result.pass) : payoutProfile ? {pass: result.pass && payoutReceiptChecked && payoutReorgChecked,
       configuration: fixture.payouts, canonicalMinedState: payoutMined, independentSDKBalanceReads: true,
       originalProfileAndTransactionCountPreserved: true, mixedCurrencyOrERC1271Qualified: false} : null,
     actualTokenPayments: tokenProfile ? tokenChecks.summary(result.pass) : null,

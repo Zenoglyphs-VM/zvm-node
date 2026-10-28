@@ -87,6 +87,10 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 	t.Run("karum-bulk-qsr-missing-allowance", func(t *testing.T) {
 		executedMarketBrowserProfile(t, roots, "karum", "bulk", "batch", "qsr-approval")
 	})
+	for _, app := range []string{"nft", "karum"} {
+		t.Run(app+"-single-external-royalty-batch", func(t *testing.T) { executedMarketBrowserProfile(t, roots, app, "single", "batch", "external-royalty") })
+	}
+
 }
 
 func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind, action string, payment ...string) {
@@ -95,7 +99,12 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	if len(payment) > 1 {
 		t.Fatal("one token payment profile is required")
 	}
-	if len(payment) == 1 {
+	if len(payment) == 1 && payment[0] == "external-royalty" {
+		if kind != "single" || action != "batch" {
+			t.Fatal("undeclared external royalty browser profile")
+		}
+		f, transport = orderbook.NewExecutedExternalRoyaltyBrowserFixture(t, kind)
+	} else if len(payment) == 1 {
 		basePayment := strings.TrimSuffix(payment[0], "-approval")
 		if !((basePayment == "qsr" && ((app == "nft" && action == "buy") || (app == "karum" && kind == "bulk" && action == "batch"))) || (kind == "single" && app == "karum" && (action == "batch" || action == "partial-batch") && basePayment == "mixed")) {
 			t.Fatal("undeclared token browser profile")
@@ -225,7 +234,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	defer web.Close()
 	input, err := json.Marshal(map[string]any{"base": web.URL, "token": token, "roots": roots,
 		"app": app, "kind": kind, "collection": f.Collection().Hex(), "exchange": f.Exchange().Hex(),
-		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex(), "payouts": f.MarketPayoutConfig(), "tokenPayment": f.TokenPaymentDescription()})
+		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex(), "payouts": f.MarketPayoutConfig(), "tokenPayment": f.TokenPaymentDescription(), "externalRoyalty": f.ExternalRoyaltyDescription()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -394,11 +403,17 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				"manualSQLOrderOrCacheControls": 0, "manualIndexOrBookSteps": 0, "ownedDriverJoined": true,
 				"unsignedSourceAndExecutionRPCFixture": true, "actualOfficialRelayerProgram": true, "actualRelayerJoined": true, "actualRelayerExit": relayerExit, "ownedCancellationMarkerVerified": true,
 				"actualProviderEVMTransaction": transport.Evidence(), "actualNonzeroPayouts": transport.MarketPayoutEvidence(t), "realWalletOrPublicNetworkOperations": 0}
+			if value := f.ExternalRoyaltyDescription(); value != nil {
+				record["externalRoyalty"] = value
+			}
 			raw, err := json.Marshal(record)
 			if err != nil {
 				t.Fatal(err)
 			}
 			marker := "EXECUTED-MARKET-BROWSER-GO "
+			if f.ExternalRoyaltyDescription() != nil {
+				marker = "EXECUTED-EXTERNAL-ROYALTY-BROWSER-GO "
+			}
 			if f.TokenPaymentProfile() != "" {
 				marker = "EXECUTED-TOKEN-PAYMENT-BROWSER-GO "
 				if f.TokenApprovalRequired() {

@@ -65,6 +65,9 @@ func payoutShare(amount *big.Int, bps uint64) *big.Int {
 }
 
 func (p *ExecutedMarketProviderFixture) AssertMarketPayouts(t *testing.T, phase string, included bool) map[string]any {
+	if p.f.r.scenario.royalty != nil {
+		return p.assertExternalRoyaltyPayouts(t, phase, included)
+	}
 	if p.f.TokenPaymentProfile() != "" {
 		return p.assertTokenPayments(t, phase, included)
 	}

@@ -536,3 +536,27 @@ gas ceilings and dependencies remain. Normal Go CI explicitly skips this new
 compiler-input prerequisite. This native foundation does not qualify external
 royalties in production pages/provider flows or authenticated NoM. Both interfaces,
 ERC-1271, generic wallets and the original complete acceptance remain open.
+
+
+## External royalty production purchase profiles
+
+Two separately named opt-in profiles retain every existing profile and use the
+actual NFT and Karum item listing controls, EIP-712 signatures, node admission,
+batch checkout, official relayer program and executed provider receipts. Their
+independent collection reports 5000 bps for token 1 and reverts for token 2. Both
+orders preserve the exact native price 200000000000000018. SDK receipt and
+canonical balance observations check the 1000-bps cap, zero-royalty revert
+fallback, independent fee/royalty rounding, receipt fees and replacement and
+restoration of the actual transaction. Karum additionally checks the ready
+capped preview and the unavailable preview with passive observation of the
+product's unmodified hash-selected RPC error response.
+
+The existing native foundation, compiler targets and all earlier production
+profiles remain. Both Solidity targets share one pinned compiler transport.
+The dedicated Go command stops after a test failure without increasing its
+12-minute package deadline or 15-minute job deadline. Success still requires
+every declared profile and control. Hosted evidence must match the new source;
+adding these profiles alone is not a qualification claim. NoM authority, full
+daemon integration, generic/physical wallets, ERC-1271 and complete A08 product
+acceptance remain separate gates. No public-chain or real-wallet operation is
+performed.

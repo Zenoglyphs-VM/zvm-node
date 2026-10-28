@@ -64,6 +64,10 @@ func newExecutedMarketActionBrowserFixture(t *testing.T, kind, action string) (*
 }
 
 func newExecutedMarketActionPaymentBrowserFixture(t *testing.T, kind, action, payment string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
+	return newExecutedMarketActionRoyaltyBrowserFixture(t, kind, action, payment, nil)
+}
+
+func newExecutedMarketActionRoyaltyBrowserFixture(t *testing.T, kind, action, payment string, royalty *executedRoyaltySetup) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
 	t.Helper()
 	key := make([]byte, 32)
 	key[31] = 2 // Deliberately public scalar-two test buyer.
@@ -75,7 +79,7 @@ func newExecutedMarketActionPaymentBrowserFixture(t *testing.T, kind, action, pa
 	if !executedMarketBuyerAction(action) {
 		age = 4 * time.Minute
 	}
-	f := newExecutedMarketFixturePaymentProfile(t, kind, uint64(time.Now().Add(-age).Unix()), znn.Address(crypto.PubkeyToAddress(buyer.PublicKey)), true, payment, action)
+	f := newExecutedMarketFixtureRoyaltyProfile(t, kind, uint64(time.Now().Add(-age).Unix()), znn.Address(crypto.PubkeyToAddress(buyer.PublicKey)), true, payment, royalty, action)
 	p := &ExecutedMarketProviderFixture{f: f}
 	f.r.backend.provider = p
 	p.source = httptest.NewServer(http.HandlerFunc(p.sourceRPC))

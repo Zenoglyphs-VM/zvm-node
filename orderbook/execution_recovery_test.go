@@ -442,19 +442,20 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 		t.Fatal("approval and seller-cancellation profiles remain separate")
 	}
 	s.credit = inputs.credit
-	s.royalty = inputs.royalty
-	if s.royalty != nil {
-		if inputs.provider || inputs.credit != nil || inputs.payment != "" || inputs.sign != nil || inputs.orders != nil {
-			t.Fatal("external royalty native setup cannot replace an existing profile")
-		}
-		s.payouts = newExecutedMarketPayouts()
-		s.payouts.royaltyBps = 5000
-	}
 	if s.provider && s.providerAction == "" {
 		s.providerAction = "buy"
 	}
 	if inputs.provider && inputs.credit == nil && (s.providerAction == "buy" || s.providerAction == "batch" || s.providerAction == "partial-batch") {
 		s.payouts = newExecutedMarketPayouts()
+	}
+	s.royalty = inputs.royalty
+	if s.royalty != nil {
+		if inputs.credit != nil || inputs.payment != "" || inputs.orders != nil ||
+			(inputs.provider && (inputs.action != "batch" || inputs.sign == nil)) || (!inputs.provider && inputs.sign != nil) {
+			t.Fatal("external royalty setup requires its native or signed provider batch profile")
+		}
+		s.payouts = newExecutedMarketPayouts()
+		s.payouts.royaltyBps = 5000
 	}
 	if inputs.buyer != (znn.Address{}) {
 		s.buyer = inputs.buyer

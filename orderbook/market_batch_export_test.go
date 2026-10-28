@@ -473,7 +473,11 @@ func (p *ExecutedMarketProviderFixture) AssertBatchState(t *testing.T, stage int
 			if (p.partial != nil && i == 0) || input.Order.PaymentToken != (common.Address{}) {
 				continue
 			}
-			proceeds.Sub(proceeds, payoutShare(input.Order.Price.Big(), setup.royaltyBps))
+			royalty := payoutShare(input.Order.Price.Big(), setup.royaltyBps)
+			if p.f.r.scenario.royalty != nil {
+				royalty = externalRoyaltyExpected(input)
+			}
+			proceeds.Sub(proceeds, royalty)
 			proceeds.Sub(proceeds, payoutShare(input.Order.Price.Big(), setup.feeBps))
 		}
 	}

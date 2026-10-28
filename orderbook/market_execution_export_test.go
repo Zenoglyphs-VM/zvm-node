@@ -82,10 +82,14 @@ func newExecutedMarketFixtureProfile(t *testing.T, kind string, timestamp uint64
 }
 
 func newExecutedMarketFixturePaymentProfile(t *testing.T, kind string, timestamp uint64, buyer znn.Address, provider bool, payment string, actions ...string) *ExecutedMarketFixture {
+	return newExecutedMarketFixtureRoyaltyProfile(t, kind, timestamp, buyer, provider, payment, nil, actions...)
+}
+
+func newExecutedMarketFixtureRoyaltyProfile(t *testing.T, kind string, timestamp uint64, buyer znn.Address, provider bool, payment string, royalty *executedRoyaltySetup, actions ...string) *ExecutedMarketFixture {
 	t.Helper()
 	key := executedMarketKey(t)
 	options := executionScenarioInputs{
-		buyer: buyer, provider: provider, payment: payment,
+		buyer: buyer, provider: provider, payment: payment, royalty: royalty,
 		seller:    znn.Address(crypto.PubkeyToAddress(key.PublicKey)),
 		timestamp: timestamp,
 		sign: func(s *executionScenario) []*Input {
