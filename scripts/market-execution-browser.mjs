@@ -39,12 +39,27 @@ assert.equal(sdk.version, '2.56.8')
 const signer = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '1')
 const buyerSigner = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '2')
 assert.equal(buyerSigner.address.toLowerCase(), fixture.buyer.toLowerCase())
-const {createPublicClient, http, decodeEventLog, keccak256, parseAbi, stringToHex} = requireApp('viem')
+const {createPublicClient, http, decodeEventLog, encodeFunctionData, keccak256, parseAbi, stringToHex} = requireApp('viem')
 const chain = createPublicClient({transport: http(new URL('/rpc', base).href, {retryCount: 0})})
 const transactions = []
 const actorSigner = fixture.action === 'buy' || batchMode ? buyerSigner : signer
 assert.equal(actorSigner.address.toLowerCase(), fixture.actor.toLowerCase())
 const targetAddress = fixture.action === 'approval' ? fixture.collection : fixture.exchange
+const quoteProfile = fixture.app === 'karum' && fixture.kind === 'single' && fixture.action === 'buy'
+const quoteApprovalData = encodeFunctionData({abi: parseAbi(['function isApprovedForAll(address owner, address operator) view returns (bool)']),
+  functionName: 'isApprovedForAll', args: [fixture.seller, fixture.exchange]}).toLowerCase()
+let quoteArmed = false, heldQuoteRequest, quoteReady, resolveQuoteReady
+let quoteHeldRequests = 0, quoteAccountRefusal = false, quoteEdited = false, quoteSignedSnapshot = null
+function armQuote() {
+  assert.ok(quoteProfile && !quoteArmed && !heldQuoteRequest)
+  quoteReady = new Promise(resolve => {resolveQuoteReady = resolve})
+  quoteArmed = true
+}
+async function releaseQuote() {
+  assert.ok(heldQuoteRequest)
+  const request = heldQuoteRequest; heldQuoteRequest = null
+  await request.continue()
+}
 let fundedNonce, fundedSellerNonce
 let releaseBuyer, heldBuyerReadyResolve
 const buyerGate = new Promise(resolve => {releaseBuyer = resolve})
@@ -86,6 +101,13 @@ function inject({seller, buyer, chainId, actor, action}) {
       throw new Error('unsupported fixture wallet method: ' + method)
     },
   }
+  // The declared fixture emits the standard provider event; product API/RPC
+  // replies are never replaced. Only its two public test accounts are allowed.
+  Object.defineProperty(window, '__executedMarketSelectAccount', {value: address => {
+    if (![seller, buyer].some(value => value.toLowerCase() === address.toLowerCase())) throw new Error('undeclared fixture account')
+    state.accounts = [address]
+    for (const fn of listeners.get('accountsChanged') || []) fn([...state.accounts])
+  }})
   const announce = () => window.dispatchEvent(new CustomEvent('eip6963:announceProvider', {detail: Object.freeze({
     info: {uuid: 'e5b6718a-5392-4b82-9999-000000000001', name: 'Fixture wallet', icon: '', rdns: 'test.zvm'}, provider})}))
   window.addEventListener('eip6963:requestProvider', announce)
@@ -197,6 +219,17 @@ async function preparePage(page) {
     assert.equal(typed.domain.verifyingContract.toLowerCase(), fixture.exchange.toLowerCase())
     assert.equal(typed.primaryType, fixture.kind === 'bulk' ? 'OrderRoot' : 'Order')
     assert.ok(signatures.length < 2)
+    if (quoteProfile && BigInt(typed.message.tokenId) === 1n) {
+      assert.ok(quoteAccountRefusal && quoteEdited); assert.equal(quoteHeldRequests, 2)
+      assert.equal(BigInt(typed.message.price), 250000000000000000n)
+      assert.equal(typed.message.paymentToken.toLowerCase(), '0x' + '0'.repeat(40))
+      assert.equal(BigInt(typed.message.expirationTime) - BigInt(typed.message.listingTime), 3900n)
+      quoteSignedSnapshot = {price: BigInt(typed.message.price).toString(), paymentToken: typed.message.paymentToken.toLowerCase(),
+        listingTime: BigInt(typed.message.listingTime).toString(), expirationTime: BigInt(typed.message.expirationTime).toString(),
+        selectedDurationSeconds: '3600', editedPrice: '0.75', editedDurationDays: 1}
+      record('actual production listing preserves the original exact price despite a form edit during approval')
+      record('the selected one-hour expiry survives a later duration edit and reaches the real typed-data signer unchanged')
+    }
     const signature = await signer.signTypedData({...typed, domain: {...typed.domain, chainId: Number(BigInt(typed.domain.chainId))}})
     signatures.push({primaryType: typed.primaryType})
     return signature
@@ -246,6 +279,19 @@ async function preparePage(page) {
   page.on('request', request => {
     const target = new URL(request.url())
     if (target.protocol === 'data:' || target.origin === base.origin) {
+      if (quoteArmed && request.method() === 'POST' && target.pathname === '/rpc') {
+        const raw = request.postData()
+        if (typeof raw === 'string' && raw.length <= 256 * 1024) {
+          let entries
+          try {const value = JSON.parse(raw); entries = Array.isArray(value) ? value : [value]} catch {entries = []}
+          if (entries.some(entry => entry.method === 'eth_call' &&
+            entry.params?.[0]?.to?.toLowerCase() === fixture.collection.toLowerCase() &&
+            entry.params?.[0]?.data?.toLowerCase() === quoteApprovalData)) {
+            assert.ok(!heldQuoteRequest); quoteArmed = false; heldQuoteRequest = request; quoteHeldRequests++
+            resolveQuoteReady(); return
+          }
+        }
+      }
       if (request.method() === 'POST' && target.pathname === '/api/nft/orders') {
         const raw = request.postData()
         if (typeof raw !== 'string' || raw.length > 256*1024) {
@@ -293,7 +339,28 @@ try {
       const selector = fixture.app === 'nft' ? 'input[aria-label="Asking price"]' : '#list-price'
       await page.waitForSelector(selector, {visible: true, timeout: 12000})
       await page.type(selector, '0.25')
-      if (fixture.app === 'nft') await click('List it')
+      if (quoteProfile && id === 1) {
+        await click('1 hour')
+        armQuote(); await page.click('[data-testid="list-submit"]')
+        await boundedReady(quoteReady, 'the original production approval read was not held')
+        await page.evaluate(account => window.__executedMarketSelectAccount(account), fixture.buyer)
+        await releaseQuote()
+        await until(() => document.body.textContent.includes('account, network or selected items changed'), 'changed account did not refuse the original listing')
+        assert.equal(signatures.length, 0); assert.equal(posts.length, 0); assert.equal(transactions.length, 0)
+        assert.equal(methods.filter(method => method === 'eth_signTypedData_v4').length, 0)
+        quoteAccountRefusal = true
+        record('an actual account change during a delayed approval read prevents any typed-data prompt or order POST')
+        await page.evaluate(account => window.__executedMarketSelectAccount(account), fixture.seller)
+        await navigate('/item/' + fixture.collection + '/1'); await connect(); await click('List for sale')
+        await page.waitForSelector(selector, {visible: true}); await page.type(selector, '0.25'); await click('1 hour')
+        armQuote(); await page.click('[data-testid="list-submit"]')
+        await boundedReady(quoteReady, 'the explicit replacement action did not reach its real approval read')
+        await page.$eval(selector, input => {input.value = '0.75'; input.dispatchEvent(new Event('input', {bubbles: true}))})
+        await click('1 day')
+        assert.equal(await page.$eval(selector, input => input.value), '0.75')
+        quoteEdited = true
+        await releaseQuote()
+      } else if (fixture.app === 'nft') await click('List it')
       else {await page.waitForSelector('[data-testid="list-submit"]', {visible: true}); await page.click('[data-testid="list-submit"]')}
       await waitOrders(id)
     }
@@ -586,7 +653,8 @@ try {
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
   assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch ? 2 : 1)
   record((partialBatch ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20))
+  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0))
+  if (quoteProfile) {assert.ok(quoteAccountRefusal && quoteEdited && quoteSignedSnapshot); assert.equal(quoteHeldRequests, 2)}
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 220)
@@ -596,6 +664,8 @@ try {
     message: document.querySelector('main')?.textContent.slice(-700)})).catch(() => null)
   process.exitCode = 1
 } finally {
+  quoteArmed = false
+  if (heldQuoteRequest) {const request = heldQuoteRequest; heldQuoteRequest = null; await request.continue().catch(() => {})}
   if (context) await context.close()
   await stop()
   await rm(profile, {recursive: true, force: false})
@@ -604,5 +674,10 @@ try {
     providerMethods: methods, providerFailures, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
     actualProductionPageActionsAndGoAdmission: true, actualProviderEVMTransactions: transactions.length,
     actualOfficialRelayerTransport: true, physicalWalletOrPublicNetwork: false,
+    actualQuotePreparation: quoteProfile ? {pass: result.pass && quoteAccountRefusal && quoteEdited && !!quoteSignedSnapshot,
+      actualDelayedApprovalRPCRequests: quoteHeldRequests, actualAccountsChangedEvent: true,
+      changedAccountRefusedBeforeTypedDataPrompt: quoteAccountRefusal,
+      originalQuotePreservedAfterFormEdit: quoteEdited, actualSignedSnapshot: quoteSignedSnapshot,
+      mockedProductAPIOrRPCReplies: 0, additionalProviderTransactions: 0} : null,
     signer: 'public scalar-one seller and scalar-two buyer EIP-1193 test signers', browserJoined: !!browser?.process() && browser.process().exitCode !== null}))
 }

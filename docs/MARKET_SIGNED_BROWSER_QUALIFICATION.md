@@ -351,3 +351,33 @@ independent execution proof. The companion model controls cover conflicting
 pending/receipt evidence, ambiguous errors and persistence failure. Generic
 Safe/ERC-4337 accounts, physical wallets, independent NoM/full-daemon acceptance
 and the full original marketplace acceptance remain separate gates.
+
+
+### Exact quote preparation on a production page
+
+The existing Karum single-order purchase profile holds two actual approval-read
+transport requests without changing their parameters or replies. During the first
+read the declared provider emits a standard accountsChanged event. The real
+application must refuse the old listing before any typed-data request or order
+POST. Restoring the public test account and making a fresh explicit action then
+tests a one-hour listing: while its approval read is held, the actual price input
+changes from 0.25 to 0.75 and its duration from one hour to one day. The real
+typed-data request and admitted order must still contain the original 0.25 ZNN
+and exactly 3600 seconds, independently of the later form values.
+
+The remaining purchase, nonce/cancellation/approval, batch/refund, credit and
+wallet-call cases are retained at the new UI pins. This adds three named checks
+to one existing profile and no browser profile or transaction. The expected
+campaign is 30 production browser profiles, 611 named checks and 34 actual
+provider transactions with verified NoM publications. The existing one-time
+frontend/relayer/wallet builds and job/test bounds are unchanged. These are
+expectations until automatic CI qualifies the exact new source revisions.
+
+The provider and accounts are the declared public fixture. EVM execution, API
+admission, official-relayer transport and signatures remain actual; NoM
+canonicality/plasma and the custom Engine adapter retain fixture authority.
+Pure source-function quote controls separately cover both interfaces, QSR
+configuration, full-precision relisting, offers, bulk selection and context
+changes. Actual mixed-currency, nonzero-royalty and ERC-1271 browser acceptance
+and the full original roadmap remain separate gates. Earlier financial
+campaigns retain their original order-module/UI/source revisions.
