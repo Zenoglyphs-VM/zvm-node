@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: Zenoglyphs-VM/zvm-nft
-          ref: 24c960409e5388b8a95da5cc7aa8f25b35dac63c
+          ref: 50c581dbc48ca6bb8f7a03c31c5eac2a6e9833ef
           path: .market-browser/zvm-nft
           persist-credentials: false
           submodules: true
