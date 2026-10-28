@@ -134,7 +134,7 @@ func TestExecutedERC1271NativeSignaturesAndRecovery(t *testing.T) {
 				if err != nil || len(raw) != 32 || new(big.Int).SetBytes(raw).Uint64() != uint64(mode) {
 					t.Fatal("native signature mode differs from actual canonical state")
 				}
-				response, signatureError := walletRead("isValidSignature", digest, input.Signature)
+				response, signatureError := walletRead("isValidSignature", digest, []byte(input.Signature))
 				signatureValid := mode == 0 && !item.wrongSigner
 				if mode == 2 {
 					if signatureError == nil || !strings.Contains(signatureError.Error(), "execution reverted") {

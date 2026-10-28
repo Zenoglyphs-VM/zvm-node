@@ -141,7 +141,7 @@ func (f *ExecutedMarketFixture) AssertContractSignatureInput(t *testing.T, input
 		t.Fatal("actual signing owner differs")
 	}
 	digest := contractInputDigest(Domain(f.Rollup().L2ChainID, f.Exchange()), input)
-	data := setup.call(t, "isValidSignature", digest, input.Signature)
+	data := setup.call(t, "isValidSignature", digest, []byte(input.Signature))
 	raw, err = f.r.eth.CallContractAtHash(ctx, ethereum.CallMsg{To: &setup.wallet, Data: data}, hash)
 	if err != nil || len(raw) != 32 || !bytes.Equal(raw[:4], []byte{0x16, 0x26, 0xba, 0x7e}) {
 		t.Fatal("actual ERC-1271 signature was not valid at the canonical hash")
