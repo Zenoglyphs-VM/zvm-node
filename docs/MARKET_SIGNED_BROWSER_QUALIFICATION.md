@@ -284,3 +284,44 @@ This extension qualifies one declared block-dependent receiver policy with a
 known owner-EOA account adapter. Unknown outer-hash recovery, other wallet/user-
 operation mappings, physical wallets, independent NoM authority and the rest of
 the original A08 acceptance remain open.
+
+
+## Caller-id wallet credit recovery
+
+The serialized lane retains all 24 signed production-interface profiles and the
+four successful/mined-revert credit profiles. Legacy fixture wallets now answer
+scoped capability discovery with an unsupported response, before continuing their
+unchanged `eth_sendTransaction` path. The workflow and browser pins select the
+new frontend revisions that passed 179 tests, typecheck and production builds.
+
+Two additional real-browser profiles exercise Wallet Call API response loss, one
+per interface. The declared fixture wallet executes from a compiled owner-EOA
+account adapter; it records exact caller ids before dispatch and retains their
+association with one actual signed outer transaction across page reloads. The
+application loses the accepted send response, then recovers only by the saved id.
+The wallet returns actual node receipt data for that exact associated hash. It
+never searches by nonce, replaces a signature or submits a duplicate transaction.
+
+A real stateful PayoutFailed estimate and an explicit wallet rejection are
+retained as offchain wallet assertions with their original request ids. Neither
+signs or publishes a transaction. The original accepted transaction is submitted
+through the unchanged official relayer with actual NoM signature verification.
+Canonical execution checks credit backing, recipient/exchange balances, owner
+nonce and receipt fees, gas headroom, exact call bytes and the compiled runtime.
+Reload, canonical removal and restoration preserve the same caller id and all
+known hashes. A wallet that temporarily returns an incomplete receipt group leaves
+the original request unresolved; canonical restoration resolves it without a new
+send. The legacy withdrawal journal is never modified by the new protocol.
+
+The new driver records 16 named checks per interface. These assertions qualify
+only after their exact-source hosted executions succeed. One relayer binary and
+one existing pinned compiler/wallet target serve all 30 serialized browser
+profiles within the unchanged 15-minute job and 12-minute test bounds. There is
+no added dependency graph, archive or browser installation.
+
+Wallet id association and inner outcome remain wallet assertions, separately
+checked against canonical outer receipts and actual exchange credit. This
+adapter is not generic Safe/ERC-4337 or physical-wallet qualification. NoM
+canonicality/plasma remain synthetic, and the custom Engine/eth fixture remains
+explicit. Independent NoM/full-daemon authority, already-lost legacy outer
+hashes, other wallet mappings and full marketplace acceptance remain open.

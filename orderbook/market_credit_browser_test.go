@@ -47,9 +47,20 @@ func TestExecutedMarketCreditBrowserRecovery(t *testing.T) {
 	for _, app := range []string{"nft", "karum"} {
 		t.Run(app+"-mined-revert", func(t *testing.T) { executedMarketCreditBrowserProfile(t, roots, app, true) })
 	}
+	for _, app := range []string{"nft", "karum"} {
+		t.Run(app+"-wallet-calls-response-loss", func(t *testing.T) { executedMarketCreditBrowserProfile(t, roots, app, false, true) })
+	}
 }
 
-func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, app string, minedRevert bool) {
+func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, app string, minedRevert bool, walletCalls ...bool) {
+	if len(walletCalls) > 1 {
+		t.Fatal("one wallet protocol variant is required")
+	}
+	useWalletCalls := len(walletCalls) == 1 && walletCalls[0]
+	if useWalletCalls && minedRevert {
+		t.Fatal("wallet response-loss profiles use the successful payout variant")
+	}
+
 	f, transport := orderbook.NewExecutedMarketCreditBrowserFixture(t, minedRevert)
 	f.Advance(0, 6)
 	deployment := filepath.Join(t.TempDir(), "apps.json")
@@ -155,11 +166,15 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 	initial := transport.AssertCreditState(t, false)
 	input, err := json.Marshal(map[string]any{"base": web.URL, "token": token, "roots": roots, "app": app,
 		"chainId": f.Rollup().L2ChainID, "wallet": f.CreditWallet().Hex(), "owner": f.Buyer().Hex(),
-		"exchange": f.Exchange().Hex(), "walletABI": f.CreditWalletABI(), "expectedCredit": "5000000000000000", "minedRevert": minedRevert})
+		"exchange": f.Exchange().Hex(), "walletABI": f.CreditWalletABI(), "expectedCredit": "5000000000000000", "minedRevert": minedRevert, "walletCalls": useWalletCalls})
 	if err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.CommandContext(ctx, "node", filepath.Join("..", "scripts", "market-credit-browser.mjs"))
+	script := "market-credit-browser.mjs"
+	if useWalletCalls {
+		script = "market-wallet-credit-browser.mjs"
+	}
+	cmd := exec.CommandContext(ctx, "node", filepath.Join("..", "scripts", script))
 	cmd.Stdin = bytes.NewReader(input)
 	stdout, stderr := &executedBrowserOutput{limit: 1 << 20}, &executedBrowserOutput{limit: 128 << 10}
 	cmd.Stdout, cmd.Stderr = stdout, stderr
@@ -239,7 +254,7 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 			}
 			transport.AssertCompleted(t)
 			exit := joinRelayer()
-			record := map[string]any{"app": app, "minedRevert": minedRevert, "pass": true, "phases": expected, "observations": observations,
+			record := map[string]any{"app": app, "minedRevert": minedRevert, "walletCalls": useWalletCalls, "pass": true, "phases": expected, "observations": observations,
 				"actualProductionCreditPage": true, "actualNodeAPIAndEVMContractState": true,
 				"actualOfficialRelayerProgram": true, "actualRelayerJoined": true, "actualRelayerExit": exit,
 				"ownedCancellationMarkerVerified": true, "ownedBrowserJoined": true,
@@ -250,7 +265,11 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 			if err != nil {
 				t.Fatal(err)
 			}
-			t.Log("EXECUTED-CREDIT-BROWSER-GO " + string(raw))
+			marker := "EXECUTED-CREDIT-BROWSER-GO "
+			if useWalletCalls {
+				marker = "EXECUTED-WALLET-CREDIT-BROWSER-GO "
+			}
+			t.Log(marker + string(raw))
 			return
 		case <-ctx.Done():
 			<-finished

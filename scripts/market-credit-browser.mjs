@@ -68,6 +68,11 @@ function inject({wallet, chainId, key}) {
         if (BigInt(params[0].chainId) !== BigInt(chainId)) throw new Error('undeclared fixture chain')
         return null
       }
+      if (method === 'wallet_getCapabilities') {
+        if (params.length !== 2 || params[0].toLowerCase() !== wallet.toLowerCase() ||
+          params[1].length !== 1 || BigInt(params[1][0]) !== BigInt(chainId)) throw new Error('unscoped legacy capability discovery')
+        return {}
+      }
       if (method === 'eth_sendTransaction') {
         const response = await window.__creditWalletSend({params, journal: localStorage.getItem(key)})
         if (response.rejected) throw Object.assign(new Error('User rejected the fixture request.'), {code: 4001})
@@ -310,8 +315,9 @@ try {
   assert.equal(requests, 2)
   assert.equal(transactions.length, 1)
   record('restoration recovers the same executed hash balances and immutable journal without re-signing')
-  assert.ok(methods.every(method => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_sendTransaction'].includes(method)))
+  assert.ok(methods.every(method => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'wallet_getCapabilities', 'eth_sendTransaction'].includes(method)))
   assert.equal(methods.filter(method => method === 'eth_sendTransaction').length, 2)
+  assert.equal(methods.filter(method => method === 'wallet_getCapabilities').length, minedRevert ? 4 : 3)
   assert.deepEqual(providerFailures, [])
   assert.deepEqual(failedHTTP, [])
   assert.deepEqual(external, [])
