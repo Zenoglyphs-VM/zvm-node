@@ -42,6 +42,7 @@ type ExecutedMarketProviderFixture struct {
 	partial                                                                             *executedPartialBatch
 	batchBalances                                                                       *executedBatchBalances
 	credit                                                                              *executedCreditTransfer
+	tokenPayment                                                                        *executedTokenPayment
 }
 
 func NewExecutedMarketProviderBrowserFixture(t *testing.T, kind string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
@@ -58,6 +59,10 @@ func NewExecutedMarketOwnerBrowserFixture(t *testing.T, kind, action string) (*E
 }
 
 func newExecutedMarketActionBrowserFixture(t *testing.T, kind, action string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
+	return newExecutedMarketActionPaymentBrowserFixture(t, kind, action, "")
+}
+
+func newExecutedMarketActionPaymentBrowserFixture(t *testing.T, kind, action, payment string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
 	t.Helper()
 	key := make([]byte, 32)
 	key[31] = 2 // Deliberately public scalar-two test buyer.
@@ -69,7 +74,7 @@ func newExecutedMarketActionBrowserFixture(t *testing.T, kind, action string) (*
 	if !executedMarketBuyerAction(action) {
 		age = 4 * time.Minute
 	}
-	f := newExecutedMarketFixtureProfile(t, kind, uint64(time.Now().Add(-age).Unix()), znn.Address(crypto.PubkeyToAddress(buyer.PublicKey)), true, action)
+	f := newExecutedMarketFixturePaymentProfile(t, kind, uint64(time.Now().Add(-age).Unix()), znn.Address(crypto.PubkeyToAddress(buyer.PublicKey)), true, payment, action)
 	p := &ExecutedMarketProviderFixture{f: f}
 	f.r.backend.provider = p
 	p.source = httptest.NewServer(http.HandlerFunc(p.sourceRPC))
@@ -650,6 +655,17 @@ func (p *ExecutedMarketProviderFixture) expectedActionCall() ([]byte, common.Add
 		args = []any{p.f.Exchange(), false}
 	default:
 		return nil, to, value, errors.New("unsupported provider action")
+	}
+	if p.f.TokenPaymentProfile() != "" {
+		value.SetInt64(0)
+		for i, input := range p.f.r.scenario.inputs {
+			if p.Action() == "buy" && i > 0 {
+				break
+			}
+			if input.Order.PaymentToken == (common.Address{}) {
+				value.Add(value, input.Order.Price.Big())
+			}
+		}
 	}
 	data, err := p.f.r.scenario.arts.MustGet(artifact).Call(method, args...)
 	return data, to, value, err

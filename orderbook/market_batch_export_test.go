@@ -384,7 +384,9 @@ func (p *ExecutedMarketProviderFixture) AssertBatchState(t *testing.T, stage int
 			status, code, remaining = StatusCancelled, CodeCancelled, 0
 		} else if filled {
 			status, code, remaining, count, owner = StatusFilled, CodeFilled, 0, 1, p.f.Buyer()
-			spent.Add(spent, input.Order.Price.Big())
+			if input.Order.PaymentToken == (common.Address{}) {
+				spent.Add(spent, input.Order.Price.Big())
+			}
 		}
 		checked := read("ZVMExchange", "checkOrder", p.f.Exchange(), input.ABI())
 		wantCancelled := int64(0)
@@ -456,7 +458,7 @@ func (p *ExecutedMarketProviderFixture) AssertBatchState(t *testing.T, stage int
 	proceeds := new(big.Int).Set(spent)
 	if setup := p.f.r.scenario.payouts; setup != nil && stage == 2 {
 		for i, input := range p.f.r.scenario.inputs {
-			if p.partial != nil && i == 0 {
+			if (p.partial != nil && i == 0) || input.Order.PaymentToken != (common.Address{}) {
 				continue
 			}
 			proceeds.Sub(proceeds, payoutShare(input.Order.Price.Big(), setup.royaltyBps))
@@ -478,7 +480,9 @@ func (p *ExecutedMarketProviderFixture) AssertBatchState(t *testing.T, stage int
 	unspent := new(big.Int)
 	if stage == 2 {
 		for _, input := range p.f.r.scenario.inputs {
-			unspent.Add(unspent, input.Order.Price.Big())
+			if input.Order.PaymentToken == (common.Address{}) {
+				unspent.Add(unspent, input.Order.Price.Big())
+			}
 		}
 		unspent.Sub(unspent, spent)
 	}

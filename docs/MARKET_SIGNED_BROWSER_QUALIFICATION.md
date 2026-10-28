@@ -400,3 +400,12 @@ while retaining all original profiles, transaction counts, build inputs and
 CI bounds. Exact-head hosted execution is required before claiming this scope.
 Mixed-currency and ERC-1271 production-interface execution remain separate
 open requirements; this native-currency lane does not establish them.
+
+
+## Additional QSR and mixed cart profiles
+
+The existing thirty native profiles and their 647 named checks stay in the lane. Two separately named single-signature profiles add an NFT item-page QSR purchase and a Karum cart containing one ZNN and one QSR listing. The simple NFT sweep retains its native-only selection.
+
+QSR uses the existing Core genesis predeploy and actual bridge derivation. A finite allowance is executed in the declared source prefix; these cases do not qualify the missing-allowance approval/purchase path. Native and QSR balances, rounded royalty/fee shares, native receipt gas and the remaining QSR allowance are read independently through canonical removal and restoration. QSR prices include a non-divisible base-unit amount. No balance storage insertion or product API/RPC response replacement is used.
+
+The candidate retains the existing workflow limits, dependency graphs, compiler/wallet target and relayer build. Exact-source automatic CI output must establish the current totals. Historical runs keep their original revisions. Mixed partial refunds, token bulk signatures, royalty cap boundaries, ERC-1271 production-page paths, general wallets and independent NoM/full-daemon acceptance remain separate open gates.

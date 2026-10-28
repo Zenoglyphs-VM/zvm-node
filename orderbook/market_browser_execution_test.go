@@ -71,12 +71,23 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 			}
 		}
 	}
+	// Preserve every native case and add separately named token cases.
+	t.Run("nft-single-qsr", func(t *testing.T) { executedMarketBrowserProfile(t, roots, "nft", "single", "buy", "qsr") })
+	t.Run("karum-single-mixed-batch", func(t *testing.T) { executedMarketBrowserProfile(t, roots, "karum", "single", "batch", "mixed") })
 }
 
-func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind, action string) {
+func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind, action string, payment ...string) {
 	var f *orderbook.ExecutedMarketFixture
 	var transport *orderbook.ExecutedMarketProviderFixture
-	if action == "batch" || action == "partial-batch" {
+	if len(payment) > 1 {
+		t.Fatal("one token payment profile is required")
+	}
+	if len(payment) == 1 {
+		if kind != "single" || !((app == "nft" && action == "buy" && payment[0] == "qsr") || (app == "karum" && action == "batch" && payment[0] == "mixed")) {
+			t.Fatal("undeclared token browser profile")
+		}
+		f, transport = orderbook.NewExecutedMarketTokenBrowserFixture(t, payment[0])
+	} else if action == "batch" || action == "partial-batch" {
 		f, transport = orderbook.NewExecutedMarketBatchBrowserFixture(t, kind, action)
 	} else if action == "buy" {
 		f, transport = orderbook.NewExecutedMarketProviderBrowserFixture(t, kind)
@@ -89,7 +100,11 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 		t.Fatal("executed browser must start with an empty book")
 	}
 	deployment := filepath.Join(t.TempDir(), "apps.json")
-	if err := (&apps.Deployment{ChainID: f.Rollup().L2ChainID, Exchange: f.Exchange(), CollectionFactory: f.CollectionFactory()}).Save(deployment); err != nil {
+	appConfig := &apps.Deployment{ChainID: f.Rollup().L2ChainID, Exchange: f.Exchange(), CollectionFactory: f.CollectionFactory()}
+	if f.TokenPaymentProfile() != "" {
+		appConfig.RewardToken = f.TokenPaymentAddress()
+	}
+	if err := appConfig.Save(deployment); err != nil {
 		t.Fatal(err)
 	}
 	service := market.New(market.Config{DB: f.DB(), Rollup: f.Rollup(), Orders: f.Book(),
@@ -196,7 +211,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	defer web.Close()
 	input, err := json.Marshal(map[string]any{"base": web.URL, "token": token, "roots": roots,
 		"app": app, "kind": kind, "collection": f.Collection().Hex(), "exchange": f.Exchange().Hex(),
-		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex(), "payouts": f.MarketPayoutConfig()})
+		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex(), "payouts": f.MarketPayoutConfig(), "tokenPayment": f.TokenPaymentDescription()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -361,7 +376,11 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			if err != nil {
 				t.Fatal(err)
 			}
-			t.Log("EXECUTED-MARKET-BROWSER-GO " + string(raw))
+			marker := "EXECUTED-MARKET-BROWSER-GO "
+			if f.TokenPaymentProfile() != "" {
+				marker = "EXECUTED-TOKEN-PAYMENT-BROWSER-GO "
+			}
+			t.Log(marker + string(raw))
 			return
 		case <-ctx.Done():
 			<-finished

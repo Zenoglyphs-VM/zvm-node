@@ -52,6 +52,9 @@ func (p *ExecutedMarketProviderFixture) PinMarketPayouts(t *testing.T) {
 		}
 		setup.before[address] = new(big.Int).Set(balance)
 	}
+	if p.f.TokenPaymentProfile() != "" {
+		p.pinTokenPayment(t)
+	}
 	if setup.before[setup.feeRecipient].Sign() != 0 || setup.before[setup.royaltyRecipient].Sign() != 0 {
 		t.Fatal("payout recipients have undeclared initial funds")
 	}
@@ -62,6 +65,9 @@ func payoutShare(amount *big.Int, bps uint64) *big.Int {
 }
 
 func (p *ExecutedMarketProviderFixture) AssertMarketPayouts(t *testing.T, phase string, included bool) map[string]any {
+	if p.f.TokenPaymentProfile() != "" {
+		return p.assertTokenPayments(t, phase, included)
+	}
 	t.Helper()
 	setup := p.f.r.scenario.payouts
 	if setup == nil {
@@ -145,6 +151,9 @@ func (p *ExecutedMarketProviderFixture) AssertMarketPayouts(t *testing.T, phase 
 }
 
 func (p *ExecutedMarketProviderFixture) MarketPayoutEvidence(t *testing.T) map[string]any {
+	if p.f.TokenPaymentProfile() != "" {
+		return p.tokenPaymentEvidence(t)
+	}
 	t.Helper()
 	setup := p.f.r.scenario.payouts
 	if setup == nil {

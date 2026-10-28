@@ -386,6 +386,7 @@ type executionScenario struct {
 	validated, buffered      bool
 	provider                 bool
 	providerAction           string
+	payment                  string
 	credit                   *executedCreditSetup
 	payouts                  *executedMarketPayouts
 }
@@ -399,6 +400,7 @@ type executionScenarioInputs struct {
 	buyer     znn.Address
 	provider  bool
 	action    string
+	payment   string
 	seller    znn.Address
 	timestamp uint64
 	sign      func(*executionScenario) []*Input
@@ -429,6 +431,11 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	s := &executionScenario{arts: arts, seller: inputs.seller, buyer: znn.Address{19: 162}, validated: validated, buffered: buffered}
 	s.provider = inputs.provider
 	s.providerAction = inputs.action
+	s.payment = inputs.payment
+	if s.payment != "" && (!inputs.provider || inputs.credit != nil ||
+		(s.payment != "qsr" || s.providerAction != "buy") && (s.payment != "mixed" || s.providerAction != "batch")) {
+		t.Fatal("unsupported token payment scenario")
+	}
 	s.credit = inputs.credit
 	if s.provider && s.providerAction == "" {
 		s.providerAction = "buy"
@@ -497,6 +504,13 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 			TokenID: U(id), Amount: U(1), Price: B(big.NewInt(250_000_000_000_000_000)), ListingTime: s.cfg.L2GenesisTimestamp,
 			ExpirationTime: s.cfg.L2GenesisTimestamp + 86400, Nonce: U(0), Salt: U(id)})
 	}
+	if s.payment != "" {
+		for i, order := range s.orders {
+			if s.payment == "qsr" || i == 1 {
+				order.PaymentToken, order.Price = rollup.QSRTokenAddr, U(20_000_001)
+			}
+		}
+	}
 	if inputs.orders != nil {
 		if len(inputs.orders) != 2 {
 			t.Fatal("executed scenario requires two actual accepted orders")
@@ -549,14 +563,11 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 			}
 			dm := &znn.DetailedMomentum{Momentum: &znn.Momentum{Height: h, Hash: znn.Sha3([]byte{byte(h), variant}),
 				PreviousHash: momentums[h-1].Momentum.Hash, Timestamp: s.cfg.L2GenesisTimestamp + h*10, ChainIdentifier: 70, Version: 1}}
-			send := func(from, to znn.Address, amount uint64, data []byte) *znn.AccountBlock {
+			sendToken := func(from, to znn.Address, currency znn.TokenStandard, amount uint64, data []byte) *znn.AccountBlock {
 				heights[from]++
 				block := &znn.AccountBlock{Version: 1, ChainIdentifier: 70, BlockType: znn.BlockTypeUserSend, Height: heights[from],
-					Address: from, ToAddress: to, TokenStandard: znn.ZeroTokenStandard, Amount: znn.BigIntFromUint64(amount),
+					Address: from, ToAddress: to, TokenStandard: currency, Amount: znn.BigIntFromUint64(amount),
 					Data: data, UsedPlasma: znn.BaseSendPlasma(len(data)), BasePlasma: znn.BaseSendPlasma(len(data))}
-				if amount > 0 {
-					block.TokenStandard = znn.ZNN
-				}
 				block.FusedPlasma = block.UsedPlasma
 				if validated {
 					block.PreviousHash = previous[from]
@@ -583,11 +594,22 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				dm.Momentum.Content = append(dm.Momentum.Content, znn.AccountHeader{Address: from, Height: block.Height, Hash: block.Hash})
 				return block
 			}
+			send := func(from, to znn.Address, amount uint64, data []byte) *znn.AccountBlock {
+				currency := znn.ZeroTokenStandard
+				if amount > 0 {
+					currency = znn.ZNN
+				}
+				return sendToken(from, to, currency, amount, data)
+			}
 			native := func(from znn.Address, to *common.Address, value *big.Int, data []byte) {
 				send(from, s.cfg.Inbox, 0, derive.EncodeCall(derive.Call{To: to, Value: value, Gas: 8_000_000, Data: data}))
 			}
 			switch h {
 			case 2, 3, 4:
+				if h == 2 && s.payment != "" {
+					// Mint through the real QSR bridge before later fee/funding messages.
+					sendToken(s.buyer, s.cfg.Vault, znn.QSR, 100_000_000, nil)
+				}
 				if h == 2 && validated {
 					deployer := rollup.Create2Deployer
 					native(s.seller, &deployer, nil, rollup.DeployCalldata(rollup.FeesSalt, rollup.FeesArtifact.InitCode()))
@@ -622,6 +644,17 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 					// Bound the simple setter without widening the native ceiling.
 					send(s.seller, s.cfg.Inbox, 0, derive.EncodeCall(derive.Call{To: &s.token, Gas: 500_000,
 						Data: callData("ZVMCollection", "setRoyalty", s.payouts.royaltyRecipient, new(big.Int).SetUint64(s.payouts.royaltyBps))}))
+				}
+				if s.payment != "" {
+					allowance := new(big.Int)
+					for _, order := range s.orders {
+						if order.PaymentToken == rollup.QSRTokenAddr {
+							allowance.Add(allowance, order.Price.Big())
+						}
+					}
+					qsr := rollup.QSRTokenAddr
+					send(s.buyer, s.cfg.Inbox, 0, derive.EncodeCall(derive.Call{To: &qsr, Gas: 500_000,
+						Data: tokenPaymentCall("approve(address,uint256)", tokenPaymentAddress(s.exchange), allowance)}))
 				}
 			case 7:
 				if inputs.sign == nil {

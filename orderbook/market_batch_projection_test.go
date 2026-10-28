@@ -17,6 +17,14 @@ func executedBatchMarketProjection(t *testing.T, f *orderbook.ExecutedMarketFixt
 	states := executed["states"].([]map[string]any)
 	collection := f.Collection().Hex()
 	wantListings, wantSales := []string{}, []string{}
+	prices := map[string]string{}
+	currencies := map[string]common.Address{}
+	for _, input := range inputs {
+		prices[input.Order.Hash().Hex()] = input.Order.Price.Big().String()
+		prices[input.Order.TokenID.Big().String()] = input.Order.Price.Big().String()
+		currencies[input.Order.Hash().Hex()] = input.Order.PaymentToken
+		currencies[input.Order.TokenID.Big().String()] = input.Order.PaymentToken
+	}
 	for i, input := range inputs {
 		state := states[i]
 		var detail struct {
@@ -48,13 +56,14 @@ func executedBatchMarketProjection(t *testing.T, f *orderbook.ExecutedMarketFixt
 		}
 	}
 	var listings []struct {
-		Hash  common.Hash
-		Price string
+		Hash     common.Hash
+		Price    string
+		Currency common.Address
 	}
 	executedMarketGET(t, base, "/api/nft/listings?collection="+collection, &listings)
 	gotListings := []string{}
 	for _, row := range listings {
-		if row.Price != inputs[0].Order.Price.Big().String() {
+		if row.Price != prices[row.Hash.Hex()] || row.Currency != currencies[row.Hash.Hex()] {
 			t.Fatal("batch listing lost its exact integer price")
 		}
 		gotListings = append(gotListings, row.Hash.Hex())
@@ -69,8 +78,9 @@ func executedBatchMarketProjection(t *testing.T, f *orderbook.ExecutedMarketFixt
 	gotSales := []string{}
 	for _, row := range sales {
 		var id, price string
+		var currency common.Address
 		if json.Unmarshal(row["tokenId"], &id) != nil || json.Unmarshal(row["price"], &price) != nil ||
-			price != inputs[0].Order.Price.Big().String() {
+			price != prices[id] || json.Unmarshal(row["currency"], &currency) != nil || currency != currencies[id] {
 			t.Fatal("batch sale lost its exact token or price")
 		}
 		gotSales = append(gotSales, id)
