@@ -24,6 +24,9 @@ assert.ok(['nft', 'karum'].includes(fixture.app) && ['single', 'bulk'].includes(
 assert.ok(['buy', 'cancel', 'nonce', 'approval', 'batch', 'partial-batch'].includes(fixture.action))
 const batchMode = ['batch', 'partial-batch'].includes(fixture.action)
 const partialBatch = fixture.action === 'partial-batch'
+const payoutProfile = ['buy', 'batch', 'partial-batch'].includes(fixture.action)
+assert.equal(!!fixture.payouts, payoutProfile)
+let payoutBaseline, payoutMined, payoutReceiptChecked = false, payoutReorgChecked = false
 const pins = JSON.parse(await readFile(new URL('./market-browser-pins.json', import.meta.url)))
 const git = (root, ...args) => execFileSync('git', ['--no-replace-objects', ...args], {cwd: root, encoding: 'utf8'}).trim()
 for (const app of ['nft', 'karum']) {
@@ -152,8 +155,71 @@ async function phase(name) {
   assert.equal(state.actualAcceptedBrowserInputs, true)
   assert.equal(state.alreadyDerivedSourcePrefixPreserved, true)
   assert.equal(state.hashes.length, 2)
+  if (payoutProfile) await checkPayoutState(name, state)
   return state
 }
+
+async function checkPayoutState(phaseName, state) {
+  const value = state.payouts
+  assert.ok(value?.pass && value.hashBoundContractAndBalanceReads && value.allPayoutCreditsZero)
+  const expectedFills = state.included ? (fixture.action === 'batch' ? 2 : 1) : 0
+  assert.equal(value.expectedFills, expectedFills)
+  const price = 250000000000000000n, fills = BigInt(expectedFills)
+  const royalty = price * 375n / 10000n * fills, fee = price * 200n / 10000n * fills
+  assert.equal(value.nativeGross, (price * fills).toString())
+  assert.equal(value.nativeRoyalty, royalty.toString())
+  assert.equal(value.nativeProtocolFee, fee.toString())
+  assert.equal(value.nativeSellerProceeds, (price * fills - royalty - fee).toString())
+  const addresses = {buyer: fixture.buyer, seller: fixture.seller, feeRecipient: fixture.payouts.feeRecipient,
+    royaltyRecipient: fixture.payouts.royaltyRecipient}
+  assert.equal(new Set(Object.values(addresses).map(x => x.toLowerCase())).size, 4)
+  const actual = {}
+  for (const [key, address] of Object.entries(addresses)) {
+    actual[key] = BigInt(await chain.request({method: 'eth_getBalance', params: [address, {blockHash: value.canonicalHash, requireCanonical: true}]}))
+    assert.equal(actual[key].toString(), value.balances[key])
+  }
+  if (phaseName === 'bind') {
+    assert.equal(fixture.payouts.feeBps, 200); assert.equal(fixture.payouts.royaltyBps, 375)
+    const feeAbi = parseAbi(['function feeBps() view returns (uint256)', 'function feeRecipient() view returns (address)'])
+    assert.equal(await chain.readContract({address: fixture.exchange, abi: feeAbi, functionName: 'feeBps'}), 200n)
+    assert.equal((await chain.readContract({address: fixture.exchange, abi: feeAbi, functionName: 'feeRecipient'})).toLowerCase(), addresses.feeRecipient.toLowerCase())
+    const royalties = parseAbi(['function royaltyInfo(uint256 tokenId, uint256 price) view returns (address, uint256)'])
+    const [recipient, amount] = await chain.readContract({address: fixture.collection, abi: royalties, functionName: 'royaltyInfo', args: [1n, price]})
+    assert.equal(recipient.toLowerCase(), addresses.royaltyRecipient.toLowerCase()); assert.equal(amount, price * 375n / 10000n)
+    assert.equal(actual.feeRecipient, 0n); assert.equal(actual.royaltyRecipient, 0n)
+    payoutBaseline = actual
+    record('actual nonzero royalty and protocol fee configuration names distinct executed recipients')
+  }
+  assert.ok(payoutBaseline)
+  assert.equal(actual.buyer, payoutBaseline.buyer - price * fills - BigInt(value.buyerReceiptFee))
+  assert.equal(actual.seller, payoutBaseline.seller + price * fills - royalty - fee - BigInt(value.sellerReceiptFee))
+  assert.equal(actual.feeRecipient, payoutBaseline.feeRecipient + fee)
+  assert.equal(actual.royaltyRecipient, payoutBaseline.royaltyRecipient + royalty)
+  if (phaseName === 'mined') payoutMined = structuredClone(value)
+  if (phaseName === 'replacement') assert.deepEqual(actual, payoutBaseline)
+  if (phaseName === 'restored') {
+    assert.deepEqual(value, payoutMined); payoutReorgChecked = true
+    record('canonical removal rolls back royalty fee and proceeds balances and restoration reproduces every amount')
+  }
+}
+
+function checkPayoutReceipt(receipt, state) {
+  const abi = parseAbi(['event OrderFilled(bytes32 indexed orderHash, address indexed maker, address indexed taker, uint8 side, address collection, uint256 tokenId, address paymentToken, uint256 price, uint256 royalty, uint256 fee)'])
+  const topic = keccak256(stringToHex('OrderFilled(bytes32,address,address,uint8,address,uint256,address,uint256,uint256,uint256)'))
+  const fills = receipt.logs.filter(row => row.address.toLowerCase() === fixture.exchange.toLowerCase() && row.topics[0] === topic)
+    .map(row => decodeEventLog({abi, data: row.data, topics: row.topics, strict: true}).args)
+  assert.deepEqual(fills.map(row => String(row.tokenId)).sort(), fixture.action === 'batch' ? ['1', '2'] : [partialBatch ? '2' : '1'])
+  for (const fill of fills) {
+    assert.equal(fill.price, 250000000000000000n); assert.equal(fill.royalty, fill.price * 375n / 10000n)
+    assert.equal(fill.fee, fill.price * 200n / 10000n); assert.equal(fill.side, 0)
+    assert.equal(fill.maker.toLowerCase(), fixture.seller.toLowerCase()); assert.equal(fill.taker.toLowerCase(), fixture.buyer.toLowerCase())
+    assert.equal(fill.paymentToken.toLowerCase(), '0x' + '0'.repeat(40))
+    assert.equal(fill.orderHash.toLowerCase(), state.hashes[Number(fill.tokenId) - 1].toLowerCase())
+  }
+  payoutReceiptChecked = true
+  record('executed fill receipts independently retain exact nonzero royalty protocol fee and native price')
+}
+
 async function orderRows() {
   const response = await fetch(new URL('/api/nft/orders?all=1&collection=' + fixture.collection, base), {signal: AbortSignal.timeout(5000)})
   assert.equal(response.status, 200)
@@ -418,6 +484,7 @@ try {
   assert.equal(receipt.to.toLowerCase(), fixture.exchange.toLowerCase())
   assert.ok(receipt.gasUsed > 21000n)
   assert.equal(await chain.getTransactionCount({address: actorSigner.address}), fundedNonce + 1)
+  checkPayoutReceipt(receipt, state)
   record('actual typed transaction receipt gas sender target and consumed nonce')
   await projection('filled', state.filled)
   state = await phase('replacement')
@@ -526,9 +593,10 @@ try {
       assert.equal(fill.taker.toLowerCase(), fixture.buyer.toLowerCase())
       assert.equal(fill.side, 0)
       assert.equal(fill.price, 250000000000000000n)
-      assert.equal(fill.royalty, 0n)
-      assert.equal(fill.fee, 0n)
+      assert.equal(fill.royalty, fill.price * 375n / 10000n)
+      assert.equal(fill.fee, fill.price * 200n / 10000n)
     }
+    checkPayoutReceipt(receipt, state)
     const spent = partialBatch ? 250000000000000000n : 500000000000000000n
     const unused = 500000000000000000n - spent
     const accounting = state.ownerModel.executed
@@ -653,8 +721,9 @@ try {
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
   assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch ? 2 : 1)
   record((partialBatch ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0))
+  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile ? 3 : 0))
   if (quoteProfile) {assert.ok(quoteAccountRefusal && quoteEdited && quoteSignedSnapshot); assert.equal(quoteHeldRequests, 2)}
+  if (payoutProfile) assert.ok(payoutBaseline && payoutMined && payoutReceiptChecked && payoutReorgChecked)
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 220)
@@ -674,6 +743,9 @@ try {
     providerMethods: methods, providerFailures, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
     actualProductionPageActionsAndGoAdmission: true, actualProviderEVMTransactions: transactions.length,
     actualOfficialRelayerTransport: true, physicalWalletOrPublicNetwork: false,
+    actualNonzeroPayouts: payoutProfile ? {pass: result.pass && payoutReceiptChecked && payoutReorgChecked,
+      configuration: fixture.payouts, canonicalMinedState: payoutMined, independentSDKBalanceReads: true,
+      originalProfileAndTransactionCountPreserved: true, mixedCurrencyOrERC1271Qualified: false} : null,
     actualQuotePreparation: quoteProfile ? {pass: result.pass && quoteAccountRefusal && quoteEdited && !!quoteSignedSnapshot,
       actualDelayedApprovalRPCRequests: quoteHeldRequests, actualAccountsChangedEvent: true,
       changedAccountRefusedBeforeTypedDataPrompt: quoteAccountRefusal,

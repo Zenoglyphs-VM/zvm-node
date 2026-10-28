@@ -381,3 +381,22 @@ configuration, full-precision relisting, offers, bulk selection and context
 changes. Actual mixed-currency, nonzero-royalty and ERC-1271 browser acceptance
 and the full original roadmap remain separate gates. Earlier financial
 campaigns retain their original order-module/UI/source revisions.
+
+
+### Nonzero native royalties and protocol fees
+
+The existing twelve buy, full-batch and partial-batch profiles use a 375-bps
+collection royalty and a 200-bps exchange fee. Seller, buyer, royalty receiver
+and fee receiver are four distinct public fixture addresses. The constructor
+and royalty setter execute in the declared source prefix; balances are never
+inserted into EVM state, SQL or market responses.
+
+At each canonical phase, independent hash-selected contract and balance reads
+check exact gross spend, seller proceeds, both payouts, receipt-derived gas
+costs and zero deferred credit. The actual SDK separately reads configuration,
+fill events and balances, including the partial-batch refund and source
+removal/restoration. These add three named assertions per purchase profile
+while retaining all original profiles, transaction counts, build inputs and
+CI bounds. Exact-head hosted execution is required before claiming this scope.
+Mixed-currency and ERC-1271 production-interface execution remain separate
+open requirements; this native-currency lane does not establish them.

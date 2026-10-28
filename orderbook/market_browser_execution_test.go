@@ -196,7 +196,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	defer web.Close()
 	input, err := json.Marshal(map[string]any{"base": web.URL, "token": token, "roots": roots,
 		"app": app, "kind": kind, "collection": f.Collection().Hex(), "exchange": f.Exchange().Hex(),
-		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex()})
+		"seller": f.Seller().Hex(), "buyer": f.Buyer().Hex(), "chainId": f.Rollup().L2ChainID, "action": action, "actor": transport.Actor().Hex(), "payouts": f.MarketPayoutConfig()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,6 +256,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				}
 				f.Advance(0, heights...)
 				transport.PinFundedActor(t)
+				transport.PinMarketPayouts(t)
 				if batch {
 					transport.PinBatchBalances(t)
 				}
@@ -328,11 +329,12 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			if request.name == "restored" && !reflect.DeepEqual(projection, reference) {
 				t.Fatal("restored signed-browser HTTP model differs")
 			}
+			payouts := transport.AssertMarketPayouts(t, request.name, included)
 			hashes := []string{inputs[0].Order.Hash().Hex(), inputs[1].Order.Hash().Hex()}
 			request.result <- map[string]any{"phase": request.name, "hashes": hashes, "filled": filled,
 				"actualAcceptedBrowserInputs": true, "alreadyDerivedSourcePrefixPreserved": true,
 				"transaction": transport.TransactionHash().Hex(), "actorNonce": transport.ActorNonce(), "actor": transport.Actor().Hex(), "ownerModel": projection, "included": included,
-				"batchStage": batchStage, "sellerNonce": transport.BatchSellerNonce(), "cancellation": transport.BatchCancellationHash().Hex()}
+				"batchStage": batchStage, "sellerNonce": transport.BatchSellerNonce(), "cancellation": transport.BatchCancellationHash().Hex(), "payouts": payouts}
 		case err := <-finished:
 			t.Log(strings.TrimSpace(stdout.raw.String()))
 			if err != nil {
@@ -354,7 +356,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				"cancelledJoinedExchangeCalls": f.RPCCancellations(), "distinctExecutedCheckHeaders": headers,
 				"manualSQLOrderOrCacheControls": 0, "manualIndexOrBookSteps": 0, "ownedDriverJoined": true,
 				"unsignedSourceAndExecutionRPCFixture": true, "actualOfficialRelayerProgram": true, "actualRelayerJoined": true, "actualRelayerExit": relayerExit, "ownedCancellationMarkerVerified": true,
-				"actualProviderEVMTransaction": transport.Evidence(), "realWalletOrPublicNetworkOperations": 0}
+				"actualProviderEVMTransaction": transport.Evidence(), "actualNonzeroPayouts": transport.MarketPayoutEvidence(t), "realWalletOrPublicNetworkOperations": 0}
 			raw, err := json.Marshal(record)
 			if err != nil {
 				t.Fatal(err)

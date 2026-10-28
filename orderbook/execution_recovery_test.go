@@ -387,6 +387,7 @@ type executionScenario struct {
 	provider                 bool
 	providerAction           string
 	credit                   *executedCreditSetup
+	payouts                  *executedMarketPayouts
 }
 
 func newExecutionScenario(t *testing.T) *executionScenario {
@@ -431,6 +432,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	s.credit = inputs.credit
 	if s.provider && s.providerAction == "" {
 		s.providerAction = "buy"
+	}
+	if inputs.provider && inputs.credit == nil && (s.providerAction == "buy" || s.providerAction == "batch" || s.providerAction == "partial-batch") {
+		s.payouts = newExecutedMarketPayouts()
 	}
 	if inputs.buyer != (znn.Address{}) {
 		s.buyer = inputs.buyer
@@ -593,6 +597,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 					name, args = "ZVMCollectionFactory", []any{implementation}
 				} else if h == 4 {
 					name, args = "ZVMExchange", []any{common.Address(s.seller), common.Address(s.seller), big.NewInt(0)}
+					if s.payouts != nil {
+						args = []any{common.Address(s.seller), s.payouts.feeRecipient, new(big.Int).SetUint64(s.payouts.feeBps)}
+					}
 					if s.credit != nil {
 						args = []any{common.Address(s.seller), s.credit.wallet, big.NewInt(200)}
 					}
@@ -610,6 +617,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 			case 6:
 				native(s.seller, &s.token, nil, callData("ZVMCollection", "mintBatch", common.Address(s.seller), []string{"one", "two", "three"}))
 				native(s.seller, &s.token, nil, callData("ZVMCollection", "setApprovalForAll", s.exchange, true))
+				if s.payouts != nil {
+					native(s.seller, &s.token, nil, callData("ZVMCollection", "setRoyalty", s.payouts.royaltyRecipient, new(big.Int).SetUint64(s.payouts.royaltyBps)))
+				}
 			case 7:
 				if inputs.sign == nil {
 					native(s.seller, &s.exchange, nil, callData("ZVMExchange", "approveOrders", ABIOrders(s.orders)))

@@ -453,7 +453,17 @@ func (p *ExecutedMarketProviderFixture) AssertBatchState(t *testing.T, stage int
 	}
 	wantBuyer := new(big.Int).Sub(p.batchBalances.buyer, spent)
 	wantBuyer.Sub(wantBuyer, buyerFee)
-	wantSeller := new(big.Int).Add(p.batchBalances.seller, spent)
+	proceeds := new(big.Int).Set(spent)
+	if setup := p.f.r.scenario.payouts; setup != nil && stage == 2 {
+		for i, input := range p.f.r.scenario.inputs {
+			if p.partial != nil && i == 0 {
+				continue
+			}
+			proceeds.Sub(proceeds, payoutShare(input.Order.Price.Big(), setup.royaltyBps))
+			proceeds.Sub(proceeds, payoutShare(input.Order.Price.Big(), setup.feeBps))
+		}
+	}
+	wantSeller := new(big.Int).Add(p.batchBalances.seller, proceeds)
 	wantSeller.Sub(wantSeller, sellerFee)
 	for actor, want := range map[common.Address]*big.Int{p.f.Buyer(): wantBuyer, p.f.Seller(): wantSeller} {
 		got, err := p.f.r.eth.BalanceAtHash(ctx, actor, header)
