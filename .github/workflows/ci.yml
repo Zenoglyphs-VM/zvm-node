@@ -66,6 +66,8 @@ jobs:
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: go.mod
+      - name: Check bounded immutable snapshot reuse without SDK or network
+        run: node --test --test-reporter=tap scripts/market-snapshot-read-cache.test.mjs
       - name: Build the pinned relayer program once for all browser profiles
         run: |
           test "$(git -C .market-browser/zvm-relayer rev-parse HEAD)" = 5a72a223dd60d1ae4e974d420cadd85e6f9ee929

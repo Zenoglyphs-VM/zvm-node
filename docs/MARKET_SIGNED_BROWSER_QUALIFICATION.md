@@ -497,3 +497,20 @@ estimates of current settlement inputs, not a promise about future sale terms.
 Above-cap or reverting external royalty contracts and ERC-1271 execution still
 require their separate native acceptance evidence. No deadline, gas ceiling,
 dependency graph or original transaction count is increased.
+
+### Bounded immutable observation reuse
+
+The independent proceeds observer reuses only the exchange fee, recipient,
+royalty cap and block number at an identical block hash within the same fixture.
+The cache holds at most two snapshots, joins concurrent reads and drops failed
+observations. Eviction cannot reinsert an older pending result or let an old
+failure remove a newer entry. Every selected token's royalty at its complete
+price is still read independently. Every observation still rechecks its block
+number's current canonical hash, including after a cache hit.
+
+No latest header, balance, allowance, owner, nonce, receipt or royalty is cached.
+No product RPC reply is replaced. All 37 browser profiles, 845 named checks and
+46 original provider transactions remain. Ten dependency-free cache controls
+cover failed reads, eviction and delayed completion. Workflow deadlines,
+dependencies and engine/estimator bounds are unchanged. Exact fresh CI timings
+and actual eliminated-call counts are required before claiming a speedup.
