@@ -82,7 +82,12 @@ func TestExecutedExternalRoyaltySettlementAndRecovery(t *testing.T) {
 		seller: znn.Address{19: 161}, timestamp: 1_800_000_000, royalty: setup,
 	})
 	run := newExecutionRun(t, scenario)
-	run.through(7, false)
+	// Vault deposits declared at height 7 are executed by the following
+	// derivation. Pin a fully funded branch that contains no sale first.
+	run.nomMu.Lock()
+	run.branch = 1
+	run.nomMu.Unlock()
+	run.through(9, false)
 	ctx := context.Background()
 	before := map[common.Address]*big.Int{}
 	payout := scenario.payouts
@@ -105,6 +110,9 @@ func TestExecutedExternalRoyaltySettlementAndRecovery(t *testing.T) {
 	price, ok := new(big.Int).SetString("200000000000000018", 10)
 	if !ok {
 		t.Fatal("invalid exact fixture price")
+	}
+	if before[actors[0]].Cmp(new(big.Int).Mul(new(big.Int).Set(price), big.NewInt(2))) < 0 {
+		t.Fatal("native balance baseline is not fully funded")
 	}
 	cap := payoutShare(price, 1000)
 	fee := payoutShare(price, 200)
@@ -173,8 +181,9 @@ func TestExecutedExternalRoyaltySettlementAndRecovery(t *testing.T) {
 		balances := []string{}
 		for index, actor := range actors {
 			balance, err := run.eth.BalanceAtHash(ctx, actor, hash)
-			if err != nil || balance.Cmp(wanted[index]) != 0 || scalar("credits", actor).Sign() != 0 {
-				t.Fatal("executed capped/fallback payout or credit differs")
+			credit := scalar("credits", actor)
+			if err != nil || balance.Cmp(wanted[index]) != 0 || credit.Sign() != 0 {
+				t.Fatalf("executed capped/fallback payout differs: phase=%s role=%d balance=%v want=%s credit=%s error=%v", phase, index, balance, wanted[index], credit, err)
 			}
 			balances = append(balances, balance.String())
 		}
@@ -219,6 +228,9 @@ func TestExecutedExternalRoyaltySettlementAndRecovery(t *testing.T) {
 		return result
 	}
 	observe("prefix", false)
+	run.nomMu.Lock()
+	run.branch = 0
+	run.nomMu.Unlock()
 	run.through(9, false)
 	mined := observe("mined", true)
 	run.nomMu.Lock()
@@ -241,7 +253,7 @@ func TestExecutedExternalRoyaltySettlementAndRecovery(t *testing.T) {
 	run.catchUp()
 	observe("reopened", true)
 	record := map[string]any{"pass": true, "sourceSHA256": setup.sourceSHA, "compilerSHA256": setup.compilerSHA, "artifactSHA256": setup.artifactSHA,
-		"price": price.String(), "reportedBps": 5000, "royaltyCapBps": 1000, "feeBps": 200, "separateRoundingDifference": "1",
+		"price": price.String(), "fundedBaselineSourceHeight": 9, "fundedBaselineBranch": 1, "reportedBps": 5000, "royaltyCapBps": 1000, "feeBps": 200, "separateRoundingDifference": "1",
 		"transaction": transaction.Hex(), "observations": observations, "actualEVMSettlement": true, "nativeCallsUnderDeclaredNoMObservations": true,
 		"directStateOrStorageInsertion": 0, "physicalWalletOrPublicNetwork": false, "productionBrowserOrProviderExecutionQualified": false, "authenticatedNoMQualified": false}
 	rawRecord, err := json.Marshal(record)
