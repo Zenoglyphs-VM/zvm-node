@@ -594,18 +594,20 @@ complete source-bound hosted evidence is required before acceptance.
 ## Request-identity navigation accounting
 
 The quiet observer uses the pinned Puppeteer request identifier and retains
-known event aliases. Response, finished and failed notifications complete a
-request once, including cached asset aliases. A late completion for a prior
-redirect cannot erase the current request. Every request type remains observed;
-conflicting active identities and missing identifiers fail closed. A successful
-navigation must observe its actual document request events. Bounded diagnostics
-report methods, paths and ages while excluding URL queries.
+known aliases. Response, finished, failed and identified cache-served events
+complete a request once. The public cache event is documented to indicate that
+a request loaded from cache; its occasional undefined payload cannot release
+any pending request. Late duplicate/redirect notifications cannot erase the
+current operation. Missing or conflicting identities fail closed. A successful
+navigation must observe actual document request events. Deadline diagnostics
+are a separate bounded stdout record with paths but no URL queries.
 
 DOMContentLoaded and the complete 100-ms zero-request quiet window share the
-original 20000-ms deadline. Active tracking is capped at 256 requests. Ten
-SDK/browser-free controls cover concurrent identities, aliases, late redirect
-signals, late activity, isolated pages, closure, overflow, privacy, mandatory
-request observations and the original shared budget. Actual browser
-qualification still requires the complete retained and ERC-1271 hosted matrix.
-No product response, DOM assertion, signature, receipt, balance, profile,
-transaction, package deadline or job deadline is removed or expanded.
+original 20000-ms deadline. No request type is filtered. Active tracking is
+capped at 256. Twelve SDK/browser-free controls cover identity, aliases,
+redirects, cache notifications including unknown payloads, late activity,
+isolated pages, closure, overflow, privacy and the original budget. The original
+25-check legacy browser group runs once, earlier, under a one-minute package
+bound and is excluded from the later selector. All other original package/job
+limits, assertions, profiles and transactions remain. Actual qualification
+requires the complete retained and ERC-1271 hosted matrix.

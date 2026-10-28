@@ -97,6 +97,12 @@ jobs:
         run: |
           npm run build --prefix .market-browser/zvm-nft
           npm run build --prefix .market-browser/zvm-karum
+      - name: Check retained legacy navigation before signed production profiles
+        env:
+          ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_NFT_ROOT: ${{ github.workspace }}/.market-browser/zvm-nft
+          ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
+        run: go test -json -count=1 -p=1 -failfast -timeout=1m -run '^TestMarketBrowserHTTP$' ./indexer
       - name: Check actual ERC-1271 production listings and purchases before the retained matrix
         env:
           ZVM_BROWSER_REQUIRED: "1"
@@ -113,6 +119,6 @@ jobs:
           ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
           ZVM_BROWSER_CREDIT_WALLET: ${{ runner.temp }}/zvm-market-credit-compiler/wallet.json
           ZVM_BROWSER_ROYALTY_COLLECTION: ${{ runner.temp }}/zvm-market-credit-compiler/royalty.json
-        run: go test -json -count=1 -p=1 -failfast -timeout=12m -run '^Test(MarketBrowserHTTP|ExecutedMarketBrowserAdmissionAndRecovery|MarketFullWidthTimeClients|ExecutedMarketCreditBrowserRecovery|ExecutedExternalRoyaltySettlementAndRecovery)$' ./indexer ./orderbook
+        run: go test -json -count=1 -p=1 -failfast -timeout=12m -run '^Test(ExecutedMarketBrowserAdmissionAndRecovery|MarketFullWidthTimeClients|ExecutedMarketCreditBrowserRecovery|ExecutedExternalRoyaltySettlementAndRecovery)$' ./indexer ./orderbook
       - name: Refuse tracked source drift
         run: git diff --exit-code

@@ -48,6 +48,10 @@ export function observeNavigationRequests(page) {
         active.set(id, entry); known.set(event, entry); started++; peak = Math.max(peak, active.size)
       }
       changed = performance.now(); notify()
+    } else if (type === 'requestservedfromcache') {
+      // The documented cache notification can omit its request. Without an
+      // identity it cannot release any tracked operation.
+      if (event) finish(event); else unmatchedCompletionSignals++
     } else if (type === 'response') finish(event.request())
     else if (type === 'requestfinished' || type === 'requestfailed') finish(event)
     else if (type === 'close') {closed = true; page.off('*', listener); notify()}
@@ -77,7 +81,11 @@ export function observeNavigationRequests(page) {
           const now = performance.now(), remaining = deadline - now
           if (closed) return end(new Error('navigation page closed before network quiet'))
           if (broken) return end(new Error(broken))
-          if (remaining <= 0) return end(new Error('original navigation deadline elapsed; network=' + JSON.stringify(diagnostic())))
+          if (remaining <= 0) {
+            const value = diagnostic()
+            console.log('NAVIGATION-NETWORK-DEADLINE '+JSON.stringify(value))
+            return end(new Error('original navigation deadline elapsed; network=' + JSON.stringify(value)))
+          }
           const quietRemaining = quietMilliseconds - (now - Math.max(changed, began))
           if (active.size === 0 && quietRemaining <= 0) return end()
           timer = setTimeout(check, Math.max(1, Math.min(remaining, active.size ? remaining : quietRemaining)))
@@ -123,7 +131,7 @@ export function boundedNavigation(origin) {
         maximumMilliseconds: Math.round(maximumMilliseconds * 100) / 100, timeoutMilliseconds,
         quietMilliseconds, maximumInflightRequests: 0, lifecycle: 'domcontentloaded',
         previousQuietMilliseconds: 500, oneOverallOriginalDeadline: true,
-        requestTracking: 'stable-request-identity-events', maximumTrackedRequests,
+        requestTracking: 'stable-request-identity-cache-events', maximumTrackedRequests,
         networkRequestsStarted: values.reduce((sum, value) => sum+value.started, 0),
         networkRequestsCompleted: values.reduce((sum, value) => sum+value.completed, 0),
         maximumObservedInflightRequests: Math.max(0, ...values.map(value => value.peak)),

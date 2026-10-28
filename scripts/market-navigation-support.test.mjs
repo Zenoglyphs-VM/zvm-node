@@ -100,7 +100,21 @@ let controls = 0
   await assert.rejects(navigation.goto(page, 'http://127.0.0.1:1/document'), /request events were not observed/)
   assert.equal(navigation.summary().failed, 1); controls++
 }
-assert.equal(controls, 10)
+{
+  const page = new Page(), tracker = observeNavigationRequests(page), cached = request('cached', '/asset.js')
+  page.signal('request', cached); page.signal('requestservedfromcache', request('cached', '/asset.js'))
+  page.signal('requestfinished', cached)
+  await tracker.wait(performance.now()+500)
+  assert.equal(tracker.diagnostic().activeRequests, 0); assert.equal(tracker.diagnostic().completed, 1); controls++
+}
+{
+  const page = new Page(), tracker = observeNavigationRequests(page), pending = request('pending')
+  page.signal('request', pending); page.signal('requestservedfromcache', undefined)
+  assert.equal(tracker.diagnostic().activeRequests, 1)
+  await assert.rejects(tracker.wait(performance.now()+20), /original navigation deadline elapsed/)
+  page.signal('requestfailed', pending); controls++
+}
+assert.equal(controls, 12)
 console.log('NAVIGATION-IDENTITY-CONTROLS '+JSON.stringify({controls, pass: true, SDKOrBrowserExecutions: 0,
   overallNavigationDeadlineMilliseconds: 20000, quietMilliseconds: 100, maximumInflightRequests: 0,
   duplicateAndRedirectIdentityControls: true, originalBudgetPreserved: true, diagnosticQueryValuesOmitted: true}))
