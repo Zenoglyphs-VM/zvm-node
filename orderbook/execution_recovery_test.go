@@ -389,6 +389,7 @@ type executionScenario struct {
 	payment                  string
 	credit                   *executedCreditSetup
 	payouts                  *executedMarketPayouts
+	royalty                  *executedRoyaltySetup
 }
 
 func newExecutionScenario(t *testing.T) *executionScenario {
@@ -406,6 +407,7 @@ type executionScenarioInputs struct {
 	sign      func(*executionScenario) []*Input
 	orders    []*Order
 	credit    *executedCreditSetup
+	royalty   *executedRoyaltySetup
 }
 
 func newExecutionScenarioProfile(t *testing.T, validated, buffered bool, profileDir ...string) *executionScenario {
@@ -440,6 +442,14 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 		t.Fatal("approval and seller-cancellation profiles remain separate")
 	}
 	s.credit = inputs.credit
+	s.royalty = inputs.royalty
+	if s.royalty != nil {
+		if inputs.provider || inputs.credit != nil || inputs.payment != "" || inputs.sign != nil || inputs.orders != nil {
+			t.Fatal("external royalty native setup cannot replace an existing profile")
+		}
+		s.payouts = newExecutedMarketPayouts()
+		s.payouts.royaltyBps = 5000
+	}
 	if s.provider && s.providerAction == "" {
 		s.providerAction = "buy"
 	}
@@ -506,6 +516,15 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 		s.orders = append(s.orders, &Order{Trader: common.Address(s.seller), Side: SideSell, Collection: s.token,
 			TokenID: U(id), Amount: U(1), Price: B(big.NewInt(250_000_000_000_000_000)), ListingTime: s.cfg.L2GenesisTimestamp,
 			ExpirationTime: s.cfg.L2GenesisTimestamp + 86400, Nonce: U(0), Salt: U(id)})
+	}
+	if s.royalty != nil {
+		price, ok := new(big.Int).SetString("200000000000000018", 10)
+		if !ok {
+			t.Fatal("invalid external royalty price")
+		}
+		for _, order := range s.orders {
+			order.Price = B(new(big.Int).Set(price))
+		}
 	}
 	if s.payment != "" {
 		for i, order := range s.orders {
@@ -636,6 +655,9 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				if err != nil {
 					t.Fatal(err)
 				}
+				if h == 2 && s.royalty != nil {
+					init = append([]byte(nil), s.royalty.init...)
+				}
 				native(s.seller, nil, nil, init)
 			case 5:
 				native(s.seller, &s.factory, nil, callData("ZVMCollectionFactory", "createCollection", "Recovery", "REC", "", "", big.NewInt(0)))
@@ -678,8 +700,15 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				}
 			case 8:
 				if !inputs.provider {
-					input := s.inputs[branch]
-					native(s.buyer, &s.exchange, input.Order.Price.Big(), callData("ZVMExchange", "buy", input.ABI()))
+					if s.royalty != nil {
+						if branch == 0 {
+							value := new(big.Int).Add(s.inputs[0].Order.Price.Big(), s.inputs[1].Order.Price.Big())
+							native(s.buyer, &s.exchange, value, callData("ZVMExchange", "buyMany", []ABIInput{s.inputs[0].ABI(), s.inputs[1].ABI()}))
+						}
+					} else {
+						input := s.inputs[branch]
+						native(s.buyer, &s.exchange, input.Order.Price.Big(), callData("ZVMExchange", "buy", input.ABI()))
+					}
 				}
 				send(s.seller, s.cfg.Inbox, 0, derive.EncodeAssemble([]znn.Hash{chunk}))
 			case creditSaleHeight:

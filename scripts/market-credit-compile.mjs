@@ -45,8 +45,10 @@ try {
 }
 
 const source = readRegular(fileURLToPath(new URL('../orderbook/testdata/CreditFixtureWallet.sol', import.meta.url)), 16 << 10)
+const royaltySource = readRegular(fileURLToPath(new URL('../orderbook/testdata/RoyaltyFixtureCollection.sol', import.meta.url)), 16 << 10)
 const compiler = loadCompiler(compilerPath, SOLC)
-const result = compiler.compile({language: 'Solidity', sources: {'CreditFixtureWallet.sol': {content: source.toString('utf8')}},
+const result = compiler.compile({language: 'Solidity', sources: {'CreditFixtureWallet.sol': {content: source.toString('utf8')},
+  'RoyaltyFixtureCollection.sol': {content: royaltySource.toString('utf8')}},
   settings: {optimizer: {enabled: true, runs: 200}, evmVersion: 'prague', viaIR: false,
     outputSelection: {'*': {'*': ['abi', 'evm.bytecode.object', 'evm.deployedBytecode.object']}}}})
 compiler.verify()
@@ -65,3 +67,19 @@ console.log('CREDIT-WALLET-COMPILER ' + JSON.stringify({sourceSha256: artifact.s
   compilerVersion: SOLC.version, compilerSha256: SOLC.sha256, compilerBytes: bytes,
   supportSha256: artifact.supportSha256, artifactSha256: sha256(raw), artifactBytes: raw.length,
   dependencyOrBrowserInstallations: 0, compiledTargets: 1}))
+
+// A second independent target shares the exact same bounded compiler transport.
+const collection = result.output.contracts['RoyaltyFixtureCollection.sol'].RoyaltyFixtureCollection
+assert.ok(collection && collection.evm.bytecode.object.length > 0 && collection.evm.bytecode.object.length <= 16 << 10)
+assert.ok(collection.evm.deployedBytecode.object.length > 0 && collection.evm.deployedBytecode.object.length <= 16 << 10)
+const royaltyArtifact = {schema: 1, sourceName: 'RoyaltyFixtureCollection.sol', sourceSha256: sha256(royaltySource),
+  compilerVersion: SOLC.version, compilerSha256: SOLC.sha256, supportSha256: artifact.supportSha256,
+  abi: collection.abi, bytecode: '0x' + collection.evm.bytecode.object, deployedBytecode: '0x' + collection.evm.deployedBytecode.object}
+const royaltyRaw = Buffer.from(JSON.stringify(royaltyArtifact) + '\n')
+assert.ok(royaltyRaw.length <= 64 << 10, 'compiled external royalty artifact exceeds its bound')
+const royaltyOutput = await open(path.join(directory, 'royalty.json'), 'wx', 0o600)
+try {await royaltyOutput.writeFile(royaltyRaw); await royaltyOutput.sync()} finally {await royaltyOutput.close()}
+console.log('EXTERNAL-ROYALTY-COMPILER ' + JSON.stringify({sourceSha256: royaltyArtifact.sourceSha256,
+  compilerVersion: SOLC.version, compilerSha256: SOLC.sha256, supportSha256: royaltyArtifact.supportSha256,
+  artifactSha256: sha256(royaltyRaw), artifactBytes: royaltyRaw.length, compilerTransports: 1, totalTargets: 2,
+  dependencyOrBrowserInstallations: 0}))

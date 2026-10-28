@@ -514,3 +514,25 @@ No product RPC reply is replaced. All 37 browser profiles, 845 named checks and
 cover failed reads, eviction and delayed completion. Workflow deadlines,
 dependencies and engine/estimator bounds are unchanged. Exact fresh CI timings
 and actual eliminated-call counts are required before claiming a speedup.
+
+### External royalty settlement foundation
+
+A separate minimal ERC-721/ERC-2981 test implementation uses the existing clone
+factory and actual native EVM calls. Token 1 reports a 5000-bps royalty above the
+exchange's 1000-bps cap; token 2 executes a reverting royalty call. One actual
+buyMany settles both tokens. The exact per-item price 200000000000000018 exposes
+one base unit lost by combining the independent fee/royalty floors.
+
+Independent hash-selected balances, fill mappings, owners, transfer logs and an
+executed receipt cover the capped payout and the exchange's zero-royalty fallback.
+Replacement removes the original transaction and both payouts; restoration and
+reopening recover the original state and transaction. The external runtime is
+compared with its source-bound compiled artifact. Genesis and account-block
+observations remain declared NoM fixtures, with no state/storage insertion.
+
+The two Solidity targets share one pinned compiler transport. Existing product
+contracts, 37 browser profiles, 845 checks, 46 provider transactions, deadlines,
+gas ceilings and dependencies remain. Normal Go CI explicitly skips this new
+compiler-input prerequisite. This native foundation does not qualify external
+royalties in production pages/provider flows or authenticated NoM. Both interfaces,
+ERC-1271, generic wallets and the original complete acceptance remain open.
