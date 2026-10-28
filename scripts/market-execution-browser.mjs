@@ -552,7 +552,7 @@ try {
   record('actual buy control publishes the original purchase and waits for its own receipt')
   state = await phase('ordered')
   assert.equal(state.transaction, transactions.at(-1))
-  await until(count => document.querySelectorAll('main li[data-state="done"]').length === count, 'actual application did not consume the mined purchase receipt', approvalRequired ? 2 : 1)
+  await until(count => [...document.querySelectorAll('main li[data-state="done"]')].filter(row => row.checkVisibility()).length === count, 'actual application did not consume the mined purchase receipt', approvalRequired ? 2 : 1)
   record('actual application consumes the executed receipt before success')
   state = await phase('mined')
   const purchaseReceipts = await Promise.all(transactions.map(hash => chain.getTransactionReceipt({hash})))

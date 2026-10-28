@@ -130,7 +130,7 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
   const summary = passed => ({pass: !!passed && !!before && !!mined && receiptChecked && restored,
     configuration: fixture.payouts, tokenPayment: fixture.tokenPayment, canonicalMinedState: mined,
     independentHashSelectedSDKReads: true, actualBridgePredeploy: true,
-    finiteExecutedAllowanceBeforeBuying: !requiresApproval, actualProviderApprovalBeforeBuying: !!passed && requiresApproval, missingAllowanceApprovalPathQualified: !!passed && requiresApproval,
+    finiteExecutedAllowanceBeforeBuying: !!passed, allowanceWasExecutedInSourcePrefix: !requiresApproval, actualProviderApprovalBeforeBuying: !!passed && requiresApproval, missingAllowanceApprovalPathQualified: !!passed && requiresApproval,
     actualAdditionalProviderTransactions: requiresApproval ? 1 : 0, additionalApprovalProviderTransactions: requiresApproval ? 1 : 0, mockedProductAPIOrRPCReplies: 0})
   return {state, receipt, summary}
 }
