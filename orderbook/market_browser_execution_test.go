@@ -74,6 +74,9 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 	// Preserve every native case and add separately named token cases.
 	t.Run("nft-single-qsr", func(t *testing.T) { executedMarketBrowserProfile(t, roots, "nft", "single", "buy", "qsr") })
 	t.Run("karum-single-mixed-batch", func(t *testing.T) { executedMarketBrowserProfile(t, roots, "karum", "single", "batch", "mixed") })
+	t.Run("karum-single-mixed-partial-batch", func(t *testing.T) {
+		executedMarketBrowserProfile(t, roots, "karum", "single", "partial-batch", "mixed")
+	})
 }
 
 func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind, action string, payment ...string) {
@@ -83,10 +86,10 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 		t.Fatal("one token payment profile is required")
 	}
 	if len(payment) == 1 {
-		if kind != "single" || !((app == "nft" && action == "buy" && payment[0] == "qsr") || (app == "karum" && action == "batch" && payment[0] == "mixed")) {
+		if kind != "single" || !((app == "nft" && action == "buy" && payment[0] == "qsr") || (app == "karum" && (action == "batch" || action == "partial-batch") && payment[0] == "mixed")) {
 			t.Fatal("undeclared token browser profile")
 		}
-		f, transport = orderbook.NewExecutedMarketTokenBrowserFixture(t, payment[0])
+		f, transport = orderbook.NewExecutedMarketTokenBrowserFixture(t, payment[0], action)
 	} else if action == "batch" || action == "partial-batch" {
 		f, transport = orderbook.NewExecutedMarketBatchBrowserFixture(t, kind, action)
 	} else if action == "buy" {

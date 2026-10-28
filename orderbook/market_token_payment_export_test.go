@@ -43,7 +43,7 @@ func (f *ExecutedMarketFixture) TokenPaymentDescription() map[string]any {
 	}
 	return map[string]any{"profile": f.TokenPaymentProfile(), "token": rollup.QSRTokenAddr.Hex(), "orders": orders}
 }
-func NewExecutedMarketTokenBrowserFixture(t *testing.T, profile string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
+func NewExecutedMarketTokenBrowserFixture(t *testing.T, profile string, actions ...string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
 	t.Helper()
 	action := "buy"
 	if profile == "mixed" {
@@ -51,9 +51,21 @@ func NewExecutedMarketTokenBrowserFixture(t *testing.T, profile string) (*Execut
 	} else if profile != "qsr" {
 		t.Fatal("unsupported token profile")
 	}
+	if len(actions) > 1 {
+		t.Fatal("one token browser action is required")
+	}
+	if len(actions) == 1 {
+		action = actions[0]
+	}
+	if (profile == "qsr" && action != "buy") || (profile == "mixed" && action != "batch" && action != "partial-batch") {
+		t.Fatal("unsupported token browser action")
+	}
 	f, p := newExecutedMarketActionPaymentBrowserFixture(t, "single", action, profile)
-	if action == "batch" {
+	if action == "batch" || action == "partial-batch" {
 		p.batchBalances = &executedBatchBalances{}
+	}
+	if action == "partial-batch" {
+		p.partial = &executedPartialBatch{}
 	}
 	return f, p
 }
@@ -145,7 +157,7 @@ func (p *ExecutedMarketProviderFixture) assertTokenPayments(t *testing.T, phase 
 		if len(royalty) != 64 || common.BytesToAddress(royalty[:32]) != setup.royaltyRecipient || new(big.Int).SetBytes(royalty[32:]).Cmp(payoutShare(price, 375)) != 0 {
 			t.Fatal("per-currency executed royalty differs")
 		}
-		if !included || (p.Action() == "buy" && i > 0) {
+		if !included || (p.Action() == "buy" && i > 0) || (p.partial != nil && i == 0) {
 			continue
 		}
 		fills++
@@ -163,9 +175,13 @@ func (p *ExecutedMarketProviderFixture) assertTokenPayments(t *testing.T, phase 
 	if included {
 		gas = batchTransactionFee(t, p.batchAccountingReceipt(t, p.TransactionHash()))
 	}
+	sellerGas := new(big.Int)
+	if p.partial != nil && (included || phase == "cancel-ordered" || phase == "cancel-mined") {
+		sellerGas = batchTransactionFee(t, p.batchAccountingReceipt(t, p.BatchCancellationHash()))
+	}
 	nativeWanted := map[common.Address]*big.Int{
 		p.f.Buyer():            new(big.Int).Sub(new(big.Int).Sub(new(big.Int).Set(setup.before[p.f.Buyer()]), nativeGross), gas),
-		p.f.Seller():           new(big.Int).Add(new(big.Int).Set(setup.before[p.f.Seller()]), nativeProceeds),
+		p.f.Seller():           new(big.Int).Sub(new(big.Int).Add(new(big.Int).Set(setup.before[p.f.Seller()]), nativeProceeds), sellerGas),
 		setup.feeRecipient:     new(big.Int).Add(new(big.Int).Set(setup.before[setup.feeRecipient]), nativeFee),
 		setup.royaltyRecipient: new(big.Int).Add(new(big.Int).Set(setup.before[setup.royaltyRecipient]), nativeRoyalty)}
 	tokenWanted := map[common.Address]*big.Int{
@@ -196,7 +212,7 @@ func (p *ExecutedMarketProviderFixture) assertTokenPayments(t *testing.T, phase 
 	value := map[string]any{"pass": true, "canonicalHash": p.f.HeadHash().Hex(), "expectedFills": fills,
 		"nativeGross": nativeGross.String(), "nativeRoyalty": nativeRoyalty.String(), "nativeProtocolFee": nativeFee.String(), "nativeSellerProceeds": nativeProceeds.String(),
 		"qsrGross": tokenGross.String(), "qsrRoyalty": tokenRoyalty.String(), "qsrProtocolFee": tokenFee.String(), "qsrSellerProceeds": tokenProceeds.String(),
-		"buyerReceiptFee": gas.String(), "sellerReceiptFee": "0", "balances": nativeBalances, "qsrBalances": tokenBalances,
+		"buyerReceiptFee": gas.String(), "sellerReceiptFee": sellerGas.String(), "balances": nativeBalances, "qsrBalances": tokenBalances,
 		"qsrAllowance": allowance.String(), "qsrAllowanceBefore": token.allowance.String(), "qsrCodeHash": token.codeHash.Hex(), "qsrDecimals": 8,
 		"hashBoundContractAndBalanceReads": true, "allPayoutCreditsZero": true}
 	setup.observations = append(setup.observations, map[string]any{"phase": phase, "state": value})
@@ -205,7 +221,11 @@ func (p *ExecutedMarketProviderFixture) assertTokenPayments(t *testing.T, phase 
 func (p *ExecutedMarketProviderFixture) tokenPaymentEvidence(t *testing.T) map[string]any {
 	t.Helper()
 	setup := p.f.r.scenario.payouts
-	if setup == nil || p.tokenPayment == nil || len(setup.observations) != 5 {
+	expectedPhases := 5
+	if p.partial != nil {
+		expectedPhases = 7
+	}
+	if setup == nil || p.tokenPayment == nil || len(setup.observations) != expectedPhases {
 		t.Fatal("token payment evidence lacks canonical phases")
 	}
 	return map[string]any{"pass": true, "configuration": p.f.MarketPayoutConfig(), "tokenPayment": p.f.TokenPaymentDescription(),

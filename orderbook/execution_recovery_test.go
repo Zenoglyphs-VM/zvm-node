@@ -433,7 +433,7 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	s.providerAction = inputs.action
 	s.payment = inputs.payment
 	if s.payment != "" && (!inputs.provider || inputs.credit != nil ||
-		(s.payment != "qsr" || s.providerAction != "buy") && (s.payment != "mixed" || s.providerAction != "batch")) {
+		(s.payment != "qsr" || s.providerAction != "buy") && (s.payment != "mixed" || (s.providerAction != "batch" && s.providerAction != "partial-batch"))) {
 		t.Fatal("unsupported token payment scenario")
 	}
 	s.credit = inputs.credit

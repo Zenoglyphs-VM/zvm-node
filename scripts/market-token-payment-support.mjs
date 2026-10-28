@@ -1,10 +1,11 @@
-// Independent SDK observations for two additional token payment profiles.
+// Independent SDK observations for token purchases and mixed-currency partial refunds.
 import assert from 'node:assert/strict'
 
 export function createTokenPaymentChecks({fixture, chain, viem, record}) {
   const {parseAbi, encodeFunctionData, decodeFunctionResult, decodeEventLog, keccak256, stringToHex} = viem
   const token = fixture.tokenPayment.token, zero = '0x' + '0'.repeat(40)
   assert.equal(token.toLowerCase(), '0x4200000000000000000000000000000000000101')
+  const partial = fixture.action === 'partial-batch'
   const expected = id => fixture.tokenPayment.orders[String(id)]
   const actors = {buyer: fixture.buyer, seller: fixture.seller, feeRecipient: fixture.payouts.feeRecipient, royaltyRecipient: fixture.payouts.royaltyRecipient}
   assert.equal(new Set(Object.values(actors).map(x => x.toLowerCase())).size, 4)
@@ -31,7 +32,7 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
     assert.ok(code.length > 2); assert.equal(keccak256(code), p.qsrCodeHash)
     let nativeGross = 0n, nativeRoyalty = 0n, nativeFee = 0n, qsrGross = 0n, qsrRoyalty = 0n, qsrFee = 0n, fills = 0
     for (const id of [1, 2]) {
-      if (!value.included || (fixture.action === 'buy' && id === 2)) continue
+      if (!value.included || (fixture.action === 'buy' && id === 2) || (partial && id === 1)) continue
       fills++
       const item = expected(id), price = BigInt(item.price)
       if (item.paymentToken.toLowerCase() === zero) {
@@ -64,7 +65,7 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
     }
     assert.ok(before)
     assert.equal(native.buyer, before.native.buyer - nativeGross - BigInt(p.buyerReceiptFee))
-    assert.equal(native.seller, before.native.seller + nativeGross - nativeRoyalty - nativeFee)
+    assert.equal(native.seller, before.native.seller + nativeGross - nativeRoyalty - nativeFee - BigInt(p.sellerReceiptFee))
     assert.equal(native.feeRecipient, before.native.feeRecipient + nativeFee)
     assert.equal(native.royaltyRecipient, before.native.royaltyRecipient + nativeRoyalty)
     assert.equal(qsr.buyer, before.qsr.buyer - qsrGross)
@@ -84,7 +85,7 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
     const topic = keccak256(stringToHex('OrderFilled(bytes32,address,address,uint8,address,uint256,address,uint256,uint256,uint256)'))
     const fills = receipt.logs.filter(row => row.address.toLowerCase() === fixture.exchange.toLowerCase() && row.topics[0] === topic)
       .map(row => decodeEventLog({abi, data: row.data, topics: row.topics, strict: true}).args)
-    assert.deepEqual(fills.map(row => String(row.tokenId)).sort(), fixture.action === 'batch' ? ['1', '2'] : ['1'])
+    assert.deepEqual(fills.map(row => String(row.tokenId)).sort(), fixture.action === 'batch' ? ['1', '2'] : [partial ? '2' : '1'])
     for (const fill of fills) {
       const selected = expected(fill.tokenId), price = BigInt(selected.price)
       assert.equal(fill.price, price); assert.equal(fill.paymentToken.toLowerCase(), selected.paymentToken.toLowerCase())
@@ -97,6 +98,18 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
     assert.equal(raw.blockHash, receipt.blockHash)
     const fee = BigInt(raw.gasUsed) * BigInt(raw.effectiveGasPrice) + BigInt(raw.l1Fee ?? '0x0')
     assert.equal(fee.toString(), value.payouts.buyerReceiptFee)
+    if (partial) {
+      const seller = await chain.request({method: 'eth_getTransactionReceipt', params: [value.cancellation]})
+      assert.equal(seller.transactionHash, value.cancellation)
+      assert.equal(seller.status, '0x1')
+      assert.equal(seller.from.toLowerCase(), fixture.seller.toLowerCase())
+      assert.equal(seller.to.toLowerCase(), fixture.exchange.toLowerCase())
+      const sellerFee = BigInt(seller.gasUsed) * BigInt(seller.effectiveGasPrice) + BigInt(seller.l1Fee ?? '0x0')
+      assert.ok(sellerFee > 0n); assert.equal(sellerFee.toString(), value.payouts.sellerReceiptFee)
+      assert.equal(value.ownerModel.executed.nativeSpent, '0')
+      assert.equal(value.ownerModel.executed.nativeUnspent, expected(1).price)
+      assert.equal(value.ownerModel.executed.nativeCredit, '0')
+    }
     receiptChecked = true
     record('actual token and native fill events preserve exact base units rounded payouts and independently read receipt gas')
   }
@@ -104,6 +117,6 @@ export function createTokenPaymentChecks({fixture, chain, viem, record}) {
     configuration: fixture.payouts, tokenPayment: fixture.tokenPayment, canonicalMinedState: mined,
     independentHashSelectedSDKReads: true, actualBridgePredeploy: true,
     finiteExecutedAllowanceBeforeBuying: true, missingAllowanceApprovalPathQualified: false,
-    actualAdditionalProviderTransactions: 0, mockedProductAPIOrRPCReplies: 0})
+    actualAdditionalProviderTransactions: 0, additionalApprovalProviderTransactions: 0, mockedProductAPIOrRPCReplies: 0})
   return {state, receipt, summary}
 }

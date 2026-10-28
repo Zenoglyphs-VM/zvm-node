@@ -26,7 +26,7 @@ assert.ok(['buy', 'cancel', 'nonce', 'approval', 'batch', 'partial-batch'].inclu
 const batchMode = ['batch', 'partial-batch'].includes(fixture.action)
 const partialBatch = fixture.action === 'partial-batch'
 const tokenProfile = fixture.tokenPayment?.profile ?? null
-assert.ok(tokenProfile === null || (tokenProfile === 'qsr' && fixture.app === 'nft' && fixture.kind === 'single' && fixture.action === 'buy') || (tokenProfile === 'mixed' && fixture.app === 'karum' && fixture.kind === 'single' && fixture.action === 'batch'))
+assert.ok(tokenProfile === null || (tokenProfile === 'qsr' && fixture.app === 'nft' && fixture.kind === 'single' && fixture.action === 'buy') || (tokenProfile === 'mixed' && fixture.app === 'karum' && fixture.kind === 'single' && batchMode))
 const payoutProfile = !tokenProfile && ['buy', 'batch', 'partial-batch'].includes(fixture.action)
 assert.equal(!!fixture.payouts, payoutProfile || !!tokenProfile)
 const zeroPayment = '0x' + '0'.repeat(40)

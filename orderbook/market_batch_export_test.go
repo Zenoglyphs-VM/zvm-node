@@ -151,7 +151,9 @@ func (p *ExecutedMarketProviderFixture) sendPartialBatch(ctx context.Context, ra
 		return common.Hash{}, errors.New("undeclared partial-batch actor")
 	} else {
 		for _, input := range p.f.r.scenario.inputs {
-			value.Add(value, input.Order.Price.Big())
+			if input.Order.PaymentToken == (common.Address{}) {
+				value.Add(value, input.Order.Price.Big())
+			}
 		}
 	}
 	p.mu.Lock()

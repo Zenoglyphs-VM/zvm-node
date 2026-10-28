@@ -409,3 +409,23 @@ The existing thirty native profiles and their 647 named checks stay in the lane.
 QSR uses the existing Core genesis predeploy and actual bridge derivation. A finite allowance is executed in the declared source prefix; these cases do not qualify the missing-allowance approval/purchase path. Native and QSR balances, rounded royalty/fee shares, native receipt gas and the remaining QSR allowance are read independently through canonical removal and restoration. QSR prices include a non-divisible base-unit amount. No balance storage insertion or product API/RPC response replacement is used.
 
 The candidate retains the existing workflow limits, dependency graphs, compiler/wallet target and relayer build. Exact-source automatic CI output must establish the current totals. Historical runs keep their original revisions. Mixed partial refunds, token bulk signatures, royalty cap boundaries, ERC-1271 production-page paths, general wallets and independent NoM/full-daemon acceptance remain separate open gates.
+
+### Mixed-currency partial refund profile
+
+`karum-single-mixed-partial-batch` retains a prepared original buyer request
+containing one 0.25 ZNN order and one 20,000,001-base-unit QSR order. A separate
+production seller page cancels the native order before that buyer request is
+signed and published. The original buyer request then executes only the QSR
+fill. The exact native balance delta must prove the entire 0.25 ZNN returned,
+with zero exchange credit and only the independently observed buyer gas cost.
+The seller separately pays its cancellation gas. Actual fill logs and both
+currencies' balances independently verify the 375-bps royalty, 200-bps fee,
+remaining finite QSR allowance and unchanged order bytes through canonical
+removal and restoration of both original transactions and NoM publications.
+
+This adds one separately named profile and preserves every previous native and
+token profile. It uses the existing QSR predeploy and the declared executed
+bridge deposit and finite allowance prefix. Missing-allowance approval, generic
+wallets, ERC-1271, independent NoM authority and full-daemon execution remain
+separate requirements. Source assertions and parser checks alone do not establish
+hosted execution success; historical CI remains bound to its original revision.
