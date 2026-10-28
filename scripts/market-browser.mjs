@@ -1,6 +1,7 @@
 // Real production pages and the live Go fixture. The injected wallet speaks
 // EIP-6963/EIP-1193 but is a declared stand-in, never a real signing wallet.
 import assert from 'node:assert/strict'
+import {boundedNavigation} from './market-navigation-support.mjs'
 import {execFileSync} from 'node:child_process'
 import {existsSync} from 'node:fs'
 import {readFile, mkdtemp, rm} from 'node:fs/promises'
@@ -16,6 +17,7 @@ for await (const chunk of process.stdin) {
 }
 const fixture = JSON.parse(input)
 const base = new URL(fixture.base)
+const navigation = boundedNavigation(base.origin)
 assert.equal(base.protocol, 'http:')
 assert.equal(base.hostname, '127.0.0.1')
 assert.ok(base.port && /^[a-f0-9]{64}$/.test(fixture.token))
@@ -121,7 +123,7 @@ try {
       url.searchParams.set('rpc', new URL('/rpc', base).href)
       const projection = async listed => {
         providerMethods.push(...await page.evaluate(() => window.__marketFixture?.state.calls.map(c => c.method) || []))
-        await page.goto(url.href, {waitUntil: 'networkidle0', timeout: 20000})
+        await navigation.goto(page, url.href)
         await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'actual item route did not render')
         const shown = await page.evaluate(() => !![...document.querySelectorAll('main button')].find(b => b.checkVisibility() &&
           (b.dataset.testid === 'buy' || b.textContent.trim() === 'Buy now')))
@@ -174,24 +176,24 @@ try {
         await follow(itemPath)
         const legacyAccount = new URL('/zvm-nft/address/' + fixture.alice, base)
         legacyAccount.searchParams.set('rpc', new URL('/rpc', base).href)
-        await page.goto(legacyAccount.href, {waitUntil: 'networkidle0', timeout: 20000})
+        await navigation.goto(page, legacyAccount.href)
         await follow(itemPath)
         await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'account item link did not navigate')
         record(result, 'owner account links and the legacy address alias preserve the item')
         const legacyItem = new URL('/zvm-nft/nft/' + fixture.collection + '/1', base)
         legacyItem.searchParams.set('rpc', new URL('/rpc', base).href)
-        await page.goto(legacyItem.href, {waitUntil: 'networkidle0', timeout: 20000})
+        await navigation.goto(page, legacyItem.href)
         await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'legacy item bookmark did not render')
         record(result, 'legacy NFT item bookmark resolves the same item')
         const legacyCollection = new URL('/zvm-nft/nft/' + fixture.collection, base)
         legacyCollection.searchParams.set('rpc', new URL('/rpc', base).href)
-        await page.goto(legacyCollection.href, {waitUntil: 'networkidle0', timeout: 20000})
+        await navigation.goto(page, legacyCollection.href)
         await follow(itemPath)
         await until(page, () => document.querySelector('main h1')?.textContent.trim() === '#1', 'legacy collection card did not navigate')
         record(result, 'legacy NFT collection bookmark generates a canonical item link')
         const home = new URL('/zvm-nft/', base)
         home.searchParams.set('rpc', new URL('/rpc', base).href)
-        await page.goto(home.href, {waitUntil: 'networkidle0', timeout: 20000})
+        await navigation.goto(page, home.href)
         assert.equal(await page.evaluate(() => [...document.querySelectorAll('main a')]
           .some(a => a.getAttribute('href')?.startsWith('/zvm-nft/nft/'))), false)
         await follow('/zvm-nft/create')
@@ -249,7 +251,7 @@ try {
   await rm(profile, {recursive: true, force: false})
   console.log('MARKET-BROWSER-QUALIFICATION ' + JSON.stringify({node: process.version, chrome, pins,
     results, failedHTTP, externalRequests: external.length, pageExceptions: problems.length,
-    actualBrowserProductionPagesAndGoHTTP: true, walletProvider: 'declared EIP-6963/EIP-1193 stand-in',
+    actualBrowserProductionPagesAndGoHTTP: true, boundedNavigation: navigation.summary(), walletProvider: 'declared EIP-6963/EIP-1193 stand-in',
     exchangeRPCChecksAndChainMetadata: 'declared controls; not execution or full-client evidence',
     actualTransactionsOrSignatures: 0, browserJoined: browser.process()?.exitCode !== null}))
 }

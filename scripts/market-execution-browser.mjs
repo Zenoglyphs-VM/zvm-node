@@ -3,6 +3,7 @@
 // is fabricated here. The public buyer signs ordinary EVM transactions for
 // the actual relayer CLI; independent NoM and daemon RPC remain boundaries.
 import assert from 'node:assert/strict'
+import {boundedNavigation} from './market-navigation-support.mjs'
 import {createTokenPaymentChecks} from './market-token-payment-support.mjs'
 import {createSaleProceedsChecks} from './market-sale-proceeds-support.mjs'
 import {createExternalRoyaltyChecks} from './market-external-royalty-support.mjs'
@@ -20,6 +21,7 @@ for await (const chunk of process.stdin) {
   assert.ok(rawInput.length <= 16384, 'bounded fixture input required')
 }
 const fixture = JSON.parse(rawInput), base = new URL(fixture.base)
+const navigation = boundedNavigation(base.origin)
 assert.equal(base.protocol, 'http:')
 assert.equal(base.hostname, '127.0.0.1')
 assert.ok(base.port && /^[a-f0-9]{64}$/.test(fixture.token))
@@ -158,7 +160,7 @@ function url(path, viewer = false) {
   return value.href
 }
 async function navigate(path, viewer = false) {
-  await page.goto(url(path, viewer), {waitUntil: 'networkidle0', timeout: 20000})
+  await navigation.goto(page, url(path, viewer))
 }
 async function connect() {
   const needed = await page.evaluate(() => [...document.querySelectorAll('header button')]
@@ -876,7 +878,7 @@ try {
   await stop()
   await rm(profile, {recursive: true, force: false})
   console.log((externalRoyalty ? 'EXECUTED-EXTERNAL-ROYALTY-BROWSER-QUALIFICATION ' : approvalRequired ? 'EXECUTED-TOKEN-APPROVAL-BROWSER-QUALIFICATION ' : tokenProfile ? 'EXECUTED-TOKEN-PAYMENT-BROWSER-QUALIFICATION ' : 'EXECUTED-MARKET-BROWSER-QUALIFICATION ') + JSON.stringify({node: process.version, chrome, pins,
-    result, SDKVersion: sdk.version, actualTypedDataSignatures: signatures.length, actualOrderPOSTs: posts.length,
+    result, SDKVersion: sdk.version, boundedNavigation: navigation.summary(), actualTypedDataSignatures: signatures.length, actualOrderPOSTs: posts.length,
     providerMethods: methods, providerFailures, externalRequests: external.length, pageExceptions: exceptions.length, failedHTTP,
     actualProductionPageActionsAndGoAdmission: true, actualProviderEVMTransactions: transactions.length,
     actualOfficialRelayerTransport: true, physicalWalletOrPublicNetwork: false,
