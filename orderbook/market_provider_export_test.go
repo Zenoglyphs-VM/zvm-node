@@ -342,6 +342,11 @@ func (s executionEth) GetTransactionReceipt(_ context.Context, hash common.Hash)
 	if err != nil {
 		return nil, err
 	}
+	// Ethereum receipt logs are always an array. No emitted events means an
+	// empty array, not a null value inherited from the engine's nil slice.
+	if receipts[index].Logs == nil {
+		result["logs"] = []any{}
+	}
 	result["from"], result["to"] = from, tx.To()
 	return result, nil
 }

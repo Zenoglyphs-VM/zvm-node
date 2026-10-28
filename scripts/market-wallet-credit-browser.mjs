@@ -40,6 +40,9 @@ const owner = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(
 assert.equal(owner.address.toLowerCase(), fixture.owner.toLowerCase())
 const chain = createPublicClient({transport: http(new URL('/rpc', base).href, {retryCount: 0})})
 const withdrawData = encodeFunctionData({abi: parseAbi(['function withdrawCredits()']), functionName: 'withdrawCredits'})
+const feePolicy = await readFile(join(fixture.roots[fixture.app], 'zvm-core/web/src/evm.ts'), 'utf8')
+assert.match(feePolicy, /export const TIP_WEI = 100_000_000_000n/)
+const priorityFee = 100_000_000_000n // verified pinned ZVM sender policy; relayer policy is unchanged
 const legacyKey = 'zvm.exchange-credits.v1:' + fixture.chainId + ':' + fixture.exchange.toLowerCase() + ':' + fixture.wallet.toLowerCase()
 const key = 'zvm.exchange-credit-calls.v1:' + fixture.chainId + ':' + fixture.exchange.toLowerCase() + ':' + fixture.wallet.toLowerCase()
 const executablePath = [process.env.CHROME_BIN, '/usr/bin/google-chrome', '/usr/bin/chromium'].find(name => name && existsSync(name))
@@ -199,14 +202,14 @@ try {
       assert.equal(typeof head.baseFeePerGas, 'bigint')
       const raw = await owner.signTransaction({type: 'eip1559', chainId: fixture.chainId, nonce,
         to: fixture.wallet, data, value: 0n, gas: gas * 13n / 10n,
-        maxFeePerGas: head.baseFeePerGas * 2n + 1n, maxPriorityFeePerGas: 1n})
+        maxFeePerGas: head.baseFeePerGas * 2n + priorityFee, maxPriorityFeePerGas: priorityFee})
       const hash = await chain.sendRawTransaction({serializedTransaction: raw})
       transactions.push({hash, rawBytes: (raw.length - 2) / 2, nonce})
       batch.hash = hash; batch.outcome = 'submitted'; lostResponses++
       // The fixture wallet retains its real hash under the exact caller id,
       // while the application loses the original wallet_sendCalls response.
       return {id: request.id, lost: true}
-    } catch (error) {providerFailures.push(String(error.message).slice(0, 220)); throw error}
+    } catch (error) {providerFailures.push([error.shortMessage ?? String(error.message).split('\n')[0], error.details ?? error.cause?.details ?? ''].map(value => String(value).slice(0, 200)).join(' | ')); throw error}
   })
   await page.exposeFunction('__creditWalletStatus', async params => {
     try {
@@ -225,7 +228,7 @@ try {
       return {...response, status: 200, receipts: [{transactionHash: receipt.transactionHash,
         blockHash: receipt.blockHash, blockNumber: receipt.blockNumber, gasUsed: receipt.gasUsed, status: receipt.status,
         logs: receipt.logs.map(log => ({address: log.address, data: log.data, topics: log.topics}))}]}
-    } catch (error) {providerFailures.push(String(error.message).slice(0, 220)); throw error}
+    } catch (error) {providerFailures.push([error.shortMessage ?? String(error.message).split('\n')[0], error.details ?? error.cause?.details ?? ''].map(value => String(value).slice(0, 200)).join(' | ')); throw error}
   })
   await page.evaluateOnNewDocument(inject, {wallet: fixture.wallet, chainId: fixture.chainId, key, legacyKey})
   await page.setRequestInterception(true)
