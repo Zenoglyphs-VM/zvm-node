@@ -53,7 +53,7 @@ const methods = [], failedHTTP = [], exceptions = [], external = [], providerFai
 let browser, context, page, stopPromise, rejectWallet = false, walletRejections = 0, requests = 0, actorNonce
 let originalJournal, originalHash, savedBeforeRequest = 0
 let preparationHeader, finalReceipt, originalCallId
-let recoverStatus = false, lostResponses = 0, receiverProbeRefusals = 0
+let recoverStatus = false, lostResponses = 0, receiverProbeRefusals = 0, rejectedStatusQueries = 0
 const callBatches = new Map(), statusQueries = []
 const stop = () => stopPromise ??= (async () => {if (browser) await browser.close()})()
 process.once('SIGTERM', () => {void stop()})
@@ -190,7 +190,7 @@ try {
         return {id: request.id}
       }
       if (rejectWallet) {
-        rejectWallet = false; walletRejections++; batch.outcome = 'offchain-failed'
+        rejectWallet = false; walletRejections++; batch.outcome = 'user-rejected-no-status'
         return {id: request.id, rejected: true}
       }
       assert.equal(requests, 3); assert.equal(transactions.length, 0)
@@ -219,6 +219,7 @@ try {
       statusQueries.push(id); assert.ok(statusQueries.length <= 96)
       const response = {version: '2.0.0', id, chainId: '0x' + BigInt(fixture.chainId).toString(16), atomic: false, status: 100, receipts: []}
       if (batch.outcome === 'offchain-failed') return {...response, status: 400}
+      if (batch.outcome === 'user-rejected-no-status') {rejectedStatusQueries++; return {unknown: true}}
       assert.equal(batch.outcome, 'submitted'); assert.ok(batch.hash)
       if (!recoverStatus) return {unknown: true}
       const receipt = await chain.request({method: 'eth_getTransactionReceipt', params: [batch.hash]})
@@ -266,9 +267,20 @@ try {
   await credit(fixture.expectedCredit, 'not-submitted')
   assert.equal(walletRejections, 1); assert.equal(requests, 2); assert.equal(transactions.length, 0)
   const refused = await rows(); assert.equal(refused.length, 2)
-  assert.ok(refused.every(row => row.wallet.results.length === 1 && row.wallet.results[0].status === 400))
+  assert.equal(refused[0].wallet.results.length, 1); assert.equal(refused[0].wallet.results[0].status, 400)
+  assert.deepEqual(refused[1].wallet.results, [])
+  assert.deepEqual(refused[1].wallet.dispatchRejection, {method: 'wallet_sendCalls', code: 4001})
+  assert.ok(rejectedStatusQueries > 0)
   const refusedBytes = JSON.stringify(refused)
   record('explicit rejection retains both refused request ids without signing or dropping history')
+
+  await page.reload({waitUntil: 'networkidle0', timeout: 20000}); await connect()
+  await credit(fixture.expectedCredit, 'not-submitted'); await refresh()
+  await credit(fixture.expectedCredit, 'not-submitted')
+  assert.equal(await disabled(), false); assert.equal(requests, 2); assert.equal(transactions.length, 0)
+  assert.equal(JSON.stringify(await rows()), refusedBytes)
+  assert.ok(rejectedStatusQueries >= 2)
+  record('direct user rejection without a stored wallet status survives reload and needs another explicit user action')
 
   await click('Withdraw available ZNN'); await credit(fixture.expectedCredit, 'unknown')
   await until(() => document.querySelector('[data-testid="withdraw-exchange-credit"]')?.textContent.trim() === 'Withdraw available ZNN', 'the lost send response did not settle')
@@ -352,7 +364,7 @@ try {
   record('only connected-account discovery and exact known-id status queries execute without legacy fallback or duplicate broadcasts')
   assert.deepEqual(providerFailures, []); assert.deepEqual(failedHTTP, []); assert.deepEqual(external, []); assert.deepEqual(exceptions, [])
   record('actual production pages finish without external network requests failed HTTP responses or uncaught exceptions')
-  assert.equal(result.checks.length, 16); result.pass = true
+  assert.equal(result.checks.length, 17); result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 240)
   if (page && !page.isClosed()) result.page = await page.evaluate(() => ({path: location.pathname,
@@ -367,6 +379,7 @@ try {
     providerMethods: methods, providerFailures, actualProviderEVMTransactions: transactions.length,
     signedRawBytes: transactions.map(value => value.rawBytes), originalHash, originalCallId, lostResponses,
     exactSavedIdStatusQueries: statusQueries, walletCallsRetained: callBatches.size, preparationHeader, finalReceipt,
+    directUserRejectionWithoutStoredStatus: result.pass && rejectedStatusQueries >= 2, rejectedStatusQueries,
     externalRequests: external.length, failedHTTP, pageExceptions: exceptions.length,
     browserJoined: !!browser?.process() && browser.process().exitCode !== null,
     genericSafeUserOperationOrPhysicalWalletQualified: false, independentNoMOrFullDaemonQualified: false,

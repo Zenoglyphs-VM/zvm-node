@@ -325,3 +325,29 @@ adapter is not generic Safe/ERC-4337 or physical-wallet qualification. NoM
 canonicality/plasma remain synthetic, and the custom Engine/eth fixture remains
 explicit. Independent NoM/full-daemon authority, already-lost legacy outer
 hashes, other wallet mappings and full marketplace acceptance remain open.
+
+
+### Direct wallet rejection without retained status
+
+The two existing Wallet Call API profiles also exercise a direct numeric `4001`
+send rejection whose identifier has no queryable wallet batch status. The
+production page must retain the exact request with its bounded method/code
+annotation, display it as the wallet's rejection assertion, survive a reload and
+refresh without a new dispatch, and permit a new request only after another
+explicit action. The original rejected row remains unchanged through the later
+accepted request, response loss, canonical removal and restoration.
+
+The receiver-estimate refusal remains a separate cached offchain status. Only the
+third request signs and submits one actual outer transaction per profile. This
+adds one named check per existing profile, with no additional browser profile,
+relayer compilation, wallet-contract compilation or transaction. The target is
+30 production browser profiles, 608 named checks and 34 actual provider
+transactions with verified NoM publications. These are expectations until the
+automatic workflow succeeds at the newly pinned Node and frontend revisions;
+earlier runs retain their original source identities.
+
+Provider rejection is an offchain assertion under EIP-1193 and EIP-5792, not
+independent execution proof. The companion model controls cover conflicting
+pending/receipt evidence, ambiguous errors and persistence failure. Generic
+Safe/ERC-4337 accounts, physical wallets, independent NoM/full-daemon acceptance
+and the full original marketplace acceptance remain separate gates.
