@@ -28,7 +28,7 @@ const partialBatch = fixture.action === 'partial-batch'
 const tokenProfile = fixture.tokenPayment?.profile ?? null
 const approvalRequired = fixture.tokenPayment?.approvalRequired === true
 assert.ok(!approvalRequired || !partialBatch)
-assert.ok(tokenProfile === null || (tokenProfile === 'qsr' && fixture.app === 'nft' && fixture.kind === 'single' && fixture.action === 'buy') || (tokenProfile === 'mixed' && fixture.app === 'karum' && fixture.kind === 'single' && batchMode))
+assert.ok(tokenProfile === null || (tokenProfile === 'qsr' && ((fixture.app === 'nft' && fixture.action === 'buy') || (fixture.app === 'karum' && fixture.kind === 'bulk' && fixture.action === 'batch'))) || (tokenProfile === 'mixed' && fixture.app === 'karum' && fixture.kind === 'single' && batchMode))
 const payoutProfile = !tokenProfile && ['buy', 'batch', 'partial-batch'].includes(fixture.action)
 assert.equal(!!fixture.payouts, payoutProfile || !!tokenProfile)
 const zeroPayment = '0x' + '0'.repeat(40)
@@ -51,7 +51,7 @@ assert.equal(sdk.version, '2.56.8')
 const signer = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '1')
 const buyerSigner = requireApp('viem/accounts').privateKeyToAccount('0x' + '0'.repeat(63) + '2')
 assert.equal(buyerSigner.address.toLowerCase(), fixture.buyer.toLowerCase())
-const {createPublicClient, http, decodeEventLog, encodeFunctionData, keccak256, parseAbi, stringToHex} = requireApp('viem')
+const {createPublicClient, http, decodeEventLog, encodeFunctionData, hashStruct, concat, keccak256, parseAbi, stringToHex} = requireApp('viem')
 const chain = createPublicClient({transport: http(new URL('/rpc', base).href, {retryCount: 0})})
 const transactions = []
 const actorSigner = fixture.action === 'buy' || batchMode ? buyerSigner : signer
@@ -72,7 +72,7 @@ async function releaseQuote() {
   const request = heldQuoteRequest; heldQuoteRequest = null
   await request.continue()
 }
-let fundedNonce, fundedSellerNonce
+let fundedNonce, fundedSellerNonce, tokenBulkTypedData, tokenBulkSignature, tokenBulkEvidence
 let releaseBuyer, heldBuyerReadyResolve
 const buyerGate = new Promise(resolve => {releaseBuyer = resolve})
 const heldBuyerReady = new Promise(resolve => {heldBuyerReadyResolve = resolve})
@@ -200,7 +200,9 @@ async function awaitTokenApproval(scope) {
   assert.equal(logs[0].owner.toLowerCase(), fixture.buyer.toLowerCase())
   assert.equal(logs[0].spender.toLowerCase(), fixture.exchange.toLowerCase())
   assert.equal(logs[0].value, BigInt(fixture.tokenPayment.approvalAmount))
-  assert.equal(logs[0].value, 20000001n)
+  const boughtIDs = fixture.action === 'buy' ? [1] : [1, 2]
+  const wanted = boughtIDs.reduce((sum, id) => sum + (expectedPayment(id).paymentToken.toLowerCase() === fixture.tokenPayment.token.toLowerCase() ? BigInt(expectedPayment(id).price) : 0n), 0n)
+  assert.equal(logs[0].value, wanted)
   const mined = await phase('approval-mined')
   assert.equal(mined.approval, transactions[0])
   assert.equal(mined.payouts.qsrAllowance, fixture.tokenPayment.approvalAmount)
@@ -337,10 +339,13 @@ async function preparePage(page) {
     assert.equal(typed.domain.verifyingContract.toLowerCase(), fixture.exchange.toLowerCase())
     assert.equal(typed.primaryType, fixture.kind === 'bulk' ? 'OrderRoot' : 'Order')
     assert.ok(signatures.length < 2)
-    if (tokenProfile) {
+    if (tokenProfile && fixture.kind === 'single') {
       const wanted = expectedPayment(typed.message.tokenId)
       assert.ok(wanted); assert.equal(BigInt(typed.message.price), BigInt(wanted.price))
       assert.equal(typed.message.paymentToken.toLowerCase(), wanted.paymentToken.toLowerCase())
+    } else if (tokenProfile) {
+      assert.equal(tokenProfile, 'qsr'); assert.match(typed.message.root, /^0x[0-9a-fA-F]{64}$/)
+      assert.ok(Array.isArray(typed.types.Order)); tokenBulkTypedData = structuredClone(typed)
     }
     if (quoteProfile && BigInt(typed.message.tokenId) === 1n) {
       assert.ok(quoteAccountRefusal && quoteEdited); assert.equal(quoteHeldRequests, 2)
@@ -354,6 +359,7 @@ async function preparePage(page) {
       record('the selected one-hour expiry survives a later duration edit and reaches the real typed-data signer unchanged')
     }
     const signature = await signer.signTypedData({...typed, domain: {...typed.domain, chainId: Number(BigInt(typed.domain.chainId))}})
+    if (tokenProfile && fixture.kind === 'bulk') tokenBulkSignature = signature
     signatures.push({primaryType: typed.primaryType})
     return signature
   })
@@ -515,12 +521,14 @@ try {
       await page.click(selector)
     }
     if (fixture.app === 'nft') {
-      await page.type('input[aria-label="Price each"]', '0.25')
+      if (tokenProfile) await page.select('select[aria-label="Bulk listing currency"]', 'qsr')
+      await page.type('input[aria-label="Price each"]', tokenProfile ? '0.20000001' : '0.25')
       await click('List 2 selected')
     } else {
       await click('List 2')
       await page.waitForSelector('#list-price', {visible: true, timeout: 12000})
-      await page.type('#list-price', '0.25')
+      if (tokenProfile) await click('QSR')
+      await page.type('#list-price', tokenProfile ? '0.20000001' : '0.25')
       await page.click('[data-testid="list-submit"]')
     }
     await waitOrders(2)
@@ -531,6 +539,23 @@ try {
   assert.equal(posts.length, expected)
   assert.equal(posts.flat().length, 2)
   record('actual typed-data prompt and HTTP submission cardinality')
+  if (tokenProfile && fixture.kind === 'bulk') {
+    assert.ok(tokenBulkTypedData); assert.equal(signatures.length, 1); assert.equal(posts.length, 1)
+    const inputs = posts.flat(), types = {Order: tokenBulkTypedData.types.Order}
+    const leaves = inputs.map(input => {
+      const wanted = expectedPayment(input.order.tokenId)
+      assert.equal(input.kind, 1); assert.equal(BigInt(input.order.price), BigInt(wanted.price))
+      assert.equal(input.order.paymentToken.toLowerCase(), wanted.paymentToken.toLowerCase())
+      assert.equal(input.signature, tokenBulkSignature); assert.equal(input.proof.length, 1)
+      const data = Object.fromEntries(types.Order.map(({name, type}) => [name, /^uint/.test(type) ? BigInt(input.order[name]) : input.order[name]]))
+      return hashStruct({data, primaryType: 'Order', types})
+    })
+    const root = keccak256(concat([...leaves].sort()))
+    assert.equal(tokenBulkTypedData.message.root.toLowerCase(), root.toLowerCase())
+    for (let i = 0; i < inputs.length; i++) assert.equal(inputs[i].proof[0].toLowerCase(), leaves[1 - i].toLowerCase())
+    tokenBulkEvidence = {pass: true, root, leaves, actualRootPrompts: 1, actualOrderPOSTs: 1, actualAdmittedLeaves: 2, exactQSRBaseUnitsPerLeaf: '20000001'}
+    record('one actual QSR bulk root signature binds both exact currency and price leaves and their sibling proofs')
+  }
   let state = await phase('bind')
   fundedNonce = state.actorNonce
   fundedSellerNonce = state.sellerNonce
@@ -582,7 +607,7 @@ try {
   } else if (batchMode) {
     const buyerBalanceBefore = await chain.getBalance({address: buyerSigner.address})
     if (tokenProfile) {
-      assert.equal(fixture.app, 'karum'); assert.equal(tokenProfile, 'mixed')
+      assert.equal(fixture.app, 'karum'); assert.ok(tokenProfile === 'mixed' || (tokenProfile === 'qsr' && fixture.kind === 'bulk'))
       for (const id of [1, 2]) {
         await navigate('/item/' + fixture.collection + '/' + id, true); await connect()
         const add = 'main button[data-testid="buy"] + button[title="Add to cart"]'
@@ -611,7 +636,7 @@ try {
       }, 'the actual cart checkout has not finished entering the visible viewport')
       await page.click('[data-testid="checkout"]')
     }
-    record(tokenProfile ? 'actual item controls add native and QSR listings to the real cart' : 'actual collection sweep selects two real admitted listings')
+    record(tokenProfile === 'qsr' ? 'actual item controls add both QSR listings to the real cart' : tokenProfile ? 'actual item controls add native and QSR listings to the real cart' : 'actual collection sweep selects two real admitted listings')
     if (partialBatch) {
       await boundedReady(heldBuyerReady, 'the prepared buyer request did not reach the public test wallet')
       assert.equal(transactions.length, 0)
@@ -817,7 +842,7 @@ try {
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
   assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch || approvalRequired ? 2 : 1)
   record((partialBatch || approvalRequired ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0) + (approvalRequired ? 3 : 0))
+  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0) + (approvalRequired ? 3 : 0) + (tokenProfile && fixture.kind === 'bulk' ? 1 : 0))
   if (quoteProfile) {assert.ok(quoteAccountRefusal && quoteEdited && quoteSignedSnapshot); assert.equal(quoteHeldRequests, 2)}
   if (payoutProfile) assert.ok(payoutBaseline && payoutMined && payoutReceiptChecked && payoutReorgChecked)
   if (tokenProfile) assert.ok(tokenChecks.summary(true).pass)
@@ -845,6 +870,7 @@ try {
       configuration: fixture.payouts, canonicalMinedState: payoutMined, independentSDKBalanceReads: true,
       originalProfileAndTransactionCountPreserved: true, mixedCurrencyOrERC1271Qualified: false} : null,
     actualTokenPayments: tokenProfile ? tokenChecks.summary(result.pass) : null,
+    actualTokenBulkRoot: tokenBulkEvidence ?? null,
     actualQuotePreparation: quoteProfile ? {pass: result.pass && quoteAccountRefusal && quoteEdited && !!quoteSignedSnapshot,
       actualDelayedApprovalRPCRequests: quoteHeldRequests, actualAccountsChangedEvent: true,
       changedAccountRefusedBeforeTypedDataPrompt: quoteAccountRefusal,

@@ -451,3 +451,30 @@ hashes, receipts and account blocks. All previous profiles remain. These cases
 do not establish general wallet, ERC-1271, independent NoM/full-daemon or
 production acceptance. Current-source hosted execution must qualify the new
 profiles; historical CI retains its original revision.
+
+### QSR bulk root and finite approval profiles
+
+`nft-bulk-qsr-missing-allowance` and
+`karum-bulk-qsr-missing-allowance` select two items in the actual account
+page, select QSR, and list each for exactly 20,000,001 base units with one
+OrderRoot prompt and one original order POST. Independent SDK and Go checks
+bind both admitted currency/price leaves, their sibling proofs and the same
+original root signature. The NFT account bulk form captures its selected
+currency and reward-token configuration with the quoted price and duration.
+A changed reward-token mapping prevents a late signature or POST.
+
+The NFT item purchase approves exactly 20,000,001 units for its one fill;
+the unaffected sibling remains open. The Karum cart approves exactly
+40,000,002 units and fills both original leaves. Neither profile inserts an
+allowance into state or uses an unlimited approval. Each requires the actual
+approval receipt before the original purchase request, two consecutive buyer
+nonces, two actual relayer publications and exact native gas/QSR payout
+accounting. Replacement and restoration retain the original signed bytes,
+receipts, finite allowance and all order/proof inputs.
+
+All previous native, token and mixed-currency refund profiles remain. These
+additional cases require fresh exact-head automatic CI; source preparation
+does not establish hosted success. General wallets, ERC-1271, royalty cap
+boundaries, independent NoM/full-daemon acceptance and the complete original
+roadmap remain separate requirements. Workflow, engine and estimator limits
+and dependency versions remain unchanged.

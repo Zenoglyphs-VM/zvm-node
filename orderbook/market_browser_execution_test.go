@@ -81,6 +81,12 @@ func TestExecutedMarketBrowserAdmissionAndRecovery(t *testing.T) {
 	t.Run("karum-single-mixed-missing-allowance", func(t *testing.T) {
 		executedMarketBrowserProfile(t, roots, "karum", "single", "batch", "mixed-approval")
 	})
+	t.Run("nft-bulk-qsr-missing-allowance", func(t *testing.T) {
+		executedMarketBrowserProfile(t, roots, "nft", "bulk", "buy", "qsr-approval")
+	})
+	t.Run("karum-bulk-qsr-missing-allowance", func(t *testing.T) {
+		executedMarketBrowserProfile(t, roots, "karum", "bulk", "batch", "qsr-approval")
+	})
 }
 
 func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, kind, action string, payment ...string) {
@@ -91,10 +97,10 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	}
 	if len(payment) == 1 {
 		basePayment := strings.TrimSuffix(payment[0], "-approval")
-		if kind != "single" || !((app == "nft" && action == "buy" && basePayment == "qsr") || (app == "karum" && (action == "batch" || action == "partial-batch") && basePayment == "mixed")) {
+		if !((basePayment == "qsr" && ((app == "nft" && action == "buy") || (app == "karum" && kind == "bulk" && action == "batch"))) || (kind == "single" && app == "karum" && (action == "batch" || action == "partial-batch") && basePayment == "mixed")) {
 			t.Fatal("undeclared token browser profile")
 		}
-		f, transport = orderbook.NewExecutedMarketTokenBrowserFixture(t, payment[0], action)
+		f, transport = orderbook.NewExecutedMarketTokenKindBrowserFixture(t, kind, payment[0], action)
 	} else if action == "batch" || action == "partial-batch" {
 		f, transport = orderbook.NewExecutedMarketBatchBrowserFixture(t, kind, action)
 	} else if action == "buy" {

@@ -59,10 +59,19 @@ func NewExecutedMarketTokenBrowserFixture(t *testing.T, profile string, actions 
 	if len(actions) == 1 {
 		action = actions[0]
 	}
-	if (tokenPaymentBase(profile) == "qsr" && action != "buy") || (tokenPaymentBase(profile) == "mixed" && action != "batch" && action != "partial-batch") || (tokenNeedsApproval(profile) && action == "partial-batch") {
+	return NewExecutedMarketTokenKindBrowserFixture(t, "single", profile, action)
+}
+
+// Keep the original single-listing entry point and declare token bulk explicitly.
+func NewExecutedMarketTokenKindBrowserFixture(t *testing.T, kind, profile, action string) (*ExecutedMarketFixture, *ExecutedMarketProviderFixture) {
+	t.Helper()
+	if (kind != "single" && kind != "bulk") || (kind == "bulk" && tokenPaymentBase(profile) != "qsr") {
+		t.Fatal("unsupported token listing kind")
+	}
+	if (tokenPaymentBase(profile) == "qsr" && action != "buy" && action != "batch") || (tokenPaymentBase(profile) == "mixed" && action != "batch" && action != "partial-batch") || (tokenNeedsApproval(profile) && action == "partial-batch") {
 		t.Fatal("unsupported token browser action")
 	}
-	f, p := newExecutedMarketActionPaymentBrowserFixture(t, "single", action, profile)
+	f, p := newExecutedMarketActionPaymentBrowserFixture(t, kind, action, profile)
 	if action == "batch" || action == "partial-batch" {
 		p.batchBalances = &executedBatchBalances{}
 	}
