@@ -593,18 +593,19 @@ complete source-bound hosted evidence is required before acceptance.
 
 ## Request-identity navigation accounting
 
-The quiet observer tracks public Puppeteer request objects by identity across
-the same page's navigations. Its wildcard observer receives request events
-before queued interception callbacks run. Response, finished and failed events
-complete each request once; duplicate notifications and reused redirect IDs
-cannot corrupt the active set. All request types remain observed. A bounded
-failure sample reports methods, paths and ages while excluding URL queries.
+The quiet observer uses the pinned Puppeteer request identifier and retains
+known event aliases. Response, finished and failed notifications complete a
+request once, including cached asset aliases. A late completion for a prior
+redirect cannot erase the current request. Every request type remains observed;
+conflicting active identities and missing identifiers fail closed. A successful
+navigation must observe its actual document request events. Bounded diagnostics
+report methods, paths and ages while excluding URL queries.
 
 DOMContentLoaded and the complete 100-ms zero-request quiet window share the
-original 20000-ms deadline. Active tracking is capped at 256 requests and
-overflow fails closed. Eight SDK/browser-free controls cover concurrent and
-duplicate identities, completion signals, late activity, isolated pages,
-closure, overflow, privacy and the original shared budget. Actual browser
+original 20000-ms deadline. Active tracking is capped at 256 requests. Ten
+SDK/browser-free controls cover concurrent identities, aliases, late redirect
+signals, late activity, isolated pages, closure, overflow, privacy, mandatory
+request observations and the original shared budget. Actual browser
 qualification still requires the complete retained and ERC-1271 hosted matrix.
 No product response, DOM assertion, signature, receipt, balance, profile,
 transaction, package deadline or job deadline is removed or expanded.

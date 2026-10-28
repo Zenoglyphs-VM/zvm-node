@@ -8,20 +8,45 @@ const maximumTrackedRequests = 256
 
 export function observeNavigationRequests(page) {
   if (observed.has(page)) return observed.get(page)
-  const active = new Map(), subscribers = new Set()
+  const active = new Map(), known = new WeakMap(), subscribers = new Set()
   let changed = performance.now(), closed = false, broken = '', peak = 0
   let started = 0, completed = 0, unmatchedCompletionSignals = 0
   const notify = () => {for (const listener of [...subscribers]) listener()}
+  const identity = request => {
+    if (!request || typeof request.id !== 'string' || !request.id || typeof request.url !== 'function' || typeof request.method !== 'function') {
+      broken = 'invalid navigation request identity'; notify(); return null
+    }
+    return request.id
+  }
   const finish = request => {
-    if (!active.delete(request)) {unmatchedCompletionSignals++; return}
+    const id = identity(request)
+    if (id === null) return
+    let entry = known.get(request)
+    if (!entry) {
+      const candidate = active.get(id)
+      if (candidate && candidate.request.url() === request.url() && candidate.request.method() === request.method()) {
+        entry = candidate; known.set(request, entry)
+      }
+    }
+    if (!entry || active.get(id) !== entry) {unmatchedCompletionSignals++; return}
+    active.delete(id)
     completed++; changed = performance.now(); notify()
   }
   const listener = (type, event) => {
     if (type === 'request') {
-      if (active.has(event)) return
-      if (!event || typeof event.url !== 'function') broken = 'invalid navigation request event'
-      else if (active.size === maximumTrackedRequests) broken = 'navigation request tracking limit exceeded'
-      else {active.set(event, performance.now()); started++; peak = Math.max(peak, active.size)}
+      const id = identity(event)
+      if (id === null || known.has(event)) return
+      const previous = active.get(id)
+      if (previous) {
+        if (previous.request.url() === event.url() && previous.request.method() === event.method()) known.set(event, previous)
+        else broken = 'navigation request identity reused while active'
+        notify(); return
+      }
+      if (active.size === maximumTrackedRequests) broken = 'navigation request tracking limit exceeded'
+      else {
+        const entry = {request: event, at: performance.now()}
+        active.set(id, entry); known.set(event, entry); started++; peak = Math.max(peak, active.size)
+      }
       changed = performance.now(); notify()
     } else if (type === 'response') finish(event.request())
     else if (type === 'requestfinished' || type === 'requestfailed') finish(event)
@@ -29,7 +54,7 @@ export function observeNavigationRequests(page) {
   }
   page.on('*', listener)
   const diagnostic = () => ({activeRequests: active.size, maximumTrackedRequests, peak, started, completed,
-    unmatchedCompletionSignals, requests: [...active].slice(0, 8).map(([request, at]) => {
+    unmatchedCompletionSignals, requests: [...active.values()].slice(0, 8).map(({request, at}) => {
       let path = '[unparseable]'
       try {path = new URL(request.url()).pathname.slice(0, 120)} catch {}
       return {method: String(request.method()).slice(0, 12), path,
@@ -69,15 +94,19 @@ export function boundedNavigation(origin) {
   const selected = new URL(origin)
   assert.equal(selected.protocol, 'http:'); assert.equal(selected.hostname, '127.0.0.1')
   const timeoutMilliseconds = 20000, quietMilliseconds = 100
+  const trackers = new Set()
   let attempts = 0, completed = 0, failed = 0, totalMilliseconds = 0, maximumMilliseconds = 0
   return {
     async goto(page, href) {
       assert.equal(new URL(href).origin, selected.origin)
       const began = performance.now(), deadline = began + timeoutMilliseconds
       const tracker = observeNavigationRequests(page)
+      trackers.add(tracker)
+      const before = tracker.diagnostic().started
       attempts++
       try {
         const response = await page.goto(String(href), {waitUntil: 'domcontentloaded', timeout: timeoutMilliseconds})
+        assert.ok(tracker.diagnostic().started > before, 'navigation request events were not observed')
         await tracker.wait(deadline, quietMilliseconds)
         assert.ok(performance.now() <= deadline, 'original overall navigation deadline exceeded')
         completed++
@@ -89,11 +118,15 @@ export function boundedNavigation(origin) {
       }
     },
     summary() {
+      const values = [...trackers].map(tracker => tracker.diagnostic())
       return {attempts, completed, failed, totalMilliseconds: Math.round(totalMilliseconds * 100) / 100,
         maximumMilliseconds: Math.round(maximumMilliseconds * 100) / 100, timeoutMilliseconds,
         quietMilliseconds, maximumInflightRequests: 0, lifecycle: 'domcontentloaded',
         previousQuietMilliseconds: 500, oneOverallOriginalDeadline: true,
-        requestTracking: 'public-request-identity-events', maximumTrackedRequests,
+        requestTracking: 'stable-request-identity-events', maximumTrackedRequests,
+        networkRequestsStarted: values.reduce((sum, value) => sum+value.started, 0),
+        networkRequestsCompleted: values.reduce((sum, value) => sum+value.completed, 0),
+        maximumObservedInflightRequests: Math.max(0, ...values.map(value => value.peak)),
         networkRequestTypesFiltered: 0, DOMErrorSignatureReceiptAndBalanceControlsRemoved: 0,
         productAPIOrRPCRepliesReplaced: 0}
     },

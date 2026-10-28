@@ -6,7 +6,13 @@ import {observeNavigationRequests, boundedNavigation} from './market-navigation-
 
 class Page extends EventEmitter {
   signal(type, event) {this.emit('*', type, event)}
-  async goto(href, options) {this.options = options; await this.loading?.(); return {href}}
+  async goto(href, options) {
+    this.options = options
+    const item = request('navigation-'+String(this.sequence = (this.sequence ?? 0)+1), '/document')
+    this.signal('request', item); await this.loading?.()
+    this.signal('response', {request: () => item}); this.signal('requestfinished', item)
+    return {href}
+  }
 }
 const request = (id = 'same', path = '/rpc?private=fixture-secret') => ({id,
   url: () => 'http://127.0.0.1:1'+path, method: () => 'POST'})
@@ -14,9 +20,9 @@ const delay = milliseconds => new Promise(resolve => setTimeout(resolve, millise
 let controls = 0
 
 {
-  const page = new Page(), tracker = observeNavigationRequests(page), first = request(), second = request()
+  const page = new Page(), tracker = observeNavigationRequests(page), first = request('one'), second = request('two')
   page.signal('request', first); page.signal('request', first); page.signal('request', second)
-  page.signal('response', {request: () => first}); page.signal('requestfinished', first)
+  page.signal('response', {request: () => request('one')}); page.signal('requestfinished', first)
   assert.equal(tracker.diagnostic().activeRequests, 1)
   await assert.rejects(tracker.wait(performance.now()+20), /original navigation deadline elapsed/)
   page.signal('requestfailed', second)
@@ -78,7 +84,23 @@ let controls = 0
   await assert.rejects(tracker.wait(began+40), /original navigation deadline elapsed/)
   assert.ok(performance.now()-began < 400); controls++
 }
-assert.equal(controls, 8)
+{
+  const page = new Page(), tracker = observeNavigationRequests(page)
+  const first = request('redirect', '/before'), next = request('redirect', '/after')
+  page.signal('request', first); page.signal('response', {request: () => first})
+  page.signal('request', next); page.signal('requestfinished', first)
+  assert.equal(tracker.diagnostic().activeRequests, 1)
+  page.signal('response', {request: () => request('redirect', '/after')})
+  await tracker.wait(performance.now()+500)
+  assert.equal(tracker.diagnostic().completed, 2); controls++
+}
+{
+  const page = new Page(), navigation = boundedNavigation('http://127.0.0.1:1')
+  page.goto = async () => ({})
+  await assert.rejects(navigation.goto(page, 'http://127.0.0.1:1/document'), /request events were not observed/)
+  assert.equal(navigation.summary().failed, 1); controls++
+}
+assert.equal(controls, 10)
 console.log('NAVIGATION-IDENTITY-CONTROLS '+JSON.stringify({controls, pass: true, SDKOrBrowserExecutions: 0,
   overallNavigationDeadlineMilliseconds: 20000, quietMilliseconds: 100, maximumInflightRequests: 0,
   duplicateAndRedirectIdentityControls: true, originalBudgetPreserved: true, diagnosticQueryValuesOmitted: true}))
