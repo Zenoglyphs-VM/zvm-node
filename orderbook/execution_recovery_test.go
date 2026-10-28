@@ -618,7 +618,10 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 				native(s.seller, &s.token, nil, callData("ZVMCollection", "mintBatch", common.Address(s.seller), []string{"one", "two", "three"}))
 				native(s.seller, &s.token, nil, callData("ZVMCollection", "setApprovalForAll", s.exchange, true))
 				if s.payouts != nil {
-					native(s.seller, &s.token, nil, callData("ZVMCollection", "setRoyalty", s.payouts.royaltyRecipient, new(big.Int).SetUint64(s.payouts.royaltyBps)))
+					// Mint and approval already reserve 16M gas in this momentum.
+					// Bound the simple setter without widening the native ceiling.
+					send(s.seller, s.cfg.Inbox, 0, derive.EncodeCall(derive.Call{To: &s.token, Gas: 500_000,
+						Data: callData("ZVMCollection", "setRoyalty", s.payouts.royaltyRecipient, new(big.Int).SetUint64(s.payouts.royaltyBps))}))
 				}
 			case 7:
 				if inputs.sign == nil {
