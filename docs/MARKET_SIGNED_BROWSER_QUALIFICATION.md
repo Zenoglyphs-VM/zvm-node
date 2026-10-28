@@ -478,3 +478,22 @@ does not establish hosted success. General wallets, ERC-1271, royalty cap
 boundaries, independent NoM/full-daemon acceptance and the complete original
 roadmap remain separate requirements. Workflow, engine and estimator limits
 and dependency versions remain unchanged.
+
+### Per-item sale proceeds estimates
+
+Karum reads each selected token's royalty for the complete quoted price at one
+canonical block, sharing that block's exchange fee, receiver and royalty-cap
+reads. The estimate uses separate integer floors and the actual royalty cap;
+a zero receiver disables the corresponding deduction. The display shows the
+complete currency precision and a range when selected items have different
+proceeds. Missing or failed reads remain unavailable. Changed inputs, selection,
+endpoint or a closed dialog cannot receive a late older estimate.
+
+The reader bounds active royalty calls at four and debounces form edits by
+200 ms. Refreshes occur only while the dialog is open. All existing production
+browser cases remain; every Karum listing additionally compares the actual
+display with independent SDK calls at its selected canonical hash. These are
+estimates of current settlement inputs, not a promise about future sale terms.
+Above-cap or reverting external royalty contracts and ERC-1271 execution still
+require their separate native acceptance evidence. No deadline, gas ceiling,
+dependency graph or original transaction count is increased.

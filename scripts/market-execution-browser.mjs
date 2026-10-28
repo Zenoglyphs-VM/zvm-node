@@ -4,6 +4,7 @@
 // the actual relayer CLI; independent NoM and daemon RPC remain boundaries.
 import assert from 'node:assert/strict'
 import {createTokenPaymentChecks} from './market-token-payment-support.mjs'
+import {createSaleProceedsChecks} from './market-sale-proceeds-support.mjs'
 import {execFileSync} from 'node:child_process'
 import {existsSync} from 'node:fs'
 import {readFile, mkdtemp, rm} from 'node:fs/promises'
@@ -133,6 +134,7 @@ const record = name => {
   console.log('SIGNED-BROWSER-EVENT ' + JSON.stringify({app: fixture.app, kind: fixture.kind, check: name, pass: true}))
 }
 const tokenChecks = tokenProfile ? createTokenPaymentChecks({fixture, chain, viem: requireApp('viem'), record}) : null
+const saleChecks = fixture.app === 'karum' ? createSaleProceedsChecks({fixture, page: () => page, chain, viem: requireApp('viem'), expectedPayment, record}) : null
 async function until(fn, name, ...args) {
   await page.waitForFunction(fn, {timeout: 12000, polling: 100}, ...args).catch(() => {throw new Error(name)})
 }
@@ -487,6 +489,7 @@ try {
         else await click('QSR')
       }
       await page.type(selector, tokenProfile && wanted.paymentToken.toLowerCase() !== zeroPayment ? '0.20000001' : '0.25')
+      if (saleChecks && !(quoteProfile && id === 1)) await saleChecks.verify([id])
       if (quoteProfile && id === 1) {
         await click('1 hour')
         armQuote(); await page.click('[data-testid="list-submit"]')
@@ -501,6 +504,7 @@ try {
         await page.evaluate(account => window.__executedMarketSelectAccount(account), fixture.seller)
         await navigate('/item/' + fixture.collection + '/1'); await connect(); await click('List for sale')
         await page.waitForSelector(selector, {visible: true}); await page.type(selector, '0.25'); await click('1 hour')
+        await saleChecks.verify([id])
         armQuote(); await page.click('[data-testid="list-submit"]')
         await boundedReady(quoteReady, 'the explicit replacement action did not reach its real approval read')
         await page.$eval(selector, input => {input.value = '0.75'; input.dispatchEvent(new Event('input', {bubbles: true}))})
@@ -529,6 +533,7 @@ try {
       await page.waitForSelector('#list-price', {visible: true, timeout: 12000})
       if (tokenProfile) await click('QSR')
       await page.type('#list-price', tokenProfile ? '0.20000001' : '0.25')
+      await saleChecks.verify([1, 2])
       await page.click('[data-testid="list-submit"]')
     }
     await waitOrders(2)
@@ -834,6 +839,7 @@ try {
     }
     assert.deepEqual(canonical(unchanged), canonical(original), 'accepted browser signature/proof/order was replaced')
   }
+  if (saleChecks) saleChecks.finish()
   record('actual browser order signature and proof survive both replacements')
   assert.equal(external.length, 0)
   assert.equal(exceptions.length, 0)
@@ -842,7 +848,7 @@ try {
   assert.ok(methods.every(m => ['eth_accounts', 'eth_requestAccounts', 'eth_chainId', 'wallet_switchEthereumChain', 'eth_signTypedData_v4', 'eth_sendTransaction'].includes(m)))
   assert.equal(methods.filter(m => m === 'eth_sendTransaction').length, partialBatch || approvalRequired ? 2 : 1)
   record((partialBatch || approvalRequired ? 'two' : 'one') + ' transaction method and no external request page exception or failed HTTP')
-  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0) + (approvalRequired ? 3 : 0) + (tokenProfile && fixture.kind === 'bulk' ? 1 : 0))
+  assert.equal(result.checks.length, 1 + (batchMode ? (partialBatch ? 23 : 20) : fixture.action === 'buy' ? 19 : fixture.action === 'approval' ? 22 : 20) + (quoteProfile ? 3 : 0) + (payoutProfile || tokenProfile ? 3 : 0) + (approvalRequired ? 3 : 0) + (tokenProfile && fixture.kind === 'bulk' ? 1 : 0) + (saleChecks ? 1 : 0))
   if (quoteProfile) {assert.ok(quoteAccountRefusal && quoteEdited && quoteSignedSnapshot); assert.equal(quoteHeldRequests, 2)}
   if (payoutProfile) assert.ok(payoutBaseline && payoutMined && payoutReceiptChecked && payoutReorgChecked)
   if (tokenProfile) assert.ok(tokenChecks.summary(true).pass)
@@ -871,6 +877,7 @@ try {
       originalProfileAndTransactionCountPreserved: true, mixedCurrencyOrERC1271Qualified: false} : null,
     actualTokenPayments: tokenProfile ? tokenChecks.summary(result.pass) : null,
     actualTokenBulkRoot: tokenBulkEvidence ?? null,
+    actualPerItemSaleProceeds: saleChecks ? saleChecks.summary(result.pass) : null,
     actualQuotePreparation: quoteProfile ? {pass: result.pass && quoteAccountRefusal && quoteEdited && !!quoteSignedSnapshot,
       actualDelayedApprovalRPCRequests: quoteHeldRequests, actualAccountsChangedEvent: true,
       changedAccountRefusedBeforeTypedDataPrompt: quoteAccountRefusal,

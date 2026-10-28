@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: Zenoglyphs-VM/zvm-karum
-          ref: c301df803dd48f6b05a21963a30b4a17c665e489
+          ref: 156025027e4bc1764ee02dc10d9cdbc00ed6f17c
           path: .market-browser/zvm-karum
           persist-credentials: false
           submodules: true
