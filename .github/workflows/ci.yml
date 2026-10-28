@@ -66,6 +66,8 @@ jobs:
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: go.mod
+      - name: Check bounded request-identity navigation controls without SDK or network
+        run: node scripts/market-navigation-support.test.mjs
       - name: Check bounded immutable snapshot reuse without SDK or network
         run: node --test --test-reporter=tap scripts/market-snapshot-read-cache.test.mjs
       - name: Compile the self-contained credit wallet once with the pinned compiler
