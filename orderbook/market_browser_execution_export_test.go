@@ -96,7 +96,7 @@ func (f *ExecutedMarketFixture) BindAcceptedBrowserInputs(t *testing.T, submitte
 		if id < 1 || id > 2 || accepted[id-1] != nil {
 			t.Fatal("browser inputs must name the two distinct selected tokens")
 		}
-		if f.TokenPaymentProfile() != "" {
+		if f.TokenPaymentProfile() != "" || f.r.scenario.royalty != nil {
 			want := f.r.scenario.orders[id-1]
 			if order.PaymentToken != want.PaymentToken || order.Price.Big().Cmp(want.Price.Big()) != 0 {
 				t.Fatal("token listing changed its original currency or exact base units")
@@ -113,7 +113,7 @@ func (f *ExecutedMarketFixture) BindAcceptedBrowserInputs(t *testing.T, submitte
 	orders := []*Order{&accepted[0].Order, &accepted[1].Order}
 	original := f.r.scenario
 	future := newExecutionScenarioInputs(t, true, false, executionScenarioInputs{
-		seller: original.seller, buyer: original.buyer, provider: original.provider, action: original.providerAction, payment: original.payment, timestamp: original.cfg.L2GenesisTimestamp, orders: orders,
+		seller: original.seller, buyer: original.buyer, provider: original.provider, action: original.providerAction, payment: original.payment, timestamp: original.cfg.L2GenesisTimestamp, orders: orders, royalty: original.royalty,
 		sign: func(*executionScenario) []*Input { return accepted },
 	})
 	if future.cfg.L2GenesisHash != original.cfg.L2GenesisHash || future.exchange != original.exchange || future.token != original.token {

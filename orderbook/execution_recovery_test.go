@@ -450,8 +450,8 @@ func newExecutionScenarioInputs(t *testing.T, validated, buffered bool, inputs e
 	}
 	s.royalty = inputs.royalty
 	if s.royalty != nil {
-		if inputs.credit != nil || inputs.payment != "" || inputs.orders != nil ||
-			(inputs.provider && (inputs.action != "batch" || inputs.sign == nil)) || (!inputs.provider && inputs.sign != nil) {
+		if inputs.credit != nil || inputs.payment != "" ||
+			(inputs.provider && (inputs.action != "batch" || inputs.sign == nil)) || (!inputs.provider && (inputs.sign != nil || inputs.orders != nil)) {
 			t.Fatal("external royalty setup requires its native or signed provider batch profile")
 		}
 		s.payouts = newExecutedMarketPayouts()
