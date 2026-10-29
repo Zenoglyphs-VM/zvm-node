@@ -54,7 +54,7 @@ jobs:
           git diff --exit-code
 
   market-browser:
-    needs: full-client-recovery
+    needs: [go, full-client-recovery]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
