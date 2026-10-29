@@ -77,6 +77,11 @@ func initObservations(db *sql.DB) error {
 			}
 		}
 	}
+	for _, statement := range closureIndexes {
+		if _, err := tx.Exec(statement); err != nil {
+			return err
+		}
+	}
 	if _, err := tx.Exec("INSERT INTO nft_order_meta(key,value) VALUES('rewind_epoch',0) ON CONFLICT(key) DO NOTHING"); err != nil {
 		return err
 	}
@@ -223,6 +228,11 @@ func storedAmount(in *Input) (int64, error) {
 // zero without reporting fills, so they must not turn a partial fill into a
 // full one. A fill from an older epoch may decrease after a rewind.
 func (b *Book) observe(tx *sql.Tx, in *Input, exchange common.Address, c check, at observation, now int64) (bool, error) {
+	return b.observeFill(tx, in, exchange, c, at, now, nil)
+}
+
+// A complete fill counter is supplied only by the paired hash-selected closure proof.
+func (b *Book) observeFill(tx *sql.Tx, in *Input, exchange common.Address, c check, at observation, now int64, complete *int64) (bool, error) {
 	var filled, fillEpoch, checkEpoch, block int64
 	var hash string
 	var code uint8
@@ -238,9 +248,14 @@ func (b *Book) observe(tx *sql.Tx, in *Input, exchange common.Address, c check, 
 	if err != nil {
 		return false, err
 	}
-	reportsFill := c.code == CodeOK || c.code == CodeFilled || c.code == CodeNotHeld || c.code == CodeNotFunded
+	reportsFill := complete != nil || c.code == CodeOK || c.code == CodeFilled || c.code == CodeNotHeld || c.code == CodeNotFunded
 	next := filled
-	if reportsFill {
+	if complete != nil {
+		if *complete < 0 || *complete > amount {
+			return false, errors.New("complete fill proof exceeds the stored amount")
+		}
+		next = *complete
+	} else if reportsFill {
 		next = amount - int64(c.remaining)
 	}
 	conflict := reportsFill && fillEpoch == int64(at.epoch) && next < filled
@@ -256,6 +271,9 @@ func (b *Book) observe(tx *sql.Tx, in *Input, exchange common.Address, c check, 
 	}
 	if reportsFill {
 		fillEpoch = int64(at.epoch)
+	} else {
+		// Retain the cached number, but do not present an early refusal as a full-fill proof.
+		fillEpoch = -1
 	}
 	status := statusFor(c.code)
 	var closed any

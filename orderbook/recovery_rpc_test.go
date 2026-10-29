@@ -589,6 +589,11 @@ func TestRPCLegacyMigrationPreservesIntentAndRollsBackOnRefusal(t *testing.T) {
 	for _, refuse := range []bool{false, true} {
 		t.Run(fmt.Sprintf("refusal-%t", refuse), func(t *testing.T) {
 			b, _, db, hash := recoveryBook(t)
+			for _, name := range []string{"nft_orders_closure_check", "nft_orders_closure_fill", "nft_orders_closure_unproved"} {
+				if _, err := db.Exec("DROP INDEX IF EXISTS " + name); err != nil {
+					t.Fatal(err)
+				}
+			}
 			for _, column := range []string{"checked_epoch", "checked_block", "checked_hash", "filled_epoch"} {
 				if _, err := db.Exec("ALTER TABLE nft_orders DROP COLUMN " + column); err != nil {
 					t.Fatal(err)

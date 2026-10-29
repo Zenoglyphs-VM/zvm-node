@@ -473,9 +473,8 @@ func (b *Book) check(ctx context.Context, exchange common.Address, inputs []*Inp
 func (b *Book) Get(hash common.Hash) (*Input, string, uint8, error) {
 	var raw, status string
 	var code uint8
-	err := b.cfg.DB.QueryRow(`SELECT o.input,o.status,CASE
-		WHEN o.status='open' AND (o.checked_epoch!=m.value OR typeof(m.value)!='integer') THEN ? ELSE o.code END
-		FROM nft_orders o JOIN nft_order_meta m ON m.key='rewind_epoch' WHERE o.hash=?`, CodeUnchecked, hash.Hex()).Scan(&raw, &status, &code)
+	err := b.cfg.DB.QueryRow(`SELECT o.input,o.status,`+EffectiveOrderCodeSQL+` FROM nft_orders o
+		LEFT JOIN nft_order_meta m ON m.key='rewind_epoch' WHERE o.hash=?`, hash.Hex()).Scan(&raw, &status, &code)
 	if err != nil {
 		return nil, "", 0, err
 	}
@@ -606,7 +605,7 @@ func (b *Book) step(ctx context.Context) error {
 		b.lastSweep, b.lastSweepEpoch = time.Now(), at.epoch
 		b.mu.Unlock()
 	}
-	return nil
+	return b.reconcileClosures(ctx, exchange, at)
 }
 
 type preparedLog struct {
@@ -676,7 +675,7 @@ func (b *Book) apply(tx *sql.Tx, exchange common.Address, entry preparedLog, tou
 		if len(l.Topics) != 3 {
 			return nil
 		}
-		_, err := tx.Exec(`UPDATE nft_orders SET status = ?, code = ?, closed_block = ? WHERE hash = ? AND status = ? AND exchange=?`,
+		_, err := tx.Exec(`UPDATE nft_orders SET status = ?, code = ?, closed_block = ?, checked_epoch=-1, filled_epoch=-1 WHERE hash = ? AND status = ? AND exchange=?`,
 			StatusCancelled, CodeCancelled, l.BlockNumber, l.Topics[1].Hex(), StatusOpen, exchange.Hex())
 		return err
 	case topicNonceIncremented:
@@ -706,7 +705,7 @@ func (b *Book) apply(tx *sql.Tx, exchange common.Address, entry preparedLog, tou
 			return err
 		}
 		for _, h := range stale {
-			if _, err := tx.Exec(`UPDATE nft_orders SET status = ?, code = ?, closed_block = ? WHERE hash = ?`,
+			if _, err := tx.Exec(`UPDATE nft_orders SET status = ?, code = ?, closed_block = ?, checked_epoch=-1, filled_epoch=-1 WHERE hash = ?`,
 				StatusCancelled, CodeStaleNonce, l.BlockNumber, h); err != nil {
 				return err
 			}

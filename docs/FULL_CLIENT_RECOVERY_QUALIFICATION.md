@@ -135,3 +135,29 @@ accepted head, while proving these read-only observations change no stored
 order bytes. The existing real-client index-rewind case remains the separate
 end-to-end gate; its observed worker interleaving is not inferred from these
 synthetic controls. No recovery comparison or original acceptance is relaxed.
+
+### Closed-cache provenance recovery
+
+Closed rows with stale or missing observations are recovered incrementally after
+ordinary open-order work. At most 100 rows, 16 MiB of original input and five
+seconds are admitted per pass. Three partial indexes bound selection of stale
+epochs and structural gaps without rescanning a healthy closed history at each
+poll. Index creation is a transactional migration; large-history migration cost
+and operator adoption remain separate unqualified gates.
+
+Each recovery reads checkOrder and the independent filled(orderHash) getter in
+one block-hash-selected multicall. Early cancellation/signature/time refusal
+words cannot invent historical fills. A permanent historical observation is
+retained only when its canonical header, code and complete fill state agree.
+Otherwise only a new accepted-header observation may be established; a missing
+first-closure time is never fabricated. Original inputs/hashes remain unchanged.
+Writers check the rewind epoch and compare the captured row before committing;
+all network reads precede the SQL writer. Refusal holds unproved state.
+
+The direct order/all-orders routes expose whether observations and displayed
+fill counts are verified. Other history consumers and complete historical
+first-closure reconstruction require separate review. The declared native
+legacy case changes only two derived cache rows after its first child joins;
+production performs all recovery after restart. It makes no claim that an
+observed crash produced those exact seed bytes. All original full-client cases,
+canonical business fields, proof checks and 42 acceptance requirements remain.

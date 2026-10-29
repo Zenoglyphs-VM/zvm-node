@@ -67,4 +67,7 @@ func TestFullClientDefaultPersistenceRecovery(t *testing.T) {
 			t.FailNow()
 		}
 	}
+	t.Run("owned-legacy-closed-recovery", func(t *testing.T) {
+		ownedFullClientLegacyClosureRecovery(t, want)
+	})
 }

@@ -143,7 +143,8 @@ func (s *Market) nftOrder(_ context.Context, r *http.Request) (any, error) {
 	}
 	return map[string]any{
 		"hash": in.Order.Hash(), "input": orderbook.ToWireInput(in), "status": status, "code": code, "reason": orderbook.CodeText(code),
-		"fillable": status == orderbook.StatusOpen && code == orderbook.CodeOK,
+		"fillable":            status == orderbook.StatusOpen && code == orderbook.CodeOK,
+		"observationVerified": code != orderbook.CodeUnchecked,
 	}, nil
 }
 
@@ -181,9 +182,11 @@ func (s *Market) nftOrders(_ context.Context, r *http.Request) (any, error) {
 // orderRows is the book's rows with the names a page shows beside them.
 func (s *Market) orderRows(where string, args []any, order string, limit int) ([]any, error) {
 	q := `SELECT o.hash, o.exchange, o.trader, o.side, o.collection, o.token_id, o.amount, o.filled, o.payment_token,
-		o.price, o.price_num, o.listing_time, o.expiration_time, o.kind, o.status, o.code, o.block, o.timestamp, o.source,
+		o.price, o.price_num, o.listing_time, o.expiration_time, o.kind, o.status, ` + orderbook.EffectiveOrderCodeSQL + `, o.block, o.timestamp, o.source,
+		CASE WHEN m.key IS NOT NULL AND typeof(m.value)='integer' AND m.value>=0 AND o.filled_epoch=m.value THEN 1 ELSE 0 END,
 		COALESCE(t.name,''), COALESCE(t.image,''), COALESCE(c.name,'')
 		FROM nft_orders o
+		LEFT JOIN nft_order_meta m ON m.key='rewind_epoch'
 		LEFT JOIN nft_tokens t ON t.collection = o.collection AND t.token_id = o.token_id
 		LEFT JOIN nft_collections c ON c.address = o.collection
 		WHERE ` + where + ` ORDER BY ` + order + ` LIMIT ?`
@@ -194,11 +197,12 @@ func scanOrderRow(rows *sql.Rows) (any, error) {
 	var hash, exchange, trader, collection, payment, price, status, source, name, image, collectionName string
 	var tokenID sql.NullString
 	var side, amount, filled, kind, code, block, ts int64
+	var filledVerified bool
 	var opens, expires orderbook.StoredTime
 	var priceNum float64
 	if err := rows.Scan(&hash, &exchange, &trader, &side, &collection, &tokenID, &amount, &filled, &payment,
 		&price, &priceNum, &opens, &expires, &kind, &status, &code, &block, &ts, &source,
-		&name, &image, &collectionName); err != nil {
+		&filledVerified, &name, &image, &collectionName); err != nil {
 		return nil, err
 	}
 	out := map[string]any{
@@ -207,6 +211,7 @@ func scanOrderRow(rows *sql.Rows) (any, error) {
 		"isCollection": !tokenID.Valid, "amount": amount, "filled": filled, "paymentToken": payment,
 		"price": price, "priceNum": priceNum, "listingTime": orderbook.TimeJSON(uint64(opens)), "expiry": orderbook.TimeJSON(uint64(expires)), "kind": kind,
 		"status": status, "code": code, "block": block, "timestamp": ts, "source": source,
+		"observationVerified": code != int64(orderbook.CodeUnchecked), "filledVerified": filledVerified,
 		"name": name, "image": image,
 	}
 	if code != 0 {
