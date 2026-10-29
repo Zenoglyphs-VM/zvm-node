@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -357,9 +358,26 @@ func OwnedFullClientCLIArgs(t *testing.T, directory string, args []string, phase
 		defer cancel()
 		wantHead := ownedFullClientBoundaryHead(phase)
 		head, err := f.r.eth.BlockNumber(ctx)
-		if err != nil || head != wantHead || f.r.backend.chain.CurrentBlock().Number.Uint64() != wantHead {
+		direct := f.r.backend.chain.CurrentBlock().Number.Uint64()
+		fmt.Printf("owned_full_client_boundary_observation phase=%s expected_engine_head=%d rpc_engine_head=%d direct_engine_head=%d rpc_error=%t\n", phase, wantHead, head, direct, err != nil)
+		if err != nil || head != wantHead || direct != wantHead {
 			fmt.Println("owned_full_client_boundary_refused engine_head_mismatch=true")
 			os.Exit(88)
+		}
+		if phase == "derivation-rewind-before-commit" || phase == "index-rewind-before-commit" {
+			ancestor, err := readOwnedRewindAncestor(directory)
+			if err != nil {
+				fmt.Println("owned_full_client_boundary_refused ancestor_input_invalid=true")
+				os.Exit(88)
+			}
+			fromRPC, err := f.r.eth.HeaderByNumber(ctx, new(big.Int).SetUint64(ancestor.Number))
+			fromDirect := f.r.backend.chain.GetHeaderByNumber(ancestor.Number)
+			want := common.HexToHash(ancestor.Hash)
+			if err != nil || fromRPC == nil || fromDirect == nil || fromRPC.Number.Uint64() != ancestor.Number || fromDirect.Number.Uint64() != ancestor.Number || fromRPC.Hash() != want || fromDirect.Hash() != want {
+				fmt.Println("owned_full_client_boundary_refused ancestor_header_mismatch=true")
+				os.Exit(88)
+			}
+			fmt.Printf("owned_full_client_rewind_ancestor phase=%s source_momentum=7 execution_block=6 rpc_and_direct_hashes_verified=true\n", phase)
 		}
 		fmt.Printf("owned_full_client_boundary phase=%s engine_head=%d service_responding=true actual_exit_requested=86\n", phase, wantHead)
 	}
@@ -401,11 +419,15 @@ func AssertOwnedFullClientProcess(t *testing.T, output string, exit int, phase s
 	if started != 1 || index != wantIndex || strings.Count(output, "owned_full_client_boundary phase=") != boundary || exit != 0 && exit != 86 || exit == 0 && (closed != 1 || boundary != 0) || exit == 86 && (closed != 0 || boundary != 1) {
 		t.Fatalf("owned full-client lifecycle differs: exit=%d started=%d closed=%d boundary=%d output=%s", exit, started, closed, boundary, output)
 	}
-	if exit == 86 && ownedFullClientBoundaryHead(phase) == 6 {
-		if !strings.Contains(output, "NoM reorganised; rewinding") {
+	if exit == 86 && (phase == "derivation-rewind-before-commit" || phase == "index-rewind-before-commit") {
+		if !strings.Contains(output, "NoM reorganised; rewinding svc=deriver from=9 to=7") {
 			t.Fatal("owned rewind exit did not observe the production reorg path")
 		}
-		t.Logf("owned_full_client_rewind_path phase=%s declared_source_reorg_observed=true common_engine_head=6", phase)
+		ancestor := count(fmt.Sprintf("owned_full_client_rewind_ancestor phase=%s source_momentum=7 execution_block=6 rpc_and_direct_hashes_verified=true", phase))
+		if ancestor != 1 || strings.Count(output, "owned_full_client_rewind_ancestor phase=") != 1 {
+			t.Fatal("owned rewind lacks its independent common-ancestor header proof")
+		}
+		t.Logf("owned_full_client_rewind_path phase=%s declared_source_reorg_observed=true common_execution_ancestor=6 engine_head_at_exit=%d ancestor_rpc_and_direct_hashes_verified=true", phase, ownedFullClientBoundaryHead(phase))
 	}
 	t.Logf("owned_default_full_client_child phase=%s actual_exit=%d default_profile_verified=true graceful_close=%t engine_boundary_verified=%t index_plugin_writes_verified=%t output_complete=true colocated_cli_and_client=true", phase, exit, exit == 0, exit == 86, wantIndex == 1)
 }
@@ -463,8 +485,65 @@ func (f *FullClientRecoveryCLIFixture) SourceBranch(branch int) {
 func ownedFullClientBoundaryHead(phase string) uint64 {
 	switch phase {
 	case "derivation-rewind-before-commit", "index-rewind-before-commit":
-		return 6
+		// Requesting canonical ancestor 6 does not lower the live catalyst head.
+		return 8
 	default:
 		return 7
 	}
+}
+
+type ownedRewindAncestor struct {
+	Momentum uint64 `json:"momentum"`
+	Number   uint64 `json:"number"`
+	Hash     string `json:"hash"`
+}
+
+// DeclareRewindAncestor records only a read-only committed source observation.
+// This fixture input never updates engine, derivation, index or book state.
+func (f *FullClientRecoveryCLIFixture) DeclareRewindAncestor() {
+	f.r.t.Helper()
+	var number uint64
+	var source, hash string
+	if err := f.read.QueryRow("SELECT l2_number,hash,l2_hash FROM momentums WHERE height=7").Scan(&number, &source, &hash); err != nil {
+		f.r.t.Fatal(err)
+	}
+	a, b := f.r.scenario.branches[0][7], f.r.scenario.branches[1][7]
+	if a == nil || b == nil || a.Momentum.Hash != b.Momentum.Hash || source != a.Momentum.Hash.String() || number != 6 || common.HexToHash(hash) == (common.Hash{}) || common.HexToHash(hash).Hex() != hash {
+		f.r.t.Fatal("declared rewind ancestor differs from the committed common source")
+	}
+	raw, err := json.Marshal(ownedRewindAncestor{Momentum: 7, Number: number, Hash: hash})
+	if err != nil {
+		f.r.t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(f.Directory(), "owned-rewind-ancestor.json"), raw, 0600); err != nil {
+		f.r.t.Fatal(err)
+	}
+}
+
+func readOwnedRewindAncestor(directory string) (ownedRewindAncestor, error) {
+	var value ownedRewindAncestor
+	path := filepath.Join(directory, "owned-rewind-ancestor.json")
+	info, err := os.Lstat(path)
+	if err != nil || !info.Mode().IsRegular() || info.Size() <= 0 || info.Size() > 1024 {
+		return value, fmt.Errorf("missing, nonregular or oversized declared ancestor")
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return value, err
+	}
+	opened, openErr := file.Stat()
+	raw, readErr := io.ReadAll(io.LimitReader(file, 1025))
+	after, statErr := file.Stat()
+	closeErr := file.Close()
+	current, currentErr := os.Lstat(path)
+	if openErr != nil || readErr != nil || statErr != nil || closeErr != nil || currentErr != nil || len(raw) > 1024 || int64(len(raw)) != info.Size() || !os.SameFile(info, opened) || !os.SameFile(info, after) || !os.SameFile(info, current) || after.Size() != info.Size() {
+		return value, fmt.Errorf("declared ancestor changed or was incompletely read")
+	}
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return value, err
+	}
+	if value.Momentum != 7 || value.Number != 6 || common.HexToHash(value.Hash) == (common.Hash{}) || common.HexToHash(value.Hash).Hex() != value.Hash {
+		return value, fmt.Errorf("undeclared common ancestor")
+	}
+	return value, nil
 }

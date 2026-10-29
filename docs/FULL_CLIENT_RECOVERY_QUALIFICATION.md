@@ -11,7 +11,7 @@ Run the serialized lane separately from the ordinary and browser suites:
 
 ```sh
 GOMAXPROCS=2 GOMEMLIMIT=5GiB go test -json -count=1 -p=2 -failfast \
-  -tags=fullclient_recovery -timeout=5m \
+  -tags=fullclient_recovery -timeout=7m \
   -run '^TestFullClientDefaultPersistenceRecovery$' ./orderbook
 ```
 
@@ -51,8 +51,16 @@ with the actual client and production workers. Read-only readiness verifies the
 source momentum hash, index/book cursors, original order states and latest checks.
 Only the declared NoM source changes back to the canonical branch. Fixture triggers
 exit inside derivation chunk rollback or index/book cursor rewind, before their
-transactions commit. Each fault must observe the production reorg path and actual
-eth RPC/direct engine head 6; the service and CLI exit together without cleanup.
+transactions commit. Each fault must observe the production reorg path, requested
+common execution ancestor 6, and the retained actual eth RPC/direct engine head 8.
+The pinned [catalyst forkchoice implementation](https://github.com/ethereum-optimism/op-geth/blob/e8800cffe53d459cde8a07c8e8f1de9d86e79e07/eth/catalyst/api.go#L304-L318)
+does not lower the current head when the requested ancestor is already canonical.
+Replacement payload selection later changes the execution branch. The fixture
+records both actual head observations before refusing any mismatch; it never
+forces an engine rewind. A read-only committed momentum-7 observation binds
+block 6 and its hash in a declared fixture input. The child requires matching RPC
+and direct-client header hashes, plus the exact production reorg from 9 to 7.
+The service and CLI exit together without cleanup.
 The next production child replays the canonical branch and must match the same
 original cold oracle across all six categories. The parent only selects fixture
 source observations and manages the declared trigger; it never repairs state.
@@ -70,8 +78,8 @@ chunks, deferred queues and executed roots. The exit is shared by the in-process
 client and CLI; a standalone geth/Karst daemon is not exercised.
 
 The canonical comparison excludes only existing observation-time, local epoch
-and build-duration bookkeeping. Direct chain access is limited to that read-only
-oracle. The service never exposes a custom Engine/eth adapter, changes payload
+and build-duration bookkeeping. Direct chain access is limited to the read-only
+oracle and declared boundary-header observations. The service never exposes a custom Engine/eth adapter, changes payload
 fields or invokes parent derivation/index/book repair.
 
 These are declared-horizon, synthetic unsigned NoM observations and controlled

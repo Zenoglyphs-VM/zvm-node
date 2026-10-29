@@ -27,7 +27,8 @@ func ownedFullClientProcessRecovery(t *testing.T, want map[string][]string, phas
 	rewind := phase == "derivation-rewind-before-commit" || phase == "index-rewind-before-commit"
 	boundaryHead := uint64(7)
 	if rewind {
-		boundaryHead = 6
+		// Catalyst retains the higher canonical head until replacement payloads.
+		boundaryHead = 8
 		f.SourceBranch(1)
 	}
 	start := func(phase string, number int) *ownedCLIProcess {
@@ -45,6 +46,9 @@ func ownedFullClientProcessRecovery(t *testing.T, want map[string][]string, phas
 	p.waitExit(0, true)
 	orderbook.AssertOwnedFullClientProcess(t, p.output.snapshot(), 0, phase)
 	f.CheckExecutionClientDirectory()
+	if rewind {
+		f.DeclareRewindAncestor()
+	}
 	f.OwnedProcessTrigger(phase, true)
 	if rewind {
 		f.SourceBranch(0)
