@@ -5,6 +5,19 @@ import {performance} from 'node:perf_hooks'
 
 const observed = new WeakMap()
 const maximumTrackedRequests = 256
+const maximumRecentSignals = 8
+const diagnosticSignalTypes = new Set(['Network.requestWillBeSentExtraInfo', 'Network.responseReceivedExtraInfo',
+  'Network.responseReceived', 'Network.loadingFinished', 'Network.loadingFailed', 'Network.requestServedFromCache'])
+
+function rememberSignal(entry, type, event) {
+  const status = event.response?.status ?? event.statusCode
+  const signal = {event: type.slice('Network.'.length), timestampPresent: Number.isFinite(event.timestamp),
+    timestampBeforeRequest: Number.isFinite(event.timestamp) ? event.timestamp < entry.timestamp : null,
+    responseURLMatchesRequest: event.response ? event.response.url === entry.url : null,
+    status: Number.isInteger(status) && status >= 100 && status <= 599 ? status : null}
+  if (entry.recentSignals.length === maximumRecentSignals) entry.recentSignals.shift()
+  entry.recentSignals.push(signal)
+}
 
 export function createNavigationRequestTracker(session) {
   const active = new Map(), subscribers = new Set()
@@ -27,6 +40,9 @@ export function createNavigationRequestTracker(session) {
   }
   const listener = (type, event) => {
     if (session.detached) {close(); return}
+    // Passive evidence only. Extra-info/cache signals never complete a request.
+    const tracked = typeof event?.requestId === 'string' ? active.get(event.requestId) : undefined
+    if (tracked && diagnosticSignalTypes.has(type)) rememberSignal(tracked, type, event)
     if (type === 'Network.requestWillBeSent') {
       const id = identity(event)
       if (id === null) return
@@ -42,7 +58,7 @@ export function createNavigationRequestTracker(session) {
       }
       if (active.size === maximumTrackedRequests) broken = 'navigation request tracking limit exceeded'
       else {
-        active.set(id, {url: event.request.url, method: event.request.method, timestamp: event.timestamp, at: performance.now()})
+        active.set(id, {url: event.request.url, method: event.request.method, timestamp: event.timestamp, at: performance.now(), recentSignals: []})
         started++; if (event.type === 'Document') documents++
         peak = Math.max(peak, active.size)
       }
@@ -57,10 +73,10 @@ export function createNavigationRequestTracker(session) {
   session.on('*', listener)
   const diagnostic = () => ({activeRequests: active.size, maximumTrackedRequests, peak, started, completed,
     documentRequestsStarted: documents, cacheSignals, unmatchedCompletionSignals,
-    requests: [...active.values()].slice(0, 8).map(({url, method, at}) => {
+    requests: [...active.values()].slice(0, 8).map(({url, method, at, recentSignals}) => {
       let path = '[unparseable]'
       try {path = new URL(url).pathname.slice(0, 120)} catch {}
-      return {method: method.slice(0, 12), path, ageMilliseconds: Math.round(performance.now() - at)}
+      return {method: method.slice(0, 12), path, ageMilliseconds: Math.round(performance.now() - at), recentSignals: recentSignals.map(signal => ({...signal}))}
     })})
   return {
     close, diagnostic,

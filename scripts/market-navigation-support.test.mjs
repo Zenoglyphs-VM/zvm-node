@@ -45,7 +45,24 @@ let controls = 0
   let message = ''
   try {await tracker.wait(performance.now()+15)} catch (error) {message = error.message}
   assert.match(message, /activeRequests":1/); assert.match(message, /"path":"\/rpc"/)
-  assert.ok(!message.includes('fixture-secret') && !message.includes('?private=')); controls++
+  assert.ok(!message.includes('fixture-secret') && !message.includes('?private='))
+  const secret = 'fixture-header-and-payload-secret'
+  session.signal('Network.responseReceivedExtraInfo', {requestId: 'one', statusCode: 200,
+    headers: {Authorization: secret}, rawHeaders: secret, blockedCookies: [{cookieLine: secret}]})
+  session.signal('Network.loadingFinished', terminal('one', 0))
+  session.signal('Network.responseReceived', {...terminal('one'), response: {url: 'http://127.0.0.1:1/other?private='+secret, status: 200}})
+  assert.equal(tracker.diagnostic().activeRequests, 1)
+  let signals = tracker.diagnostic().requests[0].recentSignals
+  assert.deepEqual(signals.map(signal => signal.event), ['responseReceivedExtraInfo', 'loadingFinished', 'responseReceived'])
+  assert.equal(signals[0].timestampPresent, false); assert.equal(signals[0].status, 200)
+  assert.equal(signals[1].timestampBeforeRequest, true); assert.equal(signals[2].responseURLMatchesRequest, false)
+  for (let i=0; i<20; i++) session.signal('Network.requestWillBeSentExtraInfo', {requestId: 'one', headers: {Authorization: secret}})
+  signals = tracker.diagnostic().requests[0].recentSignals
+  assert.equal(signals.length, 8); assert.ok(signals.every(signal => signal.event === 'requestWillBeSentExtraInfo'))
+  assert.ok(!JSON.stringify(tracker.diagnostic()).includes(secret) && !JSON.stringify(tracker.diagnostic()).includes('Authorization'))
+  signals[0].event = secret
+  assert.ok(!JSON.stringify(tracker.diagnostic()).includes(secret), 'diagnostic snapshots must not alias retained state')
+  assert.equal(tracker.diagnostic().activeRequests, 1); controls++
 }
 {
   const {session, tracker} = fixture(), began = performance.now(), waiting = tracker.wait(began+700)
