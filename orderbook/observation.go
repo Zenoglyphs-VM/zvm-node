@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"math"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -122,12 +123,24 @@ func (b *Book) snapshot(ctx context.Context) (observation, error) {
 	if err != nil {
 		return observation{}, err
 	}
-	head, err := b.cfg.Eth.HeaderByNumber(ctx, nil)
+	var number *big.Int
+	var acceptedHash common.Hash
+	if b.cfg.CanonicalHead != nil {
+		accepted, hash := b.cfg.CanonicalHead()
+		if accepted > math.MaxInt64 || hash == (common.Hash{}) {
+			return observation{}, errStaleObservation
+		}
+		number, acceptedHash = new(big.Int).SetUint64(accepted), hash
+	}
+	head, err := b.cfg.Eth.HeaderByNumber(ctx, number)
 	if err != nil {
 		return observation{}, err
 	}
 	if err := validHeader(head); err != nil {
 		return observation{}, err
+	}
+	if number != nil && (head.Number.Cmp(number) != 0 || head.Hash() != acceptedHash) {
+		return observation{}, errStaleObservation
 	}
 	return observation{epoch: epoch, head: head}, nil
 }
@@ -150,6 +163,12 @@ func (b *Book) verifyHeader(ctx context.Context, want *types.Header) error {
 	}
 	if validHeader(head) != nil || head.Number.Cmp(want.Number) != 0 || head.Hash() != want.Hash() {
 		return errStaleObservation
+	}
+	if b.cfg.CanonicalHead != nil {
+		number, hash := b.cfg.CanonicalHead()
+		if number != want.Number.Uint64() || hash != want.Hash() {
+			return errStaleObservation
+		}
 	}
 	return nil
 }

@@ -127,10 +127,14 @@ type Chain interface {
 
 // Config wires a Book to one chain and one exchange.
 type Config struct {
-	DB       *sql.DB
-	Eth      Chain
-	ChainID  uint64
-	Exchange func() common.Address
+	DB  *sql.DB
+	Eth Chain
+	// CanonicalHead optionally bounds observations to the locally accepted
+	// derivation number/hash. It authenticates no external NoM authority.
+	// A missing or moving anchor refuses the observation.
+	CanonicalHead func() (uint64, common.Hash)
+	ChainID       uint64
+	Exchange      func() common.Address
 	// Artifact is ZVMExchange's compiled ABI.
 	Artifact *bench.Artifact
 	// Poll is how often the exchange's logs are read; Recheck how often every

@@ -38,6 +38,9 @@ type Env struct {
 	DB     *store.DB
 	Eth    *ethclient.Client
 	L1     *znn.Client
+	// CanonicalHead is the initialized local derivation anchor. A retained
+	// execution suffix may be ahead of it after an interrupted rewind.
+	CanonicalHead func() store.Head
 	// Dex is the node's -dex deployment file, or empty. It is handed over
 	// rather than re-declared as an extension's own flag because the node
 	// already offers it on /api/info: two flags naming the same file is two

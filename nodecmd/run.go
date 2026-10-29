@@ -134,7 +134,7 @@ func Run(args []string, ext ...Extender) error {
 	var followIndex func()
 	var startHTTP func()
 	for _, e := range ext {
-		r, err := e.Build(ctx, Env{Rollup: cfg, DB: db, Eth: eth, L1: l1, Dex: *dexPath, Log: slog.Default()})
+		r, err := e.Build(ctx, Env{Rollup: cfg, DB: db, Eth: eth, L1: l1, CanonicalHead: d.Head, Dex: *dexPath, Log: slog.Default()})
 		if err != nil {
 			return err
 		}

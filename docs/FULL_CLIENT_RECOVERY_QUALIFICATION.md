@@ -116,3 +116,22 @@ leaves browser qualification incomplete. All three jobs remain required for an
 overall successful source workflow. The full-client test deadline is seven
 minutes for the two additional default-timer competing-branch/recovery cases;
 the job, compiler, browser and normal/race bounds remain unchanged. The dependency uses the documented [GitHub Actions needs condition](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idneeds).
+
+### Accepted local order observation head
+
+The production CLI supplies its initialized local derivation number and hash to
+the Market order book. A retained execution-only suffix can survive an
+interrupted rewind; workers must not treat its latest header as accepted order
+state. The optional bound requests the exact accepted height, requires its hash
+to agree, and refuses uninitialized, unsupported, unavailable or moving anchors.
+Existing RPC/header, rewind-epoch, contract and conflicting-observation guards
+remain in force. Standalone books without a local derivation callback retain
+their existing reader behavior. This bound establishes local consistency only.
+
+Seven focused synthetic subcases plus their root run in normal and selected
+race CI. They validate an accepted head behind a retained execution tip, the
+existing standalone default, missing/mismatched/unsupported anchors and a moving
+accepted head, while proving these read-only observations change no stored
+order bytes. The existing real-client index-rewind case remains the separate
+end-to-end gate; its observed worker interleaving is not inferred from these
+synthetic controls. No recovery comparison or original acceptance is relaxed.

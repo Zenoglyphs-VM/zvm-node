@@ -67,8 +67,16 @@ func (m *Market) Build(ctx context.Context, env Env) (Result, error) {
 	}
 	// The order book (D28): signatures this node was handed, kept apart from
 	// the index because the chain cannot give them back.
+	var canonicalHead func() (uint64, common.Hash)
+	if env.CanonicalHead != nil {
+		canonicalHead = func() (uint64, common.Hash) {
+			head := env.CanonicalHead()
+			return head.L2Number, head.L2Hash
+		}
+	}
 	book, err := orderbook.New(orderbook.Config{
-		DB: env.DB.SQL(), Eth: env.Eth, ChainID: env.Rollup.L2ChainID, Artifact: arts.MustGet("ZVMExchange"),
+		CanonicalHead: canonicalHead,
+		DB:            env.DB.SQL(), Eth: env.Eth, ChainID: env.Rollup.L2ChainID, Artifact: arts.MustGet("ZVMExchange"),
 		Exchange: func() common.Address {
 			if d := appsFile.Get(); d != nil {
 				return d.Exchange
