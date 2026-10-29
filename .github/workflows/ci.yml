@@ -11,6 +11,7 @@ permissions:
 jobs:
   go:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,10 +23,35 @@ jobs:
 
       - run: go build ./...
       - run: go vet ./...
+      - name: Prepare the explicit pinned simulator test workspace
+        run: python3 scripts/prepare-simulated-backend-fixture.py prepare "$RUNNER_TEMP/zvm-simulator-fixture"
+      - name: Require the exact original upstream late-waiter failure
+        env:
+          GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
+        run: |
+          set +e
+          go test -json -count=1 -timeout=10s -run '^TestZVMWaitFullCompletedBeforeWait$' github.com/ethereum/go-ethereum/miner 2>&1 | tee "$RUNNER_TEMP/zvm-simulator-original.jsonl"
+          actual_exit=${PIPESTATUS[0]}
+          set -e
+          python3 scripts/prepare-simulated-backend-fixture.py check-red "$RUNNER_TEMP/zvm-simulator-fixture" --log "$RUNNER_TEMP/zvm-simulator-original.jsonl" --actual-exit "$actual_exit"
+      - name: Apply only the pinned simulator condition predicate in its test copy
+        run: python3 scripts/prepare-simulated-backend-fixture.py apply "$RUNNER_TEMP/zvm-simulator-fixture"
+      - name: Require the same upstream late-waiter regression to pass
+        env:
+          GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
+        run: go test -json -count=1 -timeout=10s -run '^TestZVMWaitFullCompletedBeforeWait$' github.com/ethereum/go-ethereum/miner
       - name: Exercise the complete native Go suite with structured results
+        env:
+          GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
         run: go test -json -count=1 ./...
       - name: Check market HTTP and executed admission recovery with the race detector
+        env:
+          GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
         run: go test -race -json -count=1 -run '^Test(MarketHTTP(ReorgVisibility|RefusedRewind)|ExecutedMarketAdmissionAndCanonicalRecovery|WireOrderTimes(RetainOriginalInputAndHash|RefuseAmbiguousJSON)|SQLiteOrderTimesRetainUnsignedRangeAndOrdering|StoredOrderTimesRefuseLossyOrNoncanonicalValues|BookImportsFullWidthOnChainOrderTimes)$' ./indexer ./orderbook
+      - name: Verify the exact test-only dependency delta and tracked source
+        run: |
+          python3 scripts/prepare-simulated-backend-fixture.py verify "$RUNNER_TEMP/zvm-simulator-fixture"
+          git diff --exit-code
 
   market-browser:
     needs: full-client-recovery
