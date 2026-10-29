@@ -18,6 +18,7 @@ import (
 
 	"github.com/Zenoglyphs-VM/zvm-core/l2"
 	"github.com/Zenoglyphs-VM/zvm-core/rollup"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/beacon/engine"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/rawdb"
@@ -26,10 +27,12 @@ import (
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/eth/catalyst"
 	"github.com/ethereum/go-ethereum/eth/ethconfig"
+	"github.com/ethereum/go-ethereum/eth/filters"
 	"github.com/ethereum/go-ethereum/ethclient"
 	gethnode "github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/rpc"
 )
 
 // FullClientRecoveryCLIFixture owns the actual pinned op-geth service, catalyst
@@ -144,6 +147,14 @@ func (f *FullClientRecoveryCLIFixture) openExecutionClient() {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Match the pinned CLI's RegisterFilterAPI assembly. The real API uses
+	// service subscriptions, which the normal stack/chain close path closes.
+	filterSystem := filters.NewFilterSystem(service.APIBackend, filters.Config{
+		LogCacheSize:  options.FilterLogCacheSize,
+		LogQueryLimit: options.LogQueryLimit,
+		RangeLimit:    options.RangeLimit,
+	})
+	stack.RegisterAPIs([]rpc.API{{Namespace: "eth", Service: filters.NewFilterAPI(filterSystem)}})
 	if err := catalyst.Register(stack, service); err != nil {
 		t.Fatal(err)
 	}
@@ -178,6 +189,11 @@ func (f *FullClientRecoveryCLIFixture) openExecutionClient() {
 	id, err := f.r.eth.ChainID(ctx)
 	if err != nil || id.Uint64() != f.r.scenario.cfg.L2ChainID {
 		t.Fatalf("actual full-client chain ID differs: %v", err)
+	}
+	genesisHash := f.r.scenario.cfg.L2GenesisHash
+	logs, err := f.r.eth.FilterLogs(ctx, ethereum.FilterQuery{BlockHash: &genesisHash})
+	if err != nil || len(logs) != 0 {
+		t.Fatalf("actual full-client genesis log API is unavailable or unexpected: %v", err)
 	}
 	t.Log("full_client_defaults db_cache_mib=2048 trie_clean_mib=614 trie_dirty_mib=1024 snapshot_mib=409 state_scheme=path archive=false engine_api=catalyst authenticated=true")
 }
