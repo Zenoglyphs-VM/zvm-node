@@ -34,7 +34,7 @@ the RPC payload and does not claim shipped-genesis client acceptance.
 The positive storage cases declare a different synthetic genesis with one
 nonzero MessagePasser storage slot and update and reload its genesis hash. This
 keeps the real RPC encoding path usable without a production genesis change.
-Compare a cold replay with the original two restore cases and three owned-process boundaries:
+Compare a cold replay with the original two restore cases and five owned-process boundaries:
 
 graceful CLI/client close and disk reopen; the exact owned CLI SQL exit 86 with
 its parent-owned service closed gracefully; and an owned process containing both
@@ -45,7 +45,17 @@ the actual NFT plugin completes but before the index transaction commits, and
 book cursor insertion before its transaction commits. The index wrapper delegates
 the shipped NFT plugin and preserves rollback notification behavior; it checks
 transaction-visible block/log rows before exiting. The book uses a fixture-only
-SQLite trigger on cursor 7 after the actual log application writes.
+SQLite trigger on cursor 7 after the actual log application writes. Two additional
+rewind cases first persist the competing declared NoM branch through momentum 9
+with the actual client and production workers. Read-only readiness verifies the
+source momentum hash, index/book cursors, original order states and latest checks.
+Only the declared NoM source changes back to the canonical branch. Fixture triggers
+exit inside derivation chunk rollback or index/book cursor rewind, before their
+transactions commit. Each fault must observe the production reorg path and actual
+eth RPC/direct engine head 6; the service and CLI exit together without cleanup.
+The next production child replays the canonical branch and must match the same
+original cold oracle across all six categories. The parent only selects fixture
+source observations and manages the declared trigger; it never repairs state.
 Exit 86 skips the full service's test cleanup, Close and Stop. A new owned child
 opens the same client directory and starts the production CLI. The parent removes
 only the fixture's exit trigger and never derives, rewinds, indexes or repairs
@@ -76,5 +86,6 @@ source preparation and formatting alone do not establish runtime success.
 The browser job requires a successful full-client job before its expensive
 frontend, compiler and profile work starts. A failed or skipped prerequisite
 leaves browser qualification incomplete. All three jobs remain required for an
-overall successful source workflow; test selections and existing time limits are
-unchanged. The dependency uses the documented [GitHub Actions needs condition](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idneeds).
+overall successful source workflow. The full-client test deadline is seven
+minutes for the two additional default-timer competing-branch/recovery cases;
+the job, compiler, browser and normal/race bounds remain unchanged. The dependency uses the documented [GitHub Actions needs condition](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idneeds).

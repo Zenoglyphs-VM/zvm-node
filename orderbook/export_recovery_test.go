@@ -94,8 +94,8 @@ func (f *RecoveryCLIFixture) Horizon(height uint64) {
 // default 30-second sweep to refresh open orders; its timing is not overridden.
 func (f *RecoveryCLIFixture) Ready(ctx context.Context, height uint64) (bool, string) {
 	var derived, index, cursor uint64
-	var hash string
-	err := f.read.QueryRowContext(ctx, "SELECT height,l2_hash FROM momentums ORDER BY height DESC LIMIT 1").Scan(&derived, &hash)
+	var hash, sourceHash string
+	err := f.read.QueryRowContext(ctx, "SELECT height,l2_hash,hash FROM momentums ORDER BY height DESC LIMIT 1").Scan(&derived, &hash, &sourceHash)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -105,7 +105,14 @@ func (f *RecoveryCLIFixture) Ready(ctx context.Context, height uint64) (bool, st
 	if err = f.read.QueryRowContext(ctx, "SELECT value FROM nft_order_meta WHERE key=?", "scanned:"+f.r.scenario.exchange.Hex()).Scan(&cursor); err != nil {
 		return false, err.Error()
 	}
-	ready := derived == height && index == height-1 && cursor == height-1
+	f.r.nomMu.RLock()
+	branch := f.r.branch
+	expected := f.r.scenario.branches[branch][height]
+	f.r.nomMu.RUnlock()
+	if expected == nil {
+		return false, "undeclared canonical source horizon"
+	}
+	ready := derived == height && index == height-1 && cursor == height-1 && sourceHash == expected.Momentum.Hash.String()
 	for i, order := range f.r.scenario.orders {
 		var status, checked string
 		var filled, code int
@@ -113,7 +120,7 @@ func (f *RecoveryCLIFixture) Ready(ctx context.Context, height uint64) (bool, st
 		if err != nil {
 			return false, err.Error()
 		}
-		if height >= 8 && i == 0 {
+		if branch == 0 && height >= 8 && i == 0 {
 			ready = ready && status == StatusFilled && filled == 1 && code == int(CodeFilled)
 		} else {
 			ready = ready && status == StatusOpen && filled == 0 && code == int(CodeOK)

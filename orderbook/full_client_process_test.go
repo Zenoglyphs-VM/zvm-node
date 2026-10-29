@@ -24,18 +24,33 @@ func TestFullClientOwnedProcess(t *testing.T) {
 func ownedFullClientProcessRecovery(t *testing.T, want map[string][]string, phase string) {
 	t.Helper()
 	f := orderbook.NewFullClientRecoveryProcessFixture(t)
+	rewind := phase == "derivation-rewind-before-commit" || phase == "index-rewind-before-commit"
+	boundaryHead := uint64(7)
+	if rewind {
+		boundaryHead = 6
+		f.SourceBranch(1)
+	}
 	start := func(phase string, number int) *ownedCLIProcess {
 		return startOwnedCLIWithTest(t, f, phase, number, "TestFullClientOwnedProcess")
 	}
 	// Prime a real default-persistence service through its ordinary graceful
 	// close. The next process must preserve or replay its interrupted head.
 	p := start("", 0)
-	waitCLIHorizon(t, f, 7, p)
+	if rewind {
+		waitCLIHorizon(t, f, 9, p)
+		t.Log("owned_full_client_rewind_prime=true source_branch=1 momentum=9 readonly_source_hash_and_order_state_verified=true parent_reconciliation=false")
+	} else {
+		waitCLIHorizon(t, f, 7, p)
+	}
 	p.waitExit(0, true)
 	orderbook.AssertOwnedFullClientProcess(t, p.output.snapshot(), 0, phase)
 	f.CheckExecutionClientDirectory()
 	f.OwnedProcessTrigger(phase, true)
-	f.Horizon(8)
+	if rewind {
+		f.SourceBranch(0)
+	} else {
+		f.Horizon(8)
+	}
 	p = start(phase, 1)
 	p.waitExit(86, false)
 	orderbook.AssertOwnedFullClientProcess(t, p.output.snapshot(), 86, phase)
@@ -43,6 +58,8 @@ func ownedFullClientProcessRecovery(t *testing.T, want map[string][]string, phas
 	// Remove only the declared exit trigger. Production startup/derivation,
 	// index and book workers perform recovery; the parent performs no repair.
 	f.OwnedProcessTrigger(phase, false)
+	// Bound the declared source before the recovery process can derive ahead.
+	f.Horizon(8)
 	p = start("", 2)
 	waitCLIHorizon(t, f, 8, p)
 	waitCLIHorizon(t, f, 9, p)
@@ -54,5 +71,5 @@ func ownedFullClientProcessRecovery(t *testing.T, want map[string][]string, phas
 	f.RestartExecutionClient()
 	orderbook.AssertRecoveryCLIState(t, f.Snapshot(), want)
 	f.CloseExecutionClient()
-	t.Logf("owned_full_client_process_restore=true boundary=%s readonly_canonical_state_equal=true engine_head_at_process_exit=7 service_cleanup_skipped=true seeded_synthetic_genesis=true standalone_daemon=false full_N04_acceptance=false", phase)
+	t.Logf("owned_full_client_process_restore=true boundary=%s readonly_canonical_state_equal=true engine_head_at_process_exit=%d service_cleanup_skipped=true seeded_synthetic_genesis=true standalone_daemon=false full_N04_acceptance=false", phase, boundaryHead)
 }

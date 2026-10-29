@@ -108,10 +108,10 @@ func runOwnedCLIChildWithSetup(t *testing.T, raw string, setup func(*testing.T, 
 	if err != nil || json.Unmarshal(data, &recorded) != nil || !reflect.DeepEqual(recorded, cfg) {
 		t.Fatal("owned CLI marker differs")
 	}
-	if cfg.Phase != "" && cfg.Phase != "derivation-before-commit" && cfg.Phase != "index-before-commit" && cfg.Phase != "book-before-commit" {
+	if cfg.Phase != "" && cfg.Phase != "derivation-before-commit" && cfg.Phase != "index-before-commit" && cfg.Phase != "book-before-commit" && cfg.Phase != "derivation-rewind-before-commit" && cfg.Phase != "index-rewind-before-commit" {
 		t.Fatal("unexpected owned CLI phase")
 	}
-	if (cfg.Phase == "index-before-commit" || cfg.Phase == "book-before-commit") && setup == nil {
+	if (cfg.Phase == "index-before-commit" || cfg.Phase == "book-before-commit" || cfg.Phase == "derivation-rewind-before-commit" || cfg.Phase == "index-rewind-before-commit") && setup == nil {
 		t.Fatal("actual-client write boundaries require their owned service setup")
 	}
 	validateOwnedCLIArgs(t, cfg, setup != nil)

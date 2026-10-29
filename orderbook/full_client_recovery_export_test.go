@@ -355,12 +355,13 @@ func OwnedFullClientCLIArgs(t *testing.T, directory string, args []string, phase
 	return args, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
+		wantHead := ownedFullClientBoundaryHead(phase)
 		head, err := f.r.eth.BlockNumber(ctx)
-		if err != nil || head != 7 || f.r.backend.chain.CurrentBlock().Number.Uint64() != 7 {
+		if err != nil || head != wantHead || f.r.backend.chain.CurrentBlock().Number.Uint64() != wantHead {
 			fmt.Println("owned_full_client_boundary_refused engine_head_mismatch=true")
 			os.Exit(88)
 		}
-		fmt.Printf("owned_full_client_boundary phase=%s engine_head=7 service_responding=true actual_exit_requested=86\n", phase)
+		fmt.Printf("owned_full_client_boundary phase=%s engine_head=%d service_responding=true actual_exit_requested=86\n", phase, wantHead)
 	}
 }
 
@@ -391,7 +392,7 @@ func AssertOwnedFullClientProcess(t *testing.T, output string, exit int, phase s
 	}
 	started := count("owned_full_client_started " + fullClientDefaultsProfile)
 	closed := count("owned_full_client_closed graceful=true")
-	boundary := count(fmt.Sprintf("owned_full_client_boundary phase=%s engine_head=7 service_responding=true actual_exit_requested=86", phase))
+	boundary := count(fmt.Sprintf("owned_full_client_boundary phase=%s engine_head=%d service_responding=true actual_exit_requested=86", phase, ownedFullClientBoundaryHead(phase)))
 	index := count("owned_index_plugin_before_commit block=7 transaction_visible=true real_nft_plugin_completed=true")
 	wantIndex := 0
 	if exit == 86 && phase == "index-before-commit" {
@@ -399,6 +400,12 @@ func AssertOwnedFullClientProcess(t *testing.T, output string, exit int, phase s
 	}
 	if started != 1 || index != wantIndex || strings.Count(output, "owned_full_client_boundary phase=") != boundary || exit != 0 && exit != 86 || exit == 0 && (closed != 1 || boundary != 0) || exit == 86 && (closed != 0 || boundary != 1) {
 		t.Fatalf("owned full-client lifecycle differs: exit=%d started=%d closed=%d boundary=%d output=%s", exit, started, closed, boundary, output)
+	}
+	if exit == 86 && ownedFullClientBoundaryHead(phase) == 6 {
+		if !strings.Contains(output, "NoM reorganised; rewinding") {
+			t.Fatal("owned rewind exit did not observe the production reorg path")
+		}
+		t.Logf("owned_full_client_rewind_path phase=%s declared_source_reorg_observed=true common_engine_head=6", phase)
 	}
 	t.Logf("owned_default_full_client_child phase=%s actual_exit=%d default_profile_verified=true graceful_close=%t engine_boundary_verified=%t index_plugin_writes_verified=%t output_complete=true colocated_cli_and_client=true", phase, exit, exit == 0, exit == 86, wantIndex == 1)
 }
@@ -414,7 +421,7 @@ func (f *FullClientRecoveryCLIFixture) OwnedProcessTrigger(phase string, enabled
 		f.Trigger(enabled)
 		return
 	}
-	if phase != "book-before-commit" {
+	if phase != "book-before-commit" && phase != "derivation-rewind-before-commit" && phase != "index-rewind-before-commit" {
 		f.r.t.Fatal("unexpected full-client process write boundary")
 	}
 	uri := url.URL{Scheme: "file", Path: filepath.Join(f.Directory(), "node.db")}
@@ -428,9 +435,36 @@ func (f *FullClientRecoveryCLIFixture) OwnedProcessTrigger(phase string, enabled
 	defer db.Close()
 	statement := "DROP TRIGGER execution_cli_exit"
 	if enabled {
-		statement = `CREATE TRIGGER execution_cli_exit BEFORE INSERT ON nft_order_meta WHEN NEW.key LIKE 'scanned:%' AND NEW.value=7 BEGIN SELECT zvm_owned_cli_exit(); END`
+		switch phase {
+		case "book-before-commit":
+			statement = `CREATE TRIGGER execution_cli_exit BEFORE INSERT ON nft_order_meta WHEN NEW.key LIKE 'scanned:%' AND NEW.value=7 BEGIN SELECT zvm_owned_cli_exit(); END`
+		case "derivation-rewind-before-commit":
+			statement = `CREATE TRIGGER execution_cli_exit AFTER UPDATE ON chunks WHEN OLD.consumed_at=8 AND NEW.consumed_at IS NULL BEGIN SELECT zvm_owned_cli_exit(); END`
+		case "index-rewind-before-commit":
+			statement = `CREATE TRIGGER execution_cli_exit AFTER UPDATE ON nft_order_meta WHEN NEW.key LIKE 'scanned:%' AND OLD.value=8 AND NEW.value=6 BEGIN SELECT zvm_owned_cli_exit(); END`
+		}
 	}
 	if _, err := db.Exec(statement); err != nil {
 		f.r.t.Fatal(err)
+	}
+}
+
+// Only the declared NoM observation source changes; no canonical state is edited.
+func (f *FullClientRecoveryCLIFixture) SourceBranch(branch int) {
+	f.r.t.Helper()
+	if branch < 0 || branch >= len(f.r.scenario.branches) {
+		f.r.t.Fatal("undeclared full-client source branch")
+	}
+	f.r.nomMu.Lock()
+	f.r.branch = branch
+	f.r.nomMu.Unlock()
+}
+
+func ownedFullClientBoundaryHead(phase string) uint64 {
+	switch phase {
+	case "derivation-rewind-before-commit", "index-rewind-before-commit":
+		return 6
+	default:
+		return 7
 	}
 }
