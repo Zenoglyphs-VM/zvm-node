@@ -62,10 +62,17 @@ func ownedFullClientProcessRecovery(t *testing.T, want map[string][]string, phas
 	// Remove only the declared exit trigger. Production startup/derivation,
 	// index and book workers perform recovery; the parent performs no repair.
 	f.OwnedProcessTrigger(phase, false)
-	// Bound the declared source before the recovery process can derive ahead.
-	f.Horizon(8)
+	// An interrupted rewind can retain momentum 9. Its replacement must be
+	// available immediately; a frontier of 8 correctly makes production wait.
+	if rewind {
+		f.Horizon(9)
+	} else {
+		f.Horizon(8)
+	}
 	p = start("", 2)
-	waitCLIHorizon(t, f, 8, p)
+	if !rewind {
+		waitCLIHorizon(t, f, 8, p)
+	}
 	waitCLIHorizon(t, f, 9, p)
 	p.waitExit(0, true)
 	orderbook.AssertOwnedFullClientProcess(t, p.output.snapshot(), 0, phase)

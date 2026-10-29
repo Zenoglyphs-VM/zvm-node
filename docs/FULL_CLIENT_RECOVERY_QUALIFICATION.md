@@ -61,8 +61,12 @@ forces an engine rewind. A read-only committed momentum-7 observation binds
 block 6 and its hash in a declared fixture input. The child requires matching RPC
 and direct-client header hashes, plus the exact production reorg from 9 to 7.
 The service and CLI exit together without cleanup.
-The next production child replays the canonical branch and must match the same
-original cold oracle across all six categories. The parent only selects fixture
+The replacement source frontier remains at momentum 9 throughout rewind
+recovery. An interrupted SQL rewind can leave momentum 9 committed; presenting
+frontier 8 makes the production deriver correctly wait for a source that is
+behind. The three original forward-only process cases retain their 8-to-9
+observation gates. The next production child replays the canonical branch and
+must match the same original cold oracle across all six categories. The parent only selects fixture
 source observations and manages the declared trigger; it never repairs state.
 Exit 86 skips the full service's test cleanup, Close and Stop. A new owned child
 opens the same client directory and starts the production CLI. The parent removes
