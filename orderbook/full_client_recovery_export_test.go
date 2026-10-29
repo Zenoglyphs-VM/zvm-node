@@ -20,7 +20,6 @@ import (
 	"github.com/Zenoglyphs-VM/zvm-core/rollup"
 	"github.com/ethereum/go-ethereum/beacon/engine"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -241,7 +240,7 @@ func AssertFullClientEmptyMessagePasserRefused(t *testing.T) {
 	hash, root, gas := genesis.Hash(), common.Hash{}, f.r.scenario.cfg.GasLimit
 	fc := engine.ForkchoiceStateV1{HeadBlockHash: hash, SafeBlockHash: hash, FinalizedBlockHash: hash}
 	attrs := &engine.PayloadAttributes{Timestamp: genesis.Time() + 10, Withdrawals: []*types.Withdrawal{},
-		BeaconRoot: &root, NoTxPool: true, Transactions: []hexutil.Bytes{}, GasLimit: &gas,
+		BeaconRoot: &root, NoTxPool: true, Transactions: [][]byte{}, GasLimit: &gas,
 		EIP1559Params: l2.ExtraData(f.r.scenario.cfg)[1:]}
 	built, err := e.ForkchoiceUpdated(ctx, fc, attrs)
 	if err != nil || built == nil || built.PayloadStatus.Status != engine.VALID || built.PayloadID == nil {
