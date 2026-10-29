@@ -122,7 +122,15 @@ type ownedCLIProcess struct {
 	joined bool
 }
 
-func startOwnedCLI(t *testing.T, f *orderbook.RecoveryCLIFixture, phase string, number int) *ownedCLIProcess {
+// Both fixtures use the same exact-child lifecycle and production CLI controls.
+type ownedCLIFixture interface {
+	Directory() string
+	Args() []string
+	Horizon(uint64)
+	Ready(context.Context, uint64) (bool, string)
+}
+
+func startOwnedCLI(t *testing.T, f ownedCLIFixture, phase string, number int) *ownedCLIProcess {
 	t.Helper()
 	cfg := ownedCLIConfig{Directory: f.Directory(), Marker: filepath.Join(f.Directory(), fmt.Sprintf("owned-cli-%d.json", number)), Phase: phase, Args: f.Args()}
 	raw, err := json.Marshal(cfg)
@@ -209,7 +217,7 @@ func (p *ownedCLIProcess) waitExit(want int, signal bool) {
 	p.t.Logf("owned production CLI signal_requested=%t actual_exit=%d output_complete=true child_race_exit=87 child_race_diagnostics=false", signal, exit)
 }
 
-func waitCLIHorizon(t *testing.T, f *orderbook.RecoveryCLIFixture, height uint64, p *ownedCLIProcess) {
+func waitCLIHorizon(t *testing.T, f ownedCLIFixture, height uint64, p *ownedCLIProcess) {
 	t.Helper()
 	f.Horizon(height)
 	ctx, cancel := context.WithTimeout(context.Background(), 40*time.Second)

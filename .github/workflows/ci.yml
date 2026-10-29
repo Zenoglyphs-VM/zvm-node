@@ -122,3 +122,30 @@ jobs:
         run: go test -json -count=1 -p=1 -failfast -timeout=12m -run '^Test(ExecutedMarketBrowserAdmissionAndRecovery|MarketFullWidthTimeClients|ExecutedMarketCreditBrowserRecovery|ExecutedExternalRoyaltySettlementAndRecovery)$' ./indexer ./orderbook
       - name: Refuse tracked source drift
         run: git diff --exit-code
+
+  full-client-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: true
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - name: Build the explicit full-client test binary once with bounded parallelism
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: timeout 12m go test -c -p=2 -tags=fullclient_recovery -o "$RUNNER_TEMP/zvm-full-client-recovery.test" ./orderbook
+      - name: Check real catalyst refusal and serialized default-persistence reopen
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t \
+            "$RUNNER_TEMP/zvm-full-client-recovery.test" -test.v=test2json -test.failfast -test.timeout=5m \
+            -test.run='^TestFullClientDefaultPersistenceRecovery$'
+      - name: Refuse tracked source drift
+        run: git diff --exit-code
