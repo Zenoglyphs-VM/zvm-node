@@ -52,8 +52,43 @@ func (b *cliOutput) snapshot() string {
 	return string(b.raw)
 }
 
+func validateOwnedCLIArgs(t *testing.T, cfg ownedCLIConfig, allowUnbound bool) {
+	t.Helper()
+	if len(cfg.Args) != 18 {
+		t.Fatal("unexpected CLI argument count")
+	}
+	for i, name := range []string{"config", "jwt", "db", "l1", "engine", "eth", "apps"} {
+		if cfg.Args[2*i] != "-"+name {
+			t.Fatal("unexpected CLI argument")
+		}
+		value := cfg.Args[2*i+1]
+		if i >= 3 && i <= 5 {
+			if allowUnbound && i >= 4 && value == "" {
+				continue
+			}
+			u, err := url.Parse(value)
+			if err != nil || u.Scheme != "http" || u.Hostname() != "127.0.0.1" || u.Port() == "" || u.User != nil || u.RawQuery != "" {
+				t.Fatal("CLI endpoint is outside owned loopback scope")
+			}
+		} else if filepath.Dir(value) != cfg.Directory {
+			t.Fatal("CLI file is outside its fixture")
+		}
+	}
+	if !reflect.DeepEqual(cfg.Args[14:], []string{"-listen=", "-verify=false", "-prices=off", "-mainnet-rpc=off"}) {
+		t.Fatal("external CLI facilities are not disabled")
+	}
+}
+
 func runOwnedCLIChild(t *testing.T, raw string) {
 	t.Helper()
+	runOwnedCLIChildWithSetup(t, raw, nil)
+}
+
+// Setup binds only the owned service endpoints after the original declaration
+// checks. The final arguments pass the same validation before production startup.
+func runOwnedCLIChildWithSetup(t *testing.T, raw string, setup func(*testing.T, ownedCLIConfig) ([]string, func())) {
+	t.Helper()
+	var beforeExit func()
 	var cfg ownedCLIConfig
 	if len(raw) > 8192 || json.Unmarshal([]byte(raw), &cfg) != nil {
 		t.Fatal("invalid owned CLI declaration")
@@ -71,31 +106,19 @@ func runOwnedCLIChild(t *testing.T, raw string) {
 	if err != nil || json.Unmarshal(data, &recorded) != nil || !reflect.DeepEqual(recorded, cfg) {
 		t.Fatal("owned CLI marker differs")
 	}
-	if len(cfg.Args) != 18 {
-		t.Fatal("unexpected CLI argument count")
-	}
-	for i, name := range []string{"config", "jwt", "db", "l1", "engine", "eth", "apps"} {
-		if cfg.Args[2*i] != "-"+name {
-			t.Fatal("unexpected CLI argument")
-		}
-		value := cfg.Args[2*i+1]
-		if i >= 3 && i <= 5 {
-			u, err := url.Parse(value)
-			if err != nil || u.Scheme != "http" || u.Hostname() != "127.0.0.1" || u.Port() == "" || u.User != nil || u.RawQuery != "" {
-				t.Fatal("CLI endpoint is outside owned loopback scope")
-			}
-		} else if filepath.Dir(value) != cfg.Directory {
-			t.Fatal("CLI file is outside its fixture")
-		}
-	}
-	if !reflect.DeepEqual(cfg.Args[14:], []string{"-listen=", "-verify=false", "-prices=off", "-mainnet-rpc=off"}) {
-		t.Fatal("external CLI facilities are not disabled")
-	}
 	if cfg.Phase != "" && cfg.Phase != "derivation-before-commit" {
 		t.Fatal("unexpected owned CLI phase")
 	}
+	validateOwnedCLIArgs(t, cfg, setup != nil)
+	if setup != nil {
+		cfg.Args, beforeExit = setup(t, cfg)
+		validateOwnedCLIArgs(t, cfg, false)
+	}
 	if cfg.Phase != "" {
 		if err := sqlite.RegisterScalarFunction("zvm_owned_cli_exit", 0, func(*sqlite.FunctionContext, []driver.Value) (driver.Value, error) {
+			if beforeExit != nil {
+				beforeExit()
+			}
 			fmt.Println(`{"owned_cli_boundary":"derivation-before-commit","actual_exit_requested":86}`)
 			os.Exit(86)
 			return nil, nil
@@ -132,6 +155,14 @@ type ownedCLIFixture interface {
 
 func startOwnedCLI(t *testing.T, f ownedCLIFixture, phase string, number int) *ownedCLIProcess {
 	t.Helper()
+	return startOwnedCLIWithTest(t, f, phase, number, "TestExecutedNativeCLIRecovery")
+}
+
+func startOwnedCLIWithTest(t *testing.T, f ownedCLIFixture, phase string, number int, testName string) *ownedCLIProcess {
+	t.Helper()
+	if testName != "TestExecutedNativeCLIRecovery" && testName != "TestFullClientOwnedProcess" {
+		t.Fatal("unexpected owned CLI child entrypoint")
+	}
 	cfg := ownedCLIConfig{Directory: f.Directory(), Marker: filepath.Join(f.Directory(), fmt.Sprintf("owned-cli-%d.json", number)), Phase: phase, Args: f.Args()}
 	raw, err := json.Marshal(cfg)
 	if err != nil {
@@ -149,7 +180,7 @@ func startOwnedCLI(t *testing.T, f ownedCLIFixture, phase string, number int) *o
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestExecutedNativeCLIRecovery$", "-test.timeout=115s")
+	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^"+testName+"$", "-test.timeout=115s")
 	cmd.Env = append(os.Environ(), "ZVM_OWNED_CLI_CHILD="+string(raw), "GORACE=exitcode=87 halt_on_error=1 atexit_sleep_ms=0")
 	output := &cliOutput{}
 	cmd.Stdout, cmd.Stderr = output, output

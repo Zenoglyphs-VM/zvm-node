@@ -34,13 +34,24 @@ the RPC payload and does not claim shipped-genesis client acceptance.
 The positive storage cases declare a different synthetic genesis with one
 nonzero MessagePasser storage slot and update and reload its genesis hash. This
 keeps the real RPC encoding path usable without a production genesis change.
-Compare a cold replay with two separate cases: graceful CLI/client close and
-disk reopen; and an exact owned CLI SQL exit 86, followed by graceful client
-close and disk reopen. Original child markers, race-exit refusal and joined
-process checks are retained. The client directory identity is checked across
-reopen. Actual production workers reconcile state; the parent reads the
-canonical SQL tables, original unsigned orders, balances, token ownership,
-chunks, deferred queues and executed roots using the existing oracle.
+Compare a cold replay with three separate cases:
+
+graceful CLI/client close and disk reopen; the exact owned CLI SQL exit 86 with
+its parent-owned service closed gracefully; and an owned process containing both
+the actual full service and production CLI. In the last case the original SQL
+trigger exits that entire child after actual Engine/eth reads confirm L2 head 7.
+Exit 86 skips the full service's test cleanup, Close and Stop. A new owned child
+opens the same client directory and starts the production CLI. The parent removes
+only the fixture's exit trigger and never derives, rewinds, indexes or repairs
+canonical data. The restarted production workers must converge to the cold replay.
+
+The process case validates three exact joined children, their bounded output and
+normal/abrupt service lifecycle markers. The parent checks physical directory
+identity between them. It opens the final full service only after the children
+joined, solely for the existing read-only chain/SQL oracle. All six original
+canonical categories remain: balances, ownership, original unsigned orders,
+chunks, deferred queues and executed roots. The exit is shared by the in-process
+client and CLI; a standalone geth/Karst daemon is not exercised.
 
 The canonical comparison excludes only existing observation-time, local epoch
 and build-duration bookkeeping. Direct chain access is limited to that read-only
@@ -48,9 +59,16 @@ oracle. The service never exposes a custom Engine/eth adapter, changes payload
 fields or invokes parent derivation/index/book repair.
 
 These are declared-horizon, synthetic unsigned NoM observations and controlled
-CLI process exits. The full client itself closes gracefully in the parent.
-Kernel kill, daemon-process crash, hardware power loss, arbitrary scheduling,
+CLI process exits. The first two storage cases close the full service gracefully; the additional
+owned process case exits the service and CLI together without service cleanup.
+Kernel kill, standalone-daemon crash, hardware power loss, arbitrary scheduling,
 signed NoM authority, real canonicality/finality, public chains, custodial
 wallets, Karst/platform acceptance, maintainer activation and the complete N04
 acceptance remain unqualified. Hosted results must be tied to the exact source;
 source preparation and formatting alone do not establish runtime success.
+
+The browser job requires a successful full-client job before its expensive
+frontend, compiler and profile work starts. A failed or skipped prerequisite
+leaves browser qualification incomplete. All three jobs remain required for an
+overall successful source workflow; test selections and existing time limits are
+unchanged. The dependency uses the documented [GitHub Actions needs condition](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idneeds).

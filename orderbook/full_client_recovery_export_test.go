@@ -6,6 +6,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -21,6 +23,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/beacon/engine"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -35,6 +38,8 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
+const fullClientDefaultsProfile = "full_client_defaults db_cache_mib=2048 trie_clean_mib=614 trie_dirty_mib=1024 snapshot_mib=409 state_scheme=path archive=false engine_api=catalyst authenticated=true"
+
 // FullClientRecoveryCLIFixture owns the actual pinned op-geth service, catalyst
 // Engine API, JWT listener and eth API. Only the NoM observation port is synthetic.
 // A public test-only P2P key avoids key generation; no peer socket, dial, discovery,
@@ -47,6 +52,15 @@ type FullClientRecoveryCLIFixture struct {
 }
 
 func NewFullClientRecoveryCLIFixture(t *testing.T, seedMessagePasser bool) *FullClientRecoveryCLIFixture {
+	return newFullClientRecoveryCLIFixture(t, seedMessagePasser, true)
+}
+
+// No full service is opened in the parent until all owned children have joined.
+func NewFullClientRecoveryProcessFixture(t *testing.T) *FullClientRecoveryCLIFixture {
+	return newFullClientRecoveryCLIFixture(t, true, false)
+}
+
+func newFullClientRecoveryCLIFixture(t *testing.T, seedMessagePasser, openParent bool) *FullClientRecoveryCLIFixture {
 	t.Helper()
 	scenario := newExecutionScenarioProfile(t, true, false)
 	path := t.TempDir()
@@ -87,6 +101,11 @@ func NewFullClientRecoveryCLIFixture(t *testing.T, seedMessagePasser bool) *Full
 		t.Fatalf("full-client synthetic configuration did not round-trip: %v", err)
 	}
 	scenario.cfg = loaded
+	raw, err = json.Marshal(scenario.genesis)
+	if err != nil {
+		t.Fatal(err)
+	}
+	write("full-client-genesis.json", raw)
 	write("jwt.hex", []byte(strings.Repeat("0", 64)))
 	raw, err = json.Marshal(map[string]any{"chainId": scenario.cfg.L2ChainID, "exchange": scenario.exchange, "collectionFactory": scenario.factory})
 	if err != nil {
@@ -102,7 +121,9 @@ func NewFullClientRecoveryCLIFixture(t *testing.T, seedMessagePasser bool) *Full
 		t.Fatal(err)
 	}
 	f.read.SetMaxOpenConns(1)
-	f.openExecutionClient()
+	if openParent {
+		f.openExecutionClient()
+	}
 	return f
 }
 
@@ -195,7 +216,7 @@ func (f *FullClientRecoveryCLIFixture) openExecutionClient() {
 	if err != nil || len(logs) != 0 {
 		t.Fatalf("actual full-client genesis log API is unavailable or unexpected: %v", err)
 	}
-	t.Log("full_client_defaults db_cache_mib=2048 trie_clean_mib=614 trie_dirty_mib=1024 snapshot_mib=409 state_scheme=path archive=false engine_api=catalyst authenticated=true")
+	t.Log(fullClientDefaultsProfile)
 }
 
 func (f *FullClientRecoveryCLIFixture) CloseExecutionClient() {
@@ -278,4 +299,101 @@ func AssertFullClientEmptyMessagePasserRefused(t *testing.T) {
 		t.Fatal("refused full-client payload advanced the canonical head")
 	}
 	t.Log("actual_catalyst_empty_root_refusal=true payload_rewritten=false shipped_genesis_supported=false")
+}
+
+// OwnedFullClientCLIArgs starts the actual pinned service in the exact CLI
+// child. NoM remains the parent's declared fixture; no Engine reply is adapted.
+func OwnedFullClientCLIArgs(t *testing.T, directory string, args []string) ([]string, func()) {
+	t.Helper()
+	path := filepath.Join(directory, "full-client-genesis.json")
+	info, err := os.Lstat(path)
+	if err != nil || !info.Mode().IsRegular() || info.Size() > 1<<20 {
+		t.Fatalf("owned full-client genesis is missing, nonregular or oversized: %v", err)
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	opened, err := file.Stat()
+	if err != nil || !os.SameFile(info, opened) {
+		file.Close()
+		t.Fatal("owned full-client genesis identity changed before reading")
+	}
+	raw, readErr := io.ReadAll(io.LimitReader(file, (1<<20)+1))
+	after, statErr := file.Stat()
+	closeErr := file.Close()
+	current, currentErr := os.Lstat(path)
+	if readErr != nil || statErr != nil || closeErr != nil || currentErr != nil || len(raw) > 1<<20 ||
+		!os.SameFile(info, after) || !os.SameFile(info, current) || int64(len(raw)) != info.Size() || after.Size() != info.Size() {
+		t.Fatal("owned full-client genesis read was incomplete or changed")
+	}
+	var genesis core.Genesis
+	if err := json.Unmarshal(raw, &genesis); err != nil {
+		t.Fatal(err)
+	}
+	config, err := rollup.Load(filepath.Join(directory, "rollup.json"))
+	if err != nil || config.L2GenesisHash != genesis.ToBlock().Hash() {
+		t.Fatal("owned full-client genesis differs from its loaded configuration")
+	}
+	if genesis.Alloc[params.OptimismL2ToL1MessagePasser].Storage[common.HexToHash("0x01")] != common.HexToHash("0x01") {
+		t.Fatal("owned process case requires the declared synthetic MessagePasser slot")
+	}
+	r := &executionRun{t: t, path: directory, scenario: &executionScenario{genesis: &genesis, cfg: config}}
+	f := &FullClientRecoveryCLIFixture{RecoveryCLIFixture: &RecoveryCLIFixture{r: r}}
+	started := false
+	t.Cleanup(func() {
+		f.CloseExecutionClient()
+		if started {
+			fmt.Println("owned_full_client_closed graceful=true")
+		}
+	})
+	f.openExecutionClient()
+	started = true
+	fmt.Println("owned_full_client_started " + fullClientDefaultsProfile)
+	args = append([]string(nil), args...)
+	args[9], args[11] = f.engineURL, f.ethURL
+	return args, func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		head, err := f.r.eth.BlockNumber(ctx)
+		if err != nil || head != 7 || f.r.backend.chain.CurrentBlock().Number.Uint64() != 7 {
+			fmt.Println("owned_full_client_boundary_refused engine_head_mismatch=true")
+			os.Exit(88)
+		}
+		fmt.Println("owned_full_client_boundary phase=derivation-before-commit engine_head=7 service_responding=true actual_exit_requested=86")
+	}
+}
+
+// CheckExecutionClientDirectory checks the same physical directory after every
+// joined child and before the next open. It never changes any client/SQL state.
+func (f *FullClientRecoveryCLIFixture) CheckExecutionClientDirectory() {
+	f.r.t.Helper()
+	info, err := os.Lstat(filepath.Join(f.Directory(), "full-client"))
+	if err != nil || !info.IsDir() || f.engineDirectory != nil && !os.SameFile(f.engineDirectory, info) {
+		f.r.t.Fatal("owned full-client directory is missing, replaced or linked")
+	}
+	f.engineDirectory = info
+}
+
+// AssertOwnedFullClientProcess validates the bounded output of the exact joined
+// CLI child. Exit 86 is accepted only with its actual live Engine/eth boundary;
+// successful graceful children must also prove the full service close path.
+func AssertOwnedFullClientProcess(t *testing.T, output string, exit int) {
+	t.Helper()
+	count := func(marker string) int {
+		n := 0
+		for _, line := range strings.Split(output, "\n") {
+			if line == marker {
+				n++
+			}
+		}
+		return n
+	}
+	started := count("owned_full_client_started " + fullClientDefaultsProfile)
+	closed := count("owned_full_client_closed graceful=true")
+	boundary := count("owned_full_client_boundary phase=derivation-before-commit engine_head=7 service_responding=true actual_exit_requested=86")
+	if started != 1 || exit != 0 && exit != 86 || exit == 0 && (closed != 1 || boundary != 0) || exit == 86 && (closed != 0 || boundary != 1) {
+		t.Fatalf("owned full-client lifecycle differs: exit=%d started=%d closed=%d boundary=%d output=%s", exit, started, closed, boundary, output)
+	}
+	t.Logf("owned_default_full_client_child actual_exit=%d default_profile_verified=true graceful_close=%t engine_boundary_verified=%t output_complete=true colocated_cli_and_client=true", exit, exit == 0, exit == 86)
 }

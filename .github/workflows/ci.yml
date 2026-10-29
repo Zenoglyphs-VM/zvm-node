@@ -28,6 +28,7 @@ jobs:
         run: go test -race -json -count=1 -run '^Test(MarketHTTP(ReorgVisibility|RefusedRewind)|ExecutedMarketAdmissionAndCanonicalRecovery|WireOrderTimes(RetainOriginalInputAndHash|RefuseAmbiguousJSON)|SQLiteOrderTimesRetainUnsignedRangeAndOrdering|StoredOrderTimesRefuseLossyOrNoncanonicalValues|BookImportsFullWidthOnChainOrderTimes)$' ./indexer ./orderbook
 
   market-browser:
+    needs: full-client-recovery
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

@@ -56,4 +56,7 @@ func TestFullClientDefaultPersistenceRecovery(t *testing.T) {
 			t.FailNow()
 		}
 	}
+	t.Run("owned-client-process-exit", func(t *testing.T) {
+		ownedFullClientProcessRecovery(t, want)
+	})
 }
