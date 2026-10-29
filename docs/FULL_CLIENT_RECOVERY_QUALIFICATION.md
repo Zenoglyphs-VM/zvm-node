@@ -34,18 +34,24 @@ the RPC payload and does not claim shipped-genesis client acceptance.
 The positive storage cases declare a different synthetic genesis with one
 nonzero MessagePasser storage slot and update and reload its genesis hash. This
 keeps the real RPC encoding path usable without a production genesis change.
-Compare a cold replay with three separate cases:
+Compare a cold replay with the original two restore cases and three owned-process boundaries:
 
 graceful CLI/client close and disk reopen; the exact owned CLI SQL exit 86 with
 its parent-owned service closed gracefully; and an owned process containing both
 the actual full service and production CLI. In the last case the original SQL
-trigger exits that entire child after actual Engine/eth reads confirm L2 head 7.
+boundary exits that entire child after actual eth RPC and direct engine header
+reads confirm L2 head 7. Boundaries are derivation before SQL commit, index after
+the actual NFT plugin completes but before the index transaction commits, and
+book cursor insertion before its transaction commits. The index wrapper delegates
+the shipped NFT plugin and preserves rollback notification behavior; it checks
+transaction-visible block/log rows before exiting. The book uses a fixture-only
+SQLite trigger on cursor 7 after the actual log application writes.
 Exit 86 skips the full service's test cleanup, Close and Stop. A new owned child
 opens the same client directory and starts the production CLI. The parent removes
 only the fixture's exit trigger and never derives, rewinds, indexes or repairs
 canonical data. The restarted production workers must converge to the cold replay.
 
-The process case validates three exact joined children, their bounded output and
+Each process boundary validates three exact joined children, their bounded output and
 normal/abrupt service lifecycle markers. The parent checks physical directory
 identity between them. It opens the final full service only after the children
 joined, solely for the existing read-only chain/SQL oracle. All six original

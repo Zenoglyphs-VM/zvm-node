@@ -303,7 +303,7 @@ func AssertFullClientEmptyMessagePasserRefused(t *testing.T) {
 
 // OwnedFullClientCLIArgs starts the actual pinned service in the exact CLI
 // child. NoM remains the parent's declared fixture; no Engine reply is adapted.
-func OwnedFullClientCLIArgs(t *testing.T, directory string, args []string) ([]string, func()) {
+func OwnedFullClientCLIArgs(t *testing.T, directory string, args []string, phase string) ([]string, func()) {
 	t.Helper()
 	path := filepath.Join(directory, "full-client-genesis.json")
 	info, err := os.Lstat(path)
@@ -360,7 +360,7 @@ func OwnedFullClientCLIArgs(t *testing.T, directory string, args []string) ([]st
 			fmt.Println("owned_full_client_boundary_refused engine_head_mismatch=true")
 			os.Exit(88)
 		}
-		fmt.Println("owned_full_client_boundary phase=derivation-before-commit engine_head=7 service_responding=true actual_exit_requested=86")
+		fmt.Printf("owned_full_client_boundary phase=%s engine_head=7 service_responding=true actual_exit_requested=86\n", phase)
 	}
 }
 
@@ -378,7 +378,7 @@ func (f *FullClientRecoveryCLIFixture) CheckExecutionClientDirectory() {
 // AssertOwnedFullClientProcess validates the bounded output of the exact joined
 // CLI child. Exit 86 is accepted only with its actual live Engine/eth boundary;
 // successful graceful children must also prove the full service close path.
-func AssertOwnedFullClientProcess(t *testing.T, output string, exit int) {
+func AssertOwnedFullClientProcess(t *testing.T, output string, exit int, phase string) {
 	t.Helper()
 	count := func(marker string) int {
 		n := 0
@@ -391,9 +391,46 @@ func AssertOwnedFullClientProcess(t *testing.T, output string, exit int) {
 	}
 	started := count("owned_full_client_started " + fullClientDefaultsProfile)
 	closed := count("owned_full_client_closed graceful=true")
-	boundary := count("owned_full_client_boundary phase=derivation-before-commit engine_head=7 service_responding=true actual_exit_requested=86")
-	if started != 1 || exit != 0 && exit != 86 || exit == 0 && (closed != 1 || boundary != 0) || exit == 86 && (closed != 0 || boundary != 1) {
+	boundary := count(fmt.Sprintf("owned_full_client_boundary phase=%s engine_head=7 service_responding=true actual_exit_requested=86", phase))
+	index := count("owned_index_plugin_before_commit block=7 transaction_visible=true real_nft_plugin_completed=true")
+	wantIndex := 0
+	if exit == 86 && phase == "index-before-commit" {
+		wantIndex = 1
+	}
+	if started != 1 || index != wantIndex || strings.Count(output, "owned_full_client_boundary phase=") != boundary || exit != 0 && exit != 86 || exit == 0 && (closed != 1 || boundary != 0) || exit == 86 && (closed != 0 || boundary != 1) {
 		t.Fatalf("owned full-client lifecycle differs: exit=%d started=%d closed=%d boundary=%d output=%s", exit, started, closed, boundary, output)
 	}
-	t.Logf("owned_default_full_client_child actual_exit=%d default_profile_verified=true graceful_close=%t engine_boundary_verified=%t output_complete=true colocated_cli_and_client=true", exit, exit == 0, exit == 86)
+	t.Logf("owned_default_full_client_child phase=%s actual_exit=%d default_profile_verified=true graceful_close=%t engine_boundary_verified=%t index_plugin_writes_verified=%t output_complete=true colocated_cli_and_client=true", phase, exit, exit == 0, exit == 86, wantIndex == 1)
+}
+
+// Only the declared fixture trigger is changed. The index boundary is a
+// child-local wrapper over the real NFT plugin, with no parent SQL mutation.
+func (f *FullClientRecoveryCLIFixture) OwnedProcessTrigger(phase string, enabled bool) {
+	f.r.t.Helper()
+	if phase == "index-before-commit" {
+		return
+	}
+	if phase == "derivation-before-commit" {
+		f.Trigger(enabled)
+		return
+	}
+	if phase != "book-before-commit" {
+		f.r.t.Fatal("unexpected full-client process write boundary")
+	}
+	uri := url.URL{Scheme: "file", Path: filepath.Join(f.Directory(), "node.db")}
+	q := uri.Query()
+	q.Set("mode", "rw")
+	uri.RawQuery = q.Encode()
+	db, err := sql.Open("sqlite", uri.String())
+	if err != nil {
+		f.r.t.Fatal(err)
+	}
+	defer db.Close()
+	statement := "DROP TRIGGER execution_cli_exit"
+	if enabled {
+		statement = `CREATE TRIGGER execution_cli_exit BEFORE INSERT ON nft_order_meta WHEN NEW.key LIKE 'scanned:%' AND NEW.value=7 BEGIN SELECT zvm_owned_cli_exit(); END`
+	}
+	if _, err := db.Exec(statement); err != nil {
+		f.r.t.Fatal(err)
+	}
 }

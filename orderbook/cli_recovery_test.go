@@ -2,6 +2,7 @@ package orderbook_test
 
 import (
 	"context"
+	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -17,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Zenoglyphs-VM/zvm-node/indexer"
 	"github.com/Zenoglyphs-VM/zvm-node/nodecmd"
 	"github.com/Zenoglyphs-VM/zvm-node/orderbook"
 	"modernc.org/sqlite"
@@ -106,21 +108,20 @@ func runOwnedCLIChildWithSetup(t *testing.T, raw string, setup func(*testing.T, 
 	if err != nil || json.Unmarshal(data, &recorded) != nil || !reflect.DeepEqual(recorded, cfg) {
 		t.Fatal("owned CLI marker differs")
 	}
-	if cfg.Phase != "" && cfg.Phase != "derivation-before-commit" {
+	if cfg.Phase != "" && cfg.Phase != "derivation-before-commit" && cfg.Phase != "index-before-commit" && cfg.Phase != "book-before-commit" {
 		t.Fatal("unexpected owned CLI phase")
+	}
+	if (cfg.Phase == "index-before-commit" || cfg.Phase == "book-before-commit") && setup == nil {
+		t.Fatal("actual-client write boundaries require their owned service setup")
 	}
 	validateOwnedCLIArgs(t, cfg, setup != nil)
 	if setup != nil {
 		cfg.Args, beforeExit = setup(t, cfg)
 		validateOwnedCLIArgs(t, cfg, false)
 	}
-	if cfg.Phase != "" {
+	if cfg.Phase != "" && cfg.Phase != "index-before-commit" {
 		if err := sqlite.RegisterScalarFunction("zvm_owned_cli_exit", 0, func(*sqlite.FunctionContext, []driver.Value) (driver.Value, error) {
-			if beforeExit != nil {
-				beforeExit()
-			}
-			fmt.Println(`{"owned_cli_boundary":"derivation-before-commit","actual_exit_requested":86}`)
-			os.Exit(86)
+			exitOwnedCLIAtBoundary(cfg.Phase, beforeExit)
 			return nil, nil
 		}); err != nil {
 			t.Fatal(err)
@@ -128,7 +129,12 @@ func runOwnedCLIChildWithSetup(t *testing.T, raw string, setup func(*testing.T, 
 	}
 	// This is the production entrypoint with both extensions used by runNode.
 	// No package-private Deriver, Indexer or Book methods are called here.
-	err = nodecmd.Run(cfg.Args, &nodecmd.Market{}, &nodecmd.Markets{})
+	market := &nodecmd.Market{}
+	var marketExtension nodecmd.Extender = market
+	if cfg.Phase == "index-before-commit" {
+		marketExtension = &ownedCLIIndexMarket{Market: market, beforeExit: beforeExit}
+	}
+	err = nodecmd.Run(cfg.Args, marketExtension, &nodecmd.Markets{})
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("production CLI did not stop through its signal context: %v", err)
 	}
@@ -143,6 +149,7 @@ type ownedCLIProcess struct {
 	cancel context.CancelFunc
 	ctx    context.Context
 	joined bool
+	phase  string
 }
 
 // Both fixtures use the same exact-child lifecycle and production CLI controls.
@@ -188,7 +195,7 @@ func startOwnedCLIWithTest(t *testing.T, f ownedCLIFixture, phase string, number
 		cancel()
 		t.Fatal(err)
 	}
-	p := &ownedCLIProcess{t: t, cmd: cmd, output: output, done: make(chan error, 1), cancel: cancel, ctx: ctx}
+	p := &ownedCLIProcess{t: t, cmd: cmd, output: output, done: make(chan error, 1), cancel: cancel, ctx: ctx, phase: cfg.Phase}
 	go func() { p.done <- cmd.Wait() }()
 	t.Cleanup(func() {
 		if !p.joined {
@@ -239,7 +246,7 @@ func (p *ownedCLIProcess) waitExit(want int, signal bool) {
 	}
 	marker := `"owned_cli_return":"context-canceled"`
 	if want == 86 {
-		marker = `"owned_cli_boundary":"derivation-before-commit"`
+		marker = fmt.Sprintf(`"owned_cli_boundary":%q`, p.phase)
 	}
 	if !strings.Contains(string(p.output.raw), marker) {
 		p.t.Fatalf("owned CLI lacks its exact boundary marker: %s", p.output.raw)
@@ -307,5 +314,68 @@ func TestExecutedNativeCLIRecovery(t *testing.T) {
 			orderbook.AssertRecoveryCLIState(t, f.Snapshot(), want)
 			t.Log("production CLI default_poll=3s default_recheck=30s readonly_canonical_state_equal=true parent_reconciliation=false")
 		})
+	}
+}
+
+func exitOwnedCLIAtBoundary(phase string, beforeExit func()) {
+	if beforeExit != nil {
+		beforeExit()
+	}
+	raw, err := json.Marshal(map[string]any{"owned_cli_boundary": phase, "actual_exit_requested": 86})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(raw))
+	os.Exit(86)
+}
+
+// Delegate the actual shipped market and NFT plugin, then exit inside the
+// index transaction after its real writes and before IndexBlock commits.
+type ownedCLIIndexMarket struct {
+	*nodecmd.Market
+	beforeExit func()
+}
+
+func (m *ownedCLIIndexMarket) Build(ctx context.Context, env nodecmd.Env) (nodecmd.Result, error) {
+	result, err := m.Market.Build(ctx, env)
+	if err != nil {
+		return result, err
+	}
+	if len(result.Plugins) != 1 || result.Plugins[0].Name() != "nft" {
+		return nodecmd.Result{}, errors.New("owned index boundary requires the shipped NFT plugin")
+	}
+	result.Plugins[0] = ownedCLIIndexPlugin{Plugin: result.Plugins[0], beforeExit: m.beforeExit}
+	return result, nil
+}
+
+type ownedCLIIndexPlugin struct {
+	indexer.Plugin
+	beforeExit func()
+}
+
+func (p ownedCLIIndexPlugin) AfterBlock(tx *sql.Tx, block uint64) error {
+	if err := p.Plugin.AfterBlock(tx, block); err != nil {
+		return err
+	}
+	if block == 7 {
+		var blocks, logs int
+		if err := tx.QueryRow("SELECT count(*) FROM blocks WHERE number=7").Scan(&blocks); err != nil {
+			return err
+		}
+		if err := tx.QueryRow("SELECT count(*) FROM logs WHERE block=7").Scan(&logs); err != nil {
+			return err
+		}
+		if blocks != 1 || logs == 0 {
+			return errors.New("owned index boundary lacks its transaction-visible writes")
+		}
+		fmt.Println("owned_index_plugin_before_commit block=7 transaction_visible=true real_nft_plugin_completed=true")
+		exitOwnedCLIAtBoundary("index-before-commit", p.beforeExit)
+	}
+	return nil
+}
+
+func (p ownedCLIIndexPlugin) AfterRollback() {
+	if aware, ok := p.Plugin.(indexer.RollbackAware); ok {
+		aware.AfterRollback()
 	}
 }

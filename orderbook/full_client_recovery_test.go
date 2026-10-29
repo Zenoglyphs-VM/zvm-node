@@ -57,6 +57,14 @@ func TestFullClientDefaultPersistenceRecovery(t *testing.T) {
 		}
 	}
 	t.Run("owned-client-process-exit", func(t *testing.T) {
-		ownedFullClientProcessRecovery(t, want)
+		ownedFullClientProcessRecovery(t, want, "derivation-before-commit")
 	})
+	for _, phase := range []string{"index-before-commit", "book-before-commit"} {
+		t.Run("owned-"+phase, func(t *testing.T) {
+			ownedFullClientProcessRecovery(t, want, phase)
+		})
+		if t.Failed() {
+			t.FailNow()
+		}
+	}
 }
