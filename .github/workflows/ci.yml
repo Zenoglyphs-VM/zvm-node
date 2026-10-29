@@ -140,6 +140,7 @@ jobs:
           GOMEMLIMIT: 5GiB
         run: timeout 12m go test -c -p=2 -tags=fullclient_recovery -o "$RUNNER_TEMP/zvm-full-client-recovery.test" ./orderbook
       - name: Check real catalyst refusal and serialized default-persistence reopen
+        working-directory: orderbook
         env:
           GOMAXPROCS: '2'
           GOMEMLIMIT: 5GiB
