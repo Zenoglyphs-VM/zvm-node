@@ -26,11 +26,23 @@ type closureProofReply struct {
 
 type closureProofRPC struct {
 	*recoveryRPC
-	book    *Book
-	replies map[common.Hash]closureProofReply
+	book              *Book
+	replies           map[common.Hash]closureProofReply
+	legacySingleCheck bool
 }
 
 func (p *closureProofRPC) CallContractAtHash(ctx context.Context, msg ethereum.CallMsg, hash common.Hash) ([]byte, error) {
+	// Only the pre-existing cancellation regression uses its original single-check port.
+	// Complete closure proofs still require two separately declared ABI results.
+	if p.legacySingleCheck && len(msg.Data) >= 4 {
+		args, err := mcABI.Methods["aggregate3"].Inputs.Unpack(msg.Data[4:])
+		if err != nil {
+			return nil, err
+		}
+		if reflect.ValueOf(args[0]).Len() == 1 {
+			return p.recoveryRPC.CallContractAtHash(ctx, msg, hash)
+		}
+	}
 	if p.blockCall {
 		if err := p.wait(ctx); err != nil {
 			return nil, err

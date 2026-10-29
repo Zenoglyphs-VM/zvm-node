@@ -373,6 +373,9 @@ func TestRPCCancellationReplyDoesNotInventAFullFill(t *testing.T) {
 	}
 	p.header.Number, p.header.Time = big.NewInt(3), 1030
 	p.code, p.remaining = CodeCancelled, 0
+	// The independent fill counter is declared as two, not inferred from the refusal.
+	b.cfg.Eth = &closureProofRPC{recoveryRPC: p, book: b, legacySingleCheck: true,
+		replies: map[common.Hash]closureProofReply{p.header.Hash(): {uint64(CodeCancelled), 0, 2, nil}}}
 	if err := b.step(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -383,6 +386,14 @@ func TestRPCCancellationReplyDoesNotInventAFullFill(t *testing.T) {
 	}
 	if status != StatusCancelled || filled != 2 || closed != 3 {
 		t.Fatalf("early cancellation reply invented fills: %s/%d/%d", status, filled, closed)
+	}
+	var checkEpoch, fillEpoch int64
+	var checkedHash string
+	if err := db.QueryRow("SELECT checked_epoch,filled_epoch,checked_hash FROM nft_orders WHERE hash=?", hash.Hex()).Scan(&checkEpoch, &fillEpoch, &checkedHash); err != nil {
+		t.Fatal(err)
+	}
+	if checkEpoch < 0 || fillEpoch != checkEpoch || checkedHash != p.header.Hash().Hex() {
+		t.Fatal("cancellation lacks its independent current fill proof")
 	}
 }
 
