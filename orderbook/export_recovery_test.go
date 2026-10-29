@@ -113,14 +113,17 @@ func (f *RecoveryCLIFixture) Ready(ctx context.Context, height uint64) (bool, st
 		return false, "undeclared canonical source horizon"
 	}
 	ready := derived == height && index == height-1 && cursor == height-1 && sourceHash == expected.Momentum.Hash.String()
-	for i, order := range f.r.scenario.orders {
+	var states []string
+	for _, order := range f.r.scenario.orders {
 		var status, checked string
 		var filled, code int
 		err = f.read.QueryRowContext(ctx, "SELECT status,filled,code,checked_hash FROM nft_orders WHERE hash=?", order.Hash().Hex()).Scan(&status, &filled, &code, &checked)
 		if err != nil {
 			return false, err.Error()
 		}
-		if branch == 0 && height >= 8 && i == 0 {
+		states = append(states, fmt.Sprintf("%s/%d/%d/checked=%t", status, filled, code, checked == hash))
+		// The declared branch purchases this exact input at momentum 8.
+		if height >= 8 && order.Hash() == f.r.scenario.inputs[branch].Order.Hash() {
 			ready = ready && status == StatusFilled && filled == 1 && code == int(CodeFilled)
 		} else {
 			ready = ready && status == StatusOpen && filled == 0 && code == int(CodeOK)
@@ -129,7 +132,7 @@ func (f *RecoveryCLIFixture) Ready(ctx context.Context, height uint64) (bool, st
 			}
 		}
 	}
-	return ready, fmt.Sprintf("derived=%d index=%d cursor=%d", derived, index, cursor)
+	return ready, fmt.Sprintf("derived=%d index=%d cursor=%d source_match=%t branch=%d orders=%s", derived, index, cursor, sourceHash == expected.Momentum.Hash.String(), branch, strings.Join(states, ";"))
 }
 
 func (f *RecoveryCLIFixture) Trigger(enabled bool) {
