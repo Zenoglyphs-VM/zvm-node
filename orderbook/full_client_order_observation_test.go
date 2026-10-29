@@ -72,7 +72,7 @@ func (f *FullClientRecoveryCLIFixture) AssertRecoveryWithOrderObservations(got, 
 				f.r.t.Fatal("order observation does not name the same canonical RPC/direct header")
 			}
 			var input Input
-			if err := json.Unmarshal([]byte(raw), &input); err != nil || input.Order == nil || input.Order.Check() != nil || input.Order.Hash().Hex() != orderHash {
+			if err := json.Unmarshal([]byte(raw), &input); err != nil || input.Order.Check() != nil || input.Order.Hash().Hex() != orderHash {
 				f.r.t.Fatal("retained original order input or hash changed")
 			}
 			amount, err := storedAmount(&input)
