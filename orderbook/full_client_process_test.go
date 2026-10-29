@@ -80,7 +80,12 @@ func ownedFullClientProcessRecovery(t *testing.T, want map[string][]string, phas
 	// The service is opened in the parent only after all three exact children
 	// joined, solely for the existing read-only chain/SQL state oracle.
 	f.RestartExecutionClient()
-	orderbook.AssertRecoveryCLIState(t, f.Snapshot(), want)
+	got := f.Snapshot()
+	if rewind {
+		f.AssertRecoveryWithOrderObservations(got, want)
+	} else {
+		orderbook.AssertRecoveryCLIState(t, got, want)
+	}
 	f.CloseExecutionClient()
 	t.Logf("owned_full_client_process_restore=true boundary=%s readonly_canonical_state_equal=true engine_head_at_process_exit=%d service_cleanup_skipped=true seeded_synthetic_genesis=true standalone_daemon=false full_N04_acceptance=false", phase, boundaryHead)
 }

@@ -81,9 +81,24 @@ canonical categories remain: balances, ownership, original unsigned orders,
 chunks, deferred queues and executed roots. The exit is shared by the in-process
 client and CLI; a standalone geth/Karst daemon is not exercised.
 
-The canonical comparison excludes only existing observation-time, local epoch
-and build-duration bookkeeping. Direct chain access is limited to the read-only
-oracle and declared boundary-header observations. The service never exposes a custom Engine/eth adapter, changes payload
+The five original cold comparisons retain their exact SQL projection, excluding
+only existing observation-time, local-epoch and build-duration bookkeeping. The
+two new rewind comparisons additionally distinguish order business state from
+its recorded proof coordinates. Production `observe` assigns `checked_block`,
+`checked_hash` and `closed_block` to the header where a check was performed;
+sequential and batched execution can validly record different canonical headers.
+
+Before projecting exactly those three fields, the parent validates all four
+original order rows from the recovered/reference snapshots: matching canonical
+RPC/direct header hashes; the exact original order hash/input; a block-hash-
+selected contract check matching code, fill and status; closed full-fill proof at
+its recorded check block; and open checks at the current canonical tip. Original
+row vectors remain in bounded job output. Every other field of every order and
+every other canonical table remains an exact comparison. No parent SQL write,
+Book initialization, cache observation update or recovery worker runs in this
+read-only proof check. Direct chain access remains limited to the read-only
+oracle and declared header observations; one isolated client does not establish
+independent NoM canonicality or finality. The service never exposes a custom Engine/eth adapter, changes payload
 fields or invokes parent derivation/index/book repair.
 
 These are declared-horizon, synthetic unsigned NoM observations and controlled
