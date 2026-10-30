@@ -29,6 +29,16 @@ type FullClientSignedRecoveryFixture struct {
 
 func NewFullClientSignedRecoveryFixture(t *testing.T) *FullClientSignedRecoveryFixture {
 	t.Helper()
+	return newFullClientSignedRecoveryFixture(t, true)
+}
+
+func NewFullClientSignedProcessFixture(t *testing.T) *FullClientSignedRecoveryFixture {
+	t.Helper()
+	return newFullClientSignedRecoveryFixture(t, false)
+}
+
+func newFullClientSignedRecoveryFixture(t *testing.T, openParent bool) *FullClientSignedRecoveryFixture {
+	t.Helper()
 	key := executedMarketKey(t)
 	scenario := newExecutionScenarioInputs(t, true, false, executionScenarioInputs{
 		seller: znn.Address(crypto.PubkeyToAddress(key.PublicKey)), timestamp: 1_800_000_000,
@@ -44,7 +54,7 @@ func NewFullClientSignedRecoveryFixture(t *testing.T) *FullClientSignedRecoveryF
 			return inputs
 		},
 	})
-	return &FullClientSignedRecoveryFixture{FullClientRecoveryCLIFixture: newFullClientRecoveryForScenario(t, scenario, true, true)}
+	return &FullClientSignedRecoveryFixture{FullClientRecoveryCLIFixture: newFullClientRecoveryForScenario(t, scenario, true, openParent)}
 }
 
 // Before initial admission there must be no order rows. This reads the same

@@ -7,9 +7,8 @@ import (
 	"testing"
 )
 
-// This extends the signed-order path through the actual default-persistence
-// client. Its engine reopen is graceful; the declared SQL fault exits the CLI.
-// It does not extend the independent NoM/source or engine-process crash proof.
+// The same signed inputs cover graceful/client reopen, a CLI-only SQL exit,
+// and a declared colocated CLI/full-service process exit. NoM remains synthetic.
 func TestFullClientSignedOrderRecovery(t *testing.T) {
 	prime := func(f *orderbook.FullClientSignedRecoveryFixture) {
 		p := startOwnedCLI(t, f, "", 0)
@@ -58,4 +57,5 @@ func TestFullClientSignedOrderRecovery(t *testing.T) {
 			t.FailNow()
 		}
 	}
+	t.Run("owned-client-process-exit", func(t *testing.T) { ownedSignedFullClientProcessRecovery(t, want) })
 }

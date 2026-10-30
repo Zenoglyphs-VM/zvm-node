@@ -315,3 +315,25 @@ signed-path engine-process crash, kernel kill or hardware power-loss proof.
 The explicitly nonempty synthetic MessagePasser genesis and the separate shipped
 empty-genesis refusal remain. Operator/platform/release acceptance and all 42
 original requirements remain open where not independently established.
+
+
+### Colocated signed-order process exit (source candidate)
+
+The added case owns the actual full service and production CLI in the same
+exact child. After a graceful priming child joins, initial EOA order admission
+opens the persisted service in the parent through the existing Book.Submit
+path, before any fault, and closes it again. The next owned child exits 86 at
+the real derivation SQL boundary with engine head 7 and without service cleanup.
+A new owned child recovers through the production startup/workers. The parent
+removes only its declared exit hook, never repairs or resubmits an order after
+the fault, and opens the service again only after recovery joins, for the
+existing read-only signature/business/all-table oracle against cold replay.
+
+The existing graceful and CLI-only signed cases remain. This source adds one
+terminal case, three joined CLI children and five service opens: three in owned
+children and two in the parent admission/read-only phases. The signed command
+retains its four-minute timeout, reuses the same compiled binary, and preserves
+the original unsigned command and twenty-minute job limit. Source authoring and
+offline formatting do not establish execution. NoM inputs remain unsigned and
+synthetic; kernel kill, hardware power loss, independent NoM authority/finality,
+supported platforms, operator migration and release acceptance remain open.
