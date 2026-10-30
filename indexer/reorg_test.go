@@ -40,6 +40,7 @@ type fakeChain struct {
 	// gas is the gas limit each eth_call asked for, in order.
 	gas         []uint64
 	hashAnswers map[common.Hash]map[common.Address]map[[4]byte][]byte
+	callProbe   func(context.Context) error
 }
 
 func newFakeChain() *fakeChain {
@@ -164,7 +165,15 @@ type callArgs struct {
 	Gas   *hexutil.Uint64 `json:"gas"`
 }
 
-func (f *fakeEth) Call(_ context.Context, args callArgs, block rpc.BlockNumberOrHash) (hexutil.Bytes, error) {
+func (f *fakeEth) Call(ctx context.Context, args callArgs, block rpc.BlockNumberOrHash) (hexutil.Bytes, error) {
+	f.c.mu.Lock()
+	probe := f.c.callProbe
+	f.c.mu.Unlock()
+	if probe != nil {
+		if err := probe(ctx); err != nil {
+			return nil, err
+		}
+	}
 	f.c.mu.Lock()
 	defer f.c.mu.Unlock()
 	gas := uint64(0)

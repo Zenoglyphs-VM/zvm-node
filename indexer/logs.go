@@ -47,8 +47,17 @@ func (r LogRow) WordAddr(i int) common.Address {
 }
 
 // loadLogs reads indexed logs matching a WHERE clause over `logs l`, in chain order.
+// These are complete-input logical bounds, not hard process-RSS limits. A
+// selected history that cannot fit is refused before any canonical write.
+const backfillInputBytes = 64 << 20
+const backfillInputRows = 131072
+
 func (ix *Indexer) loadLogs(ctx context.Context, where string, args ...any) ([]LogRow, error) {
-	rows, err := ix.db.QueryContext(ctx, `SELECT l.tx, l.idx, l.block, b.timestamp, l.address,
+	return loadLogRows(ctx, ix.db, where, args...)
+}
+
+func loadLogRows(ctx context.Context, source PreparationSource, where string, args ...any) ([]LogRow, error) {
+	rows, err := source.QueryContext(ctx, `SELECT l.tx, l.idx, l.block, b.timestamp, l.address,
 		l.topic0, l.topic1, l.topic2, l.topic3, l.data, COALESCE(t.from_addr, ''), b.hash
 		FROM logs l JOIN blocks b ON b.number = l.block LEFT JOIN txs t ON t.hash = l.tx
 		WHERE `+where+` ORDER BY l.block, l.idx`, args...)
@@ -57,6 +66,7 @@ func (ix *Indexer) loadLogs(ctx context.Context, where string, args ...any) ([]L
 	}
 	defer rows.Close()
 	var out []LogRow
+	var inputBytes int64
 	for rows.Next() {
 		var r LogRow
 		var addr, from, hash string
@@ -75,6 +85,12 @@ func (ix *Indexer) loadLogs(ctx context.Context, where string, args ...any) ([]L
 				break
 			}
 			r.Topics = append(r.Topics, common.HexToHash(t.String))
+		}
+		// Account serialized fields plus a conservative fixed row allowance.
+		// Rows.Scan may still allocate one source row before this admission.
+		inputBytes += int64(len(r.Tx) + len(r.Data) + len(r.Topics)*common.HashLength + 256)
+		if inputBytes > backfillInputBytes || len(out) == backfillInputRows {
+			return nil, fmt.Errorf("complete backfill input exceeds its preparation bound")
 		}
 		out = append(out, r)
 	}
@@ -113,30 +129,57 @@ func readBackfillHead(ctx context.Context, db backfillSourceReader) (backfillHea
 // backfillInput is read before the write transaction. It supplies no authority
 // to apply stale source rows; applyBackfill rechecks every source block first.
 type backfillInput struct {
-	head backfillHead
-	logs []LogRow
+	head     backfillHead
+	logs     []LogRow
+	prepared *preparedInputs
 }
 
-func (ix *Indexer) readBackfill(ctx context.Context, key, where string, args []any) (*backfillInput, error) {
+func (ix *Indexer) readBackfill(ctx context.Context, key, where string, args []any, plugins ...Plugin) (*backfillInput, error) {
+	source, err := ix.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		return nil, err
+	}
+	defer source.Rollback()
 	var done int
-	if err := ix.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM index_meta WHERE key = ?", key).Scan(&done); err != nil {
+	if err := source.QueryRowContext(ctx, "SELECT COUNT(*) FROM index_meta WHERE key = ?", key).Scan(&done); err != nil {
 		return nil, err
 	}
 	if done > 0 {
 		return nil, nil
 	}
-	head, err := readBackfillHead(ctx, ix.db)
+	head, err := readBackfillHead(ctx, source)
 	if err != nil {
 		return nil, err
 	}
-	// A head that advances during this read must not extend the selected input
-	// horizon. Copy the caller's arguments before adding the bound.
 	bound := append(append([]any{}, args...), head.number)
-	logs, err := ix.loadLogs(ctx, "("+where+") AND l.block <= ?", bound...)
+	logs, err := loadLogRows(ctx, source, "("+where+") AND l.block <= ?", bound...)
 	if err != nil {
 		return nil, err
 	}
-	return &backfillInput{head: head, logs: logs}, nil
+	replay := func(visit func(LogRow) error) error {
+		for _, row := range logs {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			if err := visit(row); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	prepared, err := collectInputs(ctx, source, replay, plugins)
+	if err != nil {
+		return nil, err
+	}
+	if err := source.Commit(); err != nil {
+		prepared.Close()
+		return nil, err
+	}
+	if err := prepared.resolve(ctx); err != nil {
+		prepared.Close()
+		return nil, err
+	}
+	return &backfillInput{head: head, logs: logs, prepared: prepared}, nil
 }
 
 func (input *backfillInput) verify(ctx context.Context, tx *sql.Tx) error {
@@ -180,8 +223,8 @@ func (input *backfillInput) verify(ctx context.Context, tx *sql.Tx) error {
 // backfill replays already-indexed logs into a table that did not exist when
 // they were indexed, once per database. The source read and its application
 // are separate so their boundary can be checked without weakening atomicity.
-func (ix *Indexer) backfill(ctx context.Context, key, where string, args []any, handle func(context.Context, *sql.Tx, LogRow) error) error {
-	input, err := ix.readBackfill(ctx, key, where, args)
+func (ix *Indexer) backfill(ctx context.Context, key, where string, args []any, handle func(context.Context, *sql.Tx, LogRow) error, plugins ...Plugin) error {
+	input, err := ix.readBackfill(ctx, key, where, args, plugins...)
 	if err != nil {
 		return err
 	}
@@ -192,6 +235,8 @@ func (ix *Indexer) applyBackfill(ctx context.Context, key string, input *backfil
 	if input == nil {
 		return nil
 	}
+	defer input.prepared.Close()
+
 	dbtx, err := ix.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -213,10 +258,17 @@ func (ix *Indexer) applyBackfill(ctx context.Context, key string, input *backfil
 	if err := input.verify(ctx, dbtx); err != nil {
 		return err
 	}
+	ctx, err = input.prepared.context(ctx)
+	if err != nil {
+		return err
+	}
 	for _, row := range input.logs {
 		if err := handle(ctx, dbtx, row); err != nil {
 			return fmt.Errorf("block %d log %d: %w", row.Block, row.Index, err)
 		}
+	}
+	if err := input.prepared.finish(); err != nil {
+		return err
 	}
 	if err := ix.afterBlock(dbtx, input.head.number); err != nil {
 		return err

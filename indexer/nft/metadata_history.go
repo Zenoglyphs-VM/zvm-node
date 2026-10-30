@@ -74,6 +74,9 @@ func metadataBlockOf(ctx context.Context, number uint64) (metadataBlock, bool) {
 // The optional hash-capable host has no latest-state fallback. A failed read or
 // an exhausted budget is an unknown observation, not a proven empty URI.
 func (x *Index) readObservedURI(ctx context.Context, block uint64, addr common.Address, data []byte) (string, bool) {
+	if prepared := uriPreparation(ctx); prepared != nil {
+		return prepared.request(ctx, block, addr, uriRequest, data)
+	}
 	at, ok := metadataBlockOf(ctx, block)
 	reader, supported := x.host.(indexer.HashURIHost)
 	if !ok || !supported {
@@ -146,9 +149,13 @@ func (x *Index) observedMetadata(uri string, verified bool) metadataValue {
 
 // All payload and history writes use the caller's indexing transaction. The
 // legacy per-block time budget and this unique-payload budget survive rollback.
-// RPC calls still occur inside the existing plugin transaction; moving them to
-// a prepared-input phase is a separate, unqualified architectural change.
+// Indexer prepares external URI and collection-name responses before opening
+// its canonical writer. Direct plugin callers must supply prepared input to use
+// that boundary; the standalone host-reading helpers retain their original API.
 func (x *Index) admitMetadata(ctx context.Context, tx *sql.Tx, block uint64, value metadataValue) (metadataValue, error) {
+	if prepared := uriPreparation(ctx); prepared != nil && prepared.collect != nil {
+		return metadataValue{}, nil
+	}
 	at, ok := metadataBlockOf(ctx, block)
 	if !ok {
 		return metadataValue{}, nil
@@ -208,6 +215,9 @@ func (x *Index) admitMetadata(ctx context.Context, tx *sql.Tx, block uint64, val
 }
 
 func recordMetadata(ctx context.Context, tx *sql.Tx, kind, address, id string, block uint64, value metadataValue) error {
+	if prepared := uriPreparation(ctx); prepared != nil && prepared.collect != nil {
+		return nil
+	}
 	at, ok := metadataBlockOf(ctx, block)
 	if !ok {
 		return nil

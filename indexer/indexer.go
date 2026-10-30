@@ -449,16 +449,17 @@ func (ix *Indexer) catchUp(ctx context.Context) {
 	dexIn, dexArgs := TopicList(dexTopics)
 	type job struct {
 		Job
-		handle func(context.Context, *sql.Tx, LogRow) error
+		handle  func(context.Context, *sql.Tx, LogRow) error
+		plugins []Plugin
 	}
-	jobs := []job{{Job{Key: "dex_v1", Where: "l.topic0 IN (" + dexIn + ")", Args: dexArgs}, ix.indexDexLog}}
+	jobs := []job{{Job{Key: "dex_v1", Where: "l.topic0 IN (" + dexIn + ")", Args: dexArgs}, ix.indexDexLog, nil}}
 	for _, p := range ix.plugins {
 		for _, j := range p.Jobs() {
-			jobs = append(jobs, job{j, p.Handle})
+			jobs = append(jobs, job{j, p.Handle, []Plugin{p}})
 		}
 	}
 	for _, j := range jobs {
-		if err := ix.backfill(ctx, j.Key, j.Where, j.Args, j.handle); err != nil && ctx.Err() == nil {
+		if err := ix.backfill(ctx, j.Key, j.Where, j.Args, j.handle, j.plugins...); err != nil && ctx.Err() == nil {
 			ix.log.Warn("backfilling", "job", j.Key, "err", err)
 		}
 	}
@@ -601,6 +602,13 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 		return fmt.Errorf("block %d: %d receipts for %d transactions", number, len(receipts), len(blk.Transactions()))
 	}
 	momentum := ix.cfg.MomentumForL2Block(number)
+	prepared, err := ix.collectBlock(ctx, blk, receipts)
+	if err != nil {
+		return err
+	}
+	if prepared != nil {
+		defer prepared.inputs.Close()
+	}
 
 	dbtx, err := ix.db.Begin()
 	if err != nil {
@@ -618,6 +626,15 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 			return commit()
 		}
 		return &indexedBlockMismatch{number: number, observed: blk.Hash(), stored: existing}
+	}
+	if prepared != nil {
+		if err := prepared.verify(ctx, dbtx); err != nil {
+			return err
+		}
+		ctx, err = prepared.inputs.context(ctx)
+		if err != nil {
+			return err
+		}
 	}
 	// Recheck after acquiring the transaction: a rewind may have happened
 	// while the block and its receipts were being read from the engine.
@@ -726,6 +743,11 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 			if err := ix.indexLog(ctx, dbtx, blk, tx, from, l); err != nil {
 				return err
 			}
+		}
+	}
+	if prepared != nil {
+		if err := prepared.inputs.finish(); err != nil {
+			return err
 		}
 	}
 	// Whatever this block changed about a collection, recompute once here

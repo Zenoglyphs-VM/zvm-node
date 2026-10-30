@@ -16,6 +16,7 @@ package nft
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -88,7 +89,17 @@ func (x *Index) Attach(h indexer.Host) error { x.host = h; return nil }
 func (x *Index) Schema() string { return nftSchema + metadataHistorySchema }
 
 func (x *Index) Handle(ctx context.Context, dbtx *sql.Tx, r indexer.LogRow) error {
-	return x.indexNFTLog(withMetadataBlock(ctx, r.Block, r.BlockHash), dbtx, r)
+	ctx = withMetadataBlock(ctx, r.Block, r.BlockHash)
+	if prepared := uriPreparation(ctx); prepared != nil && prepared.err != nil {
+		return prepared.err
+	}
+	if err := x.indexNFTLog(ctx, dbtx, r); err != nil {
+		return err
+	}
+	if prepared := uriPreparation(ctx); prepared != nil {
+		return prepared.err
+	}
+	return nil
 }
 
 // Jobs backfills the NFT tables over logs already indexed, and replays the
@@ -183,5 +194,14 @@ func (x *Index) Stale(db *sql.DB) bool {
 func (x *Index) eth() *ethclient.Client { return x.host.Eth() }
 func (x *Index) log() *slog.Logger      { return x.host.Log() }
 func (x *Index) callString(ctx context.Context, addr common.Address, sig string) string {
+	if prepared := uriPreparation(ctx); prepared != nil {
+		at, ok := ctx.Value(metadataBlockKey{}).(metadataBlock)
+		if !ok {
+			prepared.err = fmt.Errorf("prepared collection name has no source block")
+			return ""
+		}
+		value, _ := prepared.request(ctx, at.number, addr, stringRequest, []byte(sig))
+		return value
+	}
 	return x.host.CallString(ctx, addr, sig)
 }

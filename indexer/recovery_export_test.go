@@ -111,7 +111,7 @@ func (ix *Indexer) PrepareRecoveryBackfill(ctx context.Context, key, plugin stri
 		if len(jobs) == 0 {
 			return nil, fmt.Errorf("recovery plugin has no backfill")
 		}
-		input, err := ix.readBackfill(ctx, key, jobs[0].Where, jobs[0].Args)
+		input, err := ix.readBackfill(ctx, key, jobs[0].Where, jobs[0].Args, p)
 		if err != nil {
 			return nil, err
 		}
@@ -124,4 +124,12 @@ func (c *RecoveryChain) RecoveryCallCount() int {
 	c.chain.mu.Lock()
 	defer c.chain.mu.Unlock()
 	return len(c.chain.gas)
+}
+
+// SetRecoveryCallProbe is confined to the loopback test provider. It executes
+// before the provider answers, so tests can check the real caller's SQL boundary.
+func (c *RecoveryChain) SetRecoveryCallProbe(probe func(context.Context) error) {
+	c.chain.mu.Lock()
+	c.chain.callProbe = probe
+	c.chain.mu.Unlock()
 }

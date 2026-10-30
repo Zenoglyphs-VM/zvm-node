@@ -227,3 +227,42 @@ writer must preserve the complete backfill's atomicity and cannot silently
 drop unprepared history, mark a prefix complete or weaken the original table
 oracle. Streaming/staging, resource and actual operator migration qualification
 remain open; this source fence alone establishes none of them.
+
+
+### Prepared URI writer boundary (candidate; native CI pending)
+
+The indexer discovers each NFT URI and collection-name request before its main
+write transaction. Discovery runs the actual NFT handler against separate
+in-memory SQLite tables, loading only the source collection/token keys needed
+by each event. Earlier mints remain available to later batch refreshes. The
+original lexicographic 5000-token batch selection and complete backfill remain
+the application boundary.
+
+The main source snapshot closes before preparation issues any URI or plugin
+collection-name call. Unrelated core token/code reads retain their existing
+path. Responses are retained
+in sequence, with explicit unknowns and content-addressed text deduplication.
+The live writer checks its captured source head; the backfill writer retains
+the exact head and complete source-block checks. Actual handlers consume only
+matching prepared responses. Missing, changed, corrupt or unused input refuses
+the complete transaction; no unprepared suffix is silently completed. An
+already-indexed block or completed job makes no repeated provider calls.
+
+Preparation has a read-back 64 MiB SQLite page limit. Selected backfill rows
+also have 64 MiB logical field accounting and a 131072-row bound. These are
+logical admission controls, not hard RSS guarantees. One source row is scanned
+before its size admission. Exhaustion refuses the whole attempt and preserves
+the incomplete job; support for histories exceeding these bounds remains open.
+Local media resolution remains in the existing metadata admission path. Direct
+plugin callers retain their old helper API and must provide prepared input to
+use the indexer's network boundary.
+
+The new candidate prepares actual-handler comparison, missing/corrupt/unused
+response, cancellation, capacity, rollback-budget and batch-selection tests.
+A real loopback provider probes the one-connection canonical DB from inside its
+callback, for live indexing and backfill; a source-movement schedule must refuse
+all target writes. The existing full-table recovery oracles are preserved. The
+race selector includes the new PreparedURI tests as well as every prior selector.
+These candidate tests have not yet executed. The isolated Python SQLite model
+does not qualify Go/modernc, process RSS, full-history performance, an operator
+database, independent chain finality, supported platforms or release readiness.
