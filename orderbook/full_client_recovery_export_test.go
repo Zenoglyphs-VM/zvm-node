@@ -64,6 +64,11 @@ func NewFullClientRecoveryProcessFixture(t *testing.T) *FullClientRecoveryCLIFix
 func newFullClientRecoveryCLIFixture(t *testing.T, seedMessagePasser, openParent bool) *FullClientRecoveryCLIFixture {
 	t.Helper()
 	scenario := newExecutionScenarioProfile(t, true, false)
+	return newFullClientRecoveryForScenario(t, scenario, seedMessagePasser, openParent)
+}
+
+func newFullClientRecoveryForScenario(t *testing.T, scenario *executionScenario, seedMessagePasser, openParent bool) *FullClientRecoveryCLIFixture {
+	t.Helper()
 	path := t.TempDir()
 	if seedMessagePasser {
 		// Explicitly different synthetic genesis, solely for storage/reopen

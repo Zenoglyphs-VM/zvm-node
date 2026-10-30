@@ -1168,7 +1168,14 @@ func (r *executionRun) assertExpected() {
 }
 
 func (r *executionRun) assertExpectedFrom(db *sql.DB) {
+	r.assertExpectedInputsFrom(db, nil)
+}
+
+func (r *executionRun) assertExpectedInputsFrom(db *sql.DB, signed []*Input) {
 	r.t.Helper()
+	if signed != nil && len(signed) != len(r.scenario.orders) {
+		r.t.Fatal("signed oracle input count differs")
+	}
 	s := r.scenario
 	head := r.backend.chain.CurrentBlock()
 	state, err := r.backend.chain.StateAt(head.Root)
@@ -1207,9 +1214,21 @@ func (r *executionRun) assertExpectedFrom(db *sql.DB) {
 		if i == 0 && (status != StatusFilled || filled != 1) || i == 1 && (status != StatusOpen || filled != 0) {
 			r.t.Fatalf("executed order %d has status %s and fill %d", i, status, filled)
 		}
-		var original Input
-		if err := json.Unmarshal([]byte(input), &original); err != nil || original.Order.Hash() != order.Hash() || original.Kind != KindOnChain || len(original.Signature) != 0 {
-			r.t.Fatal("original unsigned on-chain order input changed")
+		if signed == nil {
+			var original Input
+			if err := json.Unmarshal([]byte(input), &original); err != nil || original.Order.Hash() != order.Hash() || original.Kind != KindOnChain || len(original.Signature) != 0 {
+				r.t.Fatal("original unsigned on-chain order input changed")
+			}
+		} else {
+			var original Input
+			expected, err := json.Marshal(signed[i])
+			if err != nil || input != string(expected) || json.Unmarshal([]byte(input), &original) != nil || original.Kind != KindSingle || original.Order.Hash() != order.Hash() || len(original.Signature) == 0 {
+				r.t.Fatal("original signed order input changed")
+			}
+			signer, ok := Recover(Domain(s.cfg.L2ChainID, s.exchange), &original)
+			if !ok || signer != order.Trader {
+				r.t.Fatal("stored signed input no longer recovers its original trader")
+			}
 		}
 	}
 	var chunks, consumed, deferred, released int

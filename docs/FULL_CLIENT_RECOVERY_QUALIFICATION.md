@@ -287,3 +287,31 @@ execution; authoring and offline formatting supply no native result. The existin
 This reduces returned canonical candidates; SQLite still scans the collection
 index, and legacy candidates can still be numerous. Hard CPU/RSS bounds,
 large-history throughput and real operator migration are not established.
+
+
+### Signed EOA orders with the default full client (source candidate)
+
+The additional candidate uses the existing public scalar-one test key to sign
+two EIP-712 sell orders. Initial Book.Submit admission runs against the real
+default-persistence client's current hash and the committed local derivation
+head, after the priming CLI joins and before any fault. It performs actual
+contract checks and retains the exact original inputs. No on-chain approval
+supplies those orders. The production CLI later executes native forced buys,
+indexing and book recovery; the parent never repairs or resubmits after a fault.
+
+A cold reference is compared with a graceful client reopen and a declared
+derivation SQL exit 86 followed by client reopen. The original unsigned oracle
+remains strict; the separate signed-input branch requires exact serialized
+inputs, genuine EOA recovery and all previous balance, ownership, order, chunk,
+deferred and receipt checks. Every canonical table retains the original oracle.
+The existing default-persistence test and its time/memory limits stay intact.
+The signed controls reuse the same compiled test binary, run serially and have
+their own four-minute timeout within the unchanged twenty-minute job limit.
+
+These source controls have not executed. The new source must be compiled and
+qualified independently. NoM observations are still synthetic and unsigned;
+this supplies no NoM signature, canonicality/finality, HTTP/wallet integration,
+signed-path engine-process crash, kernel kill or hardware power-loss proof.
+The explicitly nonempty synthetic MessagePasser genesis and the separate shipped
+empty-genesis refusal remain. Operator/platform/release acceptance and all 42
+original requirements remain open where not independently established.
