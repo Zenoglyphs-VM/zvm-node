@@ -266,3 +266,24 @@ race selector includes the new PreparedURI tests as well as every prior selector
 These candidate tests have not yet executed. The isolated Python SQLite model
 does not qualify Go/modernc, process RSS, full-history performance, an operator
 database, independent chain finality, supported platforms or release readiness.
+
+
+### Sparse URI range candidates (source candidate)
+
+Prepared discovery and the live NFT batch handler share an exact decimal-text
+prefilter. Canonical unsigned token IDs outside the requested numeric interval
+stay inside SQLite. The previous lexicographic order, 5000-refresh boundary and
+big.Int validation remain. Legacy spellings and non-text storage take the old
+parser path; integer/REAL casts are not used. No schema/index migration is added.
+Both range queries use the caller context, including the live query that
+previously ignored cancellation.
+
+The candidate compares actual direct and prepared handlers with the previous
+full-scan selection for sparse, decimal-width, uint256, legacy, zero and reversed
+ranges, plus cancellation in both phases. The sparse fixture requires three
+driver candidates from 8192 canonical collection rows. These tests require
+execution; authoring and offline formatting supply no native result. The existing
+5002-row/shadow-mint boundary and all-table recovery controls remain selected.
+This reduces returned canonical candidates; SQLite still scans the collection
+index, and legacy candidates can still be numerous. Hard CPU/RSS bounds,
+large-history throughput and real operator migration are not established.

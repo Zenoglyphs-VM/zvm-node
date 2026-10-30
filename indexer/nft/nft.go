@@ -293,7 +293,7 @@ func (x *Index) refreshToken(ctx context.Context, dbtx *sql.Tx, collection commo
 // refreshRange re-reads the metadata of the tokens a BatchMetadataUpdate names
 // that the index holds, at most a few thousand of them.
 func (x *Index) refreshRange(ctx context.Context, dbtx *sql.Tx, collection common.Address, from, to *big.Int, block uint64) error {
-	rows, err := dbtx.Query(`SELECT token_id FROM nft_tokens WHERE collection = ? ORDER BY token_id`, collection.Hex())
+	rows, err := dbtx.QueryContext(ctx, `SELECT token_id FROM nft_tokens`+metadataRangeWhere, metadataRangeArgs(collection, from, to)...)
 	if err != nil {
 		return err
 	}
