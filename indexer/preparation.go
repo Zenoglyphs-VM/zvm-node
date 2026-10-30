@@ -112,8 +112,8 @@ func (inputs *preparedInputs) Close() error {
 }
 
 type preparedBlock struct {
-	head   backfillHead
-	inputs *preparedInputs
+	head    backfillHead
+	inputs  *preparedInputs
 	indexed bool
 }
 
