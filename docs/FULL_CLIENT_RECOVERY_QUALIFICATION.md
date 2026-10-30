@@ -161,3 +161,44 @@ legacy case changes only two derived cache rows after its first child joins;
 production performs all recovery after restart. It makes no claim that an
 observed crash produced those exact seed bytes. All original full-client cases,
 canonical business fields, proof checks and 42 acceptance requirements remain.
+
+### Hash-bound NFT URI observations and derived history
+
+URI reads select the exact indexed block hash. Missing host capability, malformed
+ABI data and failed reads produce unknown cache fields; they never fall back to
+latest state. Live and backfill log records carry the source block hash. A SQL
+hash fence precedes payload/cache writes, and those writes share the caller's
+index transaction. Collection name/symbol display caches are a separate legacy
+policy; the new journal binds contractURI and its resolved document, not those
+two contract properties.
+
+Versioned content-addressed payloads avoid duplicate documents. A payload is at
+most 1 MiB, with at most 16 MiB of new distinct payload bytes admitted per block;
+accounting survives rollback. Existing cooperative URI time/gas/size limits
+remain. The 128-key restore pages do not hold the full history in Go memory.
+These are algorithmic admission limits, not measured RSS or disk guarantees.
+The existing architecture still performs URI RPC reads inside the plugin's SQL
+transaction. Prepared-input reads outside the writer, full backfill resource
+qualification and large-history migration remain separate open work.
+
+Rewind restores cache fields only from journal observations whose number/hash
+matches the surviving indexed blocks. Canonical journal rows and unreferenced
+derived payloads rewind too, retaining the original all-table cold-replay oracle.
+The first migration archives exact nullable legacy URI/document/display fields
+before invalidating unproved caches; it does not assign them a new block or
+hash. That archive is explicitly unproved. Its migration/retention cost needs
+independent operator qualification before adoption. No actual operator database
+has been migrated by authoring or testing this candidate.
+
+A URI proof records a selected-hash RPC answer, and a payload hash records the
+locally materialized bytes. Neither supplies independent NoM canonicality,
+finality, media availability, an authenticated historical snapshot, first URI
+or closure time, signed/native authority or owner/platform/release acceptance.
+Missing historical inputs remain unknown. All six original canonical state
+categories and all 42 original roadmap requirements remain mandatory.
+
+The focused URI decoder, hash-call, history/rollback and actual-indexer controls
+are selected in both the normal suite and the race lane. All previous race
+selectors remain; indexer/nft is added to that lane. The RPC test call counter
+is atomic. No browser, full-client, dependency, cache or output/time limit is
+removed or relaxed. These source selections do not constitute executed tests.

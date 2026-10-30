@@ -38,7 +38,8 @@ type fakeChain struct {
 	// call with no answer reverts.
 	answers map[common.Address]map[[4]byte][]byte
 	// gas is the gas limit each eth_call asked for, in order.
-	gas []uint64
+	gas         []uint64
+	hashAnswers map[common.Hash]map[common.Address]map[[4]byte][]byte
 }
 
 func newFakeChain() *fakeChain {
@@ -163,7 +164,7 @@ type callArgs struct {
 	Gas   *hexutil.Uint64 `json:"gas"`
 }
 
-func (f *fakeEth) Call(_ context.Context, args callArgs, _ string) (hexutil.Bytes, error) {
+func (f *fakeEth) Call(_ context.Context, args callArgs, block rpc.BlockNumberOrHash) (hexutil.Bytes, error) {
 	f.c.mu.Lock()
 	defer f.c.mu.Unlock()
 	gas := uint64(0)
@@ -180,6 +181,21 @@ func (f *fakeEth) Call(_ context.Context, args callArgs, _ string) (hexutil.Byte
 	}
 	var sel [4]byte
 	copy(sel[:], data[:4])
+	if block.BlockHash != nil {
+		valid := false
+		for _, b := range f.c.blocks {
+			if b.Hash() == *block.BlockHash {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			return nil, errors.New("unknown selected block hash")
+		}
+		if out, ok := f.c.hashAnswers[*block.BlockHash][*args.To][sel]; ok {
+			return out, nil
+		}
+	}
 	if out, ok := f.c.answers[*args.To][sel]; ok {
 		return out, nil
 	}

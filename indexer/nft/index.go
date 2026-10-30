@@ -38,9 +38,11 @@ type Index struct {
 	dirty map[string]bool
 
 	// What this block's metadata reads have cost so far (metadataBudget).
-	budgetBlock uint64
-	spent       time.Duration
-	warned      bool
+	budgetBlock  uint64
+	spent        time.Duration
+	warned       bool
+	historyBlock uint64
+	historyBytes int64
 }
 
 const approvalRecoveryVersionKey = "nft_approval_recovery_v1"
@@ -57,27 +59,8 @@ var metadataBudget = 3 * time.Second
 // readURI makes a URI call inside the block's budget, or answers "" once the
 // budget is spent.
 func (x *Index) readURI(ctx context.Context, block uint64, addr common.Address, calldata []byte) string {
-	x.mu.Lock()
-	if x.budgetBlock != block {
-		x.budgetBlock, x.spent, x.warned = block, 0, false
-	}
-	if x.spent >= metadataBudget {
-		warn := !x.warned
-		x.warned = true
-		x.mu.Unlock()
-		if warn {
-			x.log().Warn("metadata reads for this block took their whole budget; the rest are indexed without it",
-				"block", block, "budget", metadataBudget)
-		}
-		return ""
-	}
-	x.mu.Unlock()
-	start := time.Now()
-	uri := x.host.CallURI(ctx, addr, calldata)
-	x.mu.Lock()
-	x.spent += time.Since(start)
-	x.mu.Unlock()
-	return uri
+	value, _ := x.readObservedURI(ctx, block, addr, calldata)
+	return value
 }
 
 // Config is what the node's main hands this plugin.
@@ -102,10 +85,10 @@ func (x *Index) Name() string { return "nft" }
 
 func (x *Index) Attach(h indexer.Host) error { x.host = h; return nil }
 
-func (x *Index) Schema() string { return nftSchema }
+func (x *Index) Schema() string { return nftSchema + metadataHistorySchema }
 
 func (x *Index) Handle(ctx context.Context, dbtx *sql.Tx, r indexer.LogRow) error {
-	return x.indexNFTLog(ctx, dbtx, r)
+	return x.indexNFTLog(withMetadataBlock(ctx, r.Block, r.BlockHash), dbtx, r)
 }
 
 // Jobs backfills the NFT tables over logs already indexed, and replays the
@@ -171,6 +154,9 @@ func (x *Index) Rebuild(dbtx *sql.Tx, block uint64) error {
 	if err := restoreTokenUpdateHeights(dbtx); err != nil {
 		return err
 	}
+	if err := restoreMetadata(dbtx, block); err != nil {
+		return err
+	}
 	if err := x.rebuildCollectionStats(dbtx, block); err != nil {
 		return err
 	}
@@ -182,7 +168,7 @@ func (x *Index) Rebuild(dbtx *sql.Tx, block uint64) error {
 // rewinds. Equal table counts do not imply matching collection identities.
 func (x *Index) Stale(db *sql.DB) bool {
 	var recovered int
-	if err := db.QueryRow("SELECT COUNT(*) FROM index_meta WHERE key IN (?,?) AND value=1", approvalRecoveryVersionKey, updateRecoveryVersionKey).Scan(&recovered); err != nil || recovered != 2 {
+	if err := db.QueryRow("SELECT COUNT(*) FROM index_meta WHERE key IN (?,?,?) AND value=1", approvalRecoveryVersionKey, updateRecoveryVersionKey, metadataHistoryVersionKey).Scan(&recovered); err != nil || recovered != 3 {
 		return true
 	}
 	var stale bool

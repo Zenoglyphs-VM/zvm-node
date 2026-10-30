@@ -1,6 +1,10 @@
 package indexer
 
 import (
+	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"testing"
 
 	"github.com/Zenoglyphs-VM/zvm-core/store"
@@ -49,4 +53,48 @@ func RecoveryState(t *testing.T, db *store.DB) map[string]string {
 func AssertRecoveryState(t *testing.T, got, want map[string]string) {
 	t.Helper()
 	n04IndexSame(t, got, want)
+}
+
+// SetURI supplies distinct hash-selected URI observations and an intentionally
+// wrong latest-state answer. It is confined to the existing loopback fixture.
+func (c *RecoveryChain) SetURI(number uint64, address common.Address, uri string) error {
+	typ, err := abi.NewType("string", "", nil)
+	if err != nil {
+		return err
+	}
+	fields := abi.Arguments{{Type: typ}}
+	raw, err := fields.Pack(uri)
+	if err != nil {
+		return err
+	}
+	wrong, err := fields.Pack("unexpected-latest-state")
+	if err != nil {
+		return err
+	}
+	c.chain.mu.Lock()
+	defer c.chain.mu.Unlock()
+	block := c.chain.blocks[number]
+	if block == nil {
+		return fmt.Errorf("URI fixture block %d is missing", number)
+	}
+	if c.chain.hashAnswers == nil {
+		c.chain.hashAnswers = map[common.Hash]map[common.Address]map[[4]byte][]byte{}
+	}
+	hash := block.Hash()
+	if c.chain.hashAnswers[hash] == nil {
+		c.chain.hashAnswers[hash] = map[common.Address]map[[4]byte][]byte{}
+	}
+	if c.chain.hashAnswers[hash][address] == nil {
+		c.chain.hashAnswers[hash][address] = map[[4]byte][]byte{}
+	}
+	if c.chain.answers[address] == nil {
+		c.chain.answers[address] = map[[4]byte][]byte{}
+	}
+	for _, sig := range []string{"tokenURI(uint256)", "contractURI()"} {
+		var selector [4]byte
+		copy(selector[:], crypto.Keccak256([]byte(sig))[:4])
+		c.chain.hashAnswers[hash][address][selector] = raw
+		c.chain.answers[address][selector] = wrong
+	}
+	return nil
 }

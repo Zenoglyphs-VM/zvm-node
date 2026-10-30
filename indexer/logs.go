@@ -16,13 +16,14 @@ import (
 // a receipt and a backfill builds it from the logs table, so a table added
 // after the chain has history fills the same way it keeps up.
 type LogRow struct {
-	Tx      string
-	Index   uint
-	Block   uint64
-	Time    uint64
-	Address common.Address
-	Topics  []common.Hash
-	Data    []byte
+	Tx        string
+	Index     uint
+	Block     uint64
+	BlockHash common.Hash
+	Time      uint64
+	Address   common.Address
+	Topics    []common.Hash
+	Data      []byte
 	// From is the transaction's sender: a relayed transaction's signer, or the
 	// Zenon account behind a native call.
 	From common.Address
@@ -30,7 +31,7 @@ type LogRow struct {
 
 func rowOf(blk *types.Block, tx *types.Transaction, from common.Address, l *types.Log) LogRow {
 	return LogRow{
-		Tx: tx.Hash().Hex(), Index: l.Index, Block: blk.NumberU64(), Time: blk.Time(),
+		Tx: tx.Hash().Hex(), Index: l.Index, Block: blk.NumberU64(), BlockHash: blk.Hash(), Time: blk.Time(),
 		Address: l.Address, Topics: l.Topics, Data: l.Data, From: from,
 	}
 }
@@ -47,7 +48,7 @@ func (r LogRow) WordAddr(i int) common.Address {
 // loadLogs reads indexed logs matching a WHERE clause over `logs l`, in chain order.
 func (ix *Indexer) loadLogs(ctx context.Context, where string, args ...any) ([]LogRow, error) {
 	rows, err := ix.db.QueryContext(ctx, `SELECT l.tx, l.idx, l.block, b.timestamp, l.address,
-		l.topic0, l.topic1, l.topic2, l.topic3, l.data, COALESCE(t.from_addr, '')
+		l.topic0, l.topic1, l.topic2, l.topic3, l.data, COALESCE(t.from_addr, ''), b.hash
 		FROM logs l JOIN blocks b ON b.number = l.block LEFT JOIN txs t ON t.hash = l.tx
 		WHERE `+where+` ORDER BY l.block, l.idx`, args...)
 	if err != nil {
@@ -57,10 +58,14 @@ func (ix *Indexer) loadLogs(ctx context.Context, where string, args ...any) ([]L
 	var out []LogRow
 	for rows.Next() {
 		var r LogRow
-		var addr, from string
+		var addr, from, hash string
 		var t0, t1, t2, t3 sql.NullString
-		if err := rows.Scan(&r.Tx, &r.Index, &r.Block, &r.Time, &addr, &t0, &t1, &t2, &t3, &r.Data, &from); err != nil {
+		if err := rows.Scan(&r.Tx, &r.Index, &r.Block, &r.Time, &addr, &t0, &t1, &t2, &t3, &r.Data, &from, &hash); err != nil {
 			return nil, err
+		}
+		r.BlockHash = common.HexToHash(hash)
+		if len(hash) != 66 || r.BlockHash == (common.Hash{}) || r.BlockHash.Hex() != hash {
+			return nil, fmt.Errorf("backfill log has no exact source block hash")
 		}
 		r.Address = common.HexToAddress(addr)
 		r.From = common.HexToAddress(from)
