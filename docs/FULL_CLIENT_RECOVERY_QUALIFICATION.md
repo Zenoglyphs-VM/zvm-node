@@ -202,3 +202,28 @@ are selected in both the normal suite and the race lane. All previous race
 selectors remain; indexer/nft is added to that lane. The RPC test call counter
 is atomic. No browser, full-client, dependency, cache or output/time limit is
 removed or relaxed. These source selections do not constitute executed tests.
+
+
+The next backfill source fence separates the existing source read from its
+transactional application. The read is bounded to its captured source height.
+Before any handler or its RPC work, the writer rechecks a height/hash/empty
+head identity and every distinct source block used by the ordered log input.
+A same-height replacement, rewind, advance or missing/changed middle block
+refuses the whole write. A concurrently completed job key skips stale replay.
+This also covers existing-token ownership updates that do not make URI reads.
+The source fence keeps only the preceding block identity while validating;
+it adds no permanent epoch, per-history map or canonical-table exclusion.
+
+The declared native regression source selects this boundary in the normal and
+race lanes, using the production reader/writer and NFT handler, real loopback
+RPC, all-table snapshots, and a successful cold-replay comparison. It includes
+declared source-store faults under a stable terminal head, a completed-key
+race, and the empty-index versus block-zero distinction. Authoring or offline
+formatting does not establish that those native controls have executed.
+
+URI RPCs still run inside the existing plugin write transaction, and the
+backfill still loads its full selected log range. Moving reads outside the
+writer must preserve the complete backfill's atomicity and cannot silently
+drop unprepared history, mark a prefix complete or weaken the original table
+oracle. Streaming/staging, resource and actual operator migration qualification
+remain open; this source fence alone establishes none of them.

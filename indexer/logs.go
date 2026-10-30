@@ -3,6 +3,7 @@ package indexer
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"math"
 	"math/big"
@@ -80,25 +81,116 @@ func (ix *Indexer) loadLogs(ctx context.Context, where string, args ...any) ([]L
 	return out, rows.Err()
 }
 
-// backfill replays already-indexed logs into a table that did not exist when
-// they were indexed, once per database: the key in index_meta records that it
-// ran. Handlers are idempotent, so a replay over rows the live path already
-// wrote converges on the same state.
-func (ix *Indexer) backfill(ctx context.Context, key, where string, args []any, handle func(context.Context, *sql.Tx, LogRow) error) error {
+// backfillHead distinguishes an empty index from an indexed block zero. The
+// hash matters when a replacement keeps the same height.
+type backfillHead struct {
+	present bool
+	number  uint64
+	hash    string
+}
+
+type backfillSourceReader interface {
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
+
+func readBackfillHead(ctx context.Context, db backfillSourceReader) (backfillHead, error) {
+	var number int64
+	var hash string
+	err := db.QueryRowContext(ctx, "SELECT number,hash FROM blocks ORDER BY number DESC LIMIT 1").Scan(&number, &hash)
+	if errors.Is(err, sql.ErrNoRows) {
+		return backfillHead{}, nil
+	}
+	if err != nil {
+		return backfillHead{}, err
+	}
+	decoded := common.HexToHash(hash)
+	if number < 0 || len(hash) != 66 || decoded == (common.Hash{}) || decoded.Hex() != hash {
+		return backfillHead{}, fmt.Errorf("backfill source head is malformed")
+	}
+	return backfillHead{present: true, number: uint64(number), hash: hash}, nil
+}
+
+// backfillInput is read before the write transaction. It supplies no authority
+// to apply stale source rows; applyBackfill rechecks every source block first.
+type backfillInput struct {
+	head backfillHead
+	logs []LogRow
+}
+
+func (ix *Indexer) readBackfill(ctx context.Context, key, where string, args []any) (*backfillInput, error) {
 	var done int
 	if err := ix.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM index_meta WHERE key = ?", key).Scan(&done); err != nil {
-		return err
+		return nil, err
 	}
 	if done > 0 {
+		return nil, nil
+	}
+	head, err := readBackfillHead(ctx, ix.db)
+	if err != nil {
+		return nil, err
+	}
+	// A head that advances during this read must not extend the selected input
+	// horizon. Copy the caller's arguments before adding the bound.
+	bound := append(append([]any{}, args...), head.number)
+	logs, err := ix.loadLogs(ctx, "("+where+") AND l.block <= ?", bound...)
+	if err != nil {
+		return nil, err
+	}
+	return &backfillInput{head: head, logs: logs}, nil
+}
+
+func (input *backfillInput) verify(ctx context.Context, tx *sql.Tx) error {
+	head, err := readBackfillHead(ctx, tx)
+	if err != nil {
+		return err
+	}
+	if head != input.head {
+		return fmt.Errorf("backfill source head moved before write")
+	}
+	// loadLogs orders by block and log index. Keep only the preceding block's
+	// identity, rather than a map proportional to the complete history.
+	var previous uint64
+	var previousHash common.Hash
+	havePrevious := false
+	for _, row := range input.logs {
+		if !head.present || row.Block > head.number || row.BlockHash == (common.Hash{}) {
+			return fmt.Errorf("backfill log has no bound source block")
+		}
+		if havePrevious && row.Block < previous {
+			return fmt.Errorf("backfill source rows are not in block order")
+		}
+		if havePrevious && row.Block == previous {
+			if row.BlockHash != previousHash {
+				return fmt.Errorf("backfill source rows disagree on a block hash")
+			}
+			continue
+		}
+		var stored string
+		if err := tx.QueryRowContext(ctx, "SELECT hash FROM blocks WHERE number=?", row.Block).Scan(&stored); err != nil {
+			return fmt.Errorf("backfill source block %d is unavailable: %w", row.Block, err)
+		}
+		if stored != row.BlockHash.Hex() {
+			return fmt.Errorf("backfill source block %d moved before write", row.Block)
+		}
+		previous, previousHash, havePrevious = row.Block, row.BlockHash, true
+	}
+	return nil
+}
+
+// backfill replays already-indexed logs into a table that did not exist when
+// they were indexed, once per database. The source read and its application
+// are separate so their boundary can be checked without weakening atomicity.
+func (ix *Indexer) backfill(ctx context.Context, key, where string, args []any, handle func(context.Context, *sql.Tx, LogRow) error) error {
+	input, err := ix.readBackfill(ctx, key, where, args)
+	if err != nil {
+		return err
+	}
+	return ix.applyBackfill(ctx, key, input, handle)
+}
+
+func (ix *Indexer) applyBackfill(ctx context.Context, key string, input *backfillInput, handle func(context.Context, *sql.Tx, LogRow) error) error {
+	if input == nil {
 		return nil
-	}
-	head, err := ix.Head()
-	if err != nil {
-		return err
-	}
-	logs, err := ix.loadLogs(ctx, where, args...)
-	if err != nil {
-		return err
 	}
 	dbtx, err := ix.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -106,21 +198,36 @@ func (ix *Indexer) backfill(ctx context.Context, key, where string, args []any, 
 	}
 	commit, rollback := ix.guardTransaction(dbtx)
 	defer rollback()
-	for _, r := range logs {
-		if err := handle(ctx, dbtx, r); err != nil {
-			return fmt.Errorf("block %d log %d: %w", r.Block, r.Index, err)
-		}
-	}
-	if err := ix.afterBlock(dbtx, head); err != nil {
+	// Another pass may have completed this key while its source was read.
+	// Do not replay old history over cache rows updated by newer live blocks.
+	var done int
+	if err := dbtx.QueryRowContext(ctx, "SELECT COUNT(*) FROM index_meta WHERE key = ?", key).Scan(&done); err != nil {
 		return err
 	}
-	if _, err := dbtx.Exec("INSERT OR REPLACE INTO index_meta (key, value) VALUES (?, ?)", key, head); err != nil {
+	if done > 0 {
+		return commit()
+	}
+	// Validate the complete input before any handler, including handlers that
+	// update existing ownership without making a URI observation. A refusal
+	// must not consume URI RPC work or publish a completed-job marker.
+	if err := input.verify(ctx, dbtx); err != nil {
+		return err
+	}
+	for _, row := range input.logs {
+		if err := handle(ctx, dbtx, row); err != nil {
+			return fmt.Errorf("block %d log %d: %w", row.Block, row.Index, err)
+		}
+	}
+	if err := ix.afterBlock(dbtx, input.head.number); err != nil {
+		return err
+	}
+	if _, err := dbtx.Exec("INSERT OR REPLACE INTO index_meta (key, value) VALUES (?, ?)", key, input.head.number); err != nil {
 		return err
 	}
 	if err := commit(); err != nil {
 		return err
 	}
-	ix.log.Info("backfilled from indexed logs", "job", key, "logs", len(logs), "head", head)
+	ix.log.Info("backfilled from indexed logs", "job", key, "logs", len(input.logs), "head", input.head.number)
 	return nil
 }
 

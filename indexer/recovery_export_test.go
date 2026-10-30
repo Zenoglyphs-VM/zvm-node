@@ -1,6 +1,7 @@
 package indexer
 
 import (
+	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -97,4 +98,30 @@ func (c *RecoveryChain) SetURI(number uint64, address common.Address, uri string
 		c.chain.answers[address][selector] = wrong
 	}
 	return nil
+}
+
+// PrepareRecoveryBackfill exposes only the production source-read/write phase
+// boundary to native tests. It adds no production callback or public API.
+func (ix *Indexer) PrepareRecoveryBackfill(ctx context.Context, key, plugin string) (func() error, error) {
+	for _, p := range ix.plugins {
+		if p.Name() != plugin {
+			continue
+		}
+		jobs := p.Jobs()
+		if len(jobs) == 0 {
+			return nil, fmt.Errorf("recovery plugin has no backfill")
+		}
+		input, err := ix.readBackfill(ctx, key, jobs[0].Where, jobs[0].Args)
+		if err != nil {
+			return nil, err
+		}
+		return func() error { return ix.applyBackfill(ctx, key, input, p.Handle) }, nil
+	}
+	return nil, fmt.Errorf("unknown recovery plugin")
+}
+
+func (c *RecoveryChain) RecoveryCallCount() int {
+	c.chain.mu.Lock()
+	defer c.chain.mu.Unlock()
+	return len(c.chain.gas)
 }
