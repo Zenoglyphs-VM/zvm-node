@@ -73,3 +73,36 @@ balance checks remain unchanged. The original 16 pure protocol controls remain,
 with five additional passive-observer controls. Synthetic event controls do not
 establish a browser root cause, actual browser recovery, complete N04 acceptance
 or production readiness. NoM and owner/platform/release gates remain separate.
+
+
+### Fixture connection state transition
+
+The first automatic workflow of revision 4a6c484444457ff734f4718047fd92e2370b073e
+passed Go, full-client recovery and all 21 pure protocol/passive controls, but
+failed the Karum single-order approval profile waiting for Connect wallet while
+the retained page diagnostic already showed its connected account. All nine
+navigations completed with matched Network starts/completions. This differs
+from the earlier item-read navigation deadline, whose cause remains
+NOT_ESTABLISHED. The current live failure's causal attribution is also pending.
+
+The old helper sampled whether connection was needed, then asynchronously
+waited/clicked the disconnected label. Ordinary auto-restoration can invalidate
+that snapshot. The replacement reads the current header and acts in one
+synchronous page evaluation. It accepts only the selected public fixture
+account's unambiguous displayed address among the two declared test identities,
+refuses wrong/ambiguous labels, and never clicks an already connected account
+button. Connect and Fixture wallet are each selected at most once per call.
+It waits for the connected header within one original twelve-second UI budget;
+there is no reload, repeated prompt, provider mutation or new transaction.
+Short display matching coordinates this fixed fixture and is not general wallet
+authentication. Original actual signature, HTTP, receipt and balance oracles
+remain independent requirements.
+
+Ten pure deterministic controls reproduce the stale check/click sequence and
+exercise restoration, disabled controls, identity refusal, one-action limits and
+the unchanged deadline. They do not qualify a real browser or establish either
+live failure's root cause. The existing 21 protocol controls, twenty-second
+navigation budget, zero-active Network requirement and 100-ms quiet interval
+remain unchanged. Full browser/owner/platform/NoM/release acceptance remains
+open; all 42 original acceptance fields remain authoritative and production
+remains NO_GO.

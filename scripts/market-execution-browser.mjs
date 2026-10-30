@@ -4,6 +4,7 @@
 // the actual relayer CLI; independent NoM and daemon RPC remain boundaries.
 import assert from 'node:assert/strict'
 import {boundedNavigation} from './market-navigation-support.mjs'
+import {connectFixtureWallet} from './market-wallet-connection-support.mjs'
 import {createTokenPaymentChecks} from './market-token-payment-support.mjs'
 import {createSaleProceedsChecks} from './market-sale-proceeds-support.mjs'
 import {createExternalRoyaltyChecks} from './market-external-royalty-support.mjs'
@@ -167,9 +168,8 @@ async function navigate(path, viewer = false) {
   await navigation.goto(page, url(path, viewer))
 }
 async function connect() {
-  const needed = await page.evaluate(() => [...document.querySelectorAll('header button')]
-    .some(b => b.checkVisibility() && b.textContent.trim() === 'Connect wallet'))
-  if (needed) {await click('Connect wallet'); await click('Fixture wallet')}
+  const viewer = new URL(page.url()).searchParams.get('__viewer') === 'buyer'
+  await connectFixtureWallet(page, viewer ? fixture.buyer : fixture.seller, [fixture.seller, fixture.buyer])
 }
 async function phase(name) {
   const response = await fetch(new URL('/__fixture/phase?name=' + name, base), {

@@ -95,6 +95,8 @@ jobs:
           go-version-file: go.mod
       - name: Check bounded protocol navigation controls without SDK or network
         run: node scripts/market-navigation-support.test.mjs
+      - name: Check fixture connection restoration without SDK or network
+        run: node scripts/market-wallet-connection-support.test.mjs
       - name: Check bounded immutable snapshot reuse without SDK or network
         run: node --test --test-reporter=tap scripts/market-snapshot-read-cache.test.mjs
       - name: Compile the self-contained credit wallet once with the pinned compiler
