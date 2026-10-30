@@ -267,7 +267,7 @@ type preparedRangeHost struct {
 }
 
 func (h *preparedRangeHost) CallURIAtHash(ctx context.Context, address common.Address, data []byte, hash common.Hash) (string, error) {
-	if len(data) == 68 {
+	if len(data) == 36 {
 		h.ids = append(h.ids, new(big.Int).SetBytes(data[4:]).String())
 	}
 	return h.uriHistoryHost.CallURIAtHash(ctx, address, data, hash)
