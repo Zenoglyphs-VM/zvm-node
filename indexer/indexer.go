@@ -601,15 +601,20 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 	if len(receipts) != len(blk.Transactions()) {
 		return fmt.Errorf("block %d: %d receipts for %d transactions", number, len(receipts), len(blk.Transactions()))
 	}
-	momentum := ix.cfg.MomentumForL2Block(number)
 	prepared, err := ix.collectBlock(ctx, blk, receipts)
 	if err != nil {
 		return err
 	}
+	return ix.applyPreparedBlock(ctx, number, blk, receipts, prepared)
+}
+
+// The same writer handles a normal IndexBlock and the test-only phase boundary.
+// A changed source refuses before handlers; a matching existing row is a no-op.
+func (ix *Indexer) applyPreparedBlock(ctx context.Context, number uint64, blk *types.Block, receipts types.Receipts, prepared *preparedBlock) error {
 	if prepared != nil {
 		defer prepared.inputs.Close()
 	}
-
+	momentum := ix.cfg.MomentumForL2Block(number)
 	dbtx, err := ix.db.Begin()
 	if err != nil {
 		return err

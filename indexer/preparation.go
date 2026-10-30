@@ -114,6 +114,7 @@ func (inputs *preparedInputs) Close() error {
 type preparedBlock struct {
 	head   backfillHead
 	inputs *preparedInputs
+	indexed bool
 }
 
 // collectBlock closes the main read transaction before issuing any URI or
@@ -146,7 +147,9 @@ func (ix *Indexer) collectBlock(ctx context.Context, block *types.Block, receipt
 		}
 		// The writer retains its idempotence check. No reads are needed for a
 		// block already indexed, even when another pass then advances the head.
-		return nil, nil
+		// Retain this decision so a rewind cannot make the writer fall through
+		// to a handler without prepared input. A fresh pass must rediscover it.
+		return &preparedBlock{head: head, inputs: &preparedInputs{}, indexed: true}, nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
@@ -188,6 +191,9 @@ func (ix *Indexer) collectBlock(ctx context.Context, block *types.Block, receipt
 }
 
 func (block *preparedBlock) verify(ctx context.Context, tx *sql.Tx) error {
+	if block.indexed {
+		return errors.New("previously indexed block changed before write; fresh preparation is required")
+	}
 	head, err := readBackfillHead(ctx, tx)
 	if err != nil {
 		return err

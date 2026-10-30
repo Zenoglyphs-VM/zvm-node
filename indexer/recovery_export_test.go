@@ -3,6 +3,7 @@ package indexer
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/Zenoglyphs-VM/zvm-core/store"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rpc"
 )
 
 // These adapters are compiled only in tests. External integration tests can
@@ -132,4 +134,21 @@ func (c *RecoveryChain) SetRecoveryCallProbe(probe func(context.Context) error) 
 	c.chain.mu.Lock()
 	c.chain.callProbe = probe
 	c.chain.mu.Unlock()
+}
+
+// PrepareRecoveryIndexedBlock exposes actual discovery of an already indexed
+// block and the actual production writer, without a production callback hook.
+func (ix *Indexer) PrepareRecoveryIndexedBlock(ctx context.Context, number uint64) (func() error, error) {
+	blk, err := ix.eth.BlockByNumber(ctx, new(big.Int).SetUint64(number))
+	if err != nil { return nil, err }
+	receipts, err := ix.eth.BlockReceipts(ctx, rpc.BlockNumberOrHashWithHash(blk.Hash(), false))
+	if err != nil { return nil, err }
+	if len(receipts) != len(blk.Transactions()) { return nil, fmt.Errorf("recovery receipt count mismatch") }
+	prepared, err := ix.collectBlock(ctx, blk, receipts)
+	if err != nil { return nil, err }
+	if prepared == nil || !prepared.indexed {
+		if prepared != nil { prepared.inputs.Close() }
+		return nil, fmt.Errorf("recovery fixture must already index the selected block")
+	}
+	return func() error { return ix.applyPreparedBlock(ctx, number, blk, receipts, prepared) }, nil
 }

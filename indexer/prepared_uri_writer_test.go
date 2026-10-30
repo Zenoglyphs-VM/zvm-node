@@ -112,3 +112,50 @@ func TestPreparedURIWriterBoundary(t *testing.T) {
 		})
 	}
 }
+
+// Use the real preparation boundary and real block writer. A source-store hole
+// is a declared fixture fault; these schedules are not process-race evidence.
+func TestPreparedURIIndexedGap(t *testing.T) {
+	for _, phase := range []string{"unchanged", "rewind", "same-head-hole", "replacement"} {
+		t.Run(phase, func(t *testing.T) {
+			ctx := context.Background()
+			chain := indexer.NewRecoveryChain()
+			chain.Put(1, 0, nftTransfer(common.Address{}, nftAlice))
+			chain.Put(2, 0, nftTransfer(common.Address{}, nftBob))
+			chain.Put(3, 0, nftTransfer(nftBob, nftAlice))
+			for number := uint64(1); number <= 3; number++ {
+				if err := chain.SetURI(number, nftCollection, uriRecoveryDocument("indexed-gap")); err != nil { t.Fatal(err) }
+			}
+			ix, db, _ := nftRecoveryIndex(t, chain)
+			nftIndexThrough(t, ix, 1, 3)
+			apply, err := ix.PrepareRecoveryIndexedBlock(ctx, 2)
+			if err != nil { t.Fatal(err) }
+			switch phase {
+			case "rewind":
+				if err := ix.Rewind(1); err != nil { t.Fatal(err) }
+			case "same-head-hole":
+				if _, err := db.SQL().Exec("DELETE FROM blocks WHERE number=2"); err != nil { t.Fatal(err) }
+			case "replacement":
+				if err := ix.Rewind(1); err != nil { t.Fatal(err) }
+				chain.Put(2, 1, nftTransfer(common.Address{}, nftOperator))
+				if err := chain.SetURI(2, nftCollection, uriRecoveryDocument("indexed-replacement")); err != nil { t.Fatal(err) }
+				if err := ix.IndexBlock(ctx, 2); err != nil { t.Fatal(err) }
+			}
+			before := indexer.RecoveryState(t, db)
+			calls := chain.RecoveryCallCount()
+			err = apply()
+			if phase == "unchanged" {
+				if err != nil { t.Fatal(err) }
+			} else if err == nil { t.Fatal("the previously indexed source disappeared or changed, but stale input was applied") }
+			indexer.AssertRecoveryState(t, indexer.RecoveryState(t, db), before)
+			if chain.RecoveryCallCount() != calls { t.Fatal("a stale idempotence decision consumed unprepared provider calls") }
+			if phase == "rewind" {
+				// Refusal requires fresh discovery, not a permanently blocked height.
+				if err := ix.IndexBlock(ctx, 2); err != nil { t.Fatal(err) }
+				reference, referenceDB, _ := nftRecoveryIndex(t, chain)
+				nftIndexThrough(t, reference, 1, 2)
+				indexer.AssertRecoveryState(t, indexer.RecoveryState(t, db), indexer.RecoveryState(t, referenceDB))
+			}
+		})
+	}
+}
