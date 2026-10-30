@@ -19,7 +19,80 @@ function rememberSignal(entry, type, event) {
   entry.recentSignals.push(signal)
 }
 
-export function createNavigationRequestTracker(session) {
+
+// Page objects give a second, passive view of the intercepted HTTP lifecycle.
+// A URL/method match is diagnostic correlation, never a protocol identity or
+// proof that a request missing from this Network session has completed.
+function observePageLifecycle(page) {
+  const active = new Map(), recent = new Map()
+  let started = 0, finished = 0, failed = 0, unmatchedSignals = 0, readErrors = 0, truncated = false
+  const read = request => {
+    const url = request.url(), method = request.method()
+    if (typeof url !== 'string' || url.length > 8192 || typeof method !== 'string' || method.length > 32) throw new Error('invalid passive request fields')
+    return {url, method}
+  }
+  const capture = (entry, request, event, response) => {
+    if (entry.signals.length === maximumRecentSignals) entry.signals.shift()
+    entry.signals.push(event)
+    try {
+      entry.interceptResolutionHandled = typeof request.isInterceptResolutionHandled === 'function' ? request.isInterceptResolutionHandled() === true : null
+      const status = response?.status()
+      if (Number.isInteger(status) && status >= 100 && status <= 599) entry.responseStatus = status
+      if (event === 'requestfailed') {
+        const error = request.failure()?.errorText
+        entry.failureClass = ['net::ERR_ABORTED', 'net::ERR_FAILED', 'net::ERR_BLOCKED_BY_CLIENT'].includes(error) ? error : 'other'
+      }
+    } catch {readErrors++}
+  }
+  const onRequest = request => {
+    if (active.has(request) || recent.has(request)) return
+    if (active.size === maximumTrackedRequests) {truncated = true; return}
+    try {
+      const entry = {...read(request), signals: [], responseStatus: null, interceptResolutionHandled: null,
+        terminal: null, failureClass: null}
+      capture(entry, request, 'request')
+      active.set(request, entry); started++
+    } catch {readErrors++}
+  }
+  const onResponse = response => {
+    try {
+      const request = response.request(), entry = active.get(request) ?? recent.get(request)
+      if (entry) capture(entry, request, 'response', response)
+      else unmatchedSignals++
+    } catch {readErrors++}
+  }
+  const terminal = (request, event) => {
+    const entry = active.get(request)
+    if (!entry) {unmatchedSignals++; return}
+    capture(entry, request, event)
+    entry.terminal = event
+    active.delete(request)
+    if (recent.size === maximumRecentSignals) recent.delete(recent.keys().next().value)
+    recent.set(request, entry)
+    if (event === 'requestfinished') finished++; else failed++
+  }
+  const listeners = {request: onRequest, response: onResponse,
+    requestfinished: request => terminal(request, 'requestfinished'),
+    requestfailed: request => terminal(request, 'requestfailed')}
+  for (const [name, listener] of Object.entries(listeners)) page.on(name, listener)
+  return {
+    close() {for (const [name, listener] of Object.entries(listeners)) page.off(name, listener)},
+    summary() {return {started, finished, failed, active: active.size, recent: recent.size, unmatchedSignals,
+      readErrors, truncated, maximumActiveRecords: maximumTrackedRequests, maximumRecentRecords: maximumRecentSignals,
+      passiveOnly: true, completionGateChanged: false}},
+    matches(url, method) {
+      const matching = records => [...records.values()].filter(entry => entry.url === url && entry.method === method)
+      const live = matching(active), ended = matching(recent)
+      return {sameURLAndMethodOnly: true, protocolIdentityEstablished: false, activeMatches: live.length,
+        recentMatches: ended.length, observations: [...live, ...ended].slice(0, maximumRecentSignals).map(entry => ({
+          signals: [...entry.signals], responseStatus: entry.responseStatus,
+          interceptResolutionHandled: entry.interceptResolutionHandled, terminal: entry.terminal, failureClass: entry.failureClass}))}
+    },
+  }
+}
+
+export function createNavigationRequestTracker(session, page) {
+  const pageLifecycle = page ? observePageLifecycle(page) : null
   const active = new Map(), subscribers = new Set()
   let changed = performance.now(), closed = false, broken = '', peak = 0
   let started = 0, completed = 0, documents = 0, cacheSignals = 0, unmatchedCompletionSignals = 0
@@ -69,14 +142,16 @@ export function createNavigationRequestTracker(session) {
       if (identity(event) !== null) cacheSignals++
     }
   }
-  const close = () => {closed = true; session.off('*', listener); notify()}
+  const close = () => {closed = true; session.off('*', listener); pageLifecycle?.close(); notify()}
   session.on('*', listener)
   const diagnostic = () => ({activeRequests: active.size, maximumTrackedRequests, peak, started, completed,
     documentRequestsStarted: documents, cacheSignals, unmatchedCompletionSignals,
+    pageLifecycle: pageLifecycle?.summary() ?? null,
     requests: [...active.values()].slice(0, 8).map(({url, method, at, recentSignals}) => {
       let path = '[unparseable]'
       try {path = new URL(url).pathname.slice(0, 120)} catch {}
-      return {method: method.slice(0, 12), path, ageMilliseconds: Math.round(performance.now() - at), recentSignals: recentSignals.map(signal => ({...signal}))}
+      return {method: method.slice(0, 12), path, ageMilliseconds: Math.round(performance.now() - at), recentSignals: recentSignals.map(signal => ({...signal})),
+        pageLifecycleMatches: pageLifecycle?.matches(url, method) ?? null}
     })})
   return {
     close, diagnostic,
@@ -122,7 +197,7 @@ export function observeNavigationRequests(page) {
     try {
       session = await page.createCDPSession()
       if (closed) throw new Error('navigation page closed during network setup')
-      tracker = createNavigationRequestTracker(session)
+      tracker = createNavigationRequestTracker(session, page)
       await session.send('Network.enable', {}, {timeout: 5000})
       if (closed || session.detached) throw new Error('navigation page closed during network setup')
       return tracker

@@ -153,8 +153,93 @@ let controls = 0
   await assert.rejects(observeNavigationRequests(page), /fixture setup refusal/)
   assert.ok(page.session.detached); assert.equal(page.session.listenerCount('*'), 0); controls++
 }
-assert.equal(controls, 16)
-console.log('NAVIGATION-IDENTITY-CONTROLS '+JSON.stringify({controls, pass: true, SDKOrBrowserExecutions: 0,
+
+// Independent page signals never satisfy the original protocol-session gate.
+const passiveRequest = (url = 'http://127.0.0.1:1/api?private=fixture-secret') => ({
+  url: () => url, method: () => 'POST', isInterceptResolutionHandled: () => true,
+  failure: () => ({errorText: 'net::ERR_ABORTED'})})
+{
+  const page = new Page(), tracker = await observeNavigationRequests(page), req = passiveRequest()
+  page.session.signal('Network.requestWillBeSent', request())
+  page.emit('request', req)
+  page.emit('response', {request: () => req, status: () => 200})
+  page.emit('requestfinished', req)
+  let value = tracker.diagnostic()
+  // The path differs, so no correlation may be invented.
+  assert.equal(value.requests[0].pageLifecycleMatches.recentMatches, 0)
+  assert.equal(value.pageLifecycle.finished, 1)
+  await assert.rejects(tracker.wait(performance.now()+15), /original navigation deadline elapsed/)
+  const req2 = passiveRequest('http://127.0.0.1:1/rpc?private=fixture-secret')
+  page.emit('request', req2); page.emit('response', {request: () => req2, status: () => 200}); page.emit('requestfinished', req2)
+  value = tracker.diagnostic()
+  const match = value.requests[0].pageLifecycleMatches
+  assert.equal(match.recentMatches, 1); assert.equal(match.activeMatches, 0)
+  assert.equal(match.protocolIdentityEstablished, false)
+  assert.deepEqual(match.observations[0].signals, ['request', 'response', 'requestfinished'])
+  assert.equal(match.observations[0].responseStatus, 200)
+  assert.equal(value.activeRequests, 1)
+  await assert.rejects(tracker.wait(performance.now()+15), /original navigation deadline elapsed/)
+  assert.ok(!JSON.stringify(value).includes('fixture-secret'))
+  page.emit('close'); controls++
+}
+{
+  const page = new Page(), tracker = await observeNavigationRequests(page), req = passiveRequest()
+  page.session.signal('Network.requestWillBeSent', request())
+  page.emit('response', {request: () => req, status: () => 200})
+  page.session.signal('Network.responseReceivedExtraInfo', {requestId: 'one', statusCode: 200})
+  const value = tracker.diagnostic()
+  assert.equal(value.pageLifecycle.unmatchedSignals, 1)
+  assert.equal(value.pageLifecycle.started, 0)
+  assert.equal(value.requests[0].pageLifecycleMatches.observations.length, 0)
+  assert.equal(value.activeRequests, 1)
+  await assert.rejects(tracker.wait(performance.now()+15), /original navigation deadline elapsed/)
+  page.emit('close'); controls++
+}
+{
+  const page = new Page(), tracker = await observeNavigationRequests(page)
+  const first = passiveRequest('http://127.0.0.1:1/rpc?private=fixture-secret'), second = passiveRequest(first.url())
+  page.session.signal('Network.requestWillBeSent', request())
+  page.emit('request', first); page.emit('request', second); page.emit('requestfailed', first)
+  const value = tracker.diagnostic(), match = value.requests[0].pageLifecycleMatches
+  assert.equal(match.activeMatches, 1); assert.equal(match.recentMatches, 1)
+  assert.equal(match.protocolIdentityEstablished, false)
+  assert.equal(value.pageLifecycle.failed, 1)
+  assert.ok(match.observations.some(entry => entry.terminal === 'requestfailed' && entry.failureClass === 'net::ERR_ABORTED'))
+  assert.equal(value.activeRequests, 1)
+  page.emit('close'); controls++
+}
+{
+  const page = new Page(), tracker = await observeNavigationRequests(page)
+  const requests = Array.from({length: 257}, (_, i) => passiveRequest('http://127.0.0.1:1/api/'+i))
+  for (const req of requests) page.emit('request', req)
+  assert.equal(tracker.diagnostic().pageLifecycle.active, 256)
+  assert.equal(tracker.diagnostic().pageLifecycle.truncated, true)
+  for (const req of requests) page.emit('requestfinished', req)
+  const value = tracker.diagnostic()
+  assert.equal(value.pageLifecycle.active, 0); assert.equal(value.pageLifecycle.recent, 8)
+  assert.equal(value.pageLifecycle.unmatchedSignals, 1)
+  assert.equal(value.pageLifecycle.completionGateChanged, false)
+  await tracker.wait(performance.now()+500)
+  page.emit('close'); controls++
+}
+{
+  const page = new Page(), tracker = await observeNavigationRequests(page)
+  page.emit('request', {url: () => {throw new Error('fixture-header-and-payload-secret')}})
+  assert.equal(tracker.diagnostic().pageLifecycle.readErrors, 1)
+  const req = passiveRequest('http://127.0.0.1:1/rpc?private=fixture-secret')
+  page.session.signal('Network.requestWillBeSent', request())
+  page.emit('request', req); page.emit('requestfinished', req)
+  const snapshot = tracker.diagnostic()
+  snapshot.requests[0].pageLifecycleMatches.observations[0].signals[0] = 'mutated'
+  assert.equal(tracker.diagnostic().requests[0].pageLifecycleMatches.observations[0].signals[0], 'request')
+  assert.ok(!JSON.stringify(tracker.diagnostic()).includes('fixture-header-and-payload-secret'))
+  page.emit('close')
+  for (const name of ['request', 'response', 'requestfinished', 'requestfailed']) assert.equal(page.listenerCount(name), 0)
+  assert.equal(page.session.listenerCount('*'), 0); controls++
+}
+
+assert.equal(controls, 21)
+console.log('NAVIGATION-IDENTITY-CONTROLS '+JSON.stringify({controls, originalProtocolControls: 16, passivePageObserverControls: 5, pass: true, SDKOrBrowserExecutions: 0,
   overallNavigationDeadlineMilliseconds: 20000, quietMilliseconds: 100, maximumInflightRequests: 0,
   requestTracking: 'cdp-network-request-identities', originalBudgetPreserved: true,
   protocolSessionsIsolated: true, interceptionOnlySignalsCountedAsNetworkRequests: false,

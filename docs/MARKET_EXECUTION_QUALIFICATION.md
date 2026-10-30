@@ -44,3 +44,32 @@ never counts as a successful exchange check or a distinct accepted header. The
 zero-unexpected-error requirement, canonical-hash assertions and original-input
 checks remain in force. Shutdown cancellations are reported explicitly rather
 than treated as completed execution failures or silently discarded.
+
+
+### Independent passive page-lifecycle observation
+
+Revision 30019289aadb3927391e20ef2ead5753ee7ed2cc passed its Go and
+full-client jobs, including signed orders across the declared colocated process
+exit. Its first automatic browser job failed in the Karum single-order partial
+batch case at the original 20-second navigation deadline. The dedicated Network
+session retained one item API read with only request/response extra-info signals;
+the failure cause remains NOT_ESTABLISHED. Extra-info status 200 is not a
+response/loading completion, and the failure remains retained.
+
+The additional observer records the public Page request, response, finished and
+failed lifecycle separately, without issuing requests or resolving interception.
+Page records use exact request-object identity internally. Correlation with the
+dedicated Network session uses URL and method only and explicitly establishes no
+protocol identity. At most 256 active and eight recent page records are retained,
+with eight signal names per record; overflow and getter errors remain visible.
+Diagnostics omit URL query values, headers, bodies and raw error text. They can
+distinguish an observed page terminal event from a missing dedicated-session
+terminal event if the failure recurs, while preserving uncertain correlations.
+
+Page observations never complete a tracked Network request. The original
+20-second overall deadline, DOMContentLoaded, zero active Network requests,
+100-ms quiet interval and all route, DOM, HTTP/error, signature, receipt and
+balance checks remain unchanged. The original 16 pure protocol controls remain,
+with five additional passive-observer controls. Synthetic event controls do not
+establish a browser root cause, actual browser recovery, complete N04 acceptance
+or production readiness. NoM and owner/platform/release gates remain separate.
