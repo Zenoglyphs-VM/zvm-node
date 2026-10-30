@@ -285,12 +285,22 @@ func (x *Index) refreshRange(ctx context.Context, dbtx *sql.Tx, collection commo
 		}
 		if id, ok := new(big.Int).SetString(s, 10); ok && id.Cmp(from) >= 0 && id.Cmp(to) <= 0 {
 			ids = append(ids, id)
+			if len(ids) == 5_001 {
+				break
+			}
 		}
 	}
-	rows.Close()
+	err = rows.Err()
+	closeErr := rows.Close()
+	if err != nil {
+		return err
+	}
+	if closeErr != nil {
+		return closeErr
+	}
 	for i, id := range ids {
 		if i == 5_000 {
-			x.log().Warn("metadata batch update truncated", "collection", collection, "tokens", len(ids))
+			x.log().Warn("metadata batch update truncated", "collection", collection, "atLeastTokens", len(ids))
 			break
 		}
 		if err := x.refreshToken(ctx, dbtx, collection, id, block); err != nil {
