@@ -195,5 +195,14 @@ jobs:
           go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t \
             "$RUNNER_TEMP/zvm-full-client-recovery.test" -test.v=test2json -test.failfast -test.timeout=3m \
             -test.run='^TestFullClientSignedWriteBoundaryRecovery$'
+      - name: Check signed orders across actual default-client rewind write exits with the same binary
+        working-directory: orderbook
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t \
+            "$RUNNER_TEMP/zvm-full-client-recovery.test" -test.v=test2json -test.failfast -test.timeout=4m \
+            -test.run='^TestFullClientSignedRewindRecovery$'
       - name: Refuse tracked source drift
         run: git diff --exit-code

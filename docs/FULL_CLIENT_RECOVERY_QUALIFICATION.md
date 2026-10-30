@@ -363,3 +363,45 @@ these events. Signed rewind schedules, independent NoM authority/finality,
 standalone daemons, platform/operator/release acceptance, kernel kill and
 hardware power loss remain open. All 42 original acceptance fields remain
 authoritative; production remains NO_GO.
+
+
+### Signed default-client rewinds (source candidate)
+
+This separate source candidate admits two genuine EOA-signed orders through
+the real Book.Submit checks at the committed common priming horizon, then
+advances an owned full-service/CLI to the competing synthetic source branch at
+momentum 9. Each case owns an exit 86 inside either the derivation rewind SQL
+transaction or the index/book rewind transaction before commit. The existing
+owned-boundary checker must observe the actual production reorg, responding
+engine head 8 and independent RPC/direct hashes for common execution ancestor
+6 (source momentum 7). Exiting skips service cleanup. Recovery makes the
+replacement source frontier available at momentum 9 immediately, as required
+by the existing production recovery path.
+
+The parent performs initial admission only before the fault. It removes only
+its declared exit hook afterward, never repairs canonical state or resubmits
+an order, and reopens the service only after recovery children have joined for
+the read-only original-signature/business/all-canonical-table oracle. The
+existing observation comparator verifies hash-selected contract results and
+independent RPC/direct headers before projecting only checked_block,
+checked_hash and closed_block. Original input rows and every business field
+remain exact; arbitrary table or signature differences are not projected.
+
+One existing compiled binary serves a new separate four-minute selector under
+the unchanged twenty-minute job cap. The original seven-minute unsigned,
+four-minute signed recovery and three-minute signed write-boundary commands,
+all selectors, dependency pins, cache/memory/parallelism settings and the
+marketplace job are unchanged. If executed, the new command requires three
+terminal passes (root and two cases), ten joined CLI children, thirteen default
+service opens (five parent and eight child), three initial signed admissions
+and two verified canonical-business comparisons. Combined full-client scopes
+would contain 20 terminal events, 51 children and 63 service opens/observations.
+These are required candidate outcomes, not executed evidence.
+
+The parent revision has independently retained native/full-client success and
+a failed first automatic browser workflow. Its navigation-deadline cause
+remains NOT_ESTABLISHED; no prior green browser matrix qualifies this candidate.
+Independent signed NoM authority/finality, HTTP/physical-wallet admission,
+standalone daemons, native full-client races, larger histories, platform,
+operator and release gates, kernel kill and hardware power loss remain open.
+All 42 original acceptance fields remain authoritative; production is NO_GO.
