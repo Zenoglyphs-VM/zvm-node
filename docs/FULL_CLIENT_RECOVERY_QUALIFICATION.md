@@ -337,3 +337,29 @@ the original unsigned command and twenty-minute job limit. Source authoring and
 offline formatting do not establish execution. NoM inputs remain unsigned and
 synthetic; kernel kill, hardware power loss, independent NoM authority/finality,
 supported platforms, operator migration and release acceptance remain open.
+
+
+### Signed index and book write boundaries (source candidate)
+
+Two additional source cases use genuine EOA-signed initial Book.Submit inputs
+with the real default full service and production CLI. The existing signed
+derivation/graceful cases and original unsigned command remain. The new command
+builds a fresh cold reference, then owns separate exact-child exits at the real
+NFT index-plugin boundary and the book scanned-cursor write before commit.
+The original owned-boundary checker requires a responding engine at head 7;
+the index case additionally proves that the real NFT plugin completed inside
+the uncommitted transaction. Exit 86 skips service cleanup. Initial admission
+is before the fault; the parent only removes its declared exit hook, never
+repairs or resubmits an order, and opens the service after recovery joins solely
+for the original-signature/business/all-canonical-table comparison.
+
+The same compiled binary is reused with a separate three-minute selector under
+the unchanged twenty-minute job cap. The original seven-minute and four-minute
+commands retain their own selectors and limits. The new command requires three
+terminal pass events (root and two cases), eight joined CLI children, eleven
+service opens (five parent and six child), three initial admissions and two
+canonical comparisons if it executes. Source preparation alone does not prove
+these events. Signed rewind schedules, independent NoM authority/finality,
+standalone daemons, platform/operator/release acceptance, kernel kill and
+hardware power loss remain open. All 42 original acceptance fields remain
+authoritative; production remains NO_GO.
