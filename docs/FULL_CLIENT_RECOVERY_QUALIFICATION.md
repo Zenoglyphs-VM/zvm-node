@@ -601,3 +601,31 @@ unchanged. Eighteen new standard-library fake controls join the unchanged 37
 existing controls in the original command; they do not qualify live behavior.
 The current candidate requires fresh hosted execution. All 42 acceptance
 conditions remain unchanged and production remains NO_GO.
+
+## SQLite file backup and restored index adoption
+
+The original normal and selected race commands now require a 65536-token SQLite
+file fixture with a 64 MiB logical page bound per database. Existing source
+writers populate metadata history, payload and legacy archive tables before
+the file fixture is seeded with canonical, legacy, embedded-NUL, BLOB and
+oversized token spellings. An unrelated sentinel table is also included in the
+existing all-application-table comparison. Committed writes remain in a nonempty
+WAL with automatic checkpointing disabled before the backup operation.
+
+Three additional controls require a VACUUM INTO backup and independent restored
+database, active-transaction refusal with rollback, and refusal to overwrite a
+nonempty target. Source and restored index adoption must preserve every table;
+the restored database must survive close/reopen and idempotent adoption. The
+original backup file hash must remain unchanged. Observations contain counts,
+hashes, engine version and stage flags, without filesystem paths or row values.
+These are candidate requirements, not execution results.
+
+SQLite documents VACUUM INTO as a consistent logical snapshot; its output may
+be incomplete or corrupt if the operation is interrupted. See the
+[SQLite VACUUM documentation](https://www.sqlite.org/lang_vacuum.html).
+This component fixture does not establish crash-safe publication, power-loss
+durability, a simultaneous-writer schedule, paired execution-engine/SQL backup,
+full-client history recovery, physical disk/RSS bounds, or real operator restore
+readiness. No operator database is touched. All original test oracles, workflow
+commands, dependencies, production code and 42 acceptance conditions remain
+unchanged. Production remains NO_GO.

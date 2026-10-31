@@ -437,6 +437,9 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 			})
 		}
 	})
+	t.Run("file-backup", func(t *testing.T) {
+		requireMetadataIndexFileBackup(t)
+	})
 	t.Run("transactional-upgrade-rollback", func(t *testing.T) {
 		x, db, _ := rangeIndexFixture(t, []any{"1", "+2"})
 		if _, err := db.Exec("DROP INDEX nft_tokens_metadata_range"); err != nil {
