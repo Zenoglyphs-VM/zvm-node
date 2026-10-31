@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS nft_sales (
 CREATE INDEX IF NOT EXISTS nft_sales_collection ON nft_sales(collection, block);
 CREATE INDEX IF NOT EXISTS nft_sales_block ON nft_sales(block);
 CREATE INDEX IF NOT EXISTS nft_sales_recent ON nft_sales(collection, timestamp DESC);
-`
+` + metadataRangeIndexSchema
 
 // Apps names the application contracts whose events the indexer trusts.
 type Apps struct {
@@ -293,7 +293,8 @@ func (x *Index) refreshToken(ctx context.Context, dbtx *sql.Tx, collection commo
 // refreshRange re-reads the metadata of the tokens a BatchMetadataUpdate names
 // that the index holds, at most a few thousand of them.
 func (x *Index) refreshRange(ctx context.Context, dbtx *sql.Tx, collection common.Address, from, to *big.Int, block uint64) error {
-	rows, err := dbtx.QueryContext(ctx, `SELECT token_id FROM nft_tokens`+metadataRangeWhere, metadataRangeArgs(collection, from, to)...)
+	statement, args := metadataRangeQuery(collection, from, to, false)
+	rows, err := dbtx.QueryContext(ctx, statement, args...)
 	if err != nil {
 		return err
 	}

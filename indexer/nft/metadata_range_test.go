@@ -96,7 +96,8 @@ func TestPreparedURIRangeFilter(t *testing.T) {
 			}
 			direct, db, recorder := seed()
 			want := oldMetadataRangeSelection(t, db, address, from, to)
-			rows, err := db.QueryContext(context.Background(), "SELECT token_id FROM nft_tokens"+metadataRangeWhere, metadataRangeArgs(address, from, to)...)
+			statement, args := metadataRangeQuery(address, from, to, false)
+			rows, err := db.QueryContext(context.Background(), statement, args...)
 			if err != nil {
 				t.Fatal(err)
 			}

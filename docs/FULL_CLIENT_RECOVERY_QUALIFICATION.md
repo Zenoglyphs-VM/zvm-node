@@ -452,3 +452,40 @@ is introduced by the read-only probe. Pure local controls, native concurrency
 controls and actual hosted browser observations are separate evidence classes.
 These diagnostics do not establish a cause for any historical failure, independent
 NoM authority/finality or complete N04/production acceptance.
+
+## Indexed decimal token ranges
+
+Unsigned 256-bit BatchMetadataUpdate bounds use an expression index on collection,
+canonical decimal length and original token text. One ordered range seek per
+intersected decimal width is merged with an ordered legacy stream. The maximum
+is 78 canonical branches plus one legacy branch and 313 parameters. No numeric
+integer/REAL cast changes token identity. The original lexicographic order,
+Go big.Int parser, 5000-match action limit and 5001-key lookahead remain.
+Legacy spellings, embedded NUL and non-text storage reach the original parser;
+the number of nonmatching legacy records is not bounded by this optimization.
+Signed, reversed and oversized internal bounds retain the original predicate.
+
+The query explicitly requires the declared index. A missing or unusable index
+refuses live refresh or discovery before canonical changes; it does not fall
+back to an unqualified scan. The original independent scan/parser oracle remains
+in the tests. Native controls require indexed searches without a temporary sort
+for narrow, cross-width and full 256-bit ranges; they also cover dense misleading
+text prefixes, legacy merging, the action boundary, cancellation, block columns,
+idempotent schema adoption, read-only refusal and transactional rollback.
+EXPLAIN output is inspected only by qualification tests on their selected SQLite
+runtime, never parsed by production code.
+
+The local standard-library SQLite model is separate from native Go execution.
+Its sparse dense-prefix fixture reduced VM steps from 465192 to 236 while
+preserving the selection. Its full-domain fixture increased VM steps from
+170017 to 237947 because of the bounded merge work. These are fixture VM counts,
+not latency, fixed RSS or a universal speedup. The added index consumes storage
+and write work. A large operator database migration, its allocation/locking cost,
+backup/rollback rehearsal and supported-platform acceptance remain unqualified;
+no actual operator database is migrated by this source qualification.
+
+The [expression-index rules](https://www.sqlite.org/expridx.html),
+[query-plan diagnostics](https://www.sqlite.org/eqp.html) and
+[required-index semantics](https://www.sqlite.org/lang_indexedby.html) describe
+the SQLite interfaces used here. All original recovery, navigation, signature,
+refund, receipt, balance and independent NoM/owner/release gates remain required.

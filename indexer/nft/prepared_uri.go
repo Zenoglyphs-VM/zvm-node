@@ -186,7 +186,8 @@ func (p *preparedURI) loadToken(ctx context.Context, source indexer.PreparationS
 }
 
 func (p *preparedURI) loadRange(ctx context.Context, source indexer.PreparationSource, address common.Address, from, to *big.Int) error {
-	rows, err := source.QueryContext(ctx, "SELECT token_id,minted_block,updated_block FROM nft_tokens"+metadataRangeWhere, metadataRangeArgs(address, from, to)...)
+	statement, args := metadataRangeQuery(address, from, to, true)
+	rows, err := source.QueryContext(ctx, statement, args...)
 	if err != nil {
 		return err
 	}
