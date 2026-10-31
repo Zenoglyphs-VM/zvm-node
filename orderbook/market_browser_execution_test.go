@@ -152,6 +152,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 		result chan map[string]any
 	}
 	phases := make(chan phaseRequest)
+	rpcProgress := newMarketRPCProgress()
 	ui := http.NewServeMux()
 	writeJSON := func(w http.ResponseWriter, value any) {
 		w.Header().Set("Content-Type", "application/json")
@@ -163,6 +164,13 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	// marks, market and execution RPC routes are their actual implementations.
 	ui.HandleFunc("GET /api/prices", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, map[string]any{"enabled": false, "tokens": map[string]any{}, "stale": true})
+	})
+	ui.HandleFunc("GET /__fixture/rpc-progress", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-ZVM-Fixture") != token {
+			http.Error(w, "fixture capability required", 403)
+			return
+		}
+		writeJSON(w, rpcProgress.snapshot())
 	})
 	ui.HandleFunc("POST /__fixture/phase", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-ZVM-Fixture") != token {
@@ -205,7 +213,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 	var requestMu sync.Mutex
 	var submitted []*orderbook.Input
 	posts := 0
-	web := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	web := httptest.NewServer(rpcProgress.observe(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost && r.URL.Path == "/api/nft/orders" {
 			body := r.Body
 			raw, err := io.ReadAll(io.LimitReader(body, (256<<10)+1))
@@ -235,7 +243,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			r.Body = io.NopCloser(bytes.NewReader(raw))
 		}
 		handler.ServeHTTP(w, r)
-	}))
+	})))
 	defer web.Close()
 	input, err := json.Marshal(map[string]any{"base": web.URL, "token": token, "roots": roots,
 		"app": app, "kind": kind, "collection": f.Collection().Hex(), "exchange": f.Exchange().Hex(),
@@ -388,6 +396,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 				"batchStage": batchStage, "sellerNonce": transport.BatchSellerNonce(), "cancellation": transport.BatchCancellationHash().Hex(), "approval": transport.TokenApprovalHash().Hex(), "payouts": payouts}
 		case err := <-finished:
 			t.Log(strings.TrimSpace(stdout.raw.String()))
+			rpcProgress.log(t)
 			if err != nil {
 				t.Fatalf("signed production browser did not pass: %v; bounded stderr=%s", err, stderr.raw.String())
 			}
@@ -435,6 +444,7 @@ func executedMarketBrowserProfile(t *testing.T, roots map[string]string, app, ki
 			return
 		case <-ctx.Done():
 			<-finished
+			rpcProgress.log(t)
 			t.Fatal("owned signed-browser integration deadline exceeded")
 		}
 	}

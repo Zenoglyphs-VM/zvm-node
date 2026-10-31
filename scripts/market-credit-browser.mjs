@@ -1,6 +1,7 @@
 // Actual account pages and original-hash recovery with a declared owner EOA
 // wrapper for one compiled test account contract. No product reply is mocked.
 import assert from 'node:assert/strict'
+import {reportOwnedRPCProgress} from './market-rpc-progress-support.mjs'
 import {execFileSync} from 'node:child_process'
 import {existsSync} from 'node:fs'
 import {readFile, mkdtemp, rm} from 'node:fs/promises'
@@ -327,6 +328,7 @@ try {
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 240)
+  await reportOwnedRPCProgress(fixture, browser)
   if (page && !page.isClosed()) result.page = await page.evaluate(() => ({path: location.pathname,
     message: document.querySelector('[data-testid="exchange-credits"]')?.textContent.slice(-900),
     buttons: [...document.querySelectorAll('button')].filter(button => button.checkVisibility()).slice(0, 20).map(button => button.textContent.trim().slice(0, 80))})).catch(() => null)

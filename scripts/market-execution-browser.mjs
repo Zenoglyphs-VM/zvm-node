@@ -3,6 +3,7 @@
 // is fabricated here. The public buyer signs ordinary EVM transactions for
 // the actual relayer CLI; independent NoM and daemon RPC remain boundaries.
 import assert from 'node:assert/strict'
+import {reportOwnedRPCProgress} from './market-rpc-progress-support.mjs'
 import {boundedNavigation} from './market-navigation-support.mjs'
 import {connectFixtureWallet} from './market-wallet-connection-support.mjs'
 import {createTokenPaymentChecks} from './market-token-payment-support.mjs'
@@ -894,6 +895,7 @@ try {
   result.pass = true
 } catch (error) {
   result.failure = String(error.message).split('\n')[0].slice(0, 220)
+  await reportOwnedRPCProgress(fixture, browser)
   if (page && !page.isClosed()) result.page = await page.evaluate(() => ({path: location.pathname,
     heading: document.querySelector('main h1')?.textContent.trim().slice(0, 80),
     buttons: [...document.querySelectorAll('button')].filter(b => b.checkVisibility()).slice(0, 24).map(b => b.textContent.trim().slice(0, 80)),

@@ -84,6 +84,7 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 		result chan map[string]any
 	}
 	phases := make(chan phaseRequest)
+	rpcProgress := newMarketRPCProgress()
 	ui := http.NewServeMux()
 	writeJSON := func(w http.ResponseWriter, value any) {
 		w.Header().Set("Content-Type", "application/json")
@@ -93,6 +94,13 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 	}
 	ui.HandleFunc("GET /api/prices", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, map[string]any{"enabled": false, "tokens": map[string]any{}, "stale": true})
+	})
+	ui.HandleFunc("GET /__fixture/rpc-progress", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-ZVM-Fixture") != token {
+			http.Error(w, "fixture capability required", 403)
+			return
+		}
+		writeJSON(w, rpcProgress.snapshot())
 	})
 	ui.HandleFunc("POST /__fixture/credit", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-ZVM-Fixture") != token {
@@ -132,7 +140,7 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 	handler := api.New(api.Config{Rollup: f.Rollup(), DB: f.Store(), Eth: f.ExecutionClient(),
 		L1: znn.NewClient(f.SourceURL()), Deriver: f.Deriver(), EthURL: f.ExecutionURL(), L1URL: f.SourceURL(),
 		Extensions: []api.Extension{service}, Relayer: relayerURL, UI: ui}).Handler()
-	web := httptest.NewServer(handler)
+	web := httptest.NewServer(rpcProgress.observe(handler))
 	defer web.Close()
 	// These public-test-key orders are explicit source-sale setup. Their actual
 	// HTTP admission is retained separately from the browser withdrawal call.
@@ -246,6 +254,7 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 				"sourcePrefixPreserved": true, "included": included}
 		case err := <-finished:
 			t.Log(strings.TrimSpace(stdout.raw.String()))
+			rpcProgress.log(t)
 			if err != nil {
 				t.Fatalf("actual credit browser failed: %v; bounded stderr=%s", err, stderr.raw.String())
 			}
@@ -273,6 +282,7 @@ func executedMarketCreditBrowserProfile(t *testing.T, roots map[string]string, a
 			return
 		case <-ctx.Done():
 			<-finished
+			rpcProgress.log(t)
 			t.Fatal("owned positive credit integration deadline exceeded")
 		}
 	}

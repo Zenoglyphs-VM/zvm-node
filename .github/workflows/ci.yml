@@ -47,7 +47,7 @@ jobs:
       - name: Check market HTTP and executed admission recovery with the race detector
         env:
           GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
-        run: go test -race -json -count=1 -run '^Test(MarketHTTP(ReorgVisibility|RefusedRewind)|ExecutedMarketAdmissionAndCanonicalRecovery|WireOrderTimes(RetainOriginalInputAndHash|RefuseAmbiguousJSON)|SQLiteOrderTimesRetainUnsignedRangeAndOrdering|StoredOrderTimesRefuseLossyOrNoncanonicalValues|BookImportsFullWidthOnChainOrderTimes|BookAcceptedHeadObservations|ClosedOrder(CompleteEvidence|Recovery|RecoveryFences|RecoveryPages)|URIHistory.*|URIHostUsesTheExactHashWithoutLatestFallback|ObservedURIDecoderRefusesIncompleteEvidence|BackfillSourceFence|PreparedURI|PreparedURIIndexedGap|PreparedURIRangeKeys|PreparedURIRangeFilter|PreparedURIRollbackBudget|PreparedURIWriterBoundary)$' ./indexer ./orderbook ./indexer/nft
+        run: go test -race -json -count=1 -run '^Test(MarketHTTP(ReorgVisibility|RefusedRewind)|ExecutedMarketAdmissionAndCanonicalRecovery|WireOrderTimes(RetainOriginalInputAndHash|RefuseAmbiguousJSON)|SQLiteOrderTimesRetainUnsignedRangeAndOrdering|StoredOrderTimesRefuseLossyOrNoncanonicalValues|BookImportsFullWidthOnChainOrderTimes|BookAcceptedHeadObservations|ClosedOrder(CompleteEvidence|Recovery|RecoveryFences|RecoveryPages)|URIHistory.*|URIHostUsesTheExactHashWithoutLatestFallback|ObservedURIDecoderRefusesIncompleteEvidence|BackfillSourceFence|PreparedURI|PreparedURIIndexedGap|PreparedURIRangeKeys|PreparedURIRangeFilter|PreparedURIRollbackBudget|PreparedURIWriterBoundary|MarketRPCProgress)$' ./indexer ./orderbook ./indexer/nft
       - name: Verify the exact test-only dependency delta and tracked source
         run: |
           python3 scripts/prepare-simulated-backend-fixture.py verify "$RUNNER_TEMP/zvm-simulator-fixture"
@@ -95,6 +95,8 @@ jobs:
           go-version-file: go.mod
       - name: Check bounded protocol navigation controls without SDK or network
         run: node scripts/market-navigation-support.test.mjs
+      - name: Check bounded owned RPC progress diagnostics without SDK or network
+        run: node scripts/market-rpc-progress-support.test.mjs
       - name: Check fixture connection restoration without SDK or network
         run: node scripts/market-wallet-connection-support.test.mjs
       - name: Check bounded immutable snapshot reuse without SDK or network

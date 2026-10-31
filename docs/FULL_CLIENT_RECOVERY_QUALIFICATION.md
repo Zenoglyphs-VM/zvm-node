@@ -425,3 +425,30 @@ different valid observation through that normalization.
 These cases use local SQLite fixtures in the existing normal and selected race
 commands. Their results do not establish operator migration, independent NoM
 source authority/finality, supported platforms or complete N04 acceptance.
+
+## Owned loopback RPC handler observations
+
+The marketplace and credit fixtures observe only their own POST /rpc handler
+lifetimes. The original request and ResponseWriter reach the original node API
+unchanged. No body, header, URL query, address or other request identity is
+retained. Tracking holds at most 32 active records and eight recent completions;
+overflow remains explicit. Normal returns, abnormal exits and context cancellation
+are observations, not HTTP status, body delivery or protocol request identity.
+The bounds cover diagnostic records, not server concurrency or process RSS.
+
+After a browser failure, the Node driver makes at most one capability-protected,
+read-only fixture GET before closing the owned browser. It permits only the
+declared loopback origin, refuses redirects, and limits the observation to 750 ms
+and 32 KiB. Unavailable, invalid or incomplete diagnostics remain unavailable and
+never replace the original failure. The Go parent separately records handler
+progress after the browser process joins, before server cleanup. The two phases
+help distinguish pre-cleanup state from cancellation during browser shutdown.
+They cannot correlate an individual server observation with a CDP request ID.
+
+The original 20-second navigation deadline, DOM lifecycle, zero-active dedicated
+Network requirement, quiet interval, signing, receipt and balance oracles remain.
+No request is completed by the observer and no RPC reply or provider transaction
+is introduced by the read-only probe. Pure local controls, native concurrency
+controls and actual hosted browser observations are separate evidence classes.
+These diagnostics do not establish a cause for any historical failure, independent
+NoM authority/finality or complete N04/production acceptance.
