@@ -629,3 +629,36 @@ full-client history recovery, physical disk/RSS bounds, or real operator restore
 readiness. No operator database is touched. All original test oracles, workflow
 commands, dependencies, production code and 42 acceptance conditions remain
 unchanged. Production remains NO_GO.
+
+## Paired cold engine and SQLite restore
+
+One additional signed full-client case joins the existing unchanged command.
+After the priming child has joined, the original two EOA orders are initially
+admitted against the real persisted service. A second owned child exits at the
+existing derivation-before-commit boundary, with its actual live engine head
+verified through both RPC and direct access. Both children must join before the
+parent removes only its declared exit hook and closes the read-only observer.
+
+The candidate then preserves a cold raw snapshot of the default full-client
+directory, SQLite and any present WAL/SHM/journal companions, plus the four
+declared configuration files. A sorted complete-file manifest authenticates
+every selected byte, with a 256 MiB aggregate logical byte limit, 4096-file limit,
+regular-file/identity checks and independent exclusive destination creation.
+No hard link or recursive archive is used. Fresh destination fixture settings
+and original signed inputs must match before any persistence is restored.
+Altered sealed metadata, incorrect payload digests and a nonempty target must
+be refused. Original source and retained backup bytes must remain unchanged.
+
+The recovery child opens independent restored engine/SQL files through the
+same production entrypoint, default service and book timers. At the declared
+terminal horizon, the unchanged original signature, balance, ownership, order,
+chunk, deferred-queue, receipt and complete canonical table/state-root oracles
+must match the existing independent sequential reference. These are candidate
+requirements, not execution results. All original cases remain mandatory.
+
+This is an owned synthetic-genesis cold-copy fixture. It does not qualify an
+online backup, an uncooperative concurrent filesystem writer, kernel kill,
+hardware power loss, arbitrary histories, operator custody, independent NoM
+canonicality/finality, accepted production contexts or real operator restore.
+The unsigned synthetic source and declared archive-backed adapter are unchanged.
+All 42 acceptance conditions remain active; production remains NO_GO.

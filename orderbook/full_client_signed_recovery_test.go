@@ -58,4 +58,10 @@ func TestFullClientSignedOrderRecovery(t *testing.T) {
 		}
 	}
 	t.Run("owned-client-process-exit", func(t *testing.T) { ownedSignedFullClientProcessRecovery(t, want) })
+	if t.Failed() {
+		t.FailNow()
+	}
+	t.Run("owned-paired-cold-backup-restore", func(t *testing.T) {
+		ownedSignedFullClientColdBackupRecovery(t, want)
+	})
 }
