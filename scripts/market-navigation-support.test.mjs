@@ -246,3 +246,5 @@ console.log('NAVIGATION-IDENTITY-CONTROLS '+JSON.stringify({controls, originalPr
   cacheProvenanceAloneCompletesRequest: false, diagnosticQueryValuesOmitted: true}))
 
 import './market-request-identity-support.test.mjs'
+
+import './market-page-client-support.test.mjs'

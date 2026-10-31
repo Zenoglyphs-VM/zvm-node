@@ -566,3 +566,38 @@ hosted browser evidence and establish no historical live failure cause.
 The existing NFT adoption and four full-client scopes remain required. No native
 command, dependency, browser profile, binary build or timeout is added. All 42
 original acceptance conditions and production NO_GO remain authoritative.
+
+## Original request-client event observations
+
+At revision 66323ed9252fac7bc94db8bf78e79b43efed1b67, the first automatic
+workflow passed its Go and four full-client scopes but failed the browser
+navigation gate. The failed navigation retained GET /api/nft/listings,
+GET /api/nft/offers and POST /rpc. Each matched one active Page request by
+opaque ID, with no Page response or terminal event. The RPC-only observer's
+111 returned handlers do not cover the two NFT GET handlers. The cause remains
+NOT_ESTABLISHED; none of these observations proves response-body delivery.
+
+The pinned puppeteer-core 25.11.0 source exposes each request's original client.
+The additional observer reads that property only after the existing same-Page
+ID check succeeds. It subscribes to eight explicit Network/Fetch event names
+without sending protocol commands, detaching sessions, changing interception,
+or replacing requests or ResponseWriters. Fetch events match only networkId;
+their independent Fetch requestId is never substituted for a Network ID.
+
+Only events after the Page request callback are visible. Earlier events remain
+unknown, and later reassignment of the request's client is not followed. A
+maximum of four original client objects is observed per Page. Signals live only
+in the existing 256 active/eight recent record window, with eight signals per
+record. Unsupported or throwing properties/subscriptions remain unavailable;
+overflow and partial observation are explicit. Cleanup removes only listeners
+owned by this observer. Raw IDs, queries, headers, bodies and client identities
+are omitted; only allowlisted event names, status values and stage flags appear.
+
+These diagnostics cannot complete the dedicated Network request, establish
+cross-session identity or correlate an individual server request. The original
+20-second/zero-inflight/100 ms navigation gate, every marketplace oracle, all Go
+source, dependencies, workflow commands, binaries and browser profiles remain
+unchanged. Eighteen new standard-library fake controls join the unchanged 37
+existing controls in the original command; they do not qualify live behavior.
+The current candidate requires fresh hosted execution. All 42 acceptance
+conditions remain unchanged and production remains NO_GO.

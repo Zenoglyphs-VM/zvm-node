@@ -2,6 +2,7 @@
 // operations that have no corresponding Network request or completion.
 import assert from 'node:assert/strict'
 import {performance} from 'node:perf_hooks'
+import {createPageClientObserver} from './market-page-client-support.mjs'
 import {readPageRequestIdentity, pageRequestIdMatches} from './market-request-identity-support.mjs'
 
 const observed = new WeakMap()
@@ -26,6 +27,7 @@ function rememberSignal(entry, type, event) {
 // proof that a request missing from this Network session has completed.
 function observePageLifecycle(page) {
   const active = new Map(), recent = new Map()
+  const pageClient = createPageClientObserver(active, recent)
   let started = 0, finished = 0, failed = 0, unmatchedSignals = 0, readErrors = 0, truncated = false
   const read = request => {
     const url = request.url(), method = request.method()
@@ -53,6 +55,7 @@ function observePageLifecycle(page) {
         terminal: null, failureClass: null}
       capture(entry, request, 'request')
       active.set(request, entry); started++
+      pageClient.observe(request, entry)
     } catch {readErrors++}
   }
   const onResponse = response => {
@@ -77,10 +80,11 @@ function observePageLifecycle(page) {
     requestfailed: request => terminal(request, 'requestfailed')}
   for (const [name, listener] of Object.entries(listeners)) page.on(name, listener)
   return {
-    close() {for (const [name, listener] of Object.entries(listeners)) page.off(name, listener)},
+    close() {for (const [name, listener] of Object.entries(listeners)) page.off(name, listener); pageClient.close()},
     summary() {return {started, finished, failed, active: active.size, recent: recent.size, unmatchedSignals,
       readErrors, truncated, maximumActiveRecords: maximumTrackedRequests, maximumRecentRecords: maximumRecentSignals,
       passiveOnly: true, completionGateChanged: false}},
+    matchesClient(id, url, method) {return pageClient.matches(id, url, method)},
     matchesRequestId(id, url, method) {return pageRequestIdMatches(active, recent, id, url, method)},
     matches(url, method) {
       const matching = records => [...records.values()].filter(entry => entry.url === url && entry.method === method)
@@ -154,7 +158,8 @@ export function createNavigationRequestTracker(session, page) {
       try {path = new URL(url).pathname.slice(0, 120)} catch {}
       return {method: method.slice(0, 12), path, ageMilliseconds: Math.round(performance.now() - at), recentSignals: recentSignals.map(signal => ({...signal})),
         pageLifecycleMatches: pageLifecycle?.matches(url, method) ?? null,
-        pageRequestIdMatches: pageLifecycle?.matchesRequestId(id, url, method) ?? null}
+        pageRequestIdMatches: pageLifecycle?.matchesRequestId(id, url, method) ?? null,
+        pageClientMatches: pageLifecycle?.matchesClient(id, url, method) ?? null}
     })})
   return {
     close, diagnostic,
