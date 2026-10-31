@@ -271,8 +271,8 @@ database, independent chain finality, supported platforms or release readiness.
 ### Sparse URI range candidates (source candidate)
 
 Prepared discovery and the live NFT batch handler share an exact decimal-text
-prefilter. Canonical unsigned token IDs outside the requested numeric interval
-stay inside SQLite. The previous lexicographic order, 5000-refresh boundary and
+prefilter. For proper subranges, canonical unsigned token IDs outside the
+requested numeric interval stay inside SQLite. The previous lexicographic order, 5000-refresh boundary and
 big.Int validation remain. Legacy spellings and non-text storage take the old
 parser path; integer/REAL casts are not used. No schema/index migration is added.
 Both range queries use the caller context, including the live query that
@@ -455,7 +455,16 @@ NoM authority/finality or complete N04/production acceptance.
 
 ## Indexed decimal token ranges
 
-Unsigned 256-bit BatchMetadataUpdate bounds use an expression index on collection,
+The exact unsigned domain `[0, 2^256-1]` reads the existing collection/token
+ordering directly. A separate scalar probe requires the existing decimal index
+in the same statement; an absent or unusable required index refuses preparation,
+including an empty collection. No outer SQL limit precedes the Go parser. Raw
+oversized numeric IDs can cross the driver in this case, then fail the original
+upper-bound check. Matching actions, lookahead, legacy spelling and block columns
+retain the original scan/parser selection. This route uses 200 SQL bytes and two
+parameters for token IDs and adds no schema or index.
+
+Other unsigned 256-bit BatchMetadataUpdate bounds use an expression index on collection,
 canonical decimal length and original token text. One ordered range seek per
 intersected decimal width is merged with an ordered legacy stream. The maximum
 is 78 canonical branches plus one legacy branch and 313 parameters. No numeric
@@ -489,3 +498,16 @@ The [expression-index rules](https://www.sqlite.org/expridx.html),
 [required-index semantics](https://www.sqlite.org/lang_indexedby.html) describe
 the SQLite interfaces used here. All original recovery, navigation, signature,
 refund, receipt, balance and independent NoM/owner/release gates remain required.
+
+The separate local SQLite 3.54.0 model retains eight selections and both column
+shapes. Its 16402-row whole-domain fixture changes from 237947 to 40069 VM steps,
+while raw driver candidates change from 5004 to 5005 for the same 5001 matches.
+This is a local VM-count observation, not Go-driver timing, fixed RSS or a
+universal speedup. The first EXISTS proposal required a temporary sort and was
+rejected. First-execution and repeated counters are retained separately; their
+difference has no established cause in this model. Other SQL and arguments are
+unchanged. Four missing-index and four unusable-index controls refuse, including
+empty collections. Actual Go plan, direct/prepared replay and the complete
+current-source CI still require execution. Parent index migration/storage costs
+and all independent operator, NoM and production gates remain open. The scalar
+probe follows the [subquery expression rules](https://www.sqlite.org/lang_expr.html).

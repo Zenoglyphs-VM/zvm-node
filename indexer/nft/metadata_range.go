@@ -39,6 +39,8 @@ const metadataCanonicalLength = `CASE WHEN typeof(token_id)='text' AND (token_id
 
 const metadataRangeIndexSchema = "CREATE INDEX IF NOT EXISTS nft_tokens_metadata_range ON nft_tokens(collection,(" + metadataCanonicalLength + "),token_id);"
 
+const metadataFullDomainMaximum = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+
 // metadataRangeQuery merges one sorted seek per decimal width with the legacy
 // stream. INDEXED BY is an index requirement, not a planner hint: an absent or
 // unusable index refuses the operation rather than silently scanning a width.
@@ -54,6 +56,13 @@ func metadataRangeQuery(collection common.Address, from, to *big.Int, includeBlo
 		return "SELECT " + columns + " FROM nft_tokens" + metadataRangeWhere, metadataRangeArgs(collection, from, to)
 	}
 	lower, upper := from.String(), to.String()
+	if lower == "0" && upper == metadataFullDomainMaximum {
+		// Every unsigned event ID is in range. Read the existing collection
+		// ordering directly and leave parsing and the matching-ID limit in Go.
+		// The scalar probe still requires the declared expression index, even
+		// for an empty collection. It is not a limit on the outer token stream.
+		return "SELECT " + columns + " FROM nft_tokens INDEXED BY nft_tokens_collection WHERE collection=? AND (SELECT 1 FROM nft_tokens INDEXED BY nft_tokens_metadata_range WHERE collection=?) IS NOT NULL ORDER BY token_id", []any{collection.Hex(), collection.Hex()}
+	}
 	parts := make([]string, 0, len(upper)-len(lower)+2)
 	args := make([]any, 0, 4*(len(upper)-len(lower)+1)+1)
 	prefix := "SELECT " + columns + " FROM nft_tokens INDEXED BY nft_tokens_metadata_range WHERE collection=? AND " + metadataCanonicalLength

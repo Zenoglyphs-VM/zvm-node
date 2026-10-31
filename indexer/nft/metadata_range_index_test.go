@@ -115,6 +115,49 @@ func requireRangeIndexPlan(t *testing.T, db *sql.DB, address common.Address, fro
 	t.Logf("METADATA-RANGE-INDEX-PLAN widths=%d searches=%d ranges=%d sqlBytes=%d parameters=%d", widths, searches, ranges, len(statement), len(args))
 }
 
+func requireFullDomainRangePlan(t *testing.T, db *sql.DB, address common.Address, maximum *big.Int) {
+	t.Helper()
+	statement, args := metadataRangeQuery(address, big.NewInt(0), maximum, false)
+	if len(statement) != 200 || len(args) != 2 || strings.Contains(statement, " LIMIT ") {
+		t.Fatal("whole-domain query changed its statement, arguments or parser boundary")
+	}
+	rows, err := db.Query("EXPLAIN QUERY PLAN "+statement, args...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	searches, collection, required := 0, 0, 0
+	for rows.Next() {
+		var node, parent, unused int
+		var detail string
+		if err := rows.Scan(&node, &parent, &unused, &detail); err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(detail, "TEMP B-TREE") || strings.Contains(detail, "SCAN nft_tokens") {
+			t.Fatalf("whole-domain query sorts or scans a token table: %s", detail)
+		}
+		if strings.HasPrefix(detail, "SEARCH ") {
+			searches++
+			if strings.Contains(detail, "nft_tokens_collection") {
+				collection++
+			}
+			if strings.Contains(detail, "nft_tokens_metadata_range") {
+				required++
+			}
+		}
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if err := rows.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if searches != 2 || collection != 1 || required != 1 {
+		t.Fatalf("whole-domain indexes: searches=%d collection=%d required=%d", searches, collection, required)
+	}
+	t.Logf("METADATA-RANGE-FULL-DOMAIN-PLAN searches=%d collection=%d required=%d sqlBytes=%d parameters=%d", searches, collection, required, len(statement), len(args))
+}
+
 func TestPreparedURIRangeIndex(t *testing.T) {
 	maximum := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(1))
 	oversized := new(big.Int).Lsh(big.NewInt(1), 256)
@@ -133,7 +176,9 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 	}{
 		{"sparse-seek", big.NewInt(7000), big.NewInt(7002), sparse, 1},
 		{"cross-width-seek", big.NewInt(9), big.NewInt(100), []any{"0", "8", "9", "10", "11", "99", "100", "101", "1000", "999999999999999"}, 3},
-		{"all-widths", big.NewInt(0), maximum, []any{"0", "1", "9", "10", "99", "100", maximum.String(), oversized.String(), strings.Repeat("9", 78), "-0", []byte("7")}, 78},
+		{"all-widths", big.NewInt(1), maximum, []any{"0", "1", "9", "10", "99", "100", maximum.String(), oversized.String(), strings.Repeat("9", 78), "-0", []byte("7")}, 78},
+		{"full-domain", big.NewInt(0), maximum, []any{"0", "+0", "-0", "00", "1", "+1", maximum.String(), "+" + maximum.String(), oversized.String(), strings.Repeat("9", 79), "1\x009", []byte("7"), []byte{0xff}}, 0},
+		{"full-domain-empty", big.NewInt(0), maximum, nil, 0},
 		{"legacy-merge", big.NewInt(0), big.NewInt(11), []any{"0", "+0", "-0", "00", "1", "+1", "01", "10", "0010", "+10", "1_0", "x", "\uff11\uff12", "1\x009", []byte("7"), []byte("+2"), []byte{0xff}}, 2},
 		{"signed-fallback", big.NewInt(-2), big.NewInt(2), []any{"-2", "-1", "0", "1", "2", "3", "+1"}, 0},
 		{"oversized-bound-fallback", oversized, new(big.Int).Add(new(big.Int).Set(oversized), big.NewInt(2)), []any{oversized.String(), new(big.Int).Add(new(big.Int).Set(oversized), big.NewInt(1)).String(), new(big.Int).Add(new(big.Int).Set(oversized), big.NewInt(2)).String(), "0", "-1"}, 0},
@@ -146,6 +191,9 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 			got, candidates := rangeIndexMatches(t, db, address, test.from, test.to, 5000)
 			if fmt.Sprint(got) != fmt.Sprint(want) {
 				t.Fatalf("indexed matches %v differ from original %v", got, want)
+			}
+			if test.name == "full-domain" || test.name == "full-domain-empty" {
+				requireFullDomainRangePlan(t, db, address, maximum)
 			}
 			if test.widths > 0 {
 				requireRangeIndexPlan(t, db, address, test.from, test.to, test.widths)
@@ -175,6 +223,23 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 			t.Fatal("original first 5000 and one lookahead changed")
 		}
 		requireRangeIndexPlan(t, db, address, from, to, 4)
+	})
+	t.Run("full-domain-lookahead", func(t *testing.T) {
+		ids := make([]any, 0, 11230)
+		for i := 0; i < 5012; i++ {
+			ids = append(ids, fmt.Sprintf("!%06d", i))
+		}
+		for i := 1; i <= 6200; i++ {
+			ids = append(ids, fmt.Sprint(i))
+		}
+		ids = append(ids, "0", "+0", "-0", "00", maximum.String(), oversized.String(), strings.Repeat("9", 79), []byte("7"))
+		_, db, address := rangeIndexFixture(t, ids)
+		want := oldMetadataRangeSelection(t, db, address, big.NewInt(0), maximum)
+		got, candidates := rangeIndexMatches(t, db, address, big.NewInt(0), maximum, 5001)
+		if len(got) != 5001 || len(want) != 5000 || candidates <= 10012 || fmt.Sprint(got[:5000]) != fmt.Sprint(want) {
+			t.Fatal("whole-domain legacy or oversized candidates changed the original matching-ID boundary")
+		}
+		requireFullDomainRangePlan(t, db, address, maximum)
 	})
 	t.Run("legacy-does-not-consume-limit", func(t *testing.T) {
 		ids := make([]any, 0, 5020)
@@ -221,10 +286,12 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 			return out
 		}
 		want := read("SELECT token_id,minted_block,updated_block FROM nft_tokens WHERE collection=? ORDER BY token_id", []any{address.Hex()})
-		statement, args := metadataRangeQuery(address, big.NewInt(1), big.NewInt(4), true)
-		got := read(statement, args)
-		if len(got) != 4 || fmt.Sprint(got) != fmt.Sprint(want) {
-			t.Fatal("discovery keys or source block columns changed")
+		for _, bounds := range [][2]*big.Int{{big.NewInt(1), big.NewInt(4)}, {big.NewInt(0), maximum}} {
+			statement, args := metadataRangeQuery(address, bounds[0], bounds[1], true)
+			got := read(statement, args)
+			if len(got) != 4 || fmt.Sprint(got) != fmt.Sprint(want) {
+				t.Fatal("discovery keys or source block columns changed")
+			}
 		}
 	})
 	t.Run("cancelled-query", func(t *testing.T) {
@@ -293,31 +360,73 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 		}
 		before := uriHistoryDump(t, db)
 		for _, discovery := range []bool{false, true} {
-			tx, err := db.Begin()
-			if err != nil {
+			for _, upper := range []*big.Int{big.NewInt(1), maximum} {
+				tx, err := db.Begin()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if discovery {
+					p, openErr := newPreparedURI(context.Background(), x, preparedURIBytes)
+					if openErr != nil {
+						t.Fatal(openErr)
+					}
+					p.collect, openErr = p.db.Begin()
+					if openErr != nil {
+						p.Close()
+						t.Fatal(openErr)
+					}
+					err = p.loadRange(context.Background(), tx, address, big.NewInt(0), upper)
+					p.Close()
+				} else {
+					err = x.refreshRange(context.Background(), tx, address, big.NewInt(0), upper, 1)
+				}
+				tx.Rollback()
+				if err == nil || !strings.Contains(err.Error(), "nft_tokens_metadata_range") {
+					t.Fatalf("missing-index path did not refuse: %v", err)
+				}
+				if uriHistoryDump(t, db) != before {
+					t.Fatal("missing-index refusal changed a canonical table")
+				}
+			}
+		}
+	})
+	t.Run("unusable-full-domain-index-refusal", func(t *testing.T) {
+		for _, name := range []string{"nft_tokens_collection", "nft_tokens_metadata_range"} {
+			x, db, address := rangeIndexFixture(t, []any{"1"})
+			if _, err := db.Exec("DROP INDEX " + name); err != nil {
 				t.Fatal(err)
 			}
-			if discovery {
-				p, openErr := newPreparedURI(context.Background(), x, preparedURIBytes)
-				if openErr != nil {
-					t.Fatal(openErr)
+			if _, err := db.Exec("CREATE INDEX " + name + " ON nft_tokens(collection,token_id) WHERE collection='unselected'"); err != nil {
+				t.Fatal(err)
+			}
+			before := uriHistoryDump(t, db)
+			for _, discovery := range []bool{false, true} {
+				tx, err := db.Begin()
+				if err != nil {
+					t.Fatal(err)
 				}
-				p.collect, openErr = p.db.Begin()
-				if openErr != nil {
+				if discovery {
+					p, openErr := newPreparedURI(context.Background(), x, preparedURIBytes)
+					if openErr != nil {
+						t.Fatal(openErr)
+					}
+					p.collect, openErr = p.db.Begin()
+					if openErr != nil {
+						p.Close()
+						t.Fatal(openErr)
+					}
+					err = p.loadRange(context.Background(), tx, address, big.NewInt(0), maximum)
 					p.Close()
-					t.Fatal(openErr)
+				} else {
+					err = x.refreshRange(context.Background(), tx, address, big.NewInt(0), maximum, 1)
 				}
-				err = p.loadRange(context.Background(), tx, address, big.NewInt(0), big.NewInt(1))
-				p.Close()
-			} else {
-				err = x.refreshRange(context.Background(), tx, address, big.NewInt(0), big.NewInt(1), 1)
-			}
-			tx.Rollback()
-			if err == nil || !strings.Contains(err.Error(), "nft_tokens_metadata_range") {
-				t.Fatalf("missing-index path did not refuse: %v", err)
-			}
-			if uriHistoryDump(t, db) != before {
-				t.Fatal("missing-index refusal changed a canonical table")
+				tx.Rollback()
+				if err == nil || !strings.Contains(err.Error(), "no query solution") {
+					t.Fatalf("unusable whole-domain index did not refuse: %v", err)
+				}
+				if uriHistoryDump(t, db) != before {
+					t.Fatal("unusable whole-domain index changed a canonical table")
+				}
 			}
 		}
 	})

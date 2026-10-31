@@ -49,6 +49,7 @@ func TestPreparedURIRangeFilter(t *testing.T) {
 		{"sparse", "7000", "7002", nil},
 		{"cross-width", "9", "100", []string{"0", "8", "9", "10", "11", "99", "100", "101", "1000"}},
 		{"uint256", maximum, maximum, []string{"1", "999999999999999999999999999999999999999999999999999999999999999999999999999999", maximum, new(big.Int).Lsh(big.NewInt(1), 256).String()}},
+		{"whole-uint256", "0", maximum, []string{"0", "+0", "-0", "00", "1", "+1", maximum, "+" + maximum, new(big.Int).Lsh(big.NewInt(1), 256).String(), "1\x009", "x"}},
 		{"legacy", "0", "11", []string{"0", "-0", "+0", "00", "01", "+1", "-1", "1", "2", "9", "10", "11", "100", "0010", "+10", "1_0", "x", "１２", "1\x009"}},
 		{"zero", "0", "0", []string{"0", "-0", "+0", "00", "1"}},
 		{"non-text", "0", "11", []string{"0", "+2", "7", "10", "100"}},
