@@ -430,6 +430,13 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 			}
 		}
 	})
+	t.Run("adoption-cost", func(t *testing.T) {
+		for _, count := range []int{4096, 16384, 65536} {
+			t.Run(fmt.Sprint(count), func(t *testing.T) {
+				requireMetadataIndexAdoptionCost(t, count)
+			})
+		}
+	})
 	t.Run("transactional-upgrade-rollback", func(t *testing.T) {
 		x, db, _ := rangeIndexFixture(t, []any{"1", "+2"})
 		if _, err := db.Exec("DROP INDEX nft_tokens_metadata_range"); err != nil {

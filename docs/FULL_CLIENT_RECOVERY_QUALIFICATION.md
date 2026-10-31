@@ -511,3 +511,30 @@ empty collections. Actual Go plan, direct/prepared replay and the complete
 current-source CI still require execution. Parent index migration/storage costs
 and all independent operator, NoM and production gates remain open. The scalar
 probe follows the [subquery expression rules](https://www.sqlite.org/lang_expr.html).
+
+## Bounded index adoption cost qualification
+
+The existing normal and selected race commands now include isolated NFT index
+adoption fixtures with 4096, 16384 and 65536 token rows across four collections.
+Each fixture reads back a 64 MiB logical database page bound, preserves every
+fixture table, and requires read-only and page-limit refusals, transactional DDL
+rollback, successful adoption and idempotent reopen. The source mint SQL seeds
+canonical, legacy, embedded-NUL, BLOB and oversized token spellings. Three
+source-bound observations report actual Go-driver SQLite version and page costs.
+These are required candidate controls, not execution results.
+
+A separate local SQLite 3.54.0 model has exercised those row counts, twelve
+source-SQL write comparisons and three independent in-memory backup copies. Its
+65536-row fixture adds 3887104 logical database/index bytes to 23326720 baseline
+bytes. Approximate progress-callback observations increase for new inserts and
+existing upserts; they are unchanged for the selected owner/metadata updates.
+Those observations are separate from native Go timing, exact VM instructions,
+process RSS, physical disk allocation, full-client block history and operator
+policy. No database file or real operator migration was used by that model.
+
+The candidate adds no production schema, index, dependency, workflow command,
+native binary, timeout or browser profile. The independent scan/parser oracle,
+5000 actions, 5001 matching lookahead, prior index cases, URI and recovery gates
+remain. Actual disk/WAL/locking, supported-platform, independent backup/restore,
+large full-client histories and every original N04 acceptance gate remain open.
+All 42 original requirements and production NO_GO remain authoritative.
