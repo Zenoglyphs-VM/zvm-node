@@ -293,6 +293,10 @@ func retainedMetadata(tx *sql.Tx, kind, address, id string, block uint64) (metad
 	if hex.EncodeToString(digest[:]) != key.String {
 		return empty, errors.New("metadata payload hash mismatch")
 	}
+	// Reject invalid source bytes before JSON decoding can replace them.
+	if !utf8.Valid(raw) {
+		return empty, errors.New("metadata payload contains invalid text")
+	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	var value metadataJSON

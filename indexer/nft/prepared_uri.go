@@ -258,6 +258,9 @@ func (p *preparedURI) loadSourceKeys(ctx context.Context, source indexer.Prepara
 	return nil
 }
 
+// Handlers must replay exactly the discovered calls, in order, without retries.
+// Repeating or omitting a call can mismatch the next request or make Complete
+// fail. Any preparation error requires aborting the indexing batch.
 func (p *preparedURI) request(ctx context.Context, block uint64, address common.Address, kind int, data []byte) (string, bool) {
 	if p.err != nil {
 		return "", false

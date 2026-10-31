@@ -405,3 +405,23 @@ Independent signed NoM authority/finality, HTTP/physical-wallet admission,
 standalone daemons, native full-client races, larger histories, platform,
 operator and release gates, kernel kill and hardware power loss remain open.
 All 42 original acceptance fields remain authoritative; production is NO_GO.
+
+## Metadata payload field validation
+
+Prepared URI consumers must replay the discovered calls exactly once and in the
+same order, without retries. A mismatch, omitted response or preparation error
+invalidates the batch; callers must abort the canonical write.
+
+The URI-history field matrix seeds canonical block/history references and matching
+payload digests before testing one malformed field or envelope condition per case.
+It covers version, trailing data, unknown fields, invalid UTF-8 in all four text
+fields, URI/document/payload size, malformed document JSON and orphan display
+fields. Each invalid case has an otherwise valid baseline. Exact size boundaries
+and a legitimate Unicode replacement character remain accepted. Complete table
+snapshots stay unchanged by validation. Raw UTF-8 is checked before JSON decoding
+can replace invalid source bytes; malformed retained input cannot become a
+different valid observation through that normalization.
+
+These cases use local SQLite fixtures in the existing normal and selected race
+commands. Their results do not establish operator migration, independent NoM
+source authority/finality, supported platforms or complete N04 acceptance.
