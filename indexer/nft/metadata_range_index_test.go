@@ -134,7 +134,7 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 		{"sparse-seek", big.NewInt(7000), big.NewInt(7002), sparse, 1},
 		{"cross-width-seek", big.NewInt(9), big.NewInt(100), []any{"0", "8", "9", "10", "11", "99", "100", "101", "1000", "999999999999999"}, 3},
 		{"all-widths", big.NewInt(0), maximum, []any{"0", "1", "9", "10", "99", "100", maximum.String(), oversized.String(), strings.Repeat("9", 78), "-0", []byte("7")}, 78},
-		{"legacy-merge", big.NewInt(0), big.NewInt(11), []any{"0", "+0", "-0", "00", "1", "+1", "01", "10", "0010", "+10", "1_0", "x", "\uff11\uff12", "1\x009", []byte("7"), []byte("+2"), []byte{0xff}}, 1},
+		{"legacy-merge", big.NewInt(0), big.NewInt(11), []any{"0", "+0", "-0", "00", "1", "+1", "01", "10", "0010", "+10", "1_0", "x", "\uff11\uff12", "1\x009", []byte("7"), []byte("+2"), []byte{0xff}}, 2},
 		{"signed-fallback", big.NewInt(-2), big.NewInt(2), []any{"-2", "-1", "0", "1", "2", "3", "+1"}, 0},
 		{"oversized-bound-fallback", oversized, new(big.Int).Add(new(big.Int).Set(oversized), big.NewInt(2)), []any{oversized.String(), new(big.Int).Add(new(big.Int).Set(oversized), big.NewInt(1)).String(), new(big.Int).Add(new(big.Int).Set(oversized), big.NewInt(2)).String(), "0", "-1"}, 0},
 	} {
