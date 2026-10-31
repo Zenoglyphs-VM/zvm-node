@@ -244,3 +244,5 @@ console.log('NAVIGATION-IDENTITY-CONTROLS '+JSON.stringify({controls, originalPr
   requestTracking: 'cdp-network-request-identities', originalBudgetPreserved: true,
   protocolSessionsIsolated: true, interceptionOnlySignalsCountedAsNetworkRequests: false,
   cacheProvenanceAloneCompletesRequest: false, diagnosticQueryValuesOmitted: true}))
+
+import './market-request-identity-support.test.mjs'

@@ -2,6 +2,7 @@
 // operations that have no corresponding Network request or completion.
 import assert from 'node:assert/strict'
 import {performance} from 'node:perf_hooks'
+import {readPageRequestIdentity, pageRequestIdMatches} from './market-request-identity-support.mjs'
 
 const observed = new WeakMap()
 const maximumTrackedRequests = 256
@@ -48,7 +49,7 @@ function observePageLifecycle(page) {
     if (active.has(request) || recent.has(request)) return
     if (active.size === maximumTrackedRequests) {truncated = true; return}
     try {
-      const entry = {...read(request), signals: [], responseStatus: null, interceptResolutionHandled: null,
+      const entry = {...read(request), requestIdentity: readPageRequestIdentity(request, page), signals: [], responseStatus: null, interceptResolutionHandled: null,
         terminal: null, failureClass: null}
       capture(entry, request, 'request')
       active.set(request, entry); started++
@@ -80,6 +81,7 @@ function observePageLifecycle(page) {
     summary() {return {started, finished, failed, active: active.size, recent: recent.size, unmatchedSignals,
       readErrors, truncated, maximumActiveRecords: maximumTrackedRequests, maximumRecentRecords: maximumRecentSignals,
       passiveOnly: true, completionGateChanged: false}},
+    matchesRequestId(id, url, method) {return pageRequestIdMatches(active, recent, id, url, method)},
     matches(url, method) {
       const matching = records => [...records.values()].filter(entry => entry.url === url && entry.method === method)
       const live = matching(active), ended = matching(recent)
@@ -147,11 +149,12 @@ export function createNavigationRequestTracker(session, page) {
   const diagnostic = () => ({activeRequests: active.size, maximumTrackedRequests, peak, started, completed,
     documentRequestsStarted: documents, cacheSignals, unmatchedCompletionSignals,
     pageLifecycle: pageLifecycle?.summary() ?? null,
-    requests: [...active.values()].slice(0, 8).map(({url, method, at, recentSignals}) => {
+    requests: [...active.entries()].slice(0, 8).map(([id, {url, method, at, recentSignals}]) => {
       let path = '[unparseable]'
       try {path = new URL(url).pathname.slice(0, 120)} catch {}
       return {method: method.slice(0, 12), path, ageMilliseconds: Math.round(performance.now() - at), recentSignals: recentSignals.map(signal => ({...signal})),
-        pageLifecycleMatches: pageLifecycle?.matches(url, method) ?? null}
+        pageLifecycleMatches: pageLifecycle?.matches(url, method) ?? null,
+        pageRequestIdMatches: pageLifecycle?.matchesRequestId(id, url, method) ?? null}
     })})
   return {
     close, diagnostic,

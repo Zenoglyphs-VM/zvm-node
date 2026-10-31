@@ -538,3 +538,31 @@ native binary, timeout or browser profile. The independent scan/parser oracle,
 remain. Actual disk/WAL/locking, supported-platform, independent backup/restore,
 large full-client histories and every original N04 acceptance gate remain open.
 All 42 original requirements and production NO_GO remain authoritative.
+
+## Passive Page request-ID compatibility observations
+
+The locked Karum driver selects puppeteer-core 25.11.0. Its reviewed CDP request
+implementation initializes HTTPRequest.id from the Network request ID. An
+additional passive observation reads that property only when the request's Frame
+returns the identical Page object. Unsupported, malformed, overlong or throwing
+properties remain unavailable. No client command, request interception decision,
+header/body read, RPC handler or ResponseWriter is introduced or replaced.
+
+The existing Page observer holds at most 256 active and eight recent records.
+Each new opaque ID is ASCII and at most 128 bytes, held only in those bounded
+memory records. Reports contain match counts and copied lifecycle summaries;
+raw IDs, URL queries, headers, bodies and wallet-linked data are omitted.
+Duplicate matches remain ambiguous. Cross-session protocol identity and server
+request correlation remain unqualified even when the same Page ID matches.
+
+The original URL/method-only observations, dedicated Network completion gate,
+20-second deadline, zero-inflight rule, 100 ms quiet interval and every original
+signature/refund/receipt/balance oracle remain unchanged. Even a finished Page
+request with a matching opaque ID cannot complete the dedicated Network request.
+Sixteen new standard-library fake controls run with the unchanged 21 protocol
+and passive controls in the existing command. They are separate from native or
+hosted browser evidence and establish no historical live failure cause.
+
+The existing NFT adoption and four full-client scopes remain required. No native
+command, dependency, browser profile, binary build or timeout is added. All 42
+original acceptance conditions and production NO_GO remain authoritative.
