@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -37,14 +38,108 @@ type Runner interface {
 type LocalRunner struct {
 	Compilers *Compilers
 	Timeout   time.Duration
+	// Limits are fixed before first use. Zero selects the defaults below.
+	MaxConcurrent  int
+	MaxInputBytes  int64
+	MaxOutputBytes int64
+	MaxStderrBytes int64
+	once           sync.Once
+	slots          chan struct{}
+}
+
+const (
+	DefaultCompileInputBytes  = 16 << 20
+	DefaultCompileOutputBytes = 64 << 20
+	DefaultCompileStderrBytes = 1 << 20
+	DefaultCompileConcurrent  = 2
+)
+
+var (
+	ErrCompilerBusy        = errors.New("compiler capacity is busy; try again shortly")
+	ErrCompilerOutputLimit = errors.New("compiler output exceeded its byte limit")
+)
+
+// compilerCapture retains a bounded prefix, then cancels the child immediately.
+// Returning an I/O error alone would leave an output-flooding child running
+// until its deadline, or waiting forever for a pipe reader that stopped.
+type compilerCapture struct {
+	// Do not embed bytes.Buffer: its promoted ReadFrom would let io.Copy
+	// bypass Write and silently remove the byte bound on process pipes.
+	buffer   bytes.Buffer
+	limit    int64
+	cancel   context.CancelFunc
+	exceeded bool
+}
+
+func (b *compilerCapture) Write(p []byte) (int, error) {
+	n := min(int64(len(p)), b.limit-int64(b.buffer.Len()))
+	if n > 0 {
+		b.buffer.Write(p[:n])
+	}
+	if n < int64(len(p)) {
+		b.exceeded = true
+		b.cancel()
+		return int(n), ErrCompilerOutputLimit
+	}
+	return int(n), nil
+}
+
+func compileLimit(value, fallback int64) (int64, error) {
+	if value == 0 {
+		return fallback, nil
+	}
+	if value < 0 || value > 256<<20 {
+		return 0, fmt.Errorf("%w: compiler byte limit must be positive and at most 256 MiB", ErrInvalid)
+	}
+	return value, nil
 }
 
 func (r *LocalRunner) Compile(ctx context.Context, compiler string, input []byte) ([]byte, error) {
-	build, err := r.Compilers.Resolve(ctx, compiler)
+	if r.MaxConcurrent < 0 || r.MaxConcurrent > 64 {
+		return nil, fmt.Errorf("%w: compiler concurrency must be between 1 and 64", ErrInvalid)
+	}
+	r.once.Do(func() {
+		n := r.MaxConcurrent
+		if n == 0 {
+			n = DefaultCompileConcurrent
+		}
+		r.slots = make(chan struct{}, n)
+	})
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	select {
+	case r.slots <- struct{}{}:
+		defer func() { <-r.slots }()
+	default:
+		return nil, ErrCompilerBusy
+	}
+	inputLimit, err := compileLimit(r.MaxInputBytes, DefaultCompileInputBytes)
 	if err != nil {
 		return nil, err
 	}
-	bin, err := r.Compilers.Path(ctx, build)
+	outputLimit, err := compileLimit(r.MaxOutputBytes, DefaultCompileOutputBytes)
+	if err != nil {
+		return nil, err
+	}
+	stderrLimit, err := compileLimit(r.MaxStderrBytes, DefaultCompileStderrBytes)
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(input)) > inputLimit {
+		return nil, fmt.Errorf("%w: compiler input is larger than %d bytes", ErrInvalid, inputLimit)
+	}
+	timeout := r.Timeout
+	if timeout == 0 {
+		timeout = 2 * time.Minute
+	}
+	cctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	build, err := r.Compilers.Resolve(cctx, compiler)
+	if err != nil {
+		return nil, err
+	}
+	bin, err := r.Compilers.Path(cctx, build)
 	if err != nil {
 		return nil, err
 	}
@@ -53,21 +148,22 @@ func (r *LocalRunner) Compile(ctx context.Context, compiler string, input []byte
 		return nil, err
 	}
 	defer os.RemoveAll(dir)
-	timeout := r.Timeout
-	if timeout == 0 {
-		timeout = 2 * time.Minute
-	}
-	cctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
 	cmd := exec.CommandContext(cctx, bin, "--standard-json")
 	cmd.Dir = dir
 	cmd.Env = []string{}
 	cmd.Stdin = bytes.NewReader(input)
-	var stdout, stderr bytes.Buffer
+	stdout := compilerCapture{limit: outputLimit, cancel: cancel}
+	stderr := compilerCapture{limit: stderrLimit, cancel: cancel}
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
-	if err := cmd.Run(); err != nil {
+	// Bound inherited pipe descriptors too if the compiler starts a child.
+	cmd.WaitDelay = time.Second
+	err = cmd.Run()
+	if stdout.exceeded || stderr.exceeded {
+		return nil, fmt.Errorf("solc %s: %w", build.LongVersion, ErrCompilerOutputLimit)
+	}
+	if err != nil {
 		if cctx.Err() != nil {
-			return nil, fmt.Errorf("solc %s did not finish within %s", build.LongVersion, timeout)
+			return nil, fmt.Errorf("solc %s stopped before completion: %w", build.LongVersion, cctx.Err())
 		}
 		// The file is there, so "not found" is its loader: several releases
 		// (0.8.12–0.8.23 among them) are linked against glibc.
@@ -76,14 +172,15 @@ func (r *LocalRunner) Compile(ctx context.Context, compiler string, input []byte
 		}
 		return nil, fmt.Errorf("solc %s failed to run: %v", build.LongVersion, err)
 	}
-	return stdout.Bytes(), nil
+	return stdout.buffer.Bytes(), nil
 }
 
 // RemoteRunner sends the work to a `zvm solcd` service.
 type RemoteRunner struct {
-	URL    string
-	Token  string
-	Client *http.Client
+	URL            string
+	Token          string
+	Client         *http.Client
+	MaxOutputBytes int64
 }
 
 type compileRequest struct {
@@ -92,6 +189,13 @@ type compileRequest struct {
 }
 
 func (r *RemoteRunner) Compile(ctx context.Context, compiler string, input []byte) ([]byte, error) {
+	if len(input) > DefaultCompileInputBytes {
+		return nil, fmt.Errorf("%w: compiler input is larger than %d bytes", ErrInvalid, DefaultCompileInputBytes)
+	}
+	limit, err := compileLimit(r.MaxOutputBytes, DefaultCompileOutputBytes)
+	if err != nil {
+		return nil, err
+	}
 	body, err := json.Marshal(compileRequest{Compiler: compiler, Input: input})
 	if err != nil {
 		return nil, err
@@ -113,9 +217,12 @@ func (r *RemoteRunner) Compile(ctx context.Context, compiler string, input []byt
 		return nil, fmt.Errorf("the verifier service: %w", err)
 	}
 	defer resp.Body.Close()
-	out, err := io.ReadAll(io.LimitReader(resp.Body, 64<<20))
+	out, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
 	if err != nil {
 		return nil, err
+	}
+	if int64(len(out)) > limit {
+		return nil, ErrCompilerOutputLimit
 	}
 	if resp.StatusCode != http.StatusOK {
 		// Its errors are solc's, already stripped of file excerpts.
