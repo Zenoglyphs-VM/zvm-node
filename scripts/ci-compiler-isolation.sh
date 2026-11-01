@@ -24,7 +24,13 @@ n01_state_before="$(sha256sum "$RUNNER_TEMP/n01-host-canaries/node-state")"
 # ceiling. The build's network access is not the runtime isolation result.
 docker pull "$N01_GO_IMAGE"
 docker image inspect "$N01_GO_IMAGE" --format '{{.Id}} {{.Os}}/{{.Architecture}}'
-docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges \
+# Build with the host scratch owner's unprivileged UID/GID. With all
+# capabilities dropped, container root cannot write another user's bind mount.
+n01_build_uid="$(id -u)"
+n01_build_gid="$(id -g)"
+case "$n01_build_uid:$n01_build_gid" in *[!0-9:]*|0:*|*:0) exit 1 ;; esac
+docker run --rm --read-only --user "$n01_build_uid:$n01_build_gid" \
+  --cap-drop ALL --security-opt no-new-privileges \
   --memory 4g --memory-swap 4g --cpus 2 --pids-limit 128 \
   --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
   --mount "type=bind,src=$RUNNER_TEMP/n01-compiler-build,dst=/scratch" \
@@ -36,6 +42,8 @@ docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges \
   --env GIT_CONFIG_KEY_1=safe.directory --env GIT_CONFIG_VALUE_1=/src/zvm-core \
   --env "N01_EXPECTED_SOURCE=$GITHUB_SHA" \
   "$N01_GO_IMAGE" sh -ceu '
+    test -w /scratch
+    test -w /out
     mkdir -p /scratch/tmp
     test "$(go version)" = "go version go1.25.0 linux/amd64"
     go version

@@ -199,12 +199,44 @@ func TestSessionsAreSignInWithEthereum(t *testing.T) {
 	if _, err := Challenge(host, "http://"+host, "z1qqjnwjjpnue8xmmpanz6csze6tcmtzzdtfsww7", testChain, now, expires); err == nil {
 		t.Error("a z1 address was offered a challenge")
 	}
-	// Lowercase addresses are not EIP-55, and EIP-4361 requires it.
-	lower := strings.Replace(message, w.account.Hex(), strings.ToLower(w.account.Hex()), 1)
+	// EIP-55 also has canonical all-lowercase addresses. Use its fixed
+	// mixed-case vector so lowercasing always changes a valid checksum.
+	// https://eips.ethereum.org/EIPS/eip-55#test-cases
+	const checksummedAddress = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed"
+	checksummed := strings.Replace(message, w.account.Hex(), checksummedAddress, 1)
+	if _, err := ParseSIWE(checksummed); err != nil {
+		t.Fatalf("the canonical mixed-case fixture did not parse: %v", err)
+	}
+	lower := strings.Replace(checksummed, checksummedAddress, strings.ToLower(checksummedAddress), 1)
+	if lower == checksummed {
+		t.Fatal("the negative checksum fixture did not change the address")
+	}
 	if _, err := ParseSIWE(lower); err == nil {
 		t.Error("an unchecksummed address parsed")
 	}
 }
+func TestSIWECanonicalLowercaseAddresses(t *testing.T) {
+	// The two all-lowercase EIP-55 test vectors are canonical checksums.
+	// They must remain accepted while a corrupted mixed-case checksum fails.
+	now := time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC)
+	for _, address := range []string{
+		"0xde709f2102306220921060314715629080e2fb77",
+		"0x27b1fdb04752bbc536007a920d24acb045561c26",
+	} {
+		message, err := Challenge("localhost:47000", "http://localhost:47000", address, testChain, now, now.Add(time.Hour))
+		if err != nil {
+			t.Fatalf("canonical address %s could not obtain a challenge: %v", address, err)
+		}
+		parsed, err := ParseSIWE(message)
+		if err != nil {
+			t.Fatalf("canonical address %s did not parse: %v", address, err)
+		}
+		if parsed.Address.Hex() != address {
+			t.Fatalf("canonical address changed: got %s, want %s", parsed.Address.Hex(), address)
+		}
+	}
+}
+
 func TestTokensRoundTripAndExpire(t *testing.T) {
 	s := testStore(t, "")
 	account := common.HexToAddress("0x1111111111111111111111111111111111111111")
