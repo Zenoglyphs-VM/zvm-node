@@ -9,7 +9,32 @@ permissions:
 
 # Linux, as most people who build this will be on.
 jobs:
+  ci-scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      run_go: ${{ steps.select.outputs.run_go }}
+      run_integration: ${{ steps.select.outputs.run_integration }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Check conservative source-selection controls without network
+        run: python3 -B scripts/check-ci-change-scope_test.py
+      - name: Read the exact optional runtime anchor with bounded history
+        continue-on-error: true
+        run: git fetch --no-tags --depth=1 origin 86a254841276ede899b22379a9cdea4f9632465a
+      - name: Select jobs from verified source inputs
+        id: select
+        env:
+          ZVM_CHANGE_BASE: ${{ github.event.before || github.event.pull_request.base.sha }}
+          ZVM_CHANGE_HEAD: ${{ github.sha }}
+        run: python3 -B scripts/check-ci-change-scope.py --github-output
+
   go:
+    needs: [ci-scope]
+    if: ${{ always() && needs.ci-scope.outputs.run_go != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -54,7 +79,8 @@ jobs:
           git diff --exit-code
 
   market-browser:
-    needs: [go, full-client-recovery]
+    needs: [ci-scope, go, full-client-recovery]
+    if: ${{ always() && needs.ci-scope.outputs.run_integration != 'false' && needs.go.result == 'success' && needs['full-client-recovery'].result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -155,6 +181,8 @@ jobs:
         run: git diff --exit-code
 
   full-client-recovery:
+    needs: [ci-scope]
+    if: ${{ always() && needs.ci-scope.outputs.run_integration != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

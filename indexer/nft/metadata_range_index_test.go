@@ -159,6 +159,9 @@ func requireFullDomainRangePlan(t *testing.T, db *sql.DB, address common.Address
 }
 
 func TestPreparedURIRangeIndex(t *testing.T) {
+	if metadataIndexProcessChild(t) {
+		return
+	}
 	maximum := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(1))
 	oversized := new(big.Int).Lsh(big.NewInt(1), 256)
 	sparse := make([]any, 0, 16384)
@@ -439,6 +442,9 @@ func TestPreparedURIRangeIndex(t *testing.T) {
 	})
 	t.Run("file-backup", func(t *testing.T) {
 		requireMetadataIndexFileBackup(t)
+	})
+	t.Run("process-interruption", func(t *testing.T) {
+		requireMetadataIndexProcessInterruption(t)
 	})
 	t.Run("transactional-upgrade-rollback", func(t *testing.T) {
 		x, db, _ := rangeIndexFixture(t, []any{"1", "+2"})
