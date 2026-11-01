@@ -311,6 +311,11 @@ func AssertFullClientEmptyMessagePasserRefused(t *testing.T) {
 // child. NoM remains the parent's declared fixture; no Engine reply is adapted.
 func OwnedFullClientCLIArgs(t *testing.T, directory string, args []string, phase string) ([]string, func()) {
 	t.Helper()
+	return ownedFullClientCLIArgs(t, directory, args, phase, false)
+}
+
+func ownedFullClientCLIArgs(t *testing.T, directory string, args []string, phase string, kernelKill bool) ([]string, func()) {
+	t.Helper()
 	path := filepath.Join(directory, "full-client-genesis.json")
 	info, err := os.Lstat(path)
 	if err != nil || !info.Mode().IsRegular() || info.Size() > 1<<20 {
@@ -384,7 +389,11 @@ func OwnedFullClientCLIArgs(t *testing.T, directory string, args []string, phase
 			}
 			fmt.Printf("owned_full_client_rewind_ancestor phase=%s source_momentum=7 execution_block=6 rpc_and_direct_hashes_verified=true\n", phase)
 		}
-		fmt.Printf("owned_full_client_boundary phase=%s engine_head=%d service_responding=true actual_exit_requested=86\n", phase, wantHead)
+		if kernelKill {
+			fmt.Printf("owned_full_client_boundary phase=%s engine_head=%d service_responding=true requested_action=parent-SIGKILL\n", phase, wantHead)
+		} else {
+			fmt.Printf("owned_full_client_boundary phase=%s engine_head=%d service_responding=true actual_exit_requested=86\n", phase, wantHead)
+		}
 	}
 }
 

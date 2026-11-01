@@ -16,7 +16,7 @@ import sys
 import time
 
 ANCHOR = '86a254841276ede899b22379a9cdea4f9632465a'
-EXPECTED_WORKFLOW_SHA256 = '91fb095227cf4cf5882ce3eab9d3fec78f1d3d71ddad48beea0104e78a082a79'
+EXPECTED_WORKFLOW_SHA256 = 'afe0565f5ebbffa8ba3b7bed64566cc3779b18ab19794796b89201ee51ce1f37'
 GUIDE = 'docs/METADATA_INDEX_PROCESS_QUALIFICATION.md'
 TESTS = frozenset(['indexer/nft/metadata_range_index_test.go',
     'indexer/nft/metadata_range_process_linux_test.go', 'indexer/nft/metadata_range_process_other_test.go'])

@@ -167,7 +167,7 @@ func startOwnedCLI(t *testing.T, f ownedCLIFixture, phase string, number int) *o
 
 func startOwnedCLIWithTest(t *testing.T, f ownedCLIFixture, phase string, number int, testName string) *ownedCLIProcess {
 	t.Helper()
-	if testName != "TestExecutedNativeCLIRecovery" && testName != "TestFullClientOwnedProcess" {
+	if testName != "TestExecutedNativeCLIRecovery" && testName != "TestFullClientOwnedProcess" && testName != "TestFullClientOwnedKernelKillProcess" {
 		t.Fatal("unexpected owned CLI child entrypoint")
 	}
 	cfg := ownedCLIConfig{Directory: f.Directory(), Marker: filepath.Join(f.Directory(), fmt.Sprintf("owned-cli-%d.json", number)), Phase: phase, Args: f.Args()}
