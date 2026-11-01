@@ -16,7 +16,11 @@ them to make room. Cross-process/operator cache ownership remains separate.
 
 The proposed `compiler-isolation` CI lane uses an immutable Linux amd64 Go image
 and builds the actual race-instrumented `zvm-node` binary once plus its test
-harness, reusing the same build cache and image. It checks the embedded source
+harness, reusing the same build cache and image. It explicitly builds the
+standard `cmd/test2json` converter from that pinned Go distribution; it does
+not assume a preinstalled tool binary at a fixed path. Build temporaries
+use the declared build scratch, and named stages expose a failed boundary
+without printing environment contents. It checks the embedded source
 revision and clean-source metadata. Build networking and writable scratch are
 distinct from the subsequent runtime profile. No local Docker engine, image,
 Solidity compiler or Go SDK download is required by this source contribution.
@@ -24,7 +28,8 @@ Solidity compiler or Go SDK download is required by this source contribution.
 The runtime profile requires kernel-observed 512 MiB memory, zero swap, two
 CPUs, 64 tasks, a 64 MiB tmpfs, UID/GID 10001, a read-only root, no effective
 capabilities, no-new-privileges and no non-loopback interface. Only the two
-declared binaries are mounted. Host-only synthetic node-secret and state
+declared binaries and the explicit JSON converter are mounted. Host-only
+synthetic node-secret and state
 canaries, source, build cache and Docker socket are not mounted. The actual
 compiler fixture also checks its inherited privilege state, absence of the
 parent-only sentinel and absence of the host canary paths. No real key, node
