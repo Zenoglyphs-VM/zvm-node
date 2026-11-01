@@ -50,3 +50,30 @@ been recorded in this guide. Preserve the existing production, original-negative
 corrected-simulator, full-client, browser and historical qualification separately.
 All original roadmap acceptance, independent NoM authority, supported platforms,
 operator/maintainer decisions and production NO_GO remain in force.
+
+## Initial failure and fixture correction
+
+The initial source workflow did not qualify either process boundary. Both new
+cases stopped before the expected marker; the complete failed Go output is
+retained. It did not expose the child's exact refusal, so the original refusal
+cause remains NOT_ESTABLISHED.
+
+Source review found an independent fixture mismatch: the child requires its
+immediate fixture directory to have mode 0700, while Go 1.25 TempDir creates its
+numbered leaf with 0777 subject to the process umask. The parent now explicitly
+selects the physical path and explicitly sets and checks 0700 on only its new
+owned test directory before creating a database. The child's original ownership,
+canonical-path, link-count and permission refusal remains.
+This source correction does not by itself establish the original failure cause.
+See the [pinned Go implementation](https://github.com/golang/go/blob/go1.25.0/src/testing/testing.go#L1322).
+
+Boundary refusal now joins the owned child before reading its bounded output and
+reports only a fixed reason class, byte counts and digests. It does not publish
+raw child output. Both actual SIGKILL, commit-state, canonical-row, resource,
+integrity, source-independence and reopen/idempotence requirements remain exact.
+The corrected candidate still needs its own first automatic native Go workflow.
+
+The selection controller separately pins its reviewed workflow and forces full
+jobs whenever workflow/controller source changes. Those reviewed gating files
+are not application compilation inputs. Original integration/runtime inputs must
+remain equal to the anchor outside the explicitly declared NFT tests and guide.

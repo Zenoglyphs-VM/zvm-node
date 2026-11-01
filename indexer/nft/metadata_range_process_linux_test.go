@@ -141,6 +141,23 @@ func (w *metadataProcessOutput) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
+func metadataProcessFailureClass(output []byte) string {
+	for _, entry := range []struct{ text, code string }{
+		{"invalid isolated index-process protocol", "INVALID_PROTOCOL"},
+		{"index-process path is not the declared private regular fixture", "PRIVATE_FIXTURE_REFUSED"},
+		{"index-process fixture ownership or link count changed", "OWNERSHIP_REFUSED"},
+		{"index-process fixture is not a legacy unindexed token table", "LEGACY_FIXTURE_REFUSED"},
+		{"production schema did not create the index inside its transaction", "INDEX_CREATION_REFUSED"},
+		{"completed schema transaction did not retain its index", "COMMIT_REFUSED"},
+		{"DATA RACE", "RACE_DIAGNOSTIC"},
+	} {
+		if bytes.Contains(output, []byte(entry.text)) {
+			return entry.code
+		}
+	}
+	return "UNCLASSIFIED"
+}
+
 func metadataProcessKillAtBoundary(t *testing.T, path, phase string) {
 	t.Helper()
 	var nonce [16]byte
@@ -176,7 +193,11 @@ func metadataProcessKillAtBoundary(t *testing.T, path, phase string) {
 	select {
 	case line := <-stdout.ready:
 		if line != expected || ctx.Err() != nil {
-			t.Fatal("owned index process did not reach its exact declared boundary")
+			command.Process.Kill()
+			<-done
+			joined = true
+			class := metadataProcessFailureClass(append(append([]byte{}, stdout.data...), stderr.data...))
+			t.Fatalf("owned index process refused its boundary: class=%s stdoutBytes=%d stderrBytes=%d stdoutSHA256=%x stderrSHA256=%x", class, stdout.total, stderr.total, sha256.Sum256(stdout.data), sha256.Sum256(stderr.data))
 		}
 	case err := <-done:
 		joined = true
@@ -281,7 +302,17 @@ func requireMetadataIndexProcessInterruption(t *testing.T) {
 	}
 	for _, phase := range []string{"before-commit", "after-commit"} {
 		t.Run(phase, func(t *testing.T) {
-			path := filepath.Join(t.TempDir(), "index-kill.db")
+			directory, err := filepath.EvalSymlinks(t.TempDir())
+			if err != nil {
+				t.Fatal("could not resolve the newly owned process fixture")
+			}
+			if err := os.Chmod(directory, 0700); err != nil {
+				t.Fatal("could not make the newly owned process fixture private")
+			}
+			if info, err := os.Lstat(directory); err != nil || !info.IsDir() || info.Mode().Perm() != 0700 {
+				t.Fatal("newly owned process fixture did not retain its private mode")
+			}
+			path := filepath.Join(directory, "index-kill.db")
 			if _, err := db.Exec("VACUUM INTO ?", path); err != nil {
 				t.Fatal(err)
 			}
