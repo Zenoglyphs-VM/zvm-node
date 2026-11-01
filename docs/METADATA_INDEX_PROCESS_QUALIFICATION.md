@@ -43,13 +43,38 @@ Skipped jobs establish selection only. They do not establish fresh runtime,
 browser, full-client, artifact, release or production qualification at a new SHA.
 Historical evidence keeps its original source/run binding.
 
-## Evidence state
+## Executed evidence and limits
 
-This initial source describes required controls. Its native execution has not yet
-been recorded in this guide. Preserve the existing production, original-negative,
-corrected-simulator, full-client, browser and historical qualification separately.
-All original roadmap acceptance, independent NoM authority, supported platforms,
-operator/maintainer decisions and production NO_GO remain in force.
+The [first automatic corrective workflow](https://github.com/edgepillar/zvm-node/actions/runs/41347033783) qualifies source
+`e37d705f6fcb754c70c587f8d2ce64f584a6a6e4`. Build and vet pass. The explicit test-only modified simulator fixture
+has 509 normal pass events with seven declared prerequisite skips and 213 selected
+race pass events with zero skips. Counts include parent tests and subtests. The
+original dependency still has its separately required negative late-waiter control;
+this does not qualify the original unmodified normal suite.
+
+Both modes pass the three process-interruption events and join two SIGKILL
+children, four in total. Each phase verifies its expected commit/index state,
+integrity, canonical table bytes, independent source, fresh adoption, idempotence
+and reopen. All 506 normal and 210 selected race parent pass events, including all
+27 range/plan/adoption/backup events per mode, remain preserved.
+
+The selector's twelve control functions also pass in hosted CI. The corrective
+source changes only the declared NFT test and this guide. The unchanged full-client
+and browser jobs are skipped by selection. That skip is not a fresh runtime or
+artifact qualification. The retained first-source full-client job has 21 events,
+54 joined CLI children and 68 service observations/lifetimes at its original
+source/run; that complete first workflow remains failed because its Go job failed.
+Earlier marketplace evidence keeps its own source/run binding.
+
+This guide-only descendant leaves every Go, simulator, integration, browser,
+dependency, workflow and selector input byte-identical to the qualified corrective
+source. Its own CI may select only the guide/selection path. It does not establish
+a fresh binary or native execution at the documentation commit.
+
+All original roadmap acceptance, independent NoM authority, whole-client and
+operator migration/restore, internal CREATE INDEX interruption, hardware power
+loss, supported platforms and maintainer decisions remain separate. Production
+remains NO_GO.
 
 ## Initial failure and fixture correction
 
@@ -71,7 +96,8 @@ Boundary refusal now joins the owned child before reading its bounded output and
 reports only a fixed reason class, byte counts and digests. It does not publish
 raw child output. Both actual SIGKILL, commit-state, canonical-row, resource,
 integrity, source-independence and reopen/idempotence requirements remain exact.
-The corrected candidate still needs its own first automatic native Go workflow.
+The corrected source now has the exact native evidence recorded above. The
+original child refusal cause remains NOT_ESTABLISHED.
 
 The selection controller separately pins its reviewed workflow and forces full
 jobs whenever workflow/controller source changes. Those reviewed gating files
