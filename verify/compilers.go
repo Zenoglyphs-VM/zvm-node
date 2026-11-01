@@ -34,10 +34,12 @@ type Compilers struct {
 	MaxCacheBytes int64
 	MaxCacheFiles int
 
-	mu     sync.Mutex
-	list   *BuildList
-	listAt time.Time
-	dl     sync.Mutex
+	mu        sync.Mutex // protects the short checked-map operations
+	listGuard compilerLock
+	list      *BuildList
+	listAt    time.Time
+
+	dl compilerLock
 	// checked holds the pinned binaries on disk this process has hashed.
 	checked map[string]bool
 }
@@ -122,8 +124,10 @@ func (c *Compilers) base() string {
 // List is the release list for this platform, re-read hourly. A failed
 // refresh keeps the last list it had.
 func (c *Compilers) List(ctx context.Context) (*BuildList, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	if err := c.listGuard.lock(ctx); err != nil {
+		return nil, err
+	}
+	defer c.listGuard.unlock()
 	if c.list != nil && time.Since(c.listAt) < listTTL {
 		return c.list, nil
 	}
@@ -190,8 +194,10 @@ func (c *Compilers) Path(ctx context.Context, b Build) (string, error) {
 		}
 		return dst, nil
 	}
-	c.dl.Lock()
-	defer c.dl.Unlock()
+	if err := c.dl.lock(ctx); err != nil {
+		return "", err
+	}
+	defer c.dl.unlock()
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
