@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict'
 import {performance} from 'node:perf_hooks'
 import {createPageClientObserver} from './market-page-client-support.mjs'
+import {describeOwnedRequestActions} from './market-request-action-support.mjs'
 import {readPageRequestIdentity, pageRequestIdMatches} from './market-request-identity-support.mjs'
 
 const observed = new WeakMap()
@@ -86,6 +87,16 @@ function observePageLifecycle(page) {
       passiveOnly: true, completionGateChanged: false}},
     matchesClient(id, url, method) {return pageClient.matches(id, url, method)},
     matchesRequestId(id, url, method) {return pageRequestIdMatches(active, recent, id, url, method)},
+    matchesActions(id, url, method) {
+      const matching = records => [...records].filter(([, entry]) => entry.requestIdentity?.status === 'AVAILABLE' &&
+        entry.requestIdentity.requestId === id && entry.url === url && entry.method === method)
+      const live = matching(active), ended = matching(recent), values = [...live, ...ended]
+      return {status: values.length > 1 ? 'AMBIGUOUS' : values.length === 1 ? 'MATCHED' : 'NO_MATCH',
+        activeMatches: live.length, recentMatches: ended.length, observationsTruncated: values.length > maximumRecentSignals,
+        requestObjectLocalObservation: true, exactProtocolSessionIdentityEstablished: false,
+        serverRequestCorrelationEstablished: false, completionGateChanged: false,
+        observations: values.slice(0, maximumRecentSignals).map(([request]) => describeOwnedRequestActions(request))}
+    },
     matches(url, method) {
       const matching = records => [...records.values()].filter(entry => entry.url === url && entry.method === method)
       const live = matching(active), ended = matching(recent)
@@ -159,7 +170,8 @@ export function createNavigationRequestTracker(session, page) {
       return {method: method.slice(0, 12), path, ageMilliseconds: Math.round(performance.now() - at), recentSignals: recentSignals.map(signal => ({...signal})),
         pageLifecycleMatches: pageLifecycle?.matches(url, method) ?? null,
         pageRequestIdMatches: pageLifecycle?.matchesRequestId(id, url, method) ?? null,
-        pageClientMatches: pageLifecycle?.matchesClient(id, url, method) ?? null}
+        pageClientMatches: pageLifecycle?.matchesClient(id, url, method) ?? null,
+        pageRequestActionMatches: pageLifecycle?.matchesActions(id, url, method) ?? null}
     })})
   return {
     close, diagnostic,

@@ -248,3 +248,5 @@ console.log('NAVIGATION-IDENTITY-CONTROLS '+JSON.stringify({controls, originalPr
 import './market-request-identity-support.test.mjs'
 
 import './market-page-client-support.test.mjs'
+
+import './market-request-action-support.test.mjs'

@@ -1,3 +1,4 @@
+import {observeOwnedRequestAction} from './market-request-action-support.mjs'
 // Actual production listing controls, real EIP-712 signatures from a public
 // test signer and the real Go node/market/RPC fixture. No market or RPC reply
 // is fabricated here. The public buyer signs ordinary EVM transactions for
@@ -81,7 +82,7 @@ function armQuote() {
 async function releaseQuote() {
   assert.ok(heldQuoteRequest)
   const request = heldQuoteRequest; heldQuoteRequest = null
-  await request.continue()
+  await observeOwnedRequestAction(request, 'CONTINUE', () => request.continue())
 }
 let fundedNonce, fundedSellerNonce, tokenBulkTypedData, tokenBulkSignature, tokenBulkEvidence
 let releaseBuyer, heldBuyerReadyResolve
@@ -474,17 +475,17 @@ async function preparePage(page) {
         const raw = request.postData()
         if (typeof raw !== 'string' || raw.length > 256*1024) {
           failedHTTP.push({path: target.pathname, status: 'invalid-observed-request'})
-          void request.abort('blockedbyclient')
+          void observeOwnedRequestAction(request, 'ABORT', () => request.abort('blockedbyclient'))
           return
         }
         try {posts.push(JSON.parse(raw).orders)} catch {
           failedHTTP.push({path: target.pathname, status: 'invalid-observed-JSON'})
-          void request.abort('blockedbyclient')
+          void observeOwnedRequestAction(request, 'ABORT', () => request.abort('blockedbyclient'))
           return
         }
       }
-      void request.continue()
-    } else {external.push(target.protocol); void request.abort('blockedbyclient')}
+      void observeOwnedRequestAction(request, 'CONTINUE', () => request.continue())
+    } else {external.push(target.protocol); void observeOwnedRequestAction(request, 'ABORT', () => request.abort('blockedbyclient'))}
   })
   page.on('pageerror', () => exceptions.push('page-exception'))
   page.on('response', response => {
@@ -904,7 +905,7 @@ try {
 } finally {
   releaseApprovalBuyer()
   quoteArmed = false
-  if (heldQuoteRequest) {const request = heldQuoteRequest; heldQuoteRequest = null; await request.continue().catch(() => {})}
+  if (heldQuoteRequest) {const request = heldQuoteRequest; heldQuoteRequest = null; await observeOwnedRequestAction(request, 'CONTINUE', () => request.continue()).catch(() => {})}
   if (context) await context.close()
   await stop()
   await rm(profile, {recursive: true, force: false})
