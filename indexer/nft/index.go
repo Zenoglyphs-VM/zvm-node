@@ -16,6 +16,7 @@ package nft
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -38,10 +39,15 @@ type Index struct {
 	dirty map[string]bool
 
 	// What this block's metadata reads have cost so far (metadataBudget).
-	budgetBlock uint64
-	spent       time.Duration
-	warned      bool
+	budgetBlock  uint64
+	spent        time.Duration
+	warned       bool
+	historyBlock uint64
+	historyBytes int64
 }
+
+const approvalRecoveryVersionKey = "nft_approval_recovery_v1"
+const updateRecoveryVersionKey = "nft_update_recovery_v1"
 
 // metadataBudget is how long one block's tokenURI and contractURI reads may
 // take together. A Transfer is cheap to emit — a contract can log thousands in
@@ -54,27 +60,8 @@ var metadataBudget = 3 * time.Second
 // readURI makes a URI call inside the block's budget, or answers "" once the
 // budget is spent.
 func (x *Index) readURI(ctx context.Context, block uint64, addr common.Address, calldata []byte) string {
-	x.mu.Lock()
-	if x.budgetBlock != block {
-		x.budgetBlock, x.spent, x.warned = block, 0, false
-	}
-	if x.spent >= metadataBudget {
-		warn := !x.warned
-		x.warned = true
-		x.mu.Unlock()
-		if warn {
-			x.log().Warn("metadata reads for this block took their whole budget; the rest are indexed without it",
-				"block", block, "budget", metadataBudget)
-		}
-		return ""
-	}
-	x.mu.Unlock()
-	start := time.Now()
-	uri := x.host.CallURI(ctx, addr, calldata)
-	x.mu.Lock()
-	x.spent += time.Since(start)
-	x.mu.Unlock()
-	return uri
+	value, _ := x.readObservedURI(ctx, block, addr, calldata)
+	return value
 }
 
 // Config is what the node's main hands this plugin.
@@ -99,10 +86,20 @@ func (x *Index) Name() string { return "nft" }
 
 func (x *Index) Attach(h indexer.Host) error { x.host = h; return nil }
 
-func (x *Index) Schema() string { return nftSchema }
+func (x *Index) Schema() string { return nftSchema + metadataHistorySchema }
 
 func (x *Index) Handle(ctx context.Context, dbtx *sql.Tx, r indexer.LogRow) error {
-	return x.indexNFTLog(ctx, dbtx, r)
+	ctx = withMetadataBlock(ctx, r.Block, r.BlockHash)
+	if prepared := uriPreparation(ctx); prepared != nil && prepared.err != nil {
+		return prepared.err
+	}
+	if err := x.indexNFTLog(ctx, dbtx, r); err != nil {
+		return err
+	}
+	if prepared := uriPreparation(ctx); prepared != nil {
+		return prepared.err
+	}
+	return nil
 }
 
 // Jobs backfills the NFT tables over logs already indexed, and replays the
@@ -129,13 +126,16 @@ func (x *Index) Deletes() []string {
 	}
 }
 
-// Restores puts each surviving token's owner back to what the surviving
-// transfers say, and drops approvals, which a reorg cannot be assumed to have
-// preserved.
+// Restores takes ownership from surviving ERC-721 transfers. The shared
+// transfer table also contains ERC-1155 ids, so bind the row to its own log.
+// Rebuild restores approvals only from the surviving event history.
 func (x *Index) Restores() []string {
 	return []string{
 		`UPDATE nft_tokens SET approved = NULL, owner = COALESCE((SELECT t.to_addr FROM token_transfers t
-			WHERE t.token = nft_tokens.collection AND t.token_id = nft_tokens.token_id ORDER BY t.block DESC, t.idx DESC LIMIT 1), owner)
+			JOIN logs l ON l.tx = t.tx AND l.idx = t.idx AND l.block = t.block AND l.address = t.token
+			WHERE t.token = nft_tokens.collection AND t.token_id = nft_tokens.token_id
+			AND l.topic0 = '` + topicTransfer.Hex() + `' AND l.topic3 IS NOT NULL
+			ORDER BY t.block DESC, t.idx DESC LIMIT 1), owner)
 			WHERE updated_block > ?`,
 	}
 }
@@ -144,19 +144,49 @@ func (x *Index) AfterBlock(dbtx *sql.Tx, block uint64) error {
 	return x.refreshDirtyCollections(dbtx, block)
 }
 
+// AfterRollback discards the collections touched by the aborted transaction.
+// Metadata read accounting is retained so retrying a block cannot renew its
+// already-consumed time budget.
+func (x *Index) AfterRollback() {
+	x.mu.Lock()
+	x.dirty = map[string]bool{}
+	x.mu.Unlock()
+}
+
 // Rebuild recomputes every collection's totals, which a rewind cannot repair by
 // deleting rows because a total is a sum over the range that survived.
 func (x *Index) Rebuild(dbtx *sql.Tx, block uint64) error {
-	return x.rebuildCollectionStats(dbtx, block)
+	if err := restoreTokenApprovals(dbtx); err != nil {
+		return err
+	}
+	if err := restoreOperatorApprovals(dbtx); err != nil {
+		return err
+	}
+	if err := restoreTokenUpdateHeights(dbtx); err != nil {
+		return err
+	}
+	if err := restoreMetadata(dbtx, block); err != nil {
+		return err
+	}
+	if err := x.rebuildCollectionStats(dbtx, block); err != nil {
+		return err
+	}
+	_, err := dbtx.Exec("INSERT OR REPLACE INTO index_meta (key,value) VALUES (?,1),(?,1)", approvalRecoveryVersionKey, updateRecoveryVersionKey)
+	return err
 }
 
-// Stale is true for an index that has collections but no statistics — one
-// built before this plugin's aggregate table existed.
+// Stale catches missing collection aggregates and orphan rows left by older
+// rewinds. Equal table counts do not imply matching collection identities.
 func (x *Index) Stale(db *sql.DB) bool {
-	var stats, collections int64
-	db.QueryRow("SELECT COUNT(*) FROM nft_collection_stats").Scan(&stats)
-	db.QueryRow("SELECT COUNT(*) FROM nft_collections").Scan(&collections)
-	return stats == 0 && collections > 0
+	var recovered int
+	if err := db.QueryRow("SELECT COUNT(*) FROM index_meta WHERE key IN (?,?,?) AND value=1", approvalRecoveryVersionKey, updateRecoveryVersionKey, metadataHistoryVersionKey).Scan(&recovered); err != nil || recovered != 3 {
+		return true
+	}
+	var stale bool
+	err := db.QueryRow(`SELECT
+		EXISTS (SELECT 1 FROM nft_collections c LEFT JOIN nft_collection_stats s ON s.collection = c.address WHERE s.collection IS NULL)
+		OR EXISTS (SELECT 1 FROM nft_collection_stats s LEFT JOIN nft_collections c ON c.address = s.collection WHERE c.address IS NULL)`).Scan(&stale)
+	return err != nil || stale
 }
 
 // The three things the host lends this plugin, named the way the code that
@@ -164,5 +194,14 @@ func (x *Index) Stale(db *sql.DB) bool {
 func (x *Index) eth() *ethclient.Client { return x.host.Eth() }
 func (x *Index) log() *slog.Logger      { return x.host.Log() }
 func (x *Index) callString(ctx context.Context, addr common.Address, sig string) string {
+	if prepared := uriPreparation(ctx); prepared != nil {
+		at, ok := ctx.Value(metadataBlockKey{}).(metadataBlock)
+		if !ok {
+			prepared.err = fmt.Errorf("prepared collection name has no source block")
+			return ""
+		}
+		value, _ := prepared.request(ctx, at.number, addr, stringRequest, []byte(sig))
+		return value
+	}
 	return x.host.CallString(ctx, addr, sig)
 }

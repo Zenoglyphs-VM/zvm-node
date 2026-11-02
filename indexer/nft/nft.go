@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS nft_sales (
 CREATE INDEX IF NOT EXISTS nft_sales_collection ON nft_sales(collection, block);
 CREATE INDEX IF NOT EXISTS nft_sales_block ON nft_sales(block);
 CREATE INDEX IF NOT EXISTS nft_sales_recent ON nft_sales(collection, timestamp DESC);
-`
+` + metadataRangeIndexSchema
 
 // Apps names the application contracts whose events the indexer trusts.
 type Apps struct {
@@ -251,28 +251,50 @@ func (x *Index) nftTransfer(ctx context.Context, dbtx *sql.Tx, r indexer.LogRow,
 		}
 	}
 	// A mint, or a token first seen mid-life: read its metadata.
-	uri := x.tokenURI(ctx, r.Block, r.Address, id)
-	m := x.resolveMeta(uri)
-	_, err := dbtx.Exec(`INSERT INTO nft_tokens (collection, token_id, owner, uri, meta, name, image, minted_block, updated_block)
+	value := x.tokenObservation(ctx, r.Block, r.Address, id)
+	value, err := x.admitMetadata(ctx, dbtx, r.Block, value)
+	if err != nil {
+		return err
+	}
+	uri, m := value.uri, value.meta
+	_, err = dbtx.Exec(`INSERT INTO nft_tokens (collection, token_id, owner, uri, meta, name, image, minted_block, updated_block)
 		VALUES (?,?,?,?,?,?,?,?,?)
 		ON CONFLICT(collection, token_id) DO UPDATE SET owner = excluded.owner, approved = NULL, uri = excluded.uri,
 			meta = excluded.meta, name = excluded.name, image = excluded.image, updated_block = excluded.updated_block`,
 		r.Address.Hex(), id.String(), to.Hex(), nullString(uri), m.raw, m.name, m.image, r.Block, r.Block)
-	return err
+	if err != nil {
+		return err
+	}
+	return recordMetadata(ctx, dbtx, "token", r.Address.Hex(), id.String(), r.Block, value)
 }
 
 func (x *Index) refreshToken(ctx context.Context, dbtx *sql.Tx, collection common.Address, id *big.Int, block uint64) error {
-	uri := x.tokenURI(ctx, block, collection, id)
-	m := x.resolveMeta(uri)
-	_, err := dbtx.Exec(`UPDATE nft_tokens SET uri = ?, meta = ?, name = ?, image = ?, updated_block = ? WHERE collection = ? AND token_id = ?`,
+	value := x.tokenObservation(ctx, block, collection, id)
+	value, err := x.admitMetadata(ctx, dbtx, block, value)
+	if err != nil {
+		return err
+	}
+	uri, m := value.uri, value.meta
+	result, err := dbtx.Exec(`UPDATE nft_tokens SET uri = ?, meta = ?, name = ?, image = ?, updated_block = ? WHERE collection = ? AND token_id = ?`,
 		nullString(uri), m.raw, m.name, m.image, block, collection.Hex(), id.String())
-	return err
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return nil
+	}
+	return recordMetadata(ctx, dbtx, "token", collection.Hex(), id.String(), block, value)
 }
 
 // refreshRange re-reads the metadata of the tokens a BatchMetadataUpdate names
 // that the index holds, at most a few thousand of them.
 func (x *Index) refreshRange(ctx context.Context, dbtx *sql.Tx, collection common.Address, from, to *big.Int, block uint64) error {
-	rows, err := dbtx.Query(`SELECT token_id FROM nft_tokens WHERE collection = ?`, collection.Hex())
+	statement, args := metadataRangeQuery(collection, from, to, false)
+	rows, err := dbtx.QueryContext(ctx, statement, args...)
 	if err != nil {
 		return err
 	}
@@ -285,12 +307,22 @@ func (x *Index) refreshRange(ctx context.Context, dbtx *sql.Tx, collection commo
 		}
 		if id, ok := new(big.Int).SetString(s, 10); ok && id.Cmp(from) >= 0 && id.Cmp(to) <= 0 {
 			ids = append(ids, id)
+			if len(ids) == 5_001 {
+				break
+			}
 		}
 	}
-	rows.Close()
+	err = rows.Err()
+	closeErr := rows.Close()
+	if err != nil {
+		return err
+	}
+	if closeErr != nil {
+		return closeErr
+	}
 	for i, id := range ids {
 		if i == 5_000 {
-			x.log().Warn("metadata batch update truncated", "collection", collection, "tokens", len(ids))
+			x.log().Warn("metadata batch update truncated", "collection", collection, "atLeastTokens", len(ids))
 			break
 		}
 		if err := x.refreshToken(ctx, dbtx, collection, id, block); err != nil {
@@ -304,10 +336,17 @@ func (x *Index) refreshCollection(ctx context.Context, dbtx *sql.Tx, collection 
 	if err := x.ensureCollection(ctx, dbtx, collection, block); err != nil {
 		return err
 	}
-	uri := x.contractURI(ctx, block, collection)
-	m := x.resolveMeta(uri)
-	_, err := dbtx.Exec(`UPDATE nft_collections SET contract_uri = ?, meta = ? WHERE address = ?`, nullString(uri), m.raw, collection.Hex())
-	return err
+	uri, proven := x.readObservedURI(ctx, block, collection, selContractURI)
+	value, err := x.admitMetadata(ctx, dbtx, block, x.observedMetadata(uri, proven))
+	if err != nil {
+		return err
+	}
+	uri, m := value.uri, value.meta
+	_, err = dbtx.Exec(`UPDATE nft_collections SET contract_uri = ?, meta = ? WHERE address = ?`, nullString(uri), m.raw, collection.Hex())
+	if err != nil {
+		return err
+	}
+	return recordMetadata(ctx, dbtx, "collection", collection.Hex(), "", block, value)
 }
 
 func (x *Index) ensureCollection(ctx context.Context, dbtx *sql.Tx, addr common.Address, block uint64) error {
@@ -319,12 +358,25 @@ func (x *Index) ensureCollection(ctx context.Context, dbtx *sql.Tx, addr common.
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
-	uri := x.contractURI(ctx, block, addr)
-	m := x.resolveMeta(uri)
+	uri, proven := x.readObservedURI(ctx, block, addr, selContractURI)
+	value, err := x.admitMetadata(ctx, dbtx, block, x.observedMetadata(uri, proven))
+	if err != nil {
+		return err
+	}
+	uri, m := value.uri, value.meta
 	_, err = dbtx.Exec(`INSERT OR IGNORE INTO nft_collections (address, name, symbol, contract_uri, meta, first_block) VALUES (?,?,?,?,?,?)`,
 		addr.Hex(), nullString(x.callString(ctx, addr, "name()")), nullString(x.callString(ctx, addr, "symbol()")), nullString(uri), m.raw, block)
 	x.markCollection(addr.Hex())
-	return err
+	if err != nil {
+		return err
+	}
+	return recordMetadata(ctx, dbtx, "collection", addr.Hex(), "", block, value)
+}
+
+func (x *Index) tokenObservation(ctx context.Context, block uint64, collection common.Address, id *big.Int) metadataValue {
+	data := append(append([]byte{}, selTokenURI...), common.LeftPadBytes(id.Bytes(), 32)...)
+	uri, proven := x.readObservedURI(ctx, block, collection, data)
+	return x.observedMetadata(uri, proven)
 }
 
 func (x *Index) tokenURI(ctx context.Context, block uint64, collection common.Address, id *big.Int) string {

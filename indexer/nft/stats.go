@@ -60,6 +60,12 @@ func (x *Index) refreshDirtyCollections(dbtx *sql.Tx, block uint64) error {
 }
 
 func (x *Index) rebuildCollectionStats(dbtx *sql.Tx, block uint64) error {
+	// A rewind can remove a collection entirely. Recomputing only surviving
+	// collections would leave its old aggregate row behind.
+	if _, err := dbtx.Exec(`DELETE FROM nft_collection_stats WHERE NOT EXISTS (
+		SELECT 1 FROM nft_collections c WHERE c.address = nft_collection_stats.collection)`); err != nil {
+		return err
+	}
 	rows, err := dbtx.Query(`SELECT address FROM nft_collections`)
 	if err != nil {
 		return err

@@ -67,8 +67,16 @@ func (m *Market) Build(ctx context.Context, env Env) (Result, error) {
 	}
 	// The order book (D28): signatures this node was handed, kept apart from
 	// the index because the chain cannot give them back.
+	var canonicalHead func() (uint64, common.Hash)
+	if env.CanonicalHead != nil {
+		canonicalHead = func() (uint64, common.Hash) {
+			head := env.CanonicalHead()
+			return head.L2Number, head.L2Hash
+		}
+	}
 	book, err := orderbook.New(orderbook.Config{
-		DB: env.DB.SQL(), Eth: env.Eth, ChainID: env.Rollup.L2ChainID, Artifact: arts.MustGet("ZVMExchange"),
+		CanonicalHead: canonicalHead,
+		DB:            env.DB.SQL(), Eth: env.Eth, ChainID: env.Rollup.L2ChainID, Artifact: arts.MustGet("ZVMExchange"),
 		Exchange: func() common.Address {
 			if d := appsFile.Get(); d != nil {
 				return d.Exchange
@@ -80,8 +88,6 @@ func (m *Market) Build(ctx context.Context, env Env) (Result, error) {
 	if err != nil {
 		return zero, err
 	}
-	go book.Run(ctx)
-
 	plugin := nft.New(nft.Config{
 		Apps: func() nft.Apps {
 			d := appsFile.Get()
@@ -94,17 +100,14 @@ func (m *Market) Build(ctx context.Context, env Env) (Result, error) {
 	})
 
 	return Result{
+		Start:   func(ctx context.Context) { go book.Run(ctx) },
 		Plugins: []indexer.Plugin{plugin},
 		Extensions: []api.Extension{market.New(market.Config{
 			DB: env.DB.SQL(), Rollup: env.Rollup, Orders: book, Apps: appsFile, Media: store,
 			Log: slog.Default().With("svc", "market"),
 		})},
-		// The book is not in the index, so the index's rewind does not touch
-		// it: an order whose fill was rolled back has to go back to open.
-		OnRewind: func(l2Number uint64) {
-			if err := book.Rewind(l2Number); err != nil {
-				slog.Error("rewinding the order book", "err", err)
-			}
-		},
+		// The book's payloads stay intact; cache markers and cursors rewind
+		// in the same SQL transaction as the index, including on refusal.
+		OnRewindTx: book.RewindTx,
 	}, nil
 }

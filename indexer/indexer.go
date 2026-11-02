@@ -156,22 +156,66 @@ type Indexer struct {
 
 	plugins []Plugin
 
-	mu      sync.Mutex
-	pairs   map[common.Address]*pairInfo
-	dirty   map[string]bool
-	candles *candleCache
+	mu                    sync.Mutex
+	pairs                 map[common.Address]*pairInfo
+	dirty                 map[string]bool
+	candles               *candleCache
+	recoveryMu            sync.Mutex
+	canonicalLinksChecked bool
 
-	// afterRewind is state kept outside the index that has to move with it,
-	// the order book's fills. It is the index's to call rather than the
-	// deriver's, because the index now also rewinds itself (parentMismatch).
-	afterRewind []func(l2Number uint64)
+	// Shared-database state must rewind inside the index transaction. The
+	// post-commit callbacks are for notifications or state outside that DB.
+	beforeRewindCommit []func(*sql.Tx, uint64) error
+	afterRewind        []func(l2Number uint64)
 }
 
-// AfterRewind registers fn to run after every rewind of the index, whoever
-// asked for it: the deriver after an L1 reorg, or the index on finding a block
-// that no longer links to the one below it.
+// BeforeRewindCommit registers a participant in the shared database rewind.
+// It must use the provided transaction for local SQL only, without committing
+// it or opening another write transaction. An error aborts the entire rewind.
+func (ix *Indexer) BeforeRewindCommit(fn func(*sql.Tx, uint64) error) {
+	ix.beforeRewindCommit = append(ix.beforeRewindCommit, fn)
+}
+
+// AfterRewind registers a post-commit notification. Persistent state in the
+// shared database belongs in BeforeRewindCommit so a refusal can roll back both.
 func (ix *Indexer) AfterRewind(fn func(l2Number uint64)) {
 	ix.afterRewind = append(ix.afterRewind, fn)
+}
+
+// ReconcileExtensionState closes an older startup gap where the index committed
+// its rewind before an extension did. Participants use one local transaction
+// and the persisted index head. Bind them before calling this method, and keep
+// followers and extension workers idle until it succeeds. This does not validate
+// that head against an independent chain or send post-rewind notifications.
+func (ix *Indexer) ReconcileExtensionState(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if ix.db == nil {
+		return errors.New("extension recovery requires an initialized index")
+	}
+	if len(ix.beforeRewindCommit) == 0 {
+		return nil
+	}
+	tx, err := ix.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	commit, rollback := ix.guardTransaction(tx)
+	defer rollback()
+	var height sql.NullInt64
+	if err := tx.QueryRow("SELECT MAX(number) FROM blocks").Scan(&height); err != nil {
+		return err
+	}
+	if height.Valid && height.Int64 < 0 {
+		return errors.New("invalid persisted index height during extension recovery")
+	}
+	for _, fn := range ix.beforeRewindCommit {
+		if err := fn(tx, uint64(height.Int64)); err != nil {
+			return fmt.Errorf("reconciling extension state: %w", err)
+		}
+	}
+	return commit()
 }
 
 // parentMismatch is IndexBlock refusing a block whose parent is not the block
@@ -252,21 +296,34 @@ func (ix *Indexer) backfillAggregates() error {
 	ix.db.QueryRow("SELECT COUNT(*) FROM txs").Scan(&txs)
 	ix.db.QueryRow("SELECT COUNT(*) FROM dex_events").Scan(&events)
 	ix.db.QueryRow("SELECT COUNT(*) FROM blocks").Scan(&blocks)
-	stale := false
+	var stalePlugins []Plugin
 	for _, p := range ix.plugins {
 		if p.Stale(ix.db) {
-			stale = true
+			stalePlugins = append(stalePlugins, p)
 		}
 	}
-	if (addrs > 0 || txs == 0) && (candles > 0 || events == 0) && !stale &&
-		(chainStatsBasis == maxTPSBasis || blocks == 0) {
+	// The empty chain needs the same zero/basis row as a rebuilt chain. Without
+	// it, a zero-throughput block can create a different record on first index
+	// than after restart or rewind, although the surviving blocks are identical.
+	if (addrs > 0 || txs == 0) && (candles > 0 || events == 0) && len(stalePlugins) == 0 && chainStatsBasis == maxTPSBasis {
 		return nil
+	}
+	// Stale and Head read through the database pool. Resolve them before the
+	// write transaction holds a connection, including on a one-connection DB.
+	var head uint64
+	if len(stalePlugins) > 0 {
+		var err error
+		head, err = ix.Head()
+		if err != nil {
+			return err
+		}
 	}
 	dbtx, err := ix.db.Begin()
 	if err != nil {
 		return err
 	}
-	defer dbtx.Rollback()
+	commit, rollback := ix.guardTransaction(dbtx)
+	defer rollback()
 	if addrs == 0 && txs > 0 {
 		ix.log.Info("building address counters from the transactions already indexed", "txs", txs)
 		if err := rebuildAddrStats(dbtx); err != nil {
@@ -279,23 +336,21 @@ func (ix *Indexer) backfillAggregates() error {
 			return err
 		}
 	}
-	for _, p := range ix.plugins {
-		if !p.Stale(ix.db) {
-			continue
-		}
+	for _, p := range stalePlugins {
 		ix.log.Info("rebuilding a plugin's derived tables", "plugin", p.Name())
-		head, _ := ix.Head()
 		if err := p.Rebuild(dbtx, head); err != nil {
 			return fmt.Errorf("rebuilding the %s index: %w", p.Name(), err)
 		}
 	}
-	if chainStatsBasis != maxTPSBasis && blocks > 0 {
-		ix.log.Info("finding the chain's highest transactions-per-second block", "blocks", blocks)
+	if chainStatsBasis != maxTPSBasis {
+		if blocks > 0 {
+			ix.log.Info("finding the chain's highest transactions-per-second block", "blocks", blocks)
+		}
 		if err := rebuildMaxTPS(dbtx); err != nil {
 			return err
 		}
 	}
-	return dbtx.Commit()
+	return commit()
 }
 
 func (ix *Indexer) Head() (uint64, error) {
@@ -321,19 +376,44 @@ func (ix *Indexer) Head() (uint64, error) {
 // chain last agree, the way Blockscout and The Graph detect a reorg: by the
 // parent hash, not by being told.
 func (ix *Indexer) Follow(ctx context.Context, chainHead func() uint64) {
-	repaired := false
+	ix.follow(ctx, func() store.Head { return store.Head{L2Number: chainHead()} }, false)
+}
+
+// FollowCanonical observes both number and hash, including a quiet same-height
+// replacement or a missed rewind notification. An unchanged accepted head
+// avoids repeating canonical RPC checks on every idle polling pass.
+func (ix *Indexer) FollowCanonical(ctx context.Context, chainHead func() store.Head) {
+	ix.follow(ctx, chainHead, true)
+}
+
+func (ix *Indexer) follow(ctx context.Context, chainHead func() store.Head, bindDerived bool) {
+	var lastAnchor store.Head
+	checked := false
 	for {
-		ix.catchUp(ctx)
-		// Retried until it succeeds: the node starts following before the
-		// engine necessarily answers.
-		if !repaired {
-			if err := ix.repairBrokenLink(ctx); err != nil {
-				ix.log.Warn("checking the index's stored chain", "err", err)
-			} else {
-				repaired = true
+		anchor := chainHead()
+		if !checked || !bindDerived || anchor != lastAnchor {
+			if !bindDerived {
+				hdr, err := ix.eth.HeaderByNumber(ctx, new(big.Int).SetUint64(anchor.L2Number))
+				if err == nil && hdr != nil {
+					anchor.L2Hash = hdr.Hash()
+				}
 			}
+			if err := ix.reconcileCanonical(ctx, anchor, bindDerived); err != nil {
+				if ctx.Err() != nil {
+					return
+				}
+				ix.log.Warn("reconciling the canonical index", "err", err)
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(500 * time.Millisecond):
+				}
+				continue
+			}
+			lastAnchor, checked = anchor, true
 		}
-		head := chainHead()
+		ix.catchUp(ctx)
+		head := anchor.L2Number
 		indexed, err := ix.Head()
 		if err != nil {
 			ix.log.Warn("reading the index head", "err", err)
@@ -344,11 +424,10 @@ func (ix *Indexer) Follow(ctx context.Context, chainHead func() uint64) {
 					return
 				}
 				var pm *parentMismatch
-				if errors.As(err, &pm) {
+				var replaced *indexedBlockMismatch
+				if errors.As(err, &pm) || errors.As(err, &replaced) {
 					ix.log.Warn("the chain reorganised under the index", "err", err)
-					if err := ix.rewindToFork(ctx, n-1); err != nil {
-						ix.log.Warn("rewinding the index to the fork", "err", err)
-					}
+					checked = false
 					break
 				}
 				ix.log.Warn("indexing block", "number", n, "err", err)
@@ -363,48 +442,6 @@ func (ix *Indexer) Follow(ctx context.Context, chainHead func() uint64) {
 	}
 }
 
-// repairBrokenLink finds the lowest stored block whose parent is not the
-// stored block below it and, if there is one, rewinds to the fork. A broken
-// link means one side of it is an orphan the index never dropped; walking down
-// from below the link against the chain says which.
-func (ix *Indexer) repairBrokenLink(ctx context.Context) error {
-	var broken sql.NullInt64
-	if err := ix.db.QueryRow(`SELECT MIN(b.number) FROM blocks b
-		JOIN blocks p ON p.number = b.number - 1 WHERE b.parent != p.hash`).Scan(&broken); err != nil {
-		return err
-	}
-	if !broken.Valid {
-		return nil
-	}
-	ix.log.Warn("the index holds a block that does not link to the one below it", "number", broken.Int64)
-	return ix.rewindToFork(ctx, uint64(broken.Int64)-1)
-}
-
-// rewindToFork walks down from `from` to the highest block the index and the
-// chain agree on, and rewinds the index to it.
-func (ix *Indexer) rewindToFork(ctx context.Context, from uint64) error {
-	fork := from
-	for ; fork > 0; fork-- {
-		var stored string
-		err := ix.db.QueryRow("SELECT hash FROM blocks WHERE number = ?", fork).Scan(&stored)
-		if errors.Is(err, sql.ErrNoRows) {
-			continue
-		}
-		if err != nil {
-			return err
-		}
-		hdr, err := ix.eth.HeaderByNumber(ctx, new(big.Int).SetUint64(fork))
-		if err != nil {
-			return err
-		}
-		if hdr.Hash().Hex() == stored {
-			break
-		}
-	}
-	ix.log.Warn("rewinding the index to where it and the chain agree", "to", fork, "checkedFrom", from)
-	return ix.Rewind(fork)
-}
-
 // catchUp fills a derived table from logs already indexed — the tables added
 // after this chain had history — and replays an application contract's own
 // logs the first time the node is told where that contract is.
@@ -412,16 +449,17 @@ func (ix *Indexer) catchUp(ctx context.Context) {
 	dexIn, dexArgs := TopicList(dexTopics)
 	type job struct {
 		Job
-		handle func(context.Context, *sql.Tx, LogRow) error
+		handle  func(context.Context, *sql.Tx, LogRow) error
+		plugins []Plugin
 	}
-	jobs := []job{{Job{Key: "dex_v1", Where: "l.topic0 IN (" + dexIn + ")", Args: dexArgs}, ix.indexDexLog}}
+	jobs := []job{{Job{Key: "dex_v1", Where: "l.topic0 IN (" + dexIn + ")", Args: dexArgs}, ix.indexDexLog, nil}}
 	for _, p := range ix.plugins {
 		for _, j := range p.Jobs() {
-			jobs = append(jobs, job{j, p.Handle})
+			jobs = append(jobs, job{j, p.Handle, []Plugin{p}})
 		}
 	}
 	for _, j := range jobs {
-		if err := ix.backfill(ctx, j.Key, j.Where, j.Args, j.handle); err != nil && ctx.Err() == nil {
+		if err := ix.backfill(ctx, j.Key, j.Where, j.Args, j.handle, j.plugins...); err != nil && ctx.Err() == nil {
 			ix.log.Warn("backfilling", "job", j.Key, "err", err)
 		}
 	}
@@ -431,11 +469,28 @@ func (ix *Indexer) catchUp(ctx context.Context) {
 // says so, or when the index finds an orphan itself. Then the AfterRewind
 // hooks run.
 func (ix *Indexer) Rewind(number uint64) error {
+	return ix.rewindGuarded(number, nil)
+}
+
+func (ix *Indexer) rewindGuarded(number uint64, guard func(*sql.Tx) error) error {
 	tx, err := ix.db.Begin()
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	commit, rollback := ix.guardTransaction(tx)
+	defer rollback()
+	if guard != nil {
+		if err := guard(tx); err != nil {
+			return err
+		}
+	}
+	// The removed range still names the affected tokens here. Recompute only
+	// their counters from the surviving prefix, without copying the history.
+	if _, err := tx.Exec(`UPDATE tokens SET transfers = (
+		SELECT COUNT(*) FROM token_transfers t WHERE t.token = tokens.address AND t.block <= ?)
+		WHERE address IN (SELECT token FROM token_transfers WHERE block > ?)`, number, number); err != nil {
+		return err
+	}
 	for _, stmt := range []string{
 		"DELETE FROM blocks WHERE number > ?", "DELETE FROM txs WHERE block > ?",
 		"DELETE FROM logs WHERE block > ?",
@@ -500,7 +555,12 @@ func (ix *Indexer) Rewind(number uint64) error {
 			return fmt.Errorf("rebuilding the %s index: %w", p.Name(), err)
 		}
 	}
-	if err := tx.Commit(); err != nil {
+	for _, fn := range ix.beforeRewindCommit {
+		if err := fn(tx, number); err != nil {
+			return fmt.Errorf("rewinding extension state: %w", err)
+		}
+	}
+	if err := commit(); err != nil {
 		return err
 	}
 	ix.forgetPairs()
@@ -541,13 +601,58 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 	if len(receipts) != len(blk.Transactions()) {
 		return fmt.Errorf("block %d: %d receipts for %d transactions", number, len(receipts), len(blk.Transactions()))
 	}
-	momentum := ix.cfg.MomentumForL2Block(number)
+	prepared, err := ix.collectBlock(ctx, blk, receipts)
+	if err != nil {
+		return err
+	}
+	return ix.applyPreparedBlock(ctx, number, blk, receipts, prepared)
+}
 
+// The same writer handles a normal IndexBlock and the test-only phase boundary.
+// A changed source refuses before handlers; a matching existing row is a no-op.
+func (ix *Indexer) applyPreparedBlock(ctx context.Context, number uint64, blk *types.Block, receipts types.Receipts, prepared *preparedBlock) error {
+	if prepared != nil {
+		defer prepared.inputs.Close()
+	}
+	momentum := ix.cfg.MomentumForL2Block(number)
 	dbtx, err := ix.db.Begin()
 	if err != nil {
 		return err
 	}
-	defer dbtx.Rollback()
+	commit, rollback := ix.guardTransaction(dbtx)
+	defer rollback()
+	var existing string
+	err = dbtx.QueryRow("SELECT hash FROM blocks WHERE number=?", number).Scan(&existing)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if err == nil {
+		if existing == blk.Hash().Hex() {
+			return commit()
+		}
+		return &indexedBlockMismatch{number: number, observed: blk.Hash(), stored: existing}
+	}
+	if prepared != nil {
+		if err := prepared.verify(ctx, dbtx); err != nil {
+			return err
+		}
+		ctx, err = prepared.inputs.context(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	// Recheck after acquiring the transaction: a rewind may have happened
+	// while the block and its receipts were being read from the engine.
+	if number > 1 {
+		var stored string
+		err := dbtx.QueryRow("SELECT hash FROM blocks WHERE number=?", number-1).Scan(&stored)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		if err == nil && stored != blk.ParentHash().Hex() {
+			return &parentMismatch{number: number, parent: blk.ParentHash(), stored: stored}
+		}
+	}
 
 	baseFee := blk.BaseFee()
 	if baseFee == nil {
@@ -645,12 +750,17 @@ func (ix *Indexer) IndexBlock(ctx context.Context, number uint64) error {
 			}
 		}
 	}
+	if prepared != nil {
+		if err := prepared.inputs.finish(); err != nil {
+			return err
+		}
+	}
 	// Whatever this block changed about a collection, recompute once here
 	// rather than once per reader (D21).
 	if err := ix.afterBlock(dbtx, number); err != nil {
 		return err
 	}
-	return dbtx.Commit()
+	return commit()
 }
 
 func (ix *Indexer) origin(dbtx *sql.Tx, hash common.Hash) (string, *string) {

@@ -9,8 +9,34 @@ permissions:
 
 # Linux, as most people who build this will be on.
 jobs:
-  go:
+  ci-scope:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      run_go: ${{ steps.select.outputs.run_go }}
+      run_integration: ${{ steps.select.outputs.run_integration }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Check conservative source-selection controls without network
+        run: python3 -B scripts/check-ci-change-scope_test.py
+      - name: Read the exact optional runtime anchor with bounded history
+        continue-on-error: true
+        run: git fetch --no-tags --depth=1 origin 86a254841276ede899b22379a9cdea4f9632465a
+      - name: Select jobs from verified source inputs
+        id: select
+        env:
+          ZVM_CHANGE_BASE: ${{ github.event.before || github.event.pull_request.base.sha }}
+          ZVM_CHANGE_HEAD: ${{ github.sha }}
+        run: python3 -B scripts/check-ci-change-scope.py --github-output
+
+  go:
+    needs: [ci-scope]
+    if: ${{ always() && needs.ci-scope.outputs.run_go != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,4 +48,200 @@ jobs:
 
       - run: go build ./...
       - run: go vet ./...
-      - run: go test ./...
+      - name: Prepare the explicit pinned simulator test workspace
+        run: python3 scripts/prepare-simulated-backend-fixture.py prepare "$RUNNER_TEMP/zvm-simulator-fixture"
+      - name: Require the exact original upstream late-waiter failure
+        env:
+          GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
+        run: |
+          set +e
+          go test -json -count=1 -timeout=10s -run '^TestZVMWaitFullCompletedBeforeWait$' github.com/ethereum/go-ethereum/miner 2>&1 | tee "$RUNNER_TEMP/zvm-simulator-original.jsonl"
+          actual_exit=${PIPESTATUS[0]}
+          set -e
+          python3 scripts/prepare-simulated-backend-fixture.py check-red "$RUNNER_TEMP/zvm-simulator-fixture" --log "$RUNNER_TEMP/zvm-simulator-original.jsonl" --actual-exit "$actual_exit"
+      - name: Apply only the pinned simulator condition predicate in its test copy
+        run: python3 scripts/prepare-simulated-backend-fixture.py apply "$RUNNER_TEMP/zvm-simulator-fixture"
+      - name: Require the same upstream late-waiter regression to pass
+        env:
+          GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
+        run: go test -json -count=1 -timeout=10s -run '^TestZVMWaitFullCompletedBeforeWait$' github.com/ethereum/go-ethereum/miner
+      - name: Exercise the complete native Go suite with structured results
+        env:
+          GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
+        run: go test -json -count=1 ./...
+      - name: Check market HTTP and executed admission recovery with the race detector
+        env:
+          GOWORK: ${{ runner.temp }}/zvm-simulator-fixture/go.work
+        run: go test -race -json -count=1 -run '^Test(MarketHTTP(ReorgVisibility|RefusedRewind)|ExecutedMarketAdmissionAndCanonicalRecovery|WireOrderTimes(RetainOriginalInputAndHash|RefuseAmbiguousJSON)|SQLiteOrderTimesRetainUnsignedRangeAndOrdering|StoredOrderTimesRefuseLossyOrNoncanonicalValues|BookImportsFullWidthOnChainOrderTimes|BookAcceptedHeadObservations|ClosedOrder(CompleteEvidence|Recovery|RecoveryFences|RecoveryPages)|URIHistory.*|URIHostUsesTheExactHashWithoutLatestFallback|ObservedURIDecoderRefusesIncompleteEvidence|BackfillSourceFence|PreparedURI|PreparedURIIndexedGap|PreparedURIRangeKeys|PreparedURIRangeFilter|PreparedURIRollbackBudget|PreparedURIWriterBoundary|MarketRPCProgress|PreparedURIRangeIndex)$' ./indexer ./orderbook ./indexer/nft
+      - name: Verify the exact test-only dependency delta and tracked source
+        run: |
+          python3 scripts/prepare-simulated-backend-fixture.py verify "$RUNNER_TEMP/zvm-simulator-fixture"
+          git diff --exit-code
+
+  market-browser:
+    needs: [ci-scope, go, full-client-recovery]
+    if: ${{ always() && needs.ci-scope.outputs.run_integration != 'false' && needs.go.result == 'success' && needs['full-client-recovery'].result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: true
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Zenoglyphs-VM/zvm-nft
+          ref: 50c581dbc48ca6bb8f7a03c31c5eac2a6e9833ef
+          path: .market-browser/zvm-nft
+          persist-credentials: false
+          submodules: true
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Zenoglyphs-VM/zvm-karum
+          ref: 156025027e4bc1764ee02dc10d9cdbc00ed6f17c
+          path: .market-browser/zvm-karum
+          persist-credentials: false
+          submodules: true
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Zenoglyphs-VM/zvm-relayer
+          ref: 5a72a223dd60d1ae4e974d420cadd85e6f9ee929
+          path: .market-browser/zvm-relayer
+          persist-credentials: false
+          submodules: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            .market-browser/zvm-nft/package-lock.json
+            .market-browser/zvm-karum/package-lock.json
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - name: Check bounded protocol navigation controls without SDK or network
+        run: node scripts/market-navigation-support.test.mjs
+      - name: Check bounded owned RPC progress diagnostics without SDK or network
+        run: node scripts/market-rpc-progress-support.test.mjs
+      - name: Check fixture connection restoration without SDK or network
+        run: node scripts/market-wallet-connection-support.test.mjs
+      - name: Check bounded immutable snapshot reuse without SDK or network
+        run: node --test --test-reporter=tap scripts/market-snapshot-read-cache.test.mjs
+      - name: Compile the self-contained credit wallet once with the pinned compiler
+        run: node scripts/market-credit-compile.mjs "$RUNNER_TEMP/zvm-market-credit-compiler"
+      - name: Check actual ERC-1271 native signatures and canonical recovery before production pages
+        env:
+          ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_CONTRACT_SIGNATURE_WALLET: ${{ runner.temp }}/zvm-market-credit-compiler/signature-wallet.json
+        run: go test -json -count=1 -p=1 -failfast -timeout=1m -run '^TestExecutedERC1271NativeSignaturesAndRecovery$' ./orderbook
+      - name: Build the pinned relayer program once for all browser profiles
+        run: |
+          test "$(git -C .market-browser/zvm-relayer rev-parse HEAD)" = 5a72a223dd60d1ae4e974d420cadd85e6f9ee929
+          test "$(git -C .market-browser/zvm-relayer/zvm-core rev-parse HEAD)" = 29e6d9b30be94de3772c850c7a1e9811585a8833
+          go -C .market-browser/zvm-relayer build -trimpath -o "$RUNNER_TEMP/zvm-market-relayer" ./cmd/zvm-relayer
+          sha256sum "$RUNNER_TEMP/zvm-market-relayer"
+          git -C .market-browser/zvm-relayer diff --exit-code
+          git -C .market-browser/zvm-relayer/zvm-core diff --exit-code
+      - name: Require the preinstalled browser
+        run: google-chrome --version
+      - name: Install each unchanged locked frontend
+        run: |
+          npm ci --ignore-scripts --include=dev --prefix .market-browser/zvm-nft
+          npm ci --ignore-scripts --include=dev --prefix .market-browser/zvm-karum
+      - name: Build the actual production pages for the loopback fixture
+        env:
+          VITE_ZVM_NODE: http://127.0.0.1:18733
+        run: |
+          npm run build --prefix .market-browser/zvm-nft
+          npm run build --prefix .market-browser/zvm-karum
+      - name: Check retained legacy navigation before signed production profiles
+        env:
+          ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_NFT_ROOT: ${{ github.workspace }}/.market-browser/zvm-nft
+          ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
+        run: go test -json -count=1 -p=1 -failfast -timeout=1m -run '^TestMarketBrowserHTTP$' ./indexer
+      - name: Check actual ERC-1271 production listings and purchases before the retained matrix
+        env:
+          ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_RELAYER_BINARY: ${{ runner.temp }}/zvm-market-relayer
+          ZVM_BROWSER_NFT_ROOT: ${{ github.workspace }}/.market-browser/zvm-nft
+          ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
+          ZVM_BROWSER_CONTRACT_SIGNATURE_WALLET: ${{ runner.temp }}/zvm-market-credit-compiler/signature-wallet.json
+        run: go test -json -count=1 -p=1 -failfast -timeout=2m -run '^TestExecutedERC1271ProductionMarketplaces$' ./orderbook
+      - name: Exercise production pages signed admission and actual relayer transactions with serialized browsers
+        env:
+          ZVM_BROWSER_REQUIRED: "1"
+          ZVM_BROWSER_RELAYER_BINARY: ${{ runner.temp }}/zvm-market-relayer
+          ZVM_BROWSER_NFT_ROOT: ${{ github.workspace }}/.market-browser/zvm-nft
+          ZVM_BROWSER_KARUM_ROOT: ${{ github.workspace }}/.market-browser/zvm-karum
+          ZVM_BROWSER_CREDIT_WALLET: ${{ runner.temp }}/zvm-market-credit-compiler/wallet.json
+          ZVM_BROWSER_ROYALTY_COLLECTION: ${{ runner.temp }}/zvm-market-credit-compiler/royalty.json
+        run: go test -json -count=1 -p=1 -failfast -timeout=12m -run '^Test(ExecutedMarketBrowserAdmissionAndRecovery|MarketFullWidthTimeClients|ExecutedMarketCreditBrowserRecovery|ExecutedExternalRoyaltySettlementAndRecovery)$' ./indexer ./orderbook
+      - name: Refuse tracked source drift
+        run: git diff --exit-code
+
+  full-client-recovery:
+    needs: [ci-scope]
+    if: ${{ always() && needs.ci-scope.outputs.run_integration != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 26
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: true
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - name: Build the explicit full-client test binary once with bounded parallelism
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: timeout 12m go test -c -p=2 -tags=fullclient_recovery -o "$RUNNER_TEMP/zvm-full-client-recovery.test" ./orderbook
+      - name: Check real catalyst refusal and serialized default-persistence reopen
+        working-directory: orderbook
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t \
+            "$RUNNER_TEMP/zvm-full-client-recovery.test" -test.v=test2json -test.failfast -test.timeout=7m \
+            -test.run='^TestFullClientDefaultPersistenceRecovery$'
+      - name: Check signed orders with the same default-persistence test binary
+        working-directory: orderbook
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t \
+            "$RUNNER_TEMP/zvm-full-client-recovery.test" -test.v=test2json -test.failfast -test.timeout=4m \
+            -test.run='^TestFullClientSignedOrderRecovery$'
+      - name: Check signed orders at actual index and book write boundaries with the same binary
+        working-directory: orderbook
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t \
+            "$RUNNER_TEMP/zvm-full-client-recovery.test" -test.v=test2json -test.failfast -test.timeout=3m \
+            -test.run='^TestFullClientSignedWriteBoundaryRecovery$'
+      - name: Check signed orders across actual default-client rewind write exits with the same binary
+        working-directory: orderbook
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t \
+            "$RUNNER_TEMP/zvm-full-client-recovery.test" -test.v=test2json -test.failfast -test.timeout=4m \
+            -test.run='^TestFullClientSignedRewindRecovery$'
+      - name: Check whole owned default client and node under parent SIGKILL with the same binary
+        working-directory: orderbook
+        env:
+          GOMAXPROCS: '2'
+          GOMEMLIMIT: 5GiB
+        run: |
+          go tool test2json -p github.com/Zenoglyphs-VM/zvm-node/orderbook -t \
+            "$RUNNER_TEMP/zvm-full-client-recovery.test" -test.v=test2json -test.failfast -test.timeout=7m \
+            -test.run='^Test(FullClientKernelKillRecovery|OwnedFullClientKernelMarkerControls)$'
+      - name: Refuse tracked source drift
+        run: git diff --exit-code
