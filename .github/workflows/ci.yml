@@ -11,15 +11,32 @@ permissions:
 jobs:
   go:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           submodules: true
+          persist-credentials: false
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
         with:
           go-version-file: go.mod
 
+      - run: go version
       - run: go build ./...
       - run: go vet ./...
-      - run: go test ./...
+      - run: go test -json -count=1 -timeout=3m ./...
+      - run: go test -race -json -count=1 -timeout=5m ./...
+
+  compiler-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          submodules: true
+          persist-credentials: false
+      - name: Build once and qualify the actual isolated compiler service
+        env:
+          N01_GO_IMAGE: docker.io/library/golang@sha256:ebd54034f076819b3054f155db53660ded951612bb4dfd277f933e62059e5d5a
+        run: sh scripts/ci-compiler-isolation.sh

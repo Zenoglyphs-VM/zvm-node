@@ -12,11 +12,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -27,11 +29,17 @@ type Compilers struct {
 	Dir     string
 	BaseURL string // https://binaries.soliditylang.org
 	HTTP    *http.Client
+	// A single service instance owns this cache. Existing files count toward
+	// both limits and are never evicted to make room for another version.
+	MaxCacheBytes int64
+	MaxCacheFiles int
 
-	mu     sync.Mutex
-	list   *BuildList
-	listAt time.Time
-	dl     sync.Mutex
+	mu        sync.Mutex // protects the short checked-map operations
+	listGuard compilerLock
+	list      *BuildList
+	listAt    time.Time
+
+	dl compilerLock
 	// checked holds the pinned binaries on disk this process has hashed.
 	checked map[string]bool
 }
@@ -75,8 +83,15 @@ type BuildList struct {
 }
 
 const (
-	listTTL     = time.Hour
-	maxSolcSize = 256 << 20
+	listTTL                   = time.Hour
+	maxSolcSize               = 256 << 20
+	DefaultCompilerCacheBytes = 1 << 30
+	DefaultCompilerCacheFiles = 16
+)
+
+var (
+	ErrCompilerCacheFull = errors.New("compiler cache budget exhausted")
+	compilerFileName     = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._+-]{0,199}$`)
 )
 
 // platform is the directory soliditylang.org publishes this machine's builds in.
@@ -109,8 +124,10 @@ func (c *Compilers) base() string {
 // List is the release list for this platform, re-read hourly. A failed
 // refresh keeps the last list it had.
 func (c *Compilers) List(ctx context.Context) (*BuildList, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	if err := c.listGuard.lock(ctx); err != nil {
+		return nil, err
+	}
+	defer c.listGuard.unlock()
 	if c.list != nil && time.Since(c.listAt) < listTTL {
 		return c.list, nil
 	}
@@ -154,6 +171,12 @@ func (c *Compilers) Resolve(ctx context.Context, version string) (Build, error) 
 // Path is where build's binary is on disk, fetching and checking it first if
 // this node has never used it.
 func (c *Compilers) Path(ctx context.Context, b Build) (string, error) {
+	if c.Dir == "" || !compilerFileName.MatchString(b.LongVersion) || !compilerFileName.MatchString(b.Path) {
+		return "", fmt.Errorf("%w: invalid compiler cache directory or release filename", ErrInvalid)
+	}
+	if sum, err := hex.DecodeString(strings.TrimPrefix(strings.ToLower(b.SHA256), "0x")); err != nil || len(sum) != sha256.Size {
+		return "", fmt.Errorf("%w: compiler release needs a SHA-256", ErrInvalid)
+	}
 	name := "solc-" + b.LongVersion
 	if runtime.GOOS == "windows" {
 		name += ".exe"
@@ -162,25 +185,40 @@ func (c *Compilers) Path(ctx context.Context, b Build) (string, error) {
 	// A compiler already on disk needs no lock: holding it here made every
 	// compile wait behind whichever download was in progress, and anyone can
 	// start one by naming a version this node has never used.
-	if _, err := os.Stat(dst); err == nil {
+	if info, err := os.Lstat(dst); err == nil {
+		if !info.Mode().IsRegular() {
+			return "", fmt.Errorf("compiler cache entry is not a regular file")
+		}
 		if err := c.checkPinnedOnDisk(b, dst); err != nil {
 			return "", err
 		}
 		return dst, nil
 	}
-	c.dl.Lock()
-	defer c.dl.Unlock()
-	if _, err := os.Stat(dst); err == nil {
+	if err := c.dl.lock(ctx); err != nil {
+		return "", err
+	}
+	defer c.dl.unlock()
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+	if info, err := os.Lstat(dst); err == nil {
+		if !info.Mode().IsRegular() {
+			return "", fmt.Errorf("compiler cache entry is not a regular file")
+		}
 		if err := c.checkPinnedOnDisk(b, dst); err != nil {
 			return "", err
 		}
 		return dst, nil
+	}
+	remaining, err := c.cacheRemaining()
+	if err != nil {
+		return "", err
 	}
 	plat, err := platform()
 	if err != nil {
 		return "", err
 	}
-	body, err := c.get(ctx, c.base()+"/"+plat+"/"+b.Path, maxSolcSize)
+	body, err := c.get(ctx, c.base()+"/"+plat+"/"+b.Path, min(int64(maxSolcSize), remaining))
 	if err != nil {
 		return "", fmt.Errorf("fetching solc %s: %w", b.LongVersion, err)
 	}
@@ -192,7 +230,7 @@ func (c *Compilers) Path(ctx context.Context, b Build) (string, error) {
 		return "", fmt.Errorf("solc %s: SHA-256 %x is not the %s this node pins; the release host served a different binary", b.LongVersion, sum, pin)
 	}
 	if strings.HasSuffix(b.Path, ".zip") {
-		if body, err = unzipSolc(body); err != nil {
+		if body, err = unzipSolc(body, min(int64(maxSolcSize), remaining)); err != nil {
 			return "", fmt.Errorf("solc %s: %w", b.LongVersion, err)
 		}
 	}
@@ -208,7 +246,15 @@ func (c *Compilers) Path(ctx context.Context, b Build) (string, error) {
 		os.Remove(tmp.Name())
 		return "", err
 	}
-	tmp.Close()
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		os.Remove(tmp.Name())
+		return "", err
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(tmp.Name())
+		return "", err
+	}
 	if err := os.Chmod(tmp.Name(), 0o755); err != nil {
 		os.Remove(tmp.Name())
 		return "", err
@@ -218,6 +264,51 @@ func (c *Compilers) Path(ctx context.Context, b Build) (string, error) {
 		return "", err
 	}
 	return dst, nil
+}
+
+func (c *Compilers) cacheRemaining() (int64, error) {
+	limit, files := c.MaxCacheBytes, c.MaxCacheFiles
+	if limit == 0 {
+		limit = DefaultCompilerCacheBytes
+	}
+	if files == 0 {
+		files = DefaultCompilerCacheFiles
+	}
+	if limit < 0 || files < 0 {
+		return 0, fmt.Errorf("%w: compiler cache limits must be positive", ErrInvalid)
+	}
+	info, err := os.Lstat(c.Dir)
+	if os.IsNotExist(err) {
+		return limit, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	if !info.IsDir() {
+		return 0, fmt.Errorf("compiler cache root is not a directory")
+	}
+	entries, err := os.ReadDir(c.Dir)
+	if err != nil {
+		return 0, err
+	}
+	if len(entries) >= files {
+		return 0, ErrCompilerCacheFull
+	}
+	remaining := limit
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			return 0, err
+		}
+		if !info.Mode().IsRegular() {
+			return 0, fmt.Errorf("compiler cache contains an unaccounted directory or link")
+		}
+		if info.Size() >= remaining {
+			return 0, ErrCompilerCacheFull
+		}
+		remaining -= info.Size()
+	}
+	return remaining, nil
 }
 
 // checkPinnedOnDisk hashes a pinned compiler already on disk, once per
@@ -259,19 +350,29 @@ func (c *Compilers) checkPinnedOnDisk(b Build, path string) error {
 
 // unzipSolc takes solc.exe out of a Windows release archive, which carries
 // only the compiler.
-func unzipSolc(archive []byte) ([]byte, error) {
+func unzipSolc(archive []byte, limit int64) ([]byte, error) {
 	zr, err := zip.NewReader(bytes.NewReader(archive), int64(len(archive)))
 	if err != nil {
 		return nil, err
 	}
 	for _, f := range zr.File {
 		if strings.EqualFold(filepath.Base(f.Name), "solc.exe") {
+			if !f.Mode().IsRegular() || f.UncompressedSize64 > uint64(limit) {
+				return nil, fmt.Errorf("compiler archive exceeds its byte limit or is not a regular file")
+			}
 			rc, err := f.Open()
 			if err != nil {
 				return nil, err
 			}
 			defer rc.Close()
-			return io.ReadAll(io.LimitReader(rc, maxSolcSize))
+			body, err := io.ReadAll(io.LimitReader(rc, limit+1))
+			if err != nil {
+				return nil, err
+			}
+			if int64(len(body)) > limit {
+				return nil, fmt.Errorf("compiler archive exceeds its byte limit")
+			}
+			return body, nil
 		}
 	}
 	return nil, fmt.Errorf("no solc.exe in the release archive")
