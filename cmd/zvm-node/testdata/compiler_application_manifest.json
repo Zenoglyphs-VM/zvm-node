@@ -1,0 +1,4291 @@
+{
+  "artifact_files": [
+    {
+      "bytes": 234651,
+      "path": "apps/artifacts/apps.json",
+      "sha256": "1e307cab2454bb2f5e4cf7d49deec93044688418610df389ba4a6c268504774d"
+    },
+    {
+      "bytes": 214561,
+      "path": "bench/artifacts/UniswapV2Factory.json",
+      "sha256": "7e666780d3ddf601a17c97dcc6a414dd77f5eae13fb37fce7e0bd282f4f61406"
+    },
+    {
+      "bytes": 223322,
+      "path": "bench/artifacts/UniswapV2Pair.json",
+      "sha256": "bb00cb1d64deea4159731b5957eeb8354531a110fb9120b9ef14edbc950e0736"
+    },
+    {
+      "bytes": 396819,
+      "path": "bench/artifacts/UniswapV2Router02.json",
+      "sha256": "b5d849090faf5255b82bddb2a8a51ad796599fa31bb7a3aa0e0db75226031aaa"
+    },
+    {
+      "bytes": 9815,
+      "path": "bench/artifacts/WZNN.json",
+      "sha256": "9f0ced5086480a080d4726ac36a4b6d8b9f6714b640a697e84dff630df3e9419"
+    },
+    {
+      "bytes": 111091,
+      "path": "bench/artifacts/bench.json",
+      "sha256": "62dfdf6dfaab4a1b3fff1ba0aafce8c2b4f5a5f720fd6046090c3b6a8c1fe6d2"
+    }
+  ],
+  "groups": [
+    {
+      "exports": [
+        {
+          "abiSha256": "93f20a7da9b4de4c809723bd219f0d0632316780ccbade3b55fba78de2b85f13",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "5721ab6bdea982cbd7690bcc59d90ba0b53da853a52c50fbeeb0cb88de1dcf4b",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/IERC1271.sol:IERC1271",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "0b24db6805705bf25882797143f7a34b97d707da25c29e5b9f37f5cc091f1de8",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/IERC1363.sol:IERC1363",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "aacd60a298b69f44e9d96171c56834a694c547138a5eb0c6a45ac5c905db20ca",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/IERC2981.sol:IERC2981",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "f1e87151c8635b01ae77e263e813ceeb486d9df6c35300055cb85c248421f55f",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/IERC5267.sol:IERC5267",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "1f8c0481be099ebbe69d1e6d9d4fdae69c0c8859b87aa31a64deccdd24d1eb91",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/IERC7913.sol:IERC7913SignatureVerifier",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4788991d085e0b9990603501d1cab5fcb830c3429fad3d59a421afc27d2ab708",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC1155Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "851ca5f5bf60a11262c78d710c46d935f0d7dde2b760ba7d7f199d273d2bcf71",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC20Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "22cb31c1805339cc470a1ef3b5cb08b468e465bd624e68529ea9b72fbb87621f",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC721Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "dc6e97473301c11b320cc61afa2ce6a387bfe5f9ad99b489ba07161c689ae337",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "1b2762a0e7b7b0a69ba83c7d79d88d32cae7f85956b6f11deab52a4c2b966eb6",
+          "name": "@openzeppelin/contracts/proxy/Clones.sol:Clones",
+          "runtimeTemplateSha256": "3aa25ad7413111c9a543eb5b1b31a3dacac7fc7e6be5c60ab6cb422a0fa52932"
+        },
+        {
+          "abiSha256": "3033dc48798f2279981a4f665b7feb9192fc7b896379adaab881c418c2be4ed5",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "1528adb9fed314f927722c41cccacb46e8848926bc5962620d08676929e7a279",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "d7de48e10801d246501e3c79c2a7ce74040bb8231d5e0e4c0bdf5909200afb88",
+          "name": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol:SafeERC20",
+          "runtimeTemplateSha256": "69f015c72b3683166c34d2aa1aa4090af786eaf639d97845ab30645438586b13"
+        },
+        {
+          "abiSha256": "a96cf16f374d1d7049231e4809f18f70174c2eabade6605a9d5fb257f5e25fb3",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC721/ERC721.sol:ERC721",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "b6d755d7aef77ce7389e295ef6eb2e19c14e322a9c8e3f224e366bb4c47ddb8c",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC721/IERC721.sol:IERC721",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "631311ccabb8b5fc66f54de8760cc062122e265acf8720f4b40f002fa83bc768",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol:IERC721Receiver",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "921d6e32a471d301778e1ebbe68065b9447e7151032ba59e95ca78dbf2c5844f",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol:IERC721Metadata",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "3e3799ff071604c9e9b61c39002c74684c027985478241dade9dd7cf52fcdfc6",
+          "name": "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol:ERC721Utils",
+          "runtimeTemplateSha256": "3aae4ae2b51bda88423bb7a7883c428116ec7e87d6821b9d395bd13b4f41c630"
+        },
+        {
+          "abiSha256": "6161c764673090d684926bf3a5d930c826fd26efa7becc4ac77418b923e5a8b7",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/common/ERC2981.sol:ERC2981",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "5ba96c69ab21a24b98dc68da1fa27ab40a855ad3b03034f0ecdf3f34bdeb6b5c",
+          "name": "@openzeppelin/contracts/utils/Bytes.sol:Bytes",
+          "runtimeTemplateSha256": "6c7314b1542dd8201b7406cc5f7f41396898a2a539c50e12668000831796608e"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/utils/Context.sol:Context",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "b0c57d7aea9cbe661b906024a7f29110b22db33863f7ad408006318aeec665d0",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "59b306eab1beb81ac5fdb11897bed0c7191c7a559407b3cad51089ff54569a7e",
+          "name": "@openzeppelin/contracts/utils/Create2.sol:Create2",
+          "runtimeTemplateSha256": "41bb12766cc4ad5d7faf347fb34e02e577cf778a11a0286dea95bb1e5ca433e6"
+        },
+        {
+          "abiSha256": "bdb444564894f49137d6f9e5392a069c34f48e29c6f2fe8a59edefe339fd45f0",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "5d62f95bddf6926d6eb29f36dbb569831f435c34a13f6ec578d11a1b2bc67e52",
+          "name": "@openzeppelin/contracts/utils/Errors.sol:Errors",
+          "runtimeTemplateSha256": "92bf83e1a1bc605b46005fff6dc78198e4b66e3db4eb484114c0775e4fb091f8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "69c18bb343302114736df8a190adfca6e438222260acc556b81c4e6cd9738945",
+          "name": "@openzeppelin/contracts/utils/LowLevelCall.sol:LowLevelCall",
+          "runtimeTemplateSha256": "98bf3c30298d91001fefe7a848692cba8a19a6c3e551664d9130bd23cd38e7c2"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "c8bdb0a15fe0f24ab9bc3e567816d7011001aa69dc477bf4b61e45910528a4bb",
+          "name": "@openzeppelin/contracts/utils/Panic.sol:Panic",
+          "runtimeTemplateSha256": "63f33e7bd969f900897caf0df46f099d46ac1539f81b1e747f8203aeef4b5531"
+        },
+        {
+          "abiSha256": "09c0fd1eba175fe4b4beffa5da23de262958fbee6e71afe9a6093f5be1ad2589",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "bcc51ca0f04ba98472826974f71b7ac8dbf60fec76fdf10db8d106004a05b32b",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "922f1fa54d8829c4b0ee0f5b1f0c2b67fbb9b759562444f020b2bb609595ddbf",
+          "name": "@openzeppelin/contracts/utils/ShortStrings.sol:ShortStrings",
+          "runtimeTemplateSha256": "3676fdced1be15c970f99c09dd0242086be8cd04392f64b4a96c8ae28f1d101d"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "c2a3094dfb55363d7060e7eef65e82c92d5985cc03bc20f7a42ad1c34897555a",
+          "name": "@openzeppelin/contracts/utils/StorageSlot.sol:StorageSlot",
+          "runtimeTemplateSha256": "e8eb2b24880ec0d24162d814edc578e134b697a48edd8845256b5c1897544907"
+        },
+        {
+          "abiSha256": "2d347703b31c4bee7b3fd9e11238996819cf1a0b201414a714a962d385673c82",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "720e5764a3429b686e2a7f2ff9ddc816b3e0c3c8ae84d089b83240b561f2278f",
+          "name": "@openzeppelin/contracts/utils/Strings.sol:Strings",
+          "runtimeTemplateSha256": "2c370e003be6a6600fd4948d206619eb46b693e82c6e912eeff2a3c23a45769b"
+        },
+        {
+          "abiSha256": "7af7890b14d7a8ea7ac9feb7a9047fae51bb6c0e2c69de58f8b0e36cd3b61ca3",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "19b8b14df38c1d5f295768638d2b614e7781498580b84119c49e65c30322f110",
+          "name": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol:ECDSA",
+          "runtimeTemplateSha256": "d1e80f279fcc244f1cc80b3de71ae2acb19a3d60a1ca47f41c0f8172dc739a82"
+        },
+        {
+          "abiSha256": "826786bfce3293abc772c40a55df7251fca7e866ec89ea25ea618c718b31a9aa",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/utils/cryptography/EIP712.sol:EIP712",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "11b48dacfa75557cae70d4ed182fd37a10aa0e81de8905a112bfea09a0080e8f",
+          "name": "@openzeppelin/contracts/utils/cryptography/Hashes.sol:Hashes",
+          "runtimeTemplateSha256": "c648ede55b637fcfe86510b14b58b4295097b6ccc34122e9a2bec6047f9e92fd"
+        },
+        {
+          "abiSha256": "86099bbe97b6f2a419b7764912d7848b3bc769e1eb06b09f6f8a6c38408edba9",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e72b56291f52ed3933a3ad8fb5f3a25d09dac65c891637c055de9c0e421a6e04",
+          "name": "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol:MerkleProof",
+          "runtimeTemplateSha256": "8d9bca9732adf3af6e413a1848feb8b78667660b932bd1988ad709bc30da96ad"
+        },
+        {
+          "abiSha256": "fff264fbe2d3a03715dac615b6f838d7eb028d7c240c0bc2137dbedbd83d610e",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "f91d360e9faa8b44ce5736e1b9460bb72c6a3a54d1259a93e89e55756044a8aa",
+          "name": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol:MessageHashUtils",
+          "runtimeTemplateSha256": "ccb0af3308150211e439450df74d1944872eb1c022b10510e579df5ad140820d"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "6d8024e4ebba2c90af1cba47c39f523948272f6d516720e3f28115f9c6882a9c",
+          "name": "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol:SignatureChecker",
+          "runtimeTemplateSha256": "8127106ff594fe7652eff1c9d43e808c774019b5780f180e7be6a8982d79fdcc"
+        },
+        {
+          "abiSha256": "fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/utils/introspection/ERC165.sol:ERC165",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/utils/introspection/IERC165.sol:IERC165",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "83b4dceaf44b5b457cb8658f0d04152e482ee771983d7ebe57ddadfc399d6554",
+          "name": "@openzeppelin/contracts/utils/math/Math.sol:Math",
+          "runtimeTemplateSha256": "e5343d84eb00567f0442c889a353edb789f9f433c7076ce7be3ddd51780cbed7"
+        },
+        {
+          "abiSha256": "ef7cf4e8aba559511a1cc14480c3222c3402c7d4bdd496bd8402f72bfd30646d",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "7f8db16e8b9d606901a6c3d647e10b290f56b1624dad375eab792ee9ba398ce7",
+          "name": "@openzeppelin/contracts/utils/math/SafeCast.sol:SafeCast",
+          "runtimeTemplateSha256": "6b0b22662626be78c7e9412afc7da661705a8444068587bf7983ff8913d9d1d9"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "eda06662dfcb332b4123f426dbb0c60309b3c26b4959da89bcd624013bd97c82",
+          "name": "@openzeppelin/contracts/utils/math/SignedMath.sol:SignedMath",
+          "runtimeTemplateSha256": "b0cae1fa1a9d1d3fb08535dc5deceff1a8de107ca930f15afa48cec6feb31696"
+        },
+        {
+          "abiSha256": "08cd9c118d1d81550a3ae263aef151500e10ee575012a742d9e0b6f2d9e173e6",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "df975489a501447c35c95b10cb0266aca394aab76fd3bd7bfd6a151f82132c5e",
+          "name": "apps/ZVMCollection.sol:ZVMCollection",
+          "runtimeTemplateSha256": "d94a80305dbbad0d4813c23d6da61da558d68a4a5dc3110e141079da557569a8"
+        },
+        {
+          "abiSha256": "bbe3d4df695cb7f7522ea7c2250fe0811b02032b7fbc597771a12e4285ad7f5f",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "dbdefee4bcc8975f86c0e7b44397aeba9b19c8ca41663dba49b70bf98dfd928b",
+          "name": "apps/ZVMCollectionFactory.sol:ZVMCollectionFactory",
+          "runtimeTemplateSha256": "1c18220882dba5dcd1f122ce23c803faeb9b828d17a0c190c032bda5738feabb"
+        },
+        {
+          "abiSha256": "6cceb6c3bfed513697e99a10be56e2540c934dcf914c9d649c1fc35977a4dc37",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "c530e303e0da16d060b1725ec309c2452df70a794a8ff27ed5d84adccc431037",
+          "name": "apps/ZVMExchange.sol:ZVMExchange",
+          "runtimeTemplateSha256": "907b868be90f7311e065afc85a5171457afc81d71309454afcb23bec068cd416"
+        },
+        {
+          "abiSha256": "97990d353015aa964e6c75206e08dc1bd2248377d31094bffcd61ee00f9667e5",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "c039693d04c3a5024405570300e61020e0f7ac2fdd9f071a6b7da2acf5f34698",
+          "name": "apps/ZVMFarm.sol:ZVMFarm",
+          "runtimeTemplateSha256": "83e1d35b0c188f0bcd2cc3dd1f0c3fa00ed77b363329aa159b513eeb5fbc53ff"
+        },
+        {
+          "abiSha256": "1d06646c3d08637f2eae9ea3b6be3c1b61af784985de851f49d2b65a0d26c733",
+          "artifact_path": "apps/artifacts/apps.json",
+          "creationSha256": "3e1bc147e6e4cab97cc33e43046d9e22891f7aeb6278d934b1858b58dde7b6c7",
+          "name": "apps/ZVMFarmFeeStrategy.sol:ZVMFarmFeeStrategy",
+          "runtimeTemplateSha256": "92d0e9e5eaf9f8ca110c837dfe578f09a5d6c3f6728a2448366d78ab12defc3c"
+        }
+      ],
+      "input_bytes": 334919,
+      "input_sha256": "28632f79d9a79a62ed9049340b5be5c5307ea9db53de708811a07f07f541136e",
+      "name": "apps",
+      "settings": {
+        "evmVersion": "prague",
+        "libraries": {},
+        "metadata": {
+          "appendCBOR": true,
+          "bytecodeHash": "ipfs",
+          "useLiteralContent": false
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode.object",
+              "evm.bytecode.linkReferences",
+              "evm.deployedBytecode.object",
+              "evm.deployedBytecode.linkReferences",
+              "evm.deployedBytecode.immutableReferences"
+            ]
+          }
+        },
+        "remappings": [],
+        "viaIR": false
+      },
+      "sources": [
+        {
+          "bytes": 3102,
+          "origin": "openzeppelin",
+          "path": "package/access/Ownable.sol",
+          "sha256": "38578bd71c0a909840e67202db527cc6b4e6b437e0f39f0c909da32c1e30cb81",
+          "unit": "@openzeppelin/contracts/access/Ownable.sol"
+        },
+        {
+          "bytes": 656,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/IERC1271.sol",
+          "sha256": "2d17bba201aa2f9c55e317315b872272a60361848dfceb6b1e77081265c79a27",
+          "unit": "@openzeppelin/contracts/interfaces/IERC1271.sol"
+        },
+        {
+          "bytes": 4454,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/IERC1363.sol",
+          "sha256": "9c3a75a925a6dac9e88b03cddc58d42fe3131b0aaaad84408521f3f7af2f991b",
+          "unit": "@openzeppelin/contracts/interfaces/IERC1363.sol"
+        },
+        {
+          "bytes": 193,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/IERC165.sol",
+          "sha256": "dfb3f56fa928a7c6cae41a7ce2c86b9210fa18d33fa26389099d66a0fa790368",
+          "unit": "@openzeppelin/contracts/interfaces/IERC165.sol"
+        },
+        {
+          "bytes": 182,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/IERC20.sol",
+          "sha256": "0158e2d3e0e28bedd99eec13dcf1a8aa3a70a5b7e4bb2ad709609c95fcc740d1",
+          "unit": "@openzeppelin/contracts/interfaces/IERC20.sol"
+        },
+        {
+          "bytes": 1114,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/IERC2981.sol",
+          "sha256": "ea5f52ef580b9cb7c97091fd8164ec3ff211f5bdec359d18191eac4fcf7fcf76",
+          "unit": "@openzeppelin/contracts/interfaces/IERC2981.sol"
+        },
+        {
+          "bytes": 740,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/IERC5267.sol",
+          "sha256": "f89772d2d4fafcbef8b73bb10ee9a3373edec2eedb2f1b302320915b351dc3d1",
+          "unit": "@openzeppelin/contracts/interfaces/IERC5267.sol"
+        },
+        {
+          "bytes": 674,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/IERC7913.sol",
+          "sha256": "f66aad4249885b0f11369bfa825dded60aa4baa0d76d9becdac9daa48c350350",
+          "unit": "@openzeppelin/contracts/interfaces/IERC7913.sol"
+        },
+        {
+          "bytes": 6540,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/draft-IERC6093.sol",
+          "sha256": "fa7068f56bc180571a6095be6eaef06d51dbe81e30cb128397d993c9599ecc30",
+          "unit": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol"
+        },
+        {
+          "bytes": 14522,
+          "origin": "openzeppelin",
+          "path": "package/proxy/Clones.sol",
+          "sha256": "06c768a2b794ea59dd6d6c1bfe33cf5098a4a8921aec14cf066576a2bffafce6",
+          "unit": "@openzeppelin/contracts/proxy/Clones.sol"
+        },
+        {
+          "bytes": 2781,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC20/IERC20.sol",
+          "sha256": "01b6f5c4fa45fd38822b286ecef6daf983d27306dd6362496fa71b3e4600b72c",
+          "unit": "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+        },
+        {
+          "bytes": 13314,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC20/utils/SafeERC20.sol",
+          "sha256": "c2394cb2a327f234711da34884947f4aa0f6dd2791d1d6303a0c7acfaf81bca3",
+          "unit": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol"
+        },
+        {
+          "bytes": 16201,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/ERC721.sol",
+          "sha256": "ef8e2398c78851bd2ec12bc48d923058c557889d5a3d5ee4919c17ff0fb3517e",
+          "unit": "@openzeppelin/contracts/token/ERC721/ERC721.sol"
+        },
+        {
+          "bytes": 4929,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/IERC721.sol",
+          "sha256": "ff0eb9902bf0ac099205615fac90eacf34fae637571b05aab3ea35dea53d5f17",
+          "unit": "@openzeppelin/contracts/token/ERC721/IERC721.sol"
+        },
+        {
+          "bytes": 997,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/IERC721Receiver.sol",
+          "sha256": "eafee3ffdc7cb2fba4bf6bd16fb28f8e5b4679742e81c2ad42a1b1df5c179feb",
+          "unit": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol"
+        },
+        {
+          "bytes": 792,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/extensions/IERC721Metadata.sol",
+          "sha256": "33223782ea652dca413702ce92f9f59d91d758a035065b24bbedb7dc60c63a78",
+          "unit": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol"
+        },
+        {
+          "bytes": 1923,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/utils/ERC721Utils.sol",
+          "sha256": "b48e95db8c85866c1d88af8e82f346e0d22d24b5aac5b936079d958c72e13b9f",
+          "unit": "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol"
+        },
+        {
+          "bytes": 5323,
+          "origin": "openzeppelin",
+          "path": "package/token/common/ERC2981.sol",
+          "sha256": "bac8f7ccae3c561a105a18cd1600ade43bb8856f9b7c9e0acc98d950af9ffa81",
+          "unit": "@openzeppelin/contracts/token/common/ERC2981.sol"
+        },
+        {
+          "bytes": 14737,
+          "origin": "openzeppelin",
+          "path": "package/utils/Bytes.sol",
+          "sha256": "3ce9120a27934c75a074cb785d3a88868069ef6529dbe4dc6b845af0836f3c70",
+          "unit": "@openzeppelin/contracts/utils/Bytes.sol"
+        },
+        {
+          "bytes": 963,
+          "origin": "openzeppelin",
+          "path": "package/utils/Context.sol",
+          "sha256": "847fda5460fee70f56f4200f59b82ae622bb03c79c77e67af010e31b7e2cc5b6",
+          "unit": "@openzeppelin/contracts/utils/Context.sol"
+        },
+        {
+          "bytes": 4372,
+          "origin": "openzeppelin",
+          "path": "package/utils/Create2.sol",
+          "sha256": "9623aa59745a23a72f313adc5adbf583968bf366a7cbf3fc43c1148d7d2c3c86",
+          "unit": "@openzeppelin/contracts/utils/Create2.sol"
+        },
+        {
+          "bytes": 896,
+          "origin": "openzeppelin",
+          "path": "package/utils/Errors.sol",
+          "sha256": "0704b9d6c032cca8512a3bc3f30f49f86f1f03102d2896a3d23e794b82efea66",
+          "unit": "@openzeppelin/contracts/utils/Errors.sol"
+        },
+        {
+          "bytes": 5547,
+          "origin": "openzeppelin",
+          "path": "package/utils/LowLevelCall.sol",
+          "sha256": "e128cbe9c6c406d5a42c26e4079c0a95b369ce552f2d0c3dfd2fcb836c5708f2",
+          "unit": "@openzeppelin/contracts/utils/LowLevelCall.sol"
+        },
+        {
+          "bytes": 1973,
+          "origin": "openzeppelin",
+          "path": "package/utils/Panic.sol",
+          "sha256": "270fc8401c1a13fae6a7a4a2dd6e381b95d658896701e51f0d3e2688acab3dec",
+          "unit": "@openzeppelin/contracts/utils/Panic.sol"
+        },
+        {
+          "bytes": 4766,
+          "origin": "openzeppelin",
+          "path": "package/utils/ReentrancyGuard.sol",
+          "sha256": "94e409e8f6e3184236651a6cc2b1a6a3ea0f0a25eb85b71e524ad5791bb2fbc8",
+          "unit": "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+        },
+        {
+          "bytes": 4310,
+          "origin": "openzeppelin",
+          "path": "package/utils/ShortStrings.sol",
+          "sha256": "1cfa08d3c551e9ec0b9cd249b09987f04e7e90f352e1a5e3b0d6a3bc426b3de7",
+          "unit": "@openzeppelin/contracts/utils/ShortStrings.sol"
+        },
+        {
+          "bytes": 4182,
+          "origin": "openzeppelin",
+          "path": "package/utils/StorageSlot.sol",
+          "sha256": "75704538dcb223239280c6726d9a31cf769a7816718517c997fc7d63bdb70778",
+          "unit": "@openzeppelin/contracts/utils/StorageSlot.sol"
+        },
+        {
+          "bytes": 21538,
+          "origin": "openzeppelin",
+          "path": "package/utils/Strings.sol",
+          "sha256": "e318709bbe73a7831d64c1351e8bdc43780b245f25191234e361e6ab9b98c67b",
+          "unit": "@openzeppelin/contracts/utils/Strings.sol"
+        },
+        {
+          "bytes": 12152,
+          "origin": "openzeppelin",
+          "path": "package/utils/cryptography/ECDSA.sol",
+          "sha256": "ba7c2d314fcd61c9783e0b3f0c664d004b76b408fda6a84edc8267d17c5012d6",
+          "unit": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol"
+        },
+        {
+          "bytes": 6695,
+          "origin": "openzeppelin",
+          "path": "package/utils/cryptography/EIP712.sol",
+          "sha256": "2845caaaf70757b6cce612ae4ffbec2c382cb3d1cb9765c98fa649c0f5f1c794",
+          "unit": "@openzeppelin/contracts/utils/cryptography/EIP712.sol"
+        },
+        {
+          "bytes": 1033,
+          "origin": "openzeppelin",
+          "path": "package/utils/cryptography/Hashes.sol",
+          "sha256": "ecdbce11c5ecdf32b306e26b8ab1b878327c08154b4ccd04518b6b64b298cf31",
+          "unit": "@openzeppelin/contracts/utils/cryptography/Hashes.sol"
+        },
+        {
+          "bytes": 24621,
+          "origin": "openzeppelin",
+          "path": "package/utils/cryptography/MerkleProof.sol",
+          "sha256": "fd5635e85da7518bf1a153eaa99d3fad8bb6700f9d5d9cb70ddde75935cb122c",
+          "unit": "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol"
+        },
+        {
+          "bytes": 8631,
+          "origin": "openzeppelin",
+          "path": "package/utils/cryptography/MessageHashUtils.sol",
+          "sha256": "538a0d7c4f0ec5a8562f58561890f7b49d14580674ecf58bc5f505b45c73df65",
+          "unit": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol"
+        },
+        {
+          "bytes": 8202,
+          "origin": "openzeppelin",
+          "path": "package/utils/cryptography/SignatureChecker.sol",
+          "sha256": "acc520422fac0a9edb85d7268085a63219a0db9e4406cd155d5c74c94e35f590",
+          "unit": "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol"
+        },
+        {
+          "bytes": 879,
+          "origin": "openzeppelin",
+          "path": "package/utils/introspection/ERC165.sol",
+          "sha256": "61a2b12c96857aaa35f48aeda67a4281637a42494c0b3795be0ae976aa7b3793",
+          "unit": "@openzeppelin/contracts/utils/introspection/ERC165.sol"
+        },
+        {
+          "bytes": 871,
+          "origin": "openzeppelin",
+          "path": "package/utils/introspection/IERC165.sol",
+          "sha256": "9055c2994b37dea1a41b7b7926dcb510f05dbe2540b0aafc5fbee9558fffd0ca",
+          "unit": "@openzeppelin/contracts/utils/introspection/IERC165.sol"
+        },
+        {
+          "bytes": 32664,
+          "origin": "openzeppelin",
+          "path": "package/utils/math/Math.sol",
+          "sha256": "bdfdbe133991c0c78042957ff5cd97167926fcaf6d15664f3835a076cb066457",
+          "unit": "@openzeppelin/contracts/utils/math/Math.sol"
+        },
+        {
+          "bytes": 34940,
+          "origin": "openzeppelin",
+          "path": "package/utils/math/SafeCast.sol",
+          "sha256": "5779bc848bde39f1ad7bc02b4f708a0040888e0083b1a33f119cd94639350134",
+          "unit": "@openzeppelin/contracts/utils/math/SafeCast.sol"
+        },
+        {
+          "bytes": 2613,
+          "origin": "openzeppelin",
+          "path": "package/utils/math/SignedMath.sol",
+          "sha256": "1ed50b1056af886752f0fb48a0165d381e69bb4a4b18b893b066dc144a7e08d7",
+          "unit": "@openzeppelin/contracts/utils/math/SignedMath.sol"
+        },
+        {
+          "bytes": 6961,
+          "origin": "project",
+          "path": "contracts/apps/ZVMCollection.sol",
+          "sha256": "8187534e7b43088e9b5ef78b397f04d2ff9a94cdadab98af110fc00840bcd7ea",
+          "unit": "apps/ZVMCollection.sol"
+        },
+        {
+          "bytes": 1551,
+          "origin": "project",
+          "path": "contracts/apps/ZVMCollectionFactory.sol",
+          "sha256": "a161f2a7e932b41d0ff60b75f431a1c2544dc0a2a32add24c742839a6544072f",
+          "unit": "apps/ZVMCollectionFactory.sol"
+        },
+        {
+          "bytes": 16629,
+          "origin": "project",
+          "path": "contracts/apps/ZVMExchange.sol",
+          "sha256": "9faef84e62cddc67ef894b8aed5e2771936d9f1ce2789379bd9e7a5eee590788",
+          "unit": "apps/ZVMExchange.sol"
+        },
+        {
+          "bytes": 12668,
+          "origin": "project",
+          "path": "contracts/apps/ZVMFarm.sol",
+          "sha256": "680e6d4f4f34ae538de0095651bf8816df65f878f74eef68f4ee9f370e4e71d7",
+          "unit": "apps/ZVMFarm.sol"
+        },
+        {
+          "bytes": 10262,
+          "origin": "project",
+          "path": "contracts/apps/ZVMFarmFeeStrategy.sol",
+          "sha256": "5dfdd1b32c9d2426ad33a8239ee86aa9a72cb96d7808f7ea327035019f174808",
+          "unit": "apps/ZVMFarmFeeStrategy.sol"
+        }
+      ],
+      "targets": [
+        {
+          "abiSha256": "93f20a7da9b4de4c809723bd219f0d0632316780ccbade3b55fba78de2b85f13",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "f0d293b8abe3f733b44597bdedd62157f9743266f2066a55cb3293b97701915d",
+          "name": "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "7c98283e2a61aff1968221713e98a7c7604b11546137360ec82fa93669875323"
+        },
+        {
+          "abiSha256": "5721ab6bdea982cbd7690bcc59d90ba0b53da853a52c50fbeeb0cb88de1dcf4b",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "7983db8ba4964f0313f405f544a6d562524660525792b89f254ebdb6233775a9",
+          "name": "@openzeppelin/contracts/interfaces/IERC1271.sol:IERC1271",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "0b24db6805705bf25882797143f7a34b97d707da25c29e5b9f37f5cc091f1de8",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "735619ca25332a97803204fae762b52803ca6a89e58ce1b05869ea79b128d942",
+          "name": "@openzeppelin/contracts/interfaces/IERC1363.sol:IERC1363",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "aacd60a298b69f44e9d96171c56834a694c547138a5eb0c6a45ac5c905db20ca",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "f07e61afe653be8bf081e575a1794f00f9bcb4724a699a79ec644cf21e48271e",
+          "name": "@openzeppelin/contracts/interfaces/IERC2981.sol:IERC2981",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "f1e87151c8635b01ae77e263e813ceeb486d9df6c35300055cb85c248421f55f",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "49881ec9f32c2c81a8e6ffb09a6366a62578b52674dffa98da044ec5ba1f0cba",
+          "name": "@openzeppelin/contracts/interfaces/IERC5267.sol:IERC5267",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "1f8c0481be099ebbe69d1e6d9d4fdae69c0c8859b87aa31a64deccdd24d1eb91",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "eb34a02f5fbb71ee316410634a952ce74c1fa59602da5060fc5c579f34d0eb72",
+          "name": "@openzeppelin/contracts/interfaces/IERC7913.sol:IERC7913SignatureVerifier",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4788991d085e0b9990603501d1cab5fcb830c3429fad3d59a421afc27d2ab708",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "15477f6827e02820a1f800a0a27b560d5a13784d3d5ee021d5774e2c8e4ccd89",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC1155Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "851ca5f5bf60a11262c78d710c46d935f0d7dde2b760ba7d7f199d273d2bcf71",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1a01b14c693e5b66ea6a3047d8edca9e7fb4ce2d5bce7363db5b065663305ebc",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC20Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "22cb31c1805339cc470a1ef3b5cb08b468e465bd624e68529ea9b72fbb87621f",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "b7b5439a9ca2e9fb1e2d821727a58754d7f0e2ea6dd5e8f663787e7b83d0e99d",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC721Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "dc6e97473301c11b320cc61afa2ce6a387bfe5f9ad99b489ba07161c689ae337",
+          "creationSha256": "1b2762a0e7b7b0a69ba83c7d79d88d32cae7f85956b6f11deab52a4c2b966eb6",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "9a06da4f26d510bf2470c1de66fb52622cb4b2eac3405a2056634d759d4d0f56",
+          "name": "@openzeppelin/contracts/proxy/Clones.sol:Clones",
+          "runtimeTemplateSha256": "3aa25ad7413111c9a543eb5b1b31a3dacac7fc7e6be5c60ab6cb422a0fa52932",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "3033dc48798f2279981a4f665b7feb9192fc7b896379adaab881c418c2be4ed5",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "a0de77dd36b8ca4f4ea36df0a91d3e987ac466078fe53f7bc68db74585518ab0",
+          "name": "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "1528adb9fed314f927722c41cccacb46e8848926bc5962620d08676929e7a279",
+          "creationSha256": "d7de48e10801d246501e3c79c2a7ce74040bb8231d5e0e4c0bdf5909200afb88",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "da738edb404240835bac0ccbf370f0a198bca406482f472174e54eeeecb0f01c",
+          "name": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol:SafeERC20",
+          "runtimeTemplateSha256": "69f015c72b3683166c34d2aa1aa4090af786eaf639d97845ab30645438586b13",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "a96cf16f374d1d7049231e4809f18f70174c2eabade6605a9d5fb257f5e25fb3",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "009957d5ccaea02aa7ab14151cc41e364f1db1cda0cea1ecfc1871f238ab3cbc",
+          "name": "@openzeppelin/contracts/token/ERC721/ERC721.sol:ERC721",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "aab6346c8fd467bab3ba115da568ea45226223cfc63bd0423f582bc179c1970c"
+        },
+        {
+          "abiSha256": "b6d755d7aef77ce7389e295ef6eb2e19c14e322a9c8e3f224e366bb4c47ddb8c",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "7572bbc428f1b7b5bfe306b96a989a0668317a7d235412d9d81ab3b86eec9952",
+          "name": "@openzeppelin/contracts/token/ERC721/IERC721.sol:IERC721",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "631311ccabb8b5fc66f54de8760cc062122e265acf8720f4b40f002fa83bc768",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "6480c966e49006f75d225ae3e6e338935dc15b399618c1a62e98e80e33cbe289",
+          "name": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol:IERC721Receiver",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "921d6e32a471d301778e1ebbe68065b9447e7151032ba59e95ca78dbf2c5844f",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "79e4cfc7a3f63f85423b2216c2f1a5ff6b9599bc5ce1b2f0321dcbbe041ddd54",
+          "name": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol:IERC721Metadata",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "3e3799ff071604c9e9b61c39002c74684c027985478241dade9dd7cf52fcdfc6",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ef6c1a58ae4a7de05ac389e193e7b366001ee4d1494eac2d7056c118207341cf",
+          "name": "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol:ERC721Utils",
+          "runtimeTemplateSha256": "3aae4ae2b51bda88423bb7a7883c428116ec7e87d6821b9d395bd13b4f41c630",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "6161c764673090d684926bf3a5d930c826fd26efa7becc4ac77418b923e5a8b7",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "bd4a265f23cc8d7ead04d4e56392a3a9e017a12cad1b00405e905719fa8c88f0",
+          "name": "@openzeppelin/contracts/token/common/ERC2981.sol:ERC2981",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "3f71b7d35556a5cf248ae18143ae738c2b9ecc4177606869dde71c58cd41501e"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "5ba96c69ab21a24b98dc68da1fa27ab40a855ad3b03034f0ecdf3f34bdeb6b5c",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "eb52591c87a3567defab9539b926d94e1fb41e9663f12d11f0ba89c881739bb1",
+          "name": "@openzeppelin/contracts/utils/Bytes.sol:Bytes",
+          "runtimeTemplateSha256": "6c7314b1542dd8201b7406cc5f7f41396898a2a539c50e12668000831796608e",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "809a341d41b07c622351387911181cd09a2df814865f2c1f700d1c2def270be2",
+          "name": "@openzeppelin/contracts/utils/Context.sol:Context",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "b0c57d7aea9cbe661b906024a7f29110b22db33863f7ad408006318aeec665d0",
+          "creationSha256": "59b306eab1beb81ac5fdb11897bed0c7191c7a559407b3cad51089ff54569a7e",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "4df8064eab239f726e494bcb24459b1ca4f19fd520265c3f94ceb82e9ce4e577",
+          "name": "@openzeppelin/contracts/utils/Create2.sol:Create2",
+          "runtimeTemplateSha256": "41bb12766cc4ad5d7faf347fb34e02e577cf778a11a0286dea95bb1e5ca433e6",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "bdb444564894f49137d6f9e5392a069c34f48e29c6f2fe8a59edefe339fd45f0",
+          "creationSha256": "5d62f95bddf6926d6eb29f36dbb569831f435c34a13f6ec578d11a1b2bc67e52",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1854e84d23bf996e4e0e4f6cfe09260c216ce0565babd676db12e1a25e40b783",
+          "name": "@openzeppelin/contracts/utils/Errors.sol:Errors",
+          "runtimeTemplateSha256": "92bf83e1a1bc605b46005fff6dc78198e4b66e3db4eb484114c0775e4fb091f8",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "69c18bb343302114736df8a190adfca6e438222260acc556b81c4e6cd9738945",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "bf936afcea140b7f7599e7b3732dfa66e53a476a07e9a4a5b63af4d513bd47a9",
+          "name": "@openzeppelin/contracts/utils/LowLevelCall.sol:LowLevelCall",
+          "runtimeTemplateSha256": "98bf3c30298d91001fefe7a848692cba8a19a6c3e551664d9130bd23cd38e7c2",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "c8bdb0a15fe0f24ab9bc3e567816d7011001aa69dc477bf4b61e45910528a4bb",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "a69bcf478b05923e04c0ff2ec9ac0d1a0f0085dda0d5e9ace2f5f6821c8ce5ad",
+          "name": "@openzeppelin/contracts/utils/Panic.sol:Panic",
+          "runtimeTemplateSha256": "63f33e7bd969f900897caf0df46f099d46ac1539f81b1e747f8203aeef4b5531",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "09c0fd1eba175fe4b4beffa5da23de262958fbee6e71afe9a6093f5be1ad2589",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "3d647a7a020d3b2ff81a647100241531c686b3651b6c4e6a652ed14185d4854b",
+          "name": "@openzeppelin/contracts/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "bcc51ca0f04ba98472826974f71b7ac8dbf60fec76fdf10db8d106004a05b32b",
+          "creationSha256": "922f1fa54d8829c4b0ee0f5b1f0c2b67fbb9b759562444f020b2bb609595ddbf",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "7e6e1534da5e16ca757c4edb770bf0e66a197baf5a16375a5d6e04ac499e7d99",
+          "name": "@openzeppelin/contracts/utils/ShortStrings.sol:ShortStrings",
+          "runtimeTemplateSha256": "3676fdced1be15c970f99c09dd0242086be8cd04392f64b4a96c8ae28f1d101d",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "c2a3094dfb55363d7060e7eef65e82c92d5985cc03bc20f7a42ad1c34897555a",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "2d181e44199cca68918590dd92667baede1863ab80f01203555e9ed8033188bb",
+          "name": "@openzeppelin/contracts/utils/StorageSlot.sol:StorageSlot",
+          "runtimeTemplateSha256": "e8eb2b24880ec0d24162d814edc578e134b697a48edd8845256b5c1897544907",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "2d347703b31c4bee7b3fd9e11238996819cf1a0b201414a714a962d385673c82",
+          "creationSha256": "720e5764a3429b686e2a7f2ff9ddc816b3e0c3c8ae84d089b83240b561f2278f",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "21b7a872d51687af8decca1c8831f3d280b5a21ea8d5edc5bdb56c6c471ce786",
+          "name": "@openzeppelin/contracts/utils/Strings.sol:Strings",
+          "runtimeTemplateSha256": "2c370e003be6a6600fd4948d206619eb46b693e82c6e912eeff2a3c23a45769b",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "7af7890b14d7a8ea7ac9feb7a9047fae51bb6c0e2c69de58f8b0e36cd3b61ca3",
+          "creationSha256": "19b8b14df38c1d5f295768638d2b614e7781498580b84119c49e65c30322f110",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "cb3224f102af7ae40c1b474624728774e496398db49215ebace236d6ad6655d3",
+          "name": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol:ECDSA",
+          "runtimeTemplateSha256": "d1e80f279fcc244f1cc80b3de71ae2acb19a3d60a1ca47f41c0f8172dc739a82",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "826786bfce3293abc772c40a55df7251fca7e866ec89ea25ea618c718b31a9aa",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "e94adef040cb2ad80ac9edc3d4016c9ae42511a81a97164a7124a3237df9b497",
+          "name": "@openzeppelin/contracts/utils/cryptography/EIP712.sol:EIP712",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "8c6c409b9ecb0d752b843a0b0da4757588602c4d37329c312e27f8b83d9cf6e8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "11b48dacfa75557cae70d4ed182fd37a10aa0e81de8905a112bfea09a0080e8f",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "97900e4a565a1cdd194f4d2c4a144b979723d46650bb419a4d1778783e5c9cff",
+          "name": "@openzeppelin/contracts/utils/cryptography/Hashes.sol:Hashes",
+          "runtimeTemplateSha256": "c648ede55b637fcfe86510b14b58b4295097b6ccc34122e9a2bec6047f9e92fd",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "86099bbe97b6f2a419b7764912d7848b3bc769e1eb06b09f6f8a6c38408edba9",
+          "creationSha256": "e72b56291f52ed3933a3ad8fb5f3a25d09dac65c891637c055de9c0e421a6e04",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "2ac6846c12133cc70089dce8990aed99a57efe23745643b768558dd8f1b9097c",
+          "name": "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol:MerkleProof",
+          "runtimeTemplateSha256": "8d9bca9732adf3af6e413a1848feb8b78667660b932bd1988ad709bc30da96ad",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "fff264fbe2d3a03715dac615b6f838d7eb028d7c240c0bc2137dbedbd83d610e",
+          "creationSha256": "f91d360e9faa8b44ce5736e1b9460bb72c6a3a54d1259a93e89e55756044a8aa",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "5ec5f257f5d8b0019a07edf39b5814ed475d4a331a298a92b4a0ab936eecfa5d",
+          "name": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol:MessageHashUtils",
+          "runtimeTemplateSha256": "ccb0af3308150211e439450df74d1944872eb1c022b10510e579df5ad140820d",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "6d8024e4ebba2c90af1cba47c39f523948272f6d516720e3f28115f9c6882a9c",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "cb21d6adb7a0a5471b3c98a55d61350d2c454fa485eb43884f7caf79ed2feef9",
+          "name": "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol:SignatureChecker",
+          "runtimeTemplateSha256": "8127106ff594fe7652eff1c9d43e808c774019b5780f180e7be6a8982d79fdcc",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "8eb0ca40a030807c2e6af4e499d625a2b7d7d2744c3c8b54f741aa39e9c23b04",
+          "name": "@openzeppelin/contracts/utils/introspection/ERC165.sol:ERC165",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "c0b454741c7e2a8f91e40765a52f3d09f1be2ee5709722e44138c2e86d823765",
+          "name": "@openzeppelin/contracts/utils/introspection/IERC165.sol:IERC165",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "83b4dceaf44b5b457cb8658f0d04152e482ee771983d7ebe57ddadfc399d6554",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "17c150c6c2276207ee3f96c7dbc2e7fc207fedd2034224b107044d356e8befba",
+          "name": "@openzeppelin/contracts/utils/math/Math.sol:Math",
+          "runtimeTemplateSha256": "e5343d84eb00567f0442c889a353edb789f9f433c7076ce7be3ddd51780cbed7",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "ef7cf4e8aba559511a1cc14480c3222c3402c7d4bdd496bd8402f72bfd30646d",
+          "creationSha256": "7f8db16e8b9d606901a6c3d647e10b290f56b1624dad375eab792ee9ba398ce7",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "8398b46c63a432f8c171d48f3bb4e49d84ed277e15cea23a48b9fb1988d663d0",
+          "name": "@openzeppelin/contracts/utils/math/SafeCast.sol:SafeCast",
+          "runtimeTemplateSha256": "6b0b22662626be78c7e9412afc7da661705a8444068587bf7983ff8913d9d1d9",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "eda06662dfcb332b4123f426dbb0c60309b3c26b4959da89bcd624013bd97c82",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "448682441761e249211f1e2d16a01b8e65deb4bab461236930e85708ff21943f",
+          "name": "@openzeppelin/contracts/utils/math/SignedMath.sol:SignedMath",
+          "runtimeTemplateSha256": "b0cae1fa1a9d1d3fb08535dc5deceff1a8de107ca930f15afa48cec6feb31696",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "08cd9c118d1d81550a3ae263aef151500e10ee575012a742d9e0b6f2d9e173e6",
+          "creationSha256": "df975489a501447c35c95b10cb0266aca394aab76fd3bd7bfd6a151f82132c5e",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "b28bb8a5d5592ca29bafbe9024ea3eabc12b96ed8b5175d01dd30c624704bc4e",
+          "name": "apps/ZVMCollection.sol:ZVMCollection",
+          "runtimeTemplateSha256": "d94a80305dbbad0d4813c23d6da61da558d68a4a5dc3110e141079da557569a8",
+          "storageLayoutSha256": "561c3618813a91d62e3994b796a1dd3914fa9d3aacc2ab8d7a7829c396cc8a48"
+        },
+        {
+          "abiSha256": "bbe3d4df695cb7f7522ea7c2250fe0811b02032b7fbc597771a12e4285ad7f5f",
+          "creationSha256": "dbdefee4bcc8975f86c0e7b44397aeba9b19c8ca41663dba49b70bf98dfd928b",
+          "immutableReferences": {
+            "12622": [
+              {
+                "length": 32,
+                "start": 94
+              },
+              {
+                "length": 32,
+                "start": 267
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "5d3d3b5fd0d14a4b6c7aee04cbce73548fc53ad970c845f5c71d7e9b598b0a79",
+          "name": "apps/ZVMCollectionFactory.sol:ZVMCollectionFactory",
+          "runtimeTemplateSha256": "1c18220882dba5dcd1f122ce23c803faeb9b828d17a0c190c032bda5738feabb",
+          "storageLayoutSha256": "b380cc19d247272fed92acbe625a75c956a4c1b2c480a2cf9f4b2002e13ce85c"
+        },
+        {
+          "abiSha256": "6cceb6c3bfed513697e99a10be56e2540c934dcf914c9d649c1fc35977a4dc37",
+          "creationSha256": "c530e303e0da16d060b1725ec309c2452df70a794a8ff27ed5d84adccc431037",
+          "immutableReferences": {
+            "6482": [
+              {
+                "length": 32,
+                "start": 6336
+              }
+            ],
+            "6484": [
+              {
+                "length": 32,
+                "start": 6294
+              }
+            ],
+            "6486": [
+              {
+                "length": 32,
+                "start": 6252
+              }
+            ],
+            "6488": [
+              {
+                "length": 32,
+                "start": 6417
+              }
+            ],
+            "6490": [
+              {
+                "length": 32,
+                "start": 6457
+              }
+            ],
+            "6493": [
+              {
+                "length": 32,
+                "start": 6027
+              }
+            ],
+            "6496": [
+              {
+                "length": 32,
+                "start": 6072
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "e1487f0e73b99976475330544b2b435c4d01076edddeb28884d1cc09803e9b5e",
+          "name": "apps/ZVMExchange.sol:ZVMExchange",
+          "runtimeTemplateSha256": "907b868be90f7311e065afc85a5171457afc81d71309454afcb23bec068cd416",
+          "storageLayoutSha256": "1b7ddaeb2f411db932b0aeabe778943cfd27c9b1be61221f21d164a7ad945050"
+        },
+        {
+          "abiSha256": "97990d353015aa964e6c75206e08dc1bd2248377d31094bffcd61ee00f9667e5",
+          "creationSha256": "c039693d04c3a5024405570300e61020e0f7ac2fdd9f071a6b7da2acf5f34698",
+          "immutableReferences": {
+            "14390": [
+              {
+                "length": 32,
+                "start": 1039
+              },
+              {
+                "length": 32,
+                "start": 3787
+              },
+              {
+                "length": 32,
+                "start": 3915
+              },
+              {
+                "length": 32,
+                "start": 3988
+              },
+              {
+                "length": 32,
+                "start": 5024
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "6808a445b74fd3b3a1f9280971944993ca505e0db05fa8747a02396c422e0b0d",
+          "name": "apps/ZVMFarm.sol:ZVMFarm",
+          "runtimeTemplateSha256": "83e1d35b0c188f0bcd2cc3dd1f0c3fa00ed77b363329aa159b513eeb5fbc53ff",
+          "storageLayoutSha256": "92122fbe2cf3f32f08a0d59955259720a78807d04009cdc4e9a8e9f53c22ebd5"
+        },
+        {
+          "abiSha256": "defc06b939f23364d9be338ceb7b1cb509a7a96b86af035d1cb9c7782de53ed2",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "3aee08937dd990d6b164d4883b30f66de706bff307bea39abf525b0af59cdd1f",
+          "name": "apps/ZVMFarmFeeStrategy.sol:IUniswapV2Factory",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "81b33d2294d58506be6d30500265f3354491e3b93594572b0ae38751c67d798c",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "19695b9bf4a995c0d7e2bf7fcad85e0d1328ab442479e1e9cbac483e043fb884",
+          "name": "apps/ZVMFarmFeeStrategy.sol:IUniswapV2Pair",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "940af6446ecc36d5fa64085e6af5ef2600dc82feb9436b348501827f616357e0",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "5f633ab81d4aac30b9bf9f14d1d7037ced4521621b4758e815827428e7d9f173",
+          "name": "apps/ZVMFarmFeeStrategy.sol:IUniswapV2Router",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "8813587d50b9b8cc385e279a9f3448a76336ab117bc5aa60651934d4708e7a18",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "bbb5d4c1cabd711225698b382241c4e826de1a25b971fab3b0dd8acf6769f1c7",
+          "name": "apps/ZVMFarmFeeStrategy.sol:IZVMFarm",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "1d06646c3d08637f2eae9ea3b6be3c1b61af784985de851f49d2b65a0d26c733",
+          "creationSha256": "3e1bc147e6e4cab97cc33e43046d9e22891f7aeb6278d934b1858b58dde7b6c7",
+          "immutableReferences": {
+            "15790": [
+              {
+                "length": 32,
+                "start": 180
+              },
+              {
+                "length": 32,
+                "start": 2408
+              },
+              {
+                "length": 32,
+                "start": 2467
+              }
+            ],
+            "15793": [
+              {
+                "length": 32,
+                "start": 425
+              },
+              {
+                "length": 32,
+                "start": 3998
+              },
+              {
+                "length": 32,
+                "start": 4058
+              }
+            ],
+            "15796": [
+              {
+                "length": 32,
+                "start": 347
+              },
+              {
+                "length": 32,
+                "start": 472
+              },
+              {
+                "length": 32,
+                "start": 3172
+              },
+              {
+                "length": 32,
+                "start": 3586
+              }
+            ],
+            "15800": [
+              {
+                "length": 32,
+                "start": 386
+              },
+              {
+                "length": 32,
+                "start": 2214
+              },
+              {
+                "length": 32,
+                "start": 2374
+              },
+              {
+                "length": 32,
+                "start": 2678
+              },
+              {
+                "length": 32,
+                "start": 3012
+              },
+              {
+                "length": 32,
+                "start": 3130
+              },
+              {
+                "length": 32,
+                "start": 3470
+              },
+              {
+                "length": 32,
+                "start": 3868
+              },
+              {
+                "length": 32,
+                "start": 4257
+              }
+            ],
+            "15803": [
+              {
+                "length": 32,
+                "start": 243
+              },
+              {
+                "length": 32,
+                "start": 2857
+              },
+              {
+                "length": 32,
+                "start": 3386
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1f516df0edbf62d1c6804cf88489b2db38cb2fb1e3e58e64413c3deadfb56b4b",
+          "name": "apps/ZVMFarmFeeStrategy.sol:ZVMFarmFeeStrategy",
+          "runtimeTemplateSha256": "92d0e9e5eaf9f8ca110c837dfe578f09a5d6c3f6728a2448366d78ab12defc3c",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        }
+      ],
+      "version": "0.8.30+commit.73712a01"
+    },
+    {
+      "exports": [
+        {
+          "abiSha256": "4788991d085e0b9990603501d1cab5fcb830c3429fad3d59a421afc27d2ab708",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC1155Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "851ca5f5bf60a11262c78d710c46d935f0d7dde2b760ba7d7f199d273d2bcf71",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC20Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "22cb31c1805339cc470a1ef3b5cb08b468e465bd624e68529ea9b72fbb87621f",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC721Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "3a013631fdc34436e45abd410bd6930f0d3d020ec17218f91adfdc673b64457a",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC1155/ERC1155.sol:ERC1155",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "88cca8a335ca6d7a4380e128d84ab7e104612b6102b63e7f9160b774f47148a4",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC1155/IERC1155.sol:IERC1155",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "c29584b36a2041476e4a118590bd3c6e09b54778edadbd967bee4cefd474fd47",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol:IERC1155Receiver",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "593e6cf6b07142684c011bfbb88517512f4113801284a5c7bf4a29d709730964",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol:IERC1155MetadataURI",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "9a7a276c0222a2ee980ca323e7e22fe7fbca599ac954a59dbc9a5fb594af141c",
+          "name": "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Utils.sol:ERC1155Utils",
+          "runtimeTemplateSha256": "441ba5c67f2c08ab333b484b340f0c8d0f94e1114b8251b26503411d2c57f23c"
+        },
+        {
+          "abiSha256": "9a559583c6c90e37f6dc08c7dfdba25918b5aa3d84e01f5dad38d45ba2212908",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "3033dc48798f2279981a4f665b7feb9192fc7b896379adaab881c418c2be4ed5",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "c5e79954477de6e2a48f15b5d66836c70f4640a7c21b43a986571d530343b6ee",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol:IERC20Metadata",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "a96cf16f374d1d7049231e4809f18f70174c2eabade6605a9d5fb257f5e25fb3",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC721/ERC721.sol:ERC721",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "b6d755d7aef77ce7389e295ef6eb2e19c14e322a9c8e3f224e366bb4c47ddb8c",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC721/IERC721.sol:IERC721",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "631311ccabb8b5fc66f54de8760cc062122e265acf8720f4b40f002fa83bc768",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol:IERC721Receiver",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "921d6e32a471d301778e1ebbe68065b9447e7151032ba59e95ca78dbf2c5844f",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol:IERC721Metadata",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "3e3799ff071604c9e9b61c39002c74684c027985478241dade9dd7cf52fcdfc6",
+          "name": "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol:ERC721Utils",
+          "runtimeTemplateSha256": "3aae4ae2b51bda88423bb7a7883c428116ec7e87d6821b9d395bd13b4f41c630"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "0b6266e5d4cb704230e1110d541b5a5e449008911f65e038348716f57ae7c9c5",
+          "name": "@openzeppelin/contracts/utils/Arrays.sol:Arrays",
+          "runtimeTemplateSha256": "993d94785fb042477ea756bf5161fc682a4a62342e227cd8e8d3bc86a7f8b651"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "5ba96c69ab21a24b98dc68da1fa27ab40a855ad3b03034f0ecdf3f34bdeb6b5c",
+          "name": "@openzeppelin/contracts/utils/Bytes.sol:Bytes",
+          "runtimeTemplateSha256": "6c7314b1542dd8201b7406cc5f7f41396898a2a539c50e12668000831796608e"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "2582e8c0400516dab975722d7f94d3a8829d241483ecd1ec99faee174f29fd2f",
+          "name": "@openzeppelin/contracts/utils/Comparators.sol:Comparators",
+          "runtimeTemplateSha256": "e97700e11b35df2de116bf951ba9851fd941f93c135f985681ddda895041feef"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/utils/Context.sol:Context",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "c8bdb0a15fe0f24ab9bc3e567816d7011001aa69dc477bf4b61e45910528a4bb",
+          "name": "@openzeppelin/contracts/utils/Panic.sol:Panic",
+          "runtimeTemplateSha256": "63f33e7bd969f900897caf0df46f099d46ac1539f81b1e747f8203aeef4b5531"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "55f5f08f8de8a578176366a784421d9070d8cd8f0da3c2ef10d0ed5bc6f887d2",
+          "name": "@openzeppelin/contracts/utils/SlotDerivation.sol:SlotDerivation",
+          "runtimeTemplateSha256": "68a06c4042a4fda177c4d52da1bb0ad71db437d2b397ce39e8191c0d4b5916fa"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "c2a3094dfb55363d7060e7eef65e82c92d5985cc03bc20f7a42ad1c34897555a",
+          "name": "@openzeppelin/contracts/utils/StorageSlot.sol:StorageSlot",
+          "runtimeTemplateSha256": "e8eb2b24880ec0d24162d814edc578e134b697a48edd8845256b5c1897544907"
+        },
+        {
+          "abiSha256": "2d347703b31c4bee7b3fd9e11238996819cf1a0b201414a714a962d385673c82",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "720e5764a3429b686e2a7f2ff9ddc816b3e0c3c8ae84d089b83240b561f2278f",
+          "name": "@openzeppelin/contracts/utils/Strings.sol:Strings",
+          "runtimeTemplateSha256": "2c370e003be6a6600fd4948d206619eb46b693e82c6e912eeff2a3c23a45769b"
+        },
+        {
+          "abiSha256": "fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/utils/introspection/ERC165.sol:ERC165",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "name": "@openzeppelin/contracts/utils/introspection/IERC165.sol:IERC165",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "83b4dceaf44b5b457cb8658f0d04152e482ee771983d7ebe57ddadfc399d6554",
+          "name": "@openzeppelin/contracts/utils/math/Math.sol:Math",
+          "runtimeTemplateSha256": "e5343d84eb00567f0442c889a353edb789f9f433c7076ce7be3ddd51780cbed7"
+        },
+        {
+          "abiSha256": "ef7cf4e8aba559511a1cc14480c3222c3402c7d4bdd496bd8402f72bfd30646d",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "7f8db16e8b9d606901a6c3d647e10b290f56b1624dad375eab792ee9ba398ce7",
+          "name": "@openzeppelin/contracts/utils/math/SafeCast.sol:SafeCast",
+          "runtimeTemplateSha256": "6b0b22662626be78c7e9412afc7da661705a8444068587bf7983ff8913d9d1d9"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "eda06662dfcb332b4123f426dbb0c60309b3c26b4959da89bcd624013bd97c82",
+          "name": "@openzeppelin/contracts/utils/math/SignedMath.sol:SignedMath",
+          "runtimeTemplateSha256": "b0cae1fa1a9d1d3fb08535dc5deceff1a8de107ca930f15afa48cec6feb31696"
+        },
+        {
+          "abiSha256": "e43493c597fa7e9f14807bbb4edd46ce92ac87dcb61a0d5a8d40238384ac0f1c",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "e4d1fa16d8782f852fb2d16f0028da539bcca3cbb7a8c29add53222c20a04ca2",
+          "name": "bench/BenchTokens.sol:BenchERC1155",
+          "runtimeTemplateSha256": "6ebc6f4287700bcc6a4ef93517e9c13db012d48a9156fee1b843489afd700e1b"
+        },
+        {
+          "abiSha256": "ad83dde4dd8a4601fff00f986bbcc1e000873d7f3db57379d3ff798a61682f1a",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "b152c0910dfa812b2b77ad85600b390a4457ccbca6ebfb47a466d4beb52e1116",
+          "name": "bench/BenchTokens.sol:BenchERC20",
+          "runtimeTemplateSha256": "e6b7623cbb66a2b09e8e2d8f51734562c8914820df147ca39097676b349b46fa"
+        },
+        {
+          "abiSha256": "7aad87550b4ea2708abea71a2945e17a559bafb2c4f6e8007a622eebed9e9120",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "a7cdf74f6d35c69fb7078a227b55000cc20ddb7f92248276195584b9b2d1ba37",
+          "name": "bench/BenchTokens.sol:BenchERC721",
+          "runtimeTemplateSha256": "79b4c9cc67f89629564675a912bd5af3b26b06a25ffc8c985d93d262a7dd1806"
+        },
+        {
+          "abiSha256": "4c85ba8afa5cbec236adbba59d68ae1b437213b4de13608467cf8aaaa4966195",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "5fd395ddae25b2a5a95ab0d975429197273748598dae30220a8a533fe9447754",
+          "name": "bench/BenchTokens.sol:Disperse",
+          "runtimeTemplateSha256": "5afc982142ecb5096cc83e7def981655bb5ad7f59755ed8284748e9b23d6009a"
+        },
+        {
+          "abiSha256": "1c10aa2ef33f0ce17614fb965abdf12b34b16380c994d1c06ab1b4316ff34c22",
+          "artifact_path": "bench/artifacts/bench.json",
+          "creationSha256": "d80960317e462d6428c75264f4262f795fd4d872544ffa9249ad53a25bea07f1",
+          "name": "bench/BenchTokens.sol:StorageChurn",
+          "runtimeTemplateSha256": "890674c8ea8a07b90ab80909610e184537122dafa70aa8b93e33cb8e058944c6"
+        }
+      ],
+      "input_bytes": 240535,
+      "input_sha256": "1729e1ce63b5b5d0f0de1f153c937b477f1a74afc20baab76ce1f8a6d02f9d49",
+      "name": "bench",
+      "settings": {
+        "evmVersion": "prague",
+        "libraries": {},
+        "metadata": {
+          "appendCBOR": true,
+          "bytecodeHash": "ipfs",
+          "useLiteralContent": false
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode.object",
+              "evm.bytecode.linkReferences",
+              "evm.deployedBytecode.object",
+              "evm.deployedBytecode.linkReferences",
+              "evm.deployedBytecode.immutableReferences"
+            ]
+          }
+        },
+        "remappings": [],
+        "viaIR": false
+      },
+      "sources": [
+        {
+          "bytes": 6540,
+          "origin": "openzeppelin",
+          "path": "package/interfaces/draft-IERC6093.sol",
+          "sha256": "fa7068f56bc180571a6095be6eaef06d51dbe81e30cb128397d993c9599ecc30",
+          "unit": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol"
+        },
+        {
+          "bytes": 15710,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC1155/ERC1155.sol",
+          "sha256": "35ad182b74ce08152cde00fd41226850c635e1b9445f3a9d7b4888f2ba55717e",
+          "unit": "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"
+        },
+        {
+          "bytes": 4750,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC1155/IERC1155.sol",
+          "sha256": "62760e5ca354484140a29dddfa03b576c2e9e3adea6eb021eb28b394c085f3e4",
+          "unit": "@openzeppelin/contracts/token/ERC1155/IERC1155.sol"
+        },
+        {
+          "bytes": 2599,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC1155/IERC1155Receiver.sol",
+          "sha256": "3df310870e0187a59020ea48e910ed2693778b1f758b57b97a47365d74b92af5",
+          "unit": "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol"
+        },
+        {
+          "bytes": 677,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC1155/extensions/IERC1155MetadataURI.sol",
+          "sha256": "d5a148ccf8ac24f69f734cb2bcfba55ecc1d24209bf7aaa022cf3bde4bbe274f",
+          "unit": "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol"
+        },
+        {
+          "bytes": 3554,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC1155/utils/ERC1155Utils.sol",
+          "sha256": "8d75a5dd3db8f1c85362ef688d6f3cf5b2892dc62424bfe35678a49ce0d87956",
+          "unit": "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Utils.sol"
+        },
+        {
+          "bytes": 10800,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC20/ERC20.sol",
+          "sha256": "50f34ae16a067a41c2c1091445d11d63788e54c717677cb6d6b0e4cdea2ad21d",
+          "unit": "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+        },
+        {
+          "bytes": 2781,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC20/IERC20.sol",
+          "sha256": "01b6f5c4fa45fd38822b286ecef6daf983d27306dd6362496fa71b3e4600b72c",
+          "unit": "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+        },
+        {
+          "bytes": 684,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC20/extensions/IERC20Metadata.sol",
+          "sha256": "0b7132f17d14d1d84b41b0bb429be62dafdff00fd3470f68724d8018eb07f57a",
+          "unit": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol"
+        },
+        {
+          "bytes": 16201,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/ERC721.sol",
+          "sha256": "ef8e2398c78851bd2ec12bc48d923058c557889d5a3d5ee4919c17ff0fb3517e",
+          "unit": "@openzeppelin/contracts/token/ERC721/ERC721.sol"
+        },
+        {
+          "bytes": 4929,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/IERC721.sol",
+          "sha256": "ff0eb9902bf0ac099205615fac90eacf34fae637571b05aab3ea35dea53d5f17",
+          "unit": "@openzeppelin/contracts/token/ERC721/IERC721.sol"
+        },
+        {
+          "bytes": 997,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/IERC721Receiver.sol",
+          "sha256": "eafee3ffdc7cb2fba4bf6bd16fb28f8e5b4679742e81c2ad42a1b1df5c179feb",
+          "unit": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol"
+        },
+        {
+          "bytes": 792,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/extensions/IERC721Metadata.sol",
+          "sha256": "33223782ea652dca413702ce92f9f59d91d758a035065b24bbedb7dc60c63a78",
+          "unit": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol"
+        },
+        {
+          "bytes": 1923,
+          "origin": "openzeppelin",
+          "path": "package/token/ERC721/utils/ERC721Utils.sol",
+          "sha256": "b48e95db8c85866c1d88af8e82f346e0d22d24b5aac5b936079d958c72e13b9f",
+          "unit": "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol"
+        },
+        {
+          "bytes": 35171,
+          "origin": "openzeppelin",
+          "path": "package/utils/Arrays.sol",
+          "sha256": "d0a51abdcac27c02821939ed07419b88950bac4117ee75e105010674ef6593c0",
+          "unit": "@openzeppelin/contracts/utils/Arrays.sol"
+        },
+        {
+          "bytes": 14737,
+          "origin": "openzeppelin",
+          "path": "package/utils/Bytes.sol",
+          "sha256": "3ce9120a27934c75a074cb785d3a88868069ef6529dbe4dc6b845af0836f3c70",
+          "unit": "@openzeppelin/contracts/utils/Bytes.sol"
+        },
+        {
+          "bytes": 443,
+          "origin": "openzeppelin",
+          "path": "package/utils/Comparators.sol",
+          "sha256": "52fb1c8f57967d42a3214bde4a8a414ab25c2e3a844d00e171ca56487024e009",
+          "unit": "@openzeppelin/contracts/utils/Comparators.sol"
+        },
+        {
+          "bytes": 963,
+          "origin": "openzeppelin",
+          "path": "package/utils/Context.sol",
+          "sha256": "847fda5460fee70f56f4200f59b82ae622bb03c79c77e67af010e31b7e2cc5b6",
+          "unit": "@openzeppelin/contracts/utils/Context.sol"
+        },
+        {
+          "bytes": 1973,
+          "origin": "openzeppelin",
+          "path": "package/utils/Panic.sol",
+          "sha256": "270fc8401c1a13fae6a7a4a2dd6e381b95d658896701e51f0d3e2688acab3dec",
+          "unit": "@openzeppelin/contracts/utils/Panic.sol"
+        },
+        {
+          "bytes": 5317,
+          "origin": "openzeppelin",
+          "path": "package/utils/SlotDerivation.sol",
+          "sha256": "f8e5f2c672918a21720ce3b5e2637c6366aa0652d085c0478fc0d0d6edb76386",
+          "unit": "@openzeppelin/contracts/utils/SlotDerivation.sol"
+        },
+        {
+          "bytes": 4182,
+          "origin": "openzeppelin",
+          "path": "package/utils/StorageSlot.sol",
+          "sha256": "75704538dcb223239280c6726d9a31cf769a7816718517c997fc7d63bdb70778",
+          "unit": "@openzeppelin/contracts/utils/StorageSlot.sol"
+        },
+        {
+          "bytes": 21538,
+          "origin": "openzeppelin",
+          "path": "package/utils/Strings.sol",
+          "sha256": "e318709bbe73a7831d64c1351e8bdc43780b245f25191234e361e6ab9b98c67b",
+          "unit": "@openzeppelin/contracts/utils/Strings.sol"
+        },
+        {
+          "bytes": 879,
+          "origin": "openzeppelin",
+          "path": "package/utils/introspection/ERC165.sol",
+          "sha256": "61a2b12c96857aaa35f48aeda67a4281637a42494c0b3795be0ae976aa7b3793",
+          "unit": "@openzeppelin/contracts/utils/introspection/ERC165.sol"
+        },
+        {
+          "bytes": 871,
+          "origin": "openzeppelin",
+          "path": "package/utils/introspection/IERC165.sol",
+          "sha256": "9055c2994b37dea1a41b7b7926dcb510f05dbe2540b0aafc5fbee9558fffd0ca",
+          "unit": "@openzeppelin/contracts/utils/introspection/IERC165.sol"
+        },
+        {
+          "bytes": 32664,
+          "origin": "openzeppelin",
+          "path": "package/utils/math/Math.sol",
+          "sha256": "bdfdbe133991c0c78042957ff5cd97167926fcaf6d15664f3835a076cb066457",
+          "unit": "@openzeppelin/contracts/utils/math/Math.sol"
+        },
+        {
+          "bytes": 34940,
+          "origin": "openzeppelin",
+          "path": "package/utils/math/SafeCast.sol",
+          "sha256": "5779bc848bde39f1ad7bc02b4f708a0040888e0083b1a33f119cd94639350134",
+          "unit": "@openzeppelin/contracts/utils/math/SafeCast.sol"
+        },
+        {
+          "bytes": 2613,
+          "origin": "openzeppelin",
+          "path": "package/utils/math/SignedMath.sol",
+          "sha256": "1ed50b1056af886752f0fb48a0165d381e69bb4a4b18b893b066dc144a7e08d7",
+          "unit": "@openzeppelin/contracts/utils/math/SignedMath.sol"
+        },
+        {
+          "bytes": 2343,
+          "origin": "project",
+          "path": "contracts/bench/BenchTokens.sol",
+          "sha256": "c2d6ce2b0cd4d71e56debcae2604b49a47a6fef6469e5ffb67802f27907c4037",
+          "unit": "bench/BenchTokens.sol"
+        }
+      ],
+      "targets": [
+        {
+          "abiSha256": "4788991d085e0b9990603501d1cab5fcb830c3429fad3d59a421afc27d2ab708",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "15477f6827e02820a1f800a0a27b560d5a13784d3d5ee021d5774e2c8e4ccd89",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC1155Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "851ca5f5bf60a11262c78d710c46d935f0d7dde2b760ba7d7f199d273d2bcf71",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1a01b14c693e5b66ea6a3047d8edca9e7fb4ce2d5bce7363db5b065663305ebc",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC20Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "22cb31c1805339cc470a1ef3b5cb08b468e465bd624e68529ea9b72fbb87621f",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "b7b5439a9ca2e9fb1e2d821727a58754d7f0e2ea6dd5e8f663787e7b83d0e99d",
+          "name": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol:IERC721Errors",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "3a013631fdc34436e45abd410bd6930f0d3d020ec17218f91adfdc673b64457a",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "052c0ca6cc095b2526cdcac667fea3da23b6ed4e1e1fe50171481df6c9983cf1",
+          "name": "@openzeppelin/contracts/token/ERC1155/ERC1155.sol:ERC1155",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "3ffff1121d7a29f04b9f2b2c5d0d72dce69905495d888316df9ee9f301c05498"
+        },
+        {
+          "abiSha256": "88cca8a335ca6d7a4380e128d84ab7e104612b6102b63e7f9160b774f47148a4",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ca7b3a8a6a78b48cefb7486a0993e03b5fc950d31fec244804b41c843377b5f8",
+          "name": "@openzeppelin/contracts/token/ERC1155/IERC1155.sol:IERC1155",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "c29584b36a2041476e4a118590bd3c6e09b54778edadbd967bee4cefd474fd47",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ad66473ad780dccd56701e2891e4baff5141c6ece012ef3baba97da3ceb96e04",
+          "name": "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol:IERC1155Receiver",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "593e6cf6b07142684c011bfbb88517512f4113801284a5c7bf4a29d709730964",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1e1682b6fa46ea9150376172be2e17b85d87c4bb038ec429f7518c47a8985e66",
+          "name": "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol:IERC1155MetadataURI",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "9a7a276c0222a2ee980ca323e7e22fe7fbca599ac954a59dbc9a5fb594af141c",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "f1ddbadc530150ffc1ddbde81729365c98b4cc0912c350375e722c4856357f8f",
+          "name": "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Utils.sol:ERC1155Utils",
+          "runtimeTemplateSha256": "441ba5c67f2c08ab333b484b340f0c8d0f94e1114b8251b26503411d2c57f23c",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "9a559583c6c90e37f6dc08c7dfdba25918b5aa3d84e01f5dad38d45ba2212908",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "66e9af279d8095f2b4696136a935a8890081617673d9592a20f1248c062c4fb9",
+          "name": "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "a9591c3976e9d4672d0d70e54f64c12906dba9254d9985490daaa97ce657f8cf"
+        },
+        {
+          "abiSha256": "3033dc48798f2279981a4f665b7feb9192fc7b896379adaab881c418c2be4ed5",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "a0de77dd36b8ca4f4ea36df0a91d3e987ac466078fe53f7bc68db74585518ab0",
+          "name": "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "c5e79954477de6e2a48f15b5d66836c70f4640a7c21b43a986571d530343b6ee",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "35dc11f81e0106d3c26c2004b1e5ff72caf26d7004551d92116b25342831385d",
+          "name": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol:IERC20Metadata",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "a96cf16f374d1d7049231e4809f18f70174c2eabade6605a9d5fb257f5e25fb3",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "009957d5ccaea02aa7ab14151cc41e364f1db1cda0cea1ecfc1871f238ab3cbc",
+          "name": "@openzeppelin/contracts/token/ERC721/ERC721.sol:ERC721",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "a8e3b7bf75b12b11b324b362888e860c43ccd44e1818681f9984a4e5bb450be2"
+        },
+        {
+          "abiSha256": "b6d755d7aef77ce7389e295ef6eb2e19c14e322a9c8e3f224e366bb4c47ddb8c",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "7572bbc428f1b7b5bfe306b96a989a0668317a7d235412d9d81ab3b86eec9952",
+          "name": "@openzeppelin/contracts/token/ERC721/IERC721.sol:IERC721",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "631311ccabb8b5fc66f54de8760cc062122e265acf8720f4b40f002fa83bc768",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "6480c966e49006f75d225ae3e6e338935dc15b399618c1a62e98e80e33cbe289",
+          "name": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol:IERC721Receiver",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "921d6e32a471d301778e1ebbe68065b9447e7151032ba59e95ca78dbf2c5844f",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "79e4cfc7a3f63f85423b2216c2f1a5ff6b9599bc5ce1b2f0321dcbbe041ddd54",
+          "name": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol:IERC721Metadata",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "3e3799ff071604c9e9b61c39002c74684c027985478241dade9dd7cf52fcdfc6",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ef6c1a58ae4a7de05ac389e193e7b366001ee4d1494eac2d7056c118207341cf",
+          "name": "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol:ERC721Utils",
+          "runtimeTemplateSha256": "3aae4ae2b51bda88423bb7a7883c428116ec7e87d6821b9d395bd13b4f41c630",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "0b6266e5d4cb704230e1110d541b5a5e449008911f65e038348716f57ae7c9c5",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ac4e7874f1157409c116b665bcbd3e243d2887125b2833fef8224f011e6c0b47",
+          "name": "@openzeppelin/contracts/utils/Arrays.sol:Arrays",
+          "runtimeTemplateSha256": "993d94785fb042477ea756bf5161fc682a4a62342e227cd8e8d3bc86a7f8b651",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "5ba96c69ab21a24b98dc68da1fa27ab40a855ad3b03034f0ecdf3f34bdeb6b5c",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "eb52591c87a3567defab9539b926d94e1fb41e9663f12d11f0ba89c881739bb1",
+          "name": "@openzeppelin/contracts/utils/Bytes.sol:Bytes",
+          "runtimeTemplateSha256": "6c7314b1542dd8201b7406cc5f7f41396898a2a539c50e12668000831796608e",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "2582e8c0400516dab975722d7f94d3a8829d241483ecd1ec99faee174f29fd2f",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "9fc4b5e502ef588100bde6b9c28a891e5f8bc8e40fbd19e7cfe4861433917546",
+          "name": "@openzeppelin/contracts/utils/Comparators.sol:Comparators",
+          "runtimeTemplateSha256": "e97700e11b35df2de116bf951ba9851fd941f93c135f985681ddda895041feef",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "809a341d41b07c622351387911181cd09a2df814865f2c1f700d1c2def270be2",
+          "name": "@openzeppelin/contracts/utils/Context.sol:Context",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "c8bdb0a15fe0f24ab9bc3e567816d7011001aa69dc477bf4b61e45910528a4bb",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "a69bcf478b05923e04c0ff2ec9ac0d1a0f0085dda0d5e9ace2f5f6821c8ce5ad",
+          "name": "@openzeppelin/contracts/utils/Panic.sol:Panic",
+          "runtimeTemplateSha256": "63f33e7bd969f900897caf0df46f099d46ac1539f81b1e747f8203aeef4b5531",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "55f5f08f8de8a578176366a784421d9070d8cd8f0da3c2ef10d0ed5bc6f887d2",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "e47802ba791a786ec7da8d0caf0173cc74dd106c1d4740654ed367b2a57faaaa",
+          "name": "@openzeppelin/contracts/utils/SlotDerivation.sol:SlotDerivation",
+          "runtimeTemplateSha256": "68a06c4042a4fda177c4d52da1bb0ad71db437d2b397ce39e8191c0d4b5916fa",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "c2a3094dfb55363d7060e7eef65e82c92d5985cc03bc20f7a42ad1c34897555a",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "2d181e44199cca68918590dd92667baede1863ab80f01203555e9ed8033188bb",
+          "name": "@openzeppelin/contracts/utils/StorageSlot.sol:StorageSlot",
+          "runtimeTemplateSha256": "e8eb2b24880ec0d24162d814edc578e134b697a48edd8845256b5c1897544907",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "2d347703b31c4bee7b3fd9e11238996819cf1a0b201414a714a962d385673c82",
+          "creationSha256": "720e5764a3429b686e2a7f2ff9ddc816b3e0c3c8ae84d089b83240b561f2278f",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "21b7a872d51687af8decca1c8831f3d280b5a21ea8d5edc5bdb56c6c471ce786",
+          "name": "@openzeppelin/contracts/utils/Strings.sol:Strings",
+          "runtimeTemplateSha256": "2c370e003be6a6600fd4948d206619eb46b693e82c6e912eeff2a3c23a45769b",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "8eb0ca40a030807c2e6af4e499d625a2b7d7d2744c3c8b54f741aa39e9c23b04",
+          "name": "@openzeppelin/contracts/utils/introspection/ERC165.sol:ERC165",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "c0b454741c7e2a8f91e40765a52f3d09f1be2ee5709722e44138c2e86d823765",
+          "name": "@openzeppelin/contracts/utils/introspection/IERC165.sol:IERC165",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "83b4dceaf44b5b457cb8658f0d04152e482ee771983d7ebe57ddadfc399d6554",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "17c150c6c2276207ee3f96c7dbc2e7fc207fedd2034224b107044d356e8befba",
+          "name": "@openzeppelin/contracts/utils/math/Math.sol:Math",
+          "runtimeTemplateSha256": "e5343d84eb00567f0442c889a353edb789f9f433c7076ce7be3ddd51780cbed7",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "ef7cf4e8aba559511a1cc14480c3222c3402c7d4bdd496bd8402f72bfd30646d",
+          "creationSha256": "7f8db16e8b9d606901a6c3d647e10b290f56b1624dad375eab792ee9ba398ce7",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "8398b46c63a432f8c171d48f3bb4e49d84ed277e15cea23a48b9fb1988d663d0",
+          "name": "@openzeppelin/contracts/utils/math/SafeCast.sol:SafeCast",
+          "runtimeTemplateSha256": "6b0b22662626be78c7e9412afc7da661705a8444068587bf7983ff8913d9d1d9",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "eda06662dfcb332b4123f426dbb0c60309b3c26b4959da89bcd624013bd97c82",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "448682441761e249211f1e2d16a01b8e65deb4bab461236930e85708ff21943f",
+          "name": "@openzeppelin/contracts/utils/math/SignedMath.sol:SignedMath",
+          "runtimeTemplateSha256": "b0cae1fa1a9d1d3fb08535dc5deceff1a8de107ca930f15afa48cec6feb31696",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "e43493c597fa7e9f14807bbb4edd46ce92ac87dcb61a0d5a8d40238384ac0f1c",
+          "creationSha256": "e4d1fa16d8782f852fb2d16f0028da539bcca3cbb7a8c29add53222c20a04ca2",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "2ae8492c6f1be2ac3cfecd0ec83b9908808f314dc71ac9ea6e349f33fece9206",
+          "name": "bench/BenchTokens.sol:BenchERC1155",
+          "runtimeTemplateSha256": "6ebc6f4287700bcc6a4ef93517e9c13db012d48a9156fee1b843489afd700e1b",
+          "storageLayoutSha256": "ede4220d3bd4ec66559013f05e6aad9490eff04d5604ea9b6fc9e6fe39371f3b"
+        },
+        {
+          "abiSha256": "ad83dde4dd8a4601fff00f986bbcc1e000873d7f3db57379d3ff798a61682f1a",
+          "creationSha256": "b152c0910dfa812b2b77ad85600b390a4457ccbca6ebfb47a466d4beb52e1116",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "5b2c5677800e61fe81deaa224ffe40b5671ba2564fe8031bcf27798e05e2bd81",
+          "name": "bench/BenchTokens.sol:BenchERC20",
+          "runtimeTemplateSha256": "e6b7623cbb66a2b09e8e2d8f51734562c8914820df147ca39097676b349b46fa",
+          "storageLayoutSha256": "0a239a90910b78b500580ea936879f2693d7f72fa8be7f965241f6b14a9a885f"
+        },
+        {
+          "abiSha256": "7aad87550b4ea2708abea71a2945e17a559bafb2c4f6e8007a622eebed9e9120",
+          "creationSha256": "a7cdf74f6d35c69fb7078a227b55000cc20ddb7f92248276195584b9b2d1ba37",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "5768630b2e959e7eb5b1aca222ee05445ab4686d7b7d1f60ea95de101260f6b6",
+          "name": "bench/BenchTokens.sol:BenchERC721",
+          "runtimeTemplateSha256": "79b4c9cc67f89629564675a912bd5af3b26b06a25ffc8c985d93d262a7dd1806",
+          "storageLayoutSha256": "9f9c209c199cad1165882b73bea39d4aa84eb8a7c42c7a3c3e6a965f038c6602"
+        },
+        {
+          "abiSha256": "4c85ba8afa5cbec236adbba59d68ae1b437213b4de13608467cf8aaaa4966195",
+          "creationSha256": "5fd395ddae25b2a5a95ab0d975429197273748598dae30220a8a533fe9447754",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "39667a39bddd42beaf5461187604abcd569968ab57118e4de8cab018472fca82",
+          "name": "bench/BenchTokens.sol:Disperse",
+          "runtimeTemplateSha256": "5afc982142ecb5096cc83e7def981655bb5ad7f59755ed8284748e9b23d6009a",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "1c10aa2ef33f0ce17614fb965abdf12b34b16380c994d1c06ab1b4316ff34c22",
+          "creationSha256": "d80960317e462d6428c75264f4262f795fd4d872544ffa9249ad53a25bea07f1",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "7048e50da02bda1cf0ca306a17353f18c99accf638f98dc0126612920e912436",
+          "name": "bench/BenchTokens.sol:StorageChurn",
+          "runtimeTemplateSha256": "890674c8ea8a07b90ab80909610e184537122dafa70aa8b93e33cb8e058944c6",
+          "storageLayoutSha256": "28a84e1c5303c115bdb849fc9a0e49e8bfac905edf1d4e4d769c72bd364ffd99"
+        }
+      ],
+      "version": "0.8.30+commit.73712a01"
+    },
+    {
+      "exports": [
+        {
+          "abiSha256": "6effaadf7efe52c4ee7ab51e41a9162db83e4b91633747fc45d08c2fd6617672",
+          "artifact_path": "bench/artifacts/WZNN.json",
+          "creationSha256": "af60436ff4200361f6cdac73edeb5ba987711f3ac69224f005dbd9b4ca60b839",
+          "name": "bench/WZNN.sol:WZNN"
+        }
+      ],
+      "input_bytes": 3519,
+      "input_sha256": "53dbb580422d76f66fd474b0476209c0f61c5cfb77825f7c7b52a53e3ef3d9d9",
+      "name": "wznn",
+      "settings": {
+        "evmVersion": "prague",
+        "libraries": {},
+        "metadata": {
+          "appendCBOR": true,
+          "bytecodeHash": "ipfs",
+          "useLiteralContent": false
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode.object",
+              "evm.bytecode.linkReferences",
+              "evm.deployedBytecode.object",
+              "evm.deployedBytecode.linkReferences",
+              "evm.deployedBytecode.immutableReferences"
+            ]
+          }
+        },
+        "remappings": [],
+        "viaIR": false
+      },
+      "sources": [
+        {
+          "bytes": 2936,
+          "origin": "project",
+          "path": "contracts/bench/WZNN.sol",
+          "sha256": "1b1b0542023d576e190ebc0f75fa59209000e6a0139fb83141e215187192d0c0",
+          "unit": "bench/WZNN.sol"
+        }
+      ],
+      "targets": [
+        {
+          "abiSha256": "6effaadf7efe52c4ee7ab51e41a9162db83e4b91633747fc45d08c2fd6617672",
+          "creationSha256": "af60436ff4200361f6cdac73edeb5ba987711f3ac69224f005dbd9b4ca60b839",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "e903ffa278d92bfe1f1576b391ff5124b6c0c7981bc0b5c6699ad30860707d32",
+          "name": "bench/WZNN.sol:WZNN",
+          "runtimeTemplateSha256": "5e790205ee9ec9e9c576a33778167a3cccd1680828293311da367c4f2b02b856",
+          "storageLayoutSha256": "6e5e41dafaa312ab163867c63fbf89b2cbdaa4ac1604c0a9f76cadfd28ed017b"
+        }
+      ],
+      "version": "0.8.30+commit.73712a01"
+    },
+    {
+      "exports": [
+        {
+          "abiSha256": "d1c2e2633fdc88d5319a34fc887f9044edd25447734f4b8839c1e4172651a3e7",
+          "artifact_path": "bench/artifacts/UniswapV2Factory.json",
+          "creationSha256": "3708cb3b10f129c91c22ae6b6c129e60d2e6484055799e7d9986d7c83284ceff",
+          "evmSha256": "f4b1d3d5a9c8b76aaf7f7181f361c35189706e2e9937830ae3e541d86b45260f",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "3807a4fcbde3924eeed1f7c5298f7c11a7e52016c8b470c5cd0fa352f1c63353",
+          "name": "contracts/UniswapV2Factory.sol:UniswapV2Factory",
+          "runtimeTemplateSha256": "3abc53f12a9cb8ae37ebfada9efc261c1ab4c2759d161e341a49bf67df3f8321",
+          "storageLayoutSha256": "799f7dd288ef9f334f6e4b8fa5a6cbf0c4ec1552e9caeaa08fde04827751b926"
+        },
+        {
+          "abiSha256": "028a21c54379447a103cca879cf45adc2fbebd50fc7ed5d7e1f6f93e5a5aad3d",
+          "artifact_path": "bench/artifacts/UniswapV2Pair.json",
+          "creationSha256": "c884817b0b634ee7a9c3daf1017f64b00f5574df06ee1ff27ca6f8fe7726e1d5",
+          "evmSha256": "107153afba4e3b5048a622bf01fb15160838d4850690c41d6c7cecfffbe3560e",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1b16833e5cabaacce7a77db5f89d51fcf75ad41bfeafd48d73067efd4c0ef78f",
+          "name": "contracts/UniswapV2Pair.sol:UniswapV2Pair",
+          "runtimeTemplateSha256": "8b5db55fa9ab3b9527508d4abe0b39eb588bf310270c8e04b3f38214e8ba63b4",
+          "storageLayoutSha256": "afcf133758cb233510e20b216d9b971adfc7fd0042b7a668a330a8960690155f"
+        }
+      ],
+      "input_bytes": 23626,
+      "input_sha256": "5106711fce8711780b33fdd1396bf021cb9db71f447e43d5e24e540bfb10988d",
+      "name": "core",
+      "settings": {
+        "evmVersion": "istanbul",
+        "libraries": {},
+        "optimizer": {
+          "enabled": true,
+          "runs": 999999
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode",
+              "evm.deployedBytecode"
+            ]
+          }
+        },
+        "remappings": []
+      },
+      "sources": [
+        {
+          "bytes": 3435,
+          "origin": "core",
+          "path": "package/contracts/UniswapV2ERC20.sol",
+          "sha256": "b8ce88929ce2c93b8fce385f8d57701b1a64c600a95317ea5f3561d36297be32",
+          "unit": "contracts/UniswapV2ERC20.sol"
+        },
+        {
+          "bytes": 1867,
+          "origin": "core",
+          "path": "package/contracts/UniswapV2Factory.sol",
+          "sha256": "e0cef3e874a68cbcc5986451b1fec180ba5ff5699f27a256b7c10fafefe36b99",
+          "unit": "contracts/UniswapV2Factory.sol"
+        },
+        {
+          "bytes": 9788,
+          "origin": "core",
+          "path": "package/contracts/UniswapV2Pair.sol",
+          "sha256": "43a5421b31415868367b62bfa161ca10bcee03778873faad905f5a3e2cce9cbd",
+          "unit": "contracts/UniswapV2Pair.sol"
+        },
+        {
+          "bytes": 823,
+          "origin": "core",
+          "path": "package/contracts/interfaces/IERC20.sol",
+          "sha256": "2b63f199f838028184efefbcfd6cf2b9192624c3dae5dc1116ecbb15c36a67e8",
+          "unit": "contracts/interfaces/IERC20.sol"
+        },
+        {
+          "bytes": 159,
+          "origin": "core",
+          "path": "package/contracts/interfaces/IUniswapV2Callee.sol",
+          "sha256": "ecfa434d468bb1888124d8c34b0b8483f4ea1e5cd63f0874c8b28aa4305c1dbc",
+          "unit": "contracts/interfaces/IUniswapV2Callee.sol"
+        },
+        {
+          "bytes": 1148,
+          "origin": "core",
+          "path": "package/contracts/interfaces/IUniswapV2ERC20.sol",
+          "sha256": "7948069aea398dec4b7e771ffc749a24fdce3a64673a1b14deae960e7a54c603",
+          "unit": "contracts/interfaces/IUniswapV2ERC20.sol"
+        },
+        {
+          "bytes": 661,
+          "origin": "core",
+          "path": "package/contracts/interfaces/IUniswapV2Factory.sol",
+          "sha256": "51d056199e3f5e41cb1a9f11ce581aa3e190cc982db5771ffeef8d8d1f962a0d",
+          "unit": "contracts/interfaces/IUniswapV2Factory.sol"
+        },
+        {
+          "bytes": 2424,
+          "origin": "core",
+          "path": "package/contracts/interfaces/IUniswapV2Pair.sol",
+          "sha256": "29c75e69ce173ff8b498584700fef76bc81498c1d98120e2877a1439f0c31b5a",
+          "unit": "contracts/interfaces/IUniswapV2Pair.sol"
+        },
+        {
+          "bytes": 602,
+          "origin": "core",
+          "path": "package/contracts/libraries/Math.sol",
+          "sha256": "e4a9d451964a0689be2b244322a353de143ca4248d8736d91aca4ffadca4325f",
+          "unit": "contracts/libraries/Math.sol"
+        },
+        {
+          "bytes": 563,
+          "origin": "core",
+          "path": "package/contracts/libraries/SafeMath.sol",
+          "sha256": "4b1c95ff75de7342e0fadff58064820a4eb7c2fcb422a75b4994980ce8e216ae",
+          "unit": "contracts/libraries/SafeMath.sol"
+        },
+        {
+          "bytes": 578,
+          "origin": "core",
+          "path": "package/contracts/libraries/UQ112x112.sol",
+          "sha256": "6633b57b0723b1d72e08cc3e8b29f0af838294e59863b6cdcce95a141ed02cdb",
+          "unit": "contracts/libraries/UQ112x112.sol"
+        },
+        {
+          "bytes": 187,
+          "origin": "core",
+          "path": "package/contracts/test/ERC20.sol",
+          "sha256": "e11b370820584a64b1ef5b498a348349f311787ba77b3b0a632abc1110dcc7e2",
+          "unit": "contracts/test/ERC20.sol"
+        }
+      ],
+      "targets": [
+        {
+          "abiSha256": "02dda45398e5df82759ac88a942d93cf68126e19d1b0e5d1e428a59209259ccf",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "71ccc2e9d760e661aabc72f18c3010de9f368643aee4629dc02fe52ca0ed2759",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "adb76a93849eef85fe6ec9fb3f9869f090602f98f996f84faecd09489f2f5233",
+          "name": "contracts/interfaces/IERC20.sol:IERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "f669ba6f25cbc06b7dc6f586dc40e02ed1c767ff07a21f3588a6211a274fc843",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "71ccc2e9d760e661aabc72f18c3010de9f368643aee4629dc02fe52ca0ed2759",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "b04b243ac86e5219e30c4f0ec9ec952bdd790a683e1813d9d5688932bfd6f33e",
+          "name": "contracts/interfaces/IUniswapV2Callee.sol:IUniswapV2Callee",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "72ae3398485661e1b62d6feda752d6e2dbf69a146fb9cef99deea8fdfde1e82e",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "71ccc2e9d760e661aabc72f18c3010de9f368643aee4629dc02fe52ca0ed2759",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "d3f30727401aa06d5f1bcfdff9a4f37ee7802842d27c1c210c6bdfbe7a626a46",
+          "name": "contracts/interfaces/IUniswapV2ERC20.sol:IUniswapV2ERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "f80fee286fed648a4a7367332de110d5548f728d032602b8f506742608f0e521",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "71ccc2e9d760e661aabc72f18c3010de9f368643aee4629dc02fe52ca0ed2759",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "05a8d3c630fc70603e1fc5b556657d8163fc73704626a6be06f7965f4a123866",
+          "name": "contracts/interfaces/IUniswapV2Factory.sol:IUniswapV2Factory",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "1d9dc0b739f9965dcf90e748e54c7899a14190848b3612435373d706a159ddab",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "71ccc2e9d760e661aabc72f18c3010de9f368643aee4629dc02fe52ca0ed2759",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "03d183bc9efb798ac86a2a3270b6aa198d4cdbf83656df6b0d925b5f8b64967e",
+          "name": "contracts/interfaces/IUniswapV2Pair.sol:IUniswapV2Pair",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "29944c62b6cc625ddd884d1602e6f06fff867b2ddf9751352417d8258c4eff3c",
+          "evmSha256": "075c907e2bd622e5dc68d4aa1812d17a665da558b42b58ebae3b48236641eb0f",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "87a2d8d65f31239ea62d36a2cae62afbc5f8ed6ed2d33d8f9c9a4c70fd1869a5",
+          "name": "contracts/libraries/Math.sol:Math",
+          "runtimeTemplateSha256": "17e070574960cb2f91fe7f841da106c76cc56478918d0d134eb9d416c0e96668",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "ab279b0e47d57524c45ae716dd6ec34a1f4072ef2e261aba7377e87448e777f6",
+          "evmSha256": "e2059b2d989fe7025756fcbf123ddd4c3db76e1a4f4592d0a7f2d0a729ba3788",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "6cef0efaf56f9e3042eca96710be1c91607597e4dd1f65a8f090779fdf86594f",
+          "name": "contracts/libraries/SafeMath.sol:SafeMath",
+          "runtimeTemplateSha256": "86d38017136d58181b3b908e2900026a888b63e54258e534749ea9262d079e80",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "9c607a9881a43cce83415bab59f2653947cd29411166e375686da90f16b12145",
+          "evmSha256": "e43395d930ff00f54e3329ead1c9a368d256750d3870e84a81b2fdcd1b060857",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ef31a81b1059cd325fa76f4ffb06178096621cdbec9128f15bce206e474882dc",
+          "name": "contracts/libraries/UQ112x112.sol:UQ112x112",
+          "runtimeTemplateSha256": "dc1b7f8dfb38d5558ab2a4e69e6a97176caa2e943f8b457b74e574df50fa52fb",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "afa2d54cf845ea0dbc058a87a99d6ea794e2a8d3dd6d2a44eda563f83ed679d4",
+          "creationSha256": "4e828aafd24142b518baa5331a2f89cbb1feebe1b74a01f86450e9a10b26e0ad",
+          "evmSha256": "ce4d39966105da44625c0621b0f928aacdd17da22440ed819e5cd00f76389f4a",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "a984b20e2b3602e87903220cfe804eeca23d8a536e11e49dbbc57230e342fda9",
+          "name": "contracts/test/ERC20.sol:ERC20",
+          "runtimeTemplateSha256": "af0c8ef0f464370748b631a8e60cda18afc153a30a911af965f77e796da3edba",
+          "storageLayoutSha256": "371ab0c64bc012a84c768ec9660afd28ab8a7018996ab3ff48dd7854f8a1ffd8"
+        },
+        {
+          "abiSha256": "97bc33c462f296684eef24ed552257f88f025a98189bddcb1ad2905586abf1b6",
+          "creationSha256": "6c664661d3d326ffc5f58a2877d27dfa9fad35be0eb19be8bc5632c013802570",
+          "evmSha256": "a043e41da9358a73adb436ee10802c2d596e1124c2effd16ebc1dc94c361081e",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "76fbe6f579aac0393c9fd84db9cb7039511d82d445a126b4ae60ca6878d626ab",
+          "name": "contracts/UniswapV2ERC20.sol:UniswapV2ERC20",
+          "runtimeTemplateSha256": "87487120cf1080f361d2cc6e4e1008c72705476766ba5c9b104ac790836997cf",
+          "storageLayoutSha256": "2af6b1b114efe5b5829c197b393760103564a0e0efa2a4f6886669e11e29e0f3"
+        },
+        {
+          "abiSha256": "d1c2e2633fdc88d5319a34fc887f9044edd25447734f4b8839c1e4172651a3e7",
+          "creationSha256": "3708cb3b10f129c91c22ae6b6c129e60d2e6484055799e7d9986d7c83284ceff",
+          "evmSha256": "f4b1d3d5a9c8b76aaf7f7181f361c35189706e2e9937830ae3e541d86b45260f",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "3807a4fcbde3924eeed1f7c5298f7c11a7e52016c8b470c5cd0fa352f1c63353",
+          "name": "contracts/UniswapV2Factory.sol:UniswapV2Factory",
+          "runtimeTemplateSha256": "3abc53f12a9cb8ae37ebfada9efc261c1ab4c2759d161e341a49bf67df3f8321",
+          "storageLayoutSha256": "799f7dd288ef9f334f6e4b8fa5a6cbf0c4ec1552e9caeaa08fde04827751b926"
+        },
+        {
+          "abiSha256": "028a21c54379447a103cca879cf45adc2fbebd50fc7ed5d7e1f6f93e5a5aad3d",
+          "creationSha256": "c884817b0b634ee7a9c3daf1017f64b00f5574df06ee1ff27ca6f8fe7726e1d5",
+          "evmSha256": "107153afba4e3b5048a622bf01fb15160838d4850690c41d6c7cecfffbe3560e",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1b16833e5cabaacce7a77db5f89d51fcf75ad41bfeafd48d73067efd4c0ef78f",
+          "name": "contracts/UniswapV2Pair.sol:UniswapV2Pair",
+          "runtimeTemplateSha256": "8b5db55fa9ab3b9527508d4abe0b39eb588bf310270c8e04b3f38214e8ba63b4",
+          "storageLayoutSha256": "afcf133758cb233510e20b216d9b971adfc7fd0042b7a668a330a8960690155f"
+        }
+      ],
+      "version": "0.5.16+commit.9c3226ce"
+    },
+    {
+      "exports": [
+        {
+          "abiSha256": "6e79ecda8373ea27fceeff14d4fd6c587524bf3241cd26919048d6572164cac5",
+          "artifact_path": "bench/artifacts/UniswapV2Router02.json",
+          "creationSha256": "b6437c1c7f6e761aaee6d4c19e8c993f7c91a5c5580ce3bd0d255ca059107f65",
+          "evmSha256": "af0ba0bba2cd0b135c69a25748578b5d89b12aa80c96f52dcc498d4a405a05e0",
+          "immutableReferences": {
+            "2357": [
+              {
+                "length": 32,
+                "start": 4295
+              },
+              {
+                "length": 32,
+                "start": 4549
+              },
+              {
+                "length": 32,
+                "start": 4971
+              },
+              {
+                "length": 32,
+                "start": 5028
+              },
+              {
+                "length": 32,
+                "start": 5455
+              },
+              {
+                "length": 32,
+                "start": 6116
+              },
+              {
+                "length": 32,
+                "start": 6324
+              },
+              {
+                "length": 32,
+                "start": 6817
+              },
+              {
+                "length": 32,
+                "start": 8799
+              },
+              {
+                "length": 32,
+                "start": 9216
+              },
+              {
+                "length": 32,
+                "start": 9641
+              },
+              {
+                "length": 32,
+                "start": 10908
+              },
+              {
+                "length": 32,
+                "start": 11743
+              },
+              {
+                "length": 32,
+                "start": 12401
+              },
+              {
+                "length": 32,
+                "start": 12442
+              },
+              {
+                "length": 32,
+                "start": 12490
+              },
+              {
+                "length": 32,
+                "start": 12967
+              },
+              {
+                "length": 32,
+                "start": 13398
+              },
+              {
+                "length": 32,
+                "start": 14381
+              },
+              {
+                "length": 32,
+                "start": 14795
+              },
+              {
+                "length": 32,
+                "start": 17482
+              },
+              {
+                "length": 32,
+                "start": 17549
+              },
+              {
+                "length": 32,
+                "start": 18413
+              },
+              {
+                "length": 32,
+                "start": 18894
+              },
+              {
+                "length": 32,
+                "start": 20297
+              },
+              {
+                "length": 32,
+                "start": 20522
+              },
+              {
+                "length": 32,
+                "start": 20650
+              }
+            ],
+            "2360": [
+              {
+                "length": 32,
+                "start": 428
+              },
+              {
+                "length": 32,
+                "start": 3677
+              },
+              {
+                "length": 32,
+                "start": 3736
+              },
+              {
+                "length": 32,
+                "start": 4053
+              },
+              {
+                "length": 32,
+                "start": 4760
+              },
+              {
+                "length": 32,
+                "start": 5874
+              },
+              {
+                "length": 32,
+                "start": 6358
+              },
+              {
+                "length": 32,
+                "start": 7710
+              },
+              {
+                "length": 32,
+                "start": 8098
+              },
+              {
+                "length": 32,
+                "start": 8306
+              },
+              {
+                "length": 32,
+                "start": 8569
+              },
+              {
+                "length": 32,
+                "start": 9004
+              },
+              {
+                "length": 32,
+                "start": 9153
+              },
+              {
+                "length": 32,
+                "start": 9843
+              },
+              {
+                "length": 32,
+                "start": 10010
+              },
+              {
+                "length": 32,
+                "start": 10223
+              },
+              {
+                "length": 32,
+                "start": 10484
+              },
+              {
+                "length": 32,
+                "start": 10716
+              },
+              {
+                "length": 32,
+                "start": 10845
+              },
+              {
+                "length": 32,
+                "start": 12524
+              },
+              {
+                "length": 32,
+                "start": 13346
+              },
+              {
+                "length": 32,
+                "start": 13432
+              },
+              {
+                "length": 32,
+                "start": 13484
+              },
+              {
+                "length": 32,
+                "start": 13613
+              },
+              {
+                "length": 32,
+                "start": 14151
+              },
+              {
+                "length": 32,
+                "start": 14583
+              },
+              {
+                "length": 32,
+                "start": 14732
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "5b8c474bcd9b2caf500f9841f7b8328ac8b1e473a851e06b4829b8fdb868a7c8",
+          "name": "contracts/UniswapV2Router02.sol:UniswapV2Router02",
+          "runtimeTemplateSha256": "8e56e0a2b9d9155e0d92bf3318c57973ec5f47d4730ae8252a5e5c8836a5475d",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        }
+      ],
+      "input_bytes": 123418,
+      "input_sha256": "75523aca86c0b7e99ef89403edf8d5e9854287341fa7bbe3dd729bbfc97e55b5",
+      "name": "periphery",
+      "settings": {
+        "evmVersion": "istanbul",
+        "libraries": {},
+        "optimizer": {
+          "enabled": true,
+          "runs": 999999
+        },
+        "outputSelection": {
+          "*": {
+            "*": [
+              "abi",
+              "metadata",
+              "storageLayout",
+              "evm.bytecode",
+              "evm.deployedBytecode"
+            ]
+          }
+        },
+        "remappings": []
+      },
+      "sources": [
+        {
+          "bytes": 506,
+          "origin": "lib",
+          "path": "package/contracts/libraries/Babylonian.sol",
+          "sha256": "ef7ba527867fa2718551e2397f8dc5c5161fc2439d470d2467115b2184eb7ad5",
+          "unit": "@uniswap/lib/contracts/libraries/Babylonian.sol"
+        },
+        {
+          "bytes": 2182,
+          "origin": "lib",
+          "path": "package/contracts/libraries/FixedPoint.sol",
+          "sha256": "6b2c2e3f04aa04dabfeaa7911c94d1fdf0d045ebb59d57617410b9efebf67823",
+          "unit": "@uniswap/lib/contracts/libraries/FixedPoint.sol"
+        },
+        {
+          "bytes": 1488,
+          "origin": "lib",
+          "path": "package/contracts/libraries/TransferHelper.sol",
+          "sha256": "72b232bc3d253ccfcf8299dac036efe549fad3ae45b1e0be813745c6da635281",
+          "unit": "@uniswap/lib/contracts/libraries/TransferHelper.sol"
+        },
+        {
+          "bytes": 159,
+          "origin": "periphery-core",
+          "path": "package/contracts/interfaces/IUniswapV2Callee.sol",
+          "sha256": "ecfa434d468bb1888124d8c34b0b8483f4ea1e5cd63f0874c8b28aa4305c1dbc",
+          "unit": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol"
+        },
+        {
+          "bytes": 661,
+          "origin": "periphery-core",
+          "path": "package/contracts/interfaces/IUniswapV2Factory.sol",
+          "sha256": "51d056199e3f5e41cb1a9f11ce581aa3e190cc982db5771ffeef8d8d1f962a0d",
+          "unit": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol"
+        },
+        {
+          "bytes": 2424,
+          "origin": "periphery-core",
+          "path": "package/contracts/interfaces/IUniswapV2Pair.sol",
+          "sha256": "29c75e69ce173ff8b498584700fef76bc81498c1d98120e2877a1439f0c31b5a",
+          "unit": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol"
+        },
+        {
+          "bytes": 2213,
+          "origin": "periphery",
+          "path": "package/contracts/UniswapV2Migrator.sol",
+          "sha256": "b1bf0327cec8556c602174e20f067782c71c051ddb6f45f00459a062402ca374",
+          "unit": "contracts/UniswapV2Migrator.sol"
+        },
+        {
+          "bytes": 12704,
+          "origin": "periphery",
+          "path": "package/contracts/UniswapV2Router01.sol",
+          "sha256": "da25cb106f822d04eb126249b2a08f986dd579920f790560ef56ca9ed8879786",
+          "unit": "contracts/UniswapV2Router01.sol"
+        },
+        {
+          "bytes": 18466,
+          "origin": "periphery",
+          "path": "package/contracts/UniswapV2Router02.sol",
+          "sha256": "acabe6d6c9c275aa5c27d8ed59b3d23d21616523071043e89eea7bca474babb8",
+          "unit": "contracts/UniswapV2Router02.sol"
+        },
+        {
+          "bytes": 3737,
+          "origin": "periphery",
+          "path": "package/contracts/examples/ExampleFlashSwap.sol",
+          "sha256": "845643504669ff07f365c3465fefaf23d591733f127e46bd6c6174eebdc3f7d9",
+          "unit": "contracts/examples/ExampleFlashSwap.sol"
+        },
+        {
+          "bytes": 3164,
+          "origin": "periphery",
+          "path": "package/contracts/examples/ExampleOracleSimple.sol",
+          "sha256": "ac597bb691036258e9416f8a8b292e318b80e3b7628e5e0de9222848038fd518",
+          "unit": "contracts/examples/ExampleOracleSimple.sol"
+        },
+        {
+          "bytes": 6410,
+          "origin": "periphery",
+          "path": "package/contracts/examples/ExampleSlidingWindowOracle.sol",
+          "sha256": "a84405c81d1fbd772abd51d51839154c3a640bee730347f484fae8139edad500",
+          "unit": "contracts/examples/ExampleSlidingWindowOracle.sol"
+        },
+        {
+          "bytes": 3552,
+          "origin": "periphery",
+          "path": "package/contracts/examples/ExampleSwapToPrice.sol",
+          "sha256": "0a5bb31ee83f5d1d8147119b8f3f49286a3c773cdcef9f424b5444080cbb948c",
+          "unit": "contracts/examples/ExampleSwapToPrice.sol"
+        },
+        {
+          "bytes": 823,
+          "origin": "periphery",
+          "path": "package/contracts/interfaces/IERC20.sol",
+          "sha256": "2b63f199f838028184efefbcfd6cf2b9192624c3dae5dc1116ecbb15c36a67e8",
+          "unit": "contracts/interfaces/IERC20.sol"
+        },
+        {
+          "bytes": 172,
+          "origin": "periphery",
+          "path": "package/contracts/interfaces/IUniswapV2Migrator.sol",
+          "sha256": "e020b26f5d9c4162340fcbb42bf6ea5febfc3ee68f33aa25e527cd43e8de0483",
+          "unit": "contracts/interfaces/IUniswapV2Migrator.sol"
+        },
+        {
+          "bytes": 3526,
+          "origin": "periphery",
+          "path": "package/contracts/interfaces/IUniswapV2Router01.sol",
+          "sha256": "0439ffe0fd4a5e1f4e22d71ddbda76d63d61679947d158cba4ee0a1da60cf663",
+          "unit": "contracts/interfaces/IUniswapV2Router01.sol"
+        },
+        {
+          "bytes": 1286,
+          "origin": "periphery",
+          "path": "package/contracts/interfaces/IUniswapV2Router02.sol",
+          "sha256": "a2900701961cb0b6152fc073856b972564f7c798797a4a044e83d2ab8f0e8d38",
+          "unit": "contracts/interfaces/IUniswapV2Router02.sol"
+        },
+        {
+          "bytes": 196,
+          "origin": "periphery",
+          "path": "package/contracts/interfaces/IWETH.sol",
+          "sha256": "60760053849b916b72386fef1126ab69c7482c2aa6b5fb836368eff42905cb30",
+          "unit": "contracts/interfaces/IWETH.sol"
+        },
+        {
+          "bytes": 454,
+          "origin": "periphery",
+          "path": "package/contracts/interfaces/V1/IUniswapV1Exchange.sol",
+          "sha256": "af0f040756cffdad159024068160e3d29974963eea113bf79debe6e0d9bfc5f4",
+          "unit": "contracts/interfaces/V1/IUniswapV1Exchange.sol"
+        },
+        {
+          "bytes": 125,
+          "origin": "periphery",
+          "path": "package/contracts/interfaces/V1/IUniswapV1Factory.sol",
+          "sha256": "757faaa23cac0f415640c16c009e92458271ece8876c0b739f2a3bbad6338aee",
+          "unit": "contracts/interfaces/V1/IUniswapV1Factory.sol"
+        },
+        {
+          "bytes": 562,
+          "origin": "periphery",
+          "path": "package/contracts/libraries/SafeMath.sol",
+          "sha256": "39e5b4c0bc19b72fa59c2d2177ba5ed6cfadcd76f3f804563011e579367530fb",
+          "unit": "contracts/libraries/SafeMath.sol"
+        },
+        {
+          "bytes": 4454,
+          "origin": "periphery",
+          "path": "package/contracts/libraries/UniswapV2Library.sol",
+          "sha256": "4f83e9334f833568fa47b36e9ceca435f6c2962760a0596b043c4e538d0fd9f2",
+          "unit": "contracts/libraries/UniswapV2Library.sol"
+        },
+        {
+          "bytes": 1689,
+          "origin": "periphery",
+          "path": "package/contracts/libraries/UniswapV2OracleLibrary.sol",
+          "sha256": "508b544096f9d916bef314a517a1f3573243272f34d8c4fbacbc7f256523e74f",
+          "unit": "contracts/libraries/UniswapV2OracleLibrary.sol"
+        },
+        {
+          "bytes": 3570,
+          "origin": "periphery",
+          "path": "package/contracts/test/DeflatingERC20.sol",
+          "sha256": "d9768f5ce9f19aeda89356a272b560ae5b9447df3200aceaa59dbb9ed8a1c8bc",
+          "unit": "contracts/test/DeflatingERC20.sol"
+        },
+        {
+          "bytes": 3398,
+          "origin": "periphery",
+          "path": "package/contracts/test/ERC20.sol",
+          "sha256": "16ace9cf263a8918972fe942217ec6854dc8251fb28420df16be7be53fb0fb88",
+          "unit": "contracts/test/ERC20.sol"
+        },
+        {
+          "bytes": 3191,
+          "origin": "periphery",
+          "path": "package/contracts/test/RouterEventEmitter.sol",
+          "sha256": "82aaec8037248d47c013c33a491df044a4e34eef87491b3b94c24a8fd135ddda",
+          "unit": "contracts/test/RouterEventEmitter.sol"
+        },
+        {
+          "bytes": 37695,
+          "origin": "periphery",
+          "path": "package/contracts/test/WETH9.sol",
+          "sha256": "33f13565b207188485030aa20fd1f38d52d8c455cc64720560fb38149dcb4137",
+          "unit": "contracts/test/WETH9.sol"
+        }
+      ],
+      "targets": [
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "e1f841a5f350dcb94bafb25c30e7161aae5c6fe1048ef715b90a3fb09489d749",
+          "evmSha256": "ce24685b5926732db780ccabe147ae78249c5cea2aa44ae8ab125b8e30ea87cd",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "33190fb61b7cb94d9c9d4b422b350a231a6d744ce2c59fa1f02bc46fde79461a",
+          "name": "@uniswap/lib/contracts/libraries/Babylonian.sol:Babylonian",
+          "runtimeTemplateSha256": "7555a5c1271e1828e1147a28e2e31b2358e2e5b7541fdb4ae585129fc64dc23c",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "9972fd78e2b4f5cbb7ea3d972370e574801304c833ee9e4de2061b68a786972b",
+          "evmSha256": "d38e326de907bfd32837f008b8dc63af5a9ee5a728fff2a9571bd6774d5a528d",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1c50bfd62137fe8298f9e1c60eec19eec6af5021eccaa4e74e3d3ab461311e20",
+          "name": "@uniswap/lib/contracts/libraries/FixedPoint.sol:FixedPoint",
+          "runtimeTemplateSha256": "ec468376faf91d36177bd004b405da1532d7e0f2313ee943e7f68a43e99c1b15",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "a90c751023b03a7ba07a7f60fb677477cb0a5b9aca559cc3a622ff0b06ad3884",
+          "evmSha256": "f0f17f391f284e31aaba4969bc49ceb4439c19b9842636e3ff7f7171210f8b53",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "7f6e2204858083e1a39efffe470da72752af1b2558f7de11558245c7a48d068d",
+          "name": "@uniswap/lib/contracts/libraries/TransferHelper.sol:TransferHelper",
+          "runtimeTemplateSha256": "6bade94a95eede6f4be74818e514005ae8d5f1e66cc00a8d1eb10c6bc984380b",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "84edfecbb9c9b22c2dad1b85189ec8fba8138ceb4e91e717c94e17d0fdeb41a4",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ab796f334cf44e067a991555e7f0d2219d36cb1cbb5c5731e8137dd59b830124",
+          "name": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol:IUniswapV2Callee",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "9ef12d4c07864e969fc7fc8a3eecca678baaa7f76db03d9db85b7c48fd256810",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ac5cec9a4a683d1fc227bfbbfdcc691f7bbf3239f80ecb421a42cbde2e5b7c27",
+          "name": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol:IUniswapV2Factory",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "ac1901cd3387e3511516f0070d6a52f141e56b9be3d121a7e77bc5c08d8daa55",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "4044c9b474bea84e0ba3b79cf96af81f97d6263045675b4b93869d60d8c8a291",
+          "name": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol:IUniswapV2Pair",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "2af6391aa0ff88516322d6cd5eed7780aec1c6c557fd7d2e30b4f28e0b42ff12",
+          "creationSha256": "98bd0b6d62601bcde3f9e56f9dba332b782c279dcb2c9d996e50270872e9cb20",
+          "evmSha256": "56502d02c1a1c089e0186c440c62bfad1301654c17674490a5bc2752f6607e5b",
+          "immutableReferences": {
+            "4391": [
+              {
+                "length": 32,
+                "start": 1253
+              }
+            ],
+            "4393": [
+              {
+                "length": 32,
+                "start": 502
+              },
+              {
+                "length": 32,
+                "start": 1860
+              },
+              {
+                "length": 32,
+                "start": 2868
+              }
+            ],
+            "4395": [
+              {
+                "length": 32,
+                "start": 737
+              },
+              {
+                "length": 32,
+                "start": 790
+              },
+              {
+                "length": 32,
+                "start": 885
+              },
+              {
+                "length": 32,
+                "start": 990
+              },
+              {
+                "length": 32,
+                "start": 1098
+              },
+              {
+                "length": 32,
+                "start": 1931
+              },
+              {
+                "length": 32,
+                "start": 2132
+              },
+              {
+                "length": 32,
+                "start": 2593
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "33f4759efa10f8180ff6661948876bbaff4054b388d3dd24047c3cbaa48fba21",
+          "name": "contracts/examples/ExampleFlashSwap.sol:ExampleFlashSwap",
+          "runtimeTemplateSha256": "c784f66c25470ddcabb1f7d1bffe4457c168520c812f7030eb69c0fdf2b292d3",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "9d2ee7aab01ae3733d21292477975f76b90d006dc7f89464cfb71cd8ef5dcf3b",
+          "creationSha256": "638dc54f5573231f9e4ab7fe55f40a3f68084b1a8b82d89a64ac203e31af43e7",
+          "evmSha256": "dfdc5355bfcac72e10661eaea80a6245630daa9605b682166c58da8698392b6b",
+          "immutableReferences": {
+            "4769": [
+              {
+                "length": 32,
+                "start": 996
+              }
+            ],
+            "4771": [
+              {
+                "length": 32,
+                "start": 461
+              },
+              {
+                "length": 32,
+                "start": 499
+              }
+            ],
+            "4773": [
+              {
+                "length": 32,
+                "start": 681
+              },
+              {
+                "length": 32,
+                "start": 1498
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "52bfa122321429ed90c2ff8b55f4f0bf9bb7e80a7ed5fcc3812b20f9079cfd6e",
+          "name": "contracts/examples/ExampleOracleSimple.sol:ExampleOracleSimple",
+          "runtimeTemplateSha256": "de5ee597a94d254e53f5914db9fe0da81e4d6f397fd97335d1e0f16f6e322671",
+          "storageLayoutSha256": "0b653b8733767429266ad234c0cf296fc65fc32d4fa3695752a1a050b0afeedb"
+        },
+        {
+          "abiSha256": "c3ebb837f383e93c322c0558d01e34ec848e18953ec500220ad7ec5d7a082735",
+          "creationSha256": "d2203ed712e6b89229153364e82d1125109f573766944ac89f4781f0b22a02b8",
+          "evmSha256": "497eca591099d647c378bd8a3f9c471e8bcacbb15faa586d0e6233530f81bbb3",
+          "immutableReferences": {
+            "4995": [
+              {
+                "length": 32,
+                "start": 578
+              },
+              {
+                "length": 32,
+                "start": 1116
+              },
+              {
+                "length": 32,
+                "start": 1157
+              }
+            ],
+            "4997": [
+              {
+                "length": 32,
+                "start": 536
+              },
+              {
+                "length": 32,
+                "start": 638
+              },
+              {
+                "length": 32,
+                "start": 795
+              }
+            ],
+            "4999": [
+              {
+                "length": 32,
+                "start": 500
+              },
+              {
+                "length": 32,
+                "start": 1239
+              },
+              {
+                "length": 32,
+                "start": 1555
+              },
+              {
+                "length": 32,
+                "start": 1894
+              }
+            ],
+            "5001": [
+              {
+                "length": 32,
+                "start": 759
+              },
+              {
+                "length": 32,
+                "start": 1428
+              },
+              {
+                "length": 32,
+                "start": 1511
+              },
+              {
+                "length": 32,
+                "start": 1607
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "826a970e201ae246f5b890e2aa2b47a24ab2f5599b0893d37841948de7995a0f",
+          "name": "contracts/examples/ExampleSlidingWindowOracle.sol:ExampleSlidingWindowOracle",
+          "runtimeTemplateSha256": "7ae7233d352c82338ef095197a02c922e7d15928d20979572e6f7265f0a08732",
+          "storageLayoutSha256": "3211885ebd58f4d51905765009893c33150ca7cffd86f487afa75d62dfd1c6f7"
+        },
+        {
+          "abiSha256": "ff0ee4b9bfc2a250de31d479771e5000b9659f59819b6db65162c0af24b47722",
+          "creationSha256": "c14f821e4dc5c9db8d3e08ac6cb9be7895519cdbfba81b59fa03f8926edd7c60",
+          "evmSha256": "c87bf91fd27e52adf8a259ae95097ed752e31f1372255a8490996314f82da424",
+          "immutableReferences": {
+            "5343": [
+              {
+                "length": 32,
+                "start": 708
+              },
+              {
+                "length": 32,
+                "start": 923
+              },
+              {
+                "length": 32,
+                "start": 1461
+              }
+            ],
+            "5345": [
+              {
+                "length": 32,
+                "start": 564
+              },
+              {
+                "length": 32,
+                "start": 1425
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "c5b1e33f6ecace4de41be0887aaa2b7ec75c736ca4b5af0dcf666ca2e5b9860b",
+          "name": "contracts/examples/ExampleSwapToPrice.sol:ExampleSwapToPrice",
+          "runtimeTemplateSha256": "c8fe0dcc7ad4b5ba9f42dd2fad73a194d14515798b85f42d75357d3dc44a88ea",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "aec36408114044f78a9cbf0fba4d7eedc7451ebe0a813268fe46d924480c18ae",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "1dcc873a0e3621d8f06afa8b07f262f79ae10c10e4d3dd63be34a6240b9830ad",
+          "name": "contracts/interfaces/IERC20.sol:IERC20",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "d0182e06fce702263218a848618a2e9655ef6facffd8623fc7686d3e431b127f",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "63d9fb61f48c2388b719d447a706ca61228608b016ab3119a69b7274a6f0efad",
+          "name": "contracts/interfaces/IUniswapV2Migrator.sol:IUniswapV2Migrator",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "e4353b9e867af289ad556a960f6c09de68f7a3970f8fe69d29ebc031a61c8dd5",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "dde22e8e55a861fc01ac5c15130272fec0ed0c3d86ce2f6bea41ee4a3f8120f0",
+          "name": "contracts/interfaces/IUniswapV2Router01.sol:IUniswapV2Router01",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "35e3de29967ce1aff0f7d72aed5bb4b417c7c696bd71b77c45cd1db0ee4a283c",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "bc550f197505caa50490612d84fa4d8652f754d85db87249accd8ee2ef3d5de3",
+          "name": "contracts/interfaces/IUniswapV2Router02.sol:IUniswapV2Router02",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "f6494a8d7d8bff42849828a5301f9259e6660f32c9e2ccfc0138eccafc0e0df1",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "b2b2087e33c5814a75af51ab4441158d6fba6aa09b6973dfe3682f4256ed787e",
+          "name": "contracts/interfaces/IWETH.sol:IWETH",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "5494c1ca7c7f4611fd07625c8ef029f4b8a3bdcc2892627ea3439863178ac262",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "7c25503050ac1e413846ea931d08396f99619fcc665334918b5d421f924dfbf8",
+          "name": "contracts/interfaces/V1/IUniswapV1Exchange.sol:IUniswapV1Exchange",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4adedcf933dc0fd921facb032c7b472aefb9758c2b987d372fcbf2dd390a70f0",
+          "creationSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evmSha256": "de9e56fd0ce737ad9a6b35b000593927c6a96e97c3bdfd65e05d59256ccbd977",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "fc9744f4d142a00423ccf19f5d9d2cf2db62dcc705e6934bcb34cd4f6071bf03",
+          "name": "contracts/interfaces/V1/IUniswapV1Factory.sol:IUniswapV1Factory",
+          "runtimeTemplateSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "440b5f939b52a64100a1a34ce09837e4e1b139e9d00d4126b260de267346a7b5",
+          "evmSha256": "e6c28f39dd1797e0ef6587e4089c63cca4febc301342215a9c5e66d52e7d8251",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "10927dab23ca69eba807c38196a9bfbd81cc51bd07b56ae1e9260cef3dcb22cc",
+          "name": "contracts/libraries/SafeMath.sol:SafeMath",
+          "runtimeTemplateSha256": "fb21bba67c08e27b3a5662eccdcc40d792678b97dad4023e18587d111808e7d9",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "6cc00b7ffbf79e87d2e1600d87b0bf1e7e0be88cf9ca192e2edc3ff6045707d4",
+          "evmSha256": "dfd5c43b228664d00141dfcd0c7eb9c87a052db2441c39ae5da89fb31dc81e5d",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "575fdd7479501ad239b7332b0230d9cbe54908846ded622d10e540706be072b5",
+          "name": "contracts/libraries/UniswapV2Library.sol:UniswapV2Library",
+          "runtimeTemplateSha256": "d1af8a37958a8c94e055475fe8f0d54dfdf8e58d37d43181327a7104fd8dc35b",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "creationSha256": "7958b1d082aa56d684a2f678631eb4d13252ecfcf02d417378c9281fe2a1feb8",
+          "evmSha256": "46bdeedb8ec0fa846450b77b9287e0ce0e618ed91c8d98203a2a55a163f78aae",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "bd22f1aed7cbe1dc502befbfc5d15cc82df2bc5811696ba60a8f4c9e41c3e13b",
+          "name": "contracts/libraries/UniswapV2OracleLibrary.sol:UniswapV2OracleLibrary",
+          "runtimeTemplateSha256": "69ffc4a8b5560a8ca5c77797278679f0efcbb94baa7347fef82d03c1b038acb6",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "2f09b4fa44922c0974d3be0e8eddfe380aed464590f262aa8a719d670f8d34a8",
+          "creationSha256": "d4fbefab53aae41c2a9e9e64922fb03e63624d11e76f290805209a594b73ceaf",
+          "evmSha256": "02ee156345c56f52afa664ab7899702a1aa9b6b3db5a4d089da771ccd3d0e746",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "a6d6380501acab895a92dcacd4d9a12e1f9d659dbfee36853ac9e7d372f759b1",
+          "name": "contracts/test/DeflatingERC20.sol:DeflatingERC20",
+          "runtimeTemplateSha256": "bcb1f33fc32cdcfc14a90a66f02db4c9fda818d31029d98f28825bfacb392a9c",
+          "storageLayoutSha256": "5be56079f86b6d27dbd62480730ea14aef51cfdf1bcca5ea0198fcc740ccff13"
+        },
+        {
+          "abiSha256": "2f09b4fa44922c0974d3be0e8eddfe380aed464590f262aa8a719d670f8d34a8",
+          "creationSha256": "50f144f91e57e9cd1c32929e3acf2c0b21ae32bad00da3cb284b8efd453eeb6b",
+          "evmSha256": "323227fac849bd014ebaedcc64e5ec8d060842bac4f566fd13d77ffb9e878daf",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "573a8df779b91d7182ffee9f5ab98a02e8606b42a00b6c96be74f731580f8eb7",
+          "name": "contracts/test/ERC20.sol:ERC20",
+          "runtimeTemplateSha256": "6e15b709ac46d8d8d9e431827f706f53c29bfea1dbcea50242f517870ffbfa98",
+          "storageLayoutSha256": "16d4226edfd3d1d45a5ac6184b9895165bb296a7d6cd4b3760903375bc89368c"
+        },
+        {
+          "abiSha256": "90975696cbbd52b2f5c317468e1ca3a7e2533d841967d2e2d319870c92e62638",
+          "creationSha256": "31d512987432954d4f4de51a964868f8b8634f02223cfdca6a3849c5a4526b0a",
+          "evmSha256": "73d27cdb77ed285ac4a297407ba012f7253c00687c25bfc6484a2f058218547d",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "3b2cb45760e3445924e4323e3be22b1eef01fed0f57498173a52c6412a3ddb1d",
+          "name": "contracts/test/RouterEventEmitter.sol:RouterEventEmitter",
+          "runtimeTemplateSha256": "1d455f03b134f2deb21192493f0dd54fce222977e84f89c9d89a9b0ca79ca39a",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "22bc25d82ab57cbe1bbcc104a31e92b2d234caaa28863f8b7a2fa941ad481730",
+          "creationSha256": "64521151e2b9603fb7273cd157a1540b82501f7514e1b9c1348663cac3512b14",
+          "evmSha256": "0b8ba4f92af69ee2c249cdf3ddae32e9466f2e6bf0ede1c40c2c1edc143d765c",
+          "immutableReferences": {},
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "ed470f265ec760acc76a4b5de342c2a4add56a17ed0009305616f2e345823855",
+          "name": "contracts/test/WETH9.sol:WETH9",
+          "runtimeTemplateSha256": "cfbbcde6216d96d738807622bbcf9903033ddafba4cbcba85bf62536209f0086",
+          "storageLayoutSha256": "0e22c2dc43fa4b20479a47c58a485129b111e0d47122fa2674bf60e254841b7e"
+        },
+        {
+          "abiSha256": "893363718c2502faf8c82fa84e0a13b64f24cbe2b2ffa095e3052bfb6075e8ef",
+          "creationSha256": "a9b582279de7f352b936c409692537095674c7985427f388bf082e0bd7993857",
+          "evmSha256": "24c024bf28c150b284b1e4ebb95f0065612c6afee8e5d0f02b74512ae183cbe9",
+          "immutableReferences": {
+            "724": [
+              {
+                "length": 32,
+                "start": 144
+              }
+            ],
+            "726": [
+              {
+                "length": 32,
+                "start": 1006
+              },
+              {
+                "length": 32,
+                "start": 1156
+              },
+              {
+                "length": 32,
+                "start": 1302
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "cdd2acd16aa976c54ba7331d38f9f51e50b24ff5a98a5b1c677b579f8618238c",
+          "name": "contracts/UniswapV2Migrator.sol:UniswapV2Migrator",
+          "runtimeTemplateSha256": "0ff1c885c451738185dcc45b35f3ea346d6f58db03fa3f7ab82f2e3e3eca37d9",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "dee81de549b634ae8a6edf4512ff82a5a1b717b12a1a9ccf19b809d426fd14d0",
+          "creationSha256": "0973b55bf5079dfead0542b5cd912c4f16af944aaf18caf2eed7a8209d79981a",
+          "evmSha256": "e8903815bcf7cb1dbefb57012cb93e6c5f094fd1293156dc122b7fb95de4cd4f",
+          "immutableReferences": {
+            "895": [
+              {
+                "length": 32,
+                "start": 3469
+              },
+              {
+                "length": 32,
+                "start": 3723
+              },
+              {
+                "length": 32,
+                "start": 4145
+              },
+              {
+                "length": 32,
+                "start": 4202
+              },
+              {
+                "length": 32,
+                "start": 4629
+              },
+              {
+                "length": 32,
+                "start": 5290
+              },
+              {
+                "length": 32,
+                "start": 5836
+              },
+              {
+                "length": 32,
+                "start": 6253
+              },
+              {
+                "length": 32,
+                "start": 6707
+              },
+              {
+                "length": 32,
+                "start": 7078
+              },
+              {
+                "length": 32,
+                "start": 7736
+              },
+              {
+                "length": 32,
+                "start": 7777
+              },
+              {
+                "length": 32,
+                "start": 7825
+              },
+              {
+                "length": 32,
+                "start": 8302
+              },
+              {
+                "length": 32,
+                "start": 8733
+              },
+              {
+                "length": 32,
+                "start": 9716
+              },
+              {
+                "length": 32,
+                "start": 10130
+              },
+              {
+                "length": 32,
+                "start": 12817
+              },
+              {
+                "length": 32,
+                "start": 12884
+              },
+              {
+                "length": 32,
+                "start": 14311
+              },
+              {
+                "length": 32,
+                "start": 14536
+              },
+              {
+                "length": 32,
+                "start": 14664
+              }
+            ],
+            "898": [
+              {
+                "length": 32,
+                "start": 357
+              },
+              {
+                "length": 32,
+                "start": 2851
+              },
+              {
+                "length": 32,
+                "start": 2910
+              },
+              {
+                "length": 32,
+                "start": 3227
+              },
+              {
+                "length": 32,
+                "start": 3934
+              },
+              {
+                "length": 32,
+                "start": 5048
+              },
+              {
+                "length": 32,
+                "start": 5606
+              },
+              {
+                "length": 32,
+                "start": 6041
+              },
+              {
+                "length": 32,
+                "start": 6190
+              },
+              {
+                "length": 32,
+                "start": 6909
+              },
+              {
+                "length": 32,
+                "start": 7859
+              },
+              {
+                "length": 32,
+                "start": 8681
+              },
+              {
+                "length": 32,
+                "start": 8767
+              },
+              {
+                "length": 32,
+                "start": 8819
+              },
+              {
+                "length": 32,
+                "start": 8948
+              },
+              {
+                "length": 32,
+                "start": 9486
+              },
+              {
+                "length": 32,
+                "start": 9918
+              },
+              {
+                "length": 32,
+                "start": 10067
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "20841ad7c6aa8c76493fa4a91e02ea38fd7da5ea5edd89a892fd3fe6df7d11f0",
+          "name": "contracts/UniswapV2Router01.sol:UniswapV2Router01",
+          "runtimeTemplateSha256": "76a9c4102646e734305e393895800f2408b9798a525bd7671ebb02f64893f930",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        },
+        {
+          "abiSha256": "6e79ecda8373ea27fceeff14d4fd6c587524bf3241cd26919048d6572164cac5",
+          "creationSha256": "b6437c1c7f6e761aaee6d4c19e8c993f7c91a5c5580ce3bd0d255ca059107f65",
+          "evmSha256": "af0ba0bba2cd0b135c69a25748578b5d89b12aa80c96f52dcc498d4a405a05e0",
+          "immutableReferences": {
+            "2357": [
+              {
+                "length": 32,
+                "start": 4295
+              },
+              {
+                "length": 32,
+                "start": 4549
+              },
+              {
+                "length": 32,
+                "start": 4971
+              },
+              {
+                "length": 32,
+                "start": 5028
+              },
+              {
+                "length": 32,
+                "start": 5455
+              },
+              {
+                "length": 32,
+                "start": 6116
+              },
+              {
+                "length": 32,
+                "start": 6324
+              },
+              {
+                "length": 32,
+                "start": 6817
+              },
+              {
+                "length": 32,
+                "start": 8799
+              },
+              {
+                "length": 32,
+                "start": 9216
+              },
+              {
+                "length": 32,
+                "start": 9641
+              },
+              {
+                "length": 32,
+                "start": 10908
+              },
+              {
+                "length": 32,
+                "start": 11743
+              },
+              {
+                "length": 32,
+                "start": 12401
+              },
+              {
+                "length": 32,
+                "start": 12442
+              },
+              {
+                "length": 32,
+                "start": 12490
+              },
+              {
+                "length": 32,
+                "start": 12967
+              },
+              {
+                "length": 32,
+                "start": 13398
+              },
+              {
+                "length": 32,
+                "start": 14381
+              },
+              {
+                "length": 32,
+                "start": 14795
+              },
+              {
+                "length": 32,
+                "start": 17482
+              },
+              {
+                "length": 32,
+                "start": 17549
+              },
+              {
+                "length": 32,
+                "start": 18413
+              },
+              {
+                "length": 32,
+                "start": 18894
+              },
+              {
+                "length": 32,
+                "start": 20297
+              },
+              {
+                "length": 32,
+                "start": 20522
+              },
+              {
+                "length": 32,
+                "start": 20650
+              }
+            ],
+            "2360": [
+              {
+                "length": 32,
+                "start": 428
+              },
+              {
+                "length": 32,
+                "start": 3677
+              },
+              {
+                "length": 32,
+                "start": 3736
+              },
+              {
+                "length": 32,
+                "start": 4053
+              },
+              {
+                "length": 32,
+                "start": 4760
+              },
+              {
+                "length": 32,
+                "start": 5874
+              },
+              {
+                "length": 32,
+                "start": 6358
+              },
+              {
+                "length": 32,
+                "start": 7710
+              },
+              {
+                "length": 32,
+                "start": 8098
+              },
+              {
+                "length": 32,
+                "start": 8306
+              },
+              {
+                "length": 32,
+                "start": 8569
+              },
+              {
+                "length": 32,
+                "start": 9004
+              },
+              {
+                "length": 32,
+                "start": 9153
+              },
+              {
+                "length": 32,
+                "start": 9843
+              },
+              {
+                "length": 32,
+                "start": 10010
+              },
+              {
+                "length": 32,
+                "start": 10223
+              },
+              {
+                "length": 32,
+                "start": 10484
+              },
+              {
+                "length": 32,
+                "start": 10716
+              },
+              {
+                "length": 32,
+                "start": 10845
+              },
+              {
+                "length": 32,
+                "start": 12524
+              },
+              {
+                "length": 32,
+                "start": 13346
+              },
+              {
+                "length": 32,
+                "start": 13432
+              },
+              {
+                "length": 32,
+                "start": 13484
+              },
+              {
+                "length": 32,
+                "start": 13613
+              },
+              {
+                "length": 32,
+                "start": 14151
+              },
+              {
+                "length": 32,
+                "start": 14583
+              },
+              {
+                "length": 32,
+                "start": 14732
+              }
+            ]
+          },
+          "linkReferences": {
+            "creation": {},
+            "runtime": {}
+          },
+          "metadataSha256": "5b8c474bcd9b2caf500f9841f7b8328ac8b1e473a851e06b4829b8fdb868a7c8",
+          "name": "contracts/UniswapV2Router02.sol:UniswapV2Router02",
+          "runtimeTemplateSha256": "8e56e0a2b9d9155e0d92bf3318c57973ec5f47d4730ae8252a5e5c8836a5475d",
+          "storageLayoutSha256": "f846b023549275be2e0c1636ca4bec256cd67a0365c39781e76ec879398473a8"
+        }
+      ],
+      "version": "0.6.6+commit.6c089d02"
+    }
+  ],
+  "packages": [
+    {
+      "bytes": 346420,
+      "id": "openzeppelin",
+      "integrity": "sha512-Ly6SlsVJ3mj+b18W3R8gNufB7dTICT105fJhodGAGgyC2oqnBAhqSiNDJ8V8DLY05cCz81GLI0CU5vNYA1EC/w==",
+      "name": "@openzeppelin/contracts",
+      "sha256": "bd202ef9a2fd09f6005edc18437b4d3090841d0f676c01c814ee9608581d2e63",
+      "url": "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-5.6.1.tgz",
+      "version": "5.6.1"
+    },
+    {
+      "bytes": 300338,
+      "id": "core",
+      "integrity": "sha512-MtybtkUPSyysqLY2U210NBDeCHX+ltHt3oADGdjqoThZaFRDKwM6k1Nb3F0A3hk5hwuQvytFWhrWHOEq6nVJ8Q==",
+      "name": "@uniswap/v2-core",
+      "sha256": "f01288aaf73a89d2ff541b7276cec215ce2c480cafbed33b0da9c89853f976a2",
+      "url": "https://registry.npmjs.org/@uniswap/v2-core/-/v2-core-1.0.1.tgz",
+      "version": "1.0.1"
+    },
+    {
+      "bytes": 722620,
+      "id": "periphery",
+      "integrity": "sha512-6dkwAMKza8nzqYiXEr2D86dgW3TTavUvCR0w2Tu33bAbM8Ah43LKAzH7oKKPRT5VJQaMi1jtkGs1E8JPor1n5g==",
+      "name": "@uniswap/v2-periphery",
+      "sha256": "c3f1cda4ee1e00e877eb15ab508e574dfd6ae5e742be97fef41105d84a198784",
+      "url": "https://registry.npmjs.org/@uniswap/v2-periphery/-/v2-periphery-1.1.0-beta.0.tgz",
+      "version": "1.1.0-beta.0"
+    },
+    {
+      "bytes": 274605,
+      "id": "periphery-core",
+      "integrity": "sha512-BJiXrBGnN8mti7saW49MXwxDBRFiWemGetE58q8zgfnPPzQKq55ADltEILqOt6VFZ22kVeVKbF8gVd8aY3l7pA==",
+      "name": "@uniswap/v2-core",
+      "sha256": "612c3bf99c809dc41a478e930f1c42e3604509028bde424e8a0017bf74fea88d",
+      "url": "https://registry.npmjs.org/@uniswap/v2-core/-/v2-core-1.0.0.tgz",
+      "version": "1.0.0"
+    },
+    {
+      "bytes": 15900,
+      "id": "lib",
+      "integrity": "sha512-2yK7sLpKIT91TiS5sewHtOa7YuM8IuBXVl4GZv2jZFys4D2sY7K5vZh6MqD25TPA95Od+0YzCVq6cTF2IKrOmg==",
+      "name": "@uniswap/lib",
+      "sha256": "fd480df65e078d483b0a40cc7f35fcd5bb0c1ccbcb40e741f1660e9e81a88328",
+      "url": "https://registry.npmjs.org/@uniswap/lib/-/lib-1.1.1.tgz",
+      "version": "1.1.1"
+    }
+  ],
+  "provenance": {
+    "compiler_execution_or_constructor_release_acceptance_established_by_this_manifest": false,
+    "expected_compiled_target_records": 122,
+    "expected_export_records": 82,
+    "expected_export_runtime_records": 81,
+    "export_runtime_not_provided": [
+      "bench/WZNN.sol:WZNN"
+    ],
+    "historical_lock_is_material_input_not_current_native_execution": true,
+    "independently_locked_non_exported_interface_targets": [
+      "apps/ZVMFarmFeeStrategy.sol:IUniswapV2Factory",
+      "apps/ZVMFarmFeeStrategy.sol:IUniswapV2Pair",
+      "apps/ZVMFarmFeeStrategy.sol:IUniswapV2Router",
+      "apps/ZVMFarmFeeStrategy.sol:IZVMFarm"
+    ],
+    "legacy_lock_sha256": "a0f7833a15362f417e64b235852592e99815134076eb6b74ca0090d3e4c48202",
+    "legacy_lock_source": "1fce1d905ab24975461147c200891da8a988ec62",
+    "legacy_original_wire_and_canonical_transport_have_identical_JSON_values": true,
+    "legacy_original_wire_input_sha256": {
+      "core": "e88468c766ed71592c445aa10b08547a1199ad3dea6b582c328bea1f7fab92e6",
+      "periphery": "ee53169d4b780ef3267f924e3fdeb7bbac8be3565b01719b533affd6105d3fdf"
+    },
+    "metadata_or_immutable_byte_masks": [],
+    "modern_recipe_path": "contracts/test/compile.mjs",
+    "modern_recipe_source": "25884ff55b5d8792bdfbc20598ce9329b0a9fc02",
+    "original_application_lock_path": "contracts/application-build.lock.json",
+    "original_application_lock_sha256": "a23a9011153fe895fd83a1df5cb97472f2466112c04ce669a63c3e210b57d9e3",
+    "original_application_lock_source": "03fd8787cf87055c87bc7a039c8a92e30df18555",
+    "production_loader_order": [
+      "bench",
+      "wznn",
+      "core",
+      "periphery",
+      "apps"
+    ],
+    "unchanged_saved_export_records": 82
+  },
+  "schema": 1,
+  "source_parent": "4827b8dac5d9fd9b851fbb5f751d9f8b4d2298bc"
+}

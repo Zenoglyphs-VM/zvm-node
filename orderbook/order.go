@@ -40,6 +40,9 @@ const (
 	CodeNotHeld      = core.CodeNotHeld
 	CodeNotFunded    = core.CodeNotFunded
 	CodeMalformed    = core.CodeMalformed
+
+	// CodeUnchecked is a local cache state, never a checkOrder ABI code.
+	CodeUnchecked uint8 = 255
 )
 
 // The EIP-712 domain the exchange signs under.
@@ -61,7 +64,6 @@ type (
 )
 
 var (
-	CodeText     = core.CodeText
 	Domain       = core.Domain
 	OrderDigest  = core.OrderDigest
 	RootDigest   = core.RootDigest
@@ -75,3 +77,10 @@ var (
 	U            = core.U
 	B            = core.B
 )
+
+func CodeText(code uint8) string {
+	if code == CodeUnchecked {
+		return "awaiting a fresh chain check"
+	}
+	return core.CodeText(code)
+}

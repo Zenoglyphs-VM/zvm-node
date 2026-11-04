@@ -1,0 +1,20 @@
+[
+  {
+    "longVersion": "0.5.16+commit.9c3226ce",
+    "path": "solc-linux-amd64-v0.5.16+commit.9c3226ce",
+    "sha256": "a15f01700ec7e02f91bbdfd4b6ff4450b3c2decae173e4f41910a3cfbaf5d3d3",
+    "version": "0.5.16"
+  },
+  {
+    "longVersion": "0.6.6+commit.6c089d02",
+    "path": "solc-linux-amd64-v0.6.6+commit.6c089d02",
+    "sha256": "5d8cd4e0cc02e9946497db68c06d56326a78ff95a21c9265cfedb819a10a539d",
+    "version": "0.6.6"
+  },
+  {
+    "longVersion": "0.8.30+commit.73712a01",
+    "path": "solc-linux-amd64-v0.8.30+commit.73712a01",
+    "sha256": "f3e987dc6ecebd4bd350c48edcbc320b46cf9e3109bd3fc3d88f1acaf4c428f7",
+    "version": "0.8.30"
+  }
+]

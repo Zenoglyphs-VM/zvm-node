@@ -1,0 +1,21 @@
+{
+  "compressedLayerBytes": 55291662,
+  "configurationDigest": "sha256:6639ffd50f7ccba24a6556eba482d544db2897994bcaef68d295ba69a3a3ae84",
+  "independentBinaryBuildProvenanceEstablished": false,
+  "layers": [
+    {
+      "digest": "sha256:0b32c7ead885cfa05b29a5fe3cc03f4d7af73f3d61bd9b63259a5a971f62ff4a",
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "size": 55291662
+    }
+  ],
+  "officialRelease": "https://github.com/ethereum-optimism/optimism/releases/tag/op-reth/v2.6.1",
+  "platform": "linux/amd64",
+  "platformManifestDigest": "sha256:02be1f9c1eef42abadcf7b6440a311ee0d63fe6e7289e784e544d5cb5a4de473",
+  "repository": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-reth",
+  "schema": 1,
+  "sourceCommit": "e16bffa18420c86dbab693097bc33117f74a5f7d",
+  "uncompressedLayerDigests": [
+    "sha256:6e8849bbc450712cceddd760109e543ea92fed8c792938337efcf0ff48daab1d"
+  ]
+}

@@ -106,17 +106,19 @@ func (s *Market) nftSubmitOrders(ctx context.Context, r *http.Request) (any, err
 		return nil, err
 	}
 	var body struct {
-		Orders []*orderbook.Input `json:"orders"`
+		Orders []*orderbook.WireInput `json:"orders"`
 	}
 	if err := json.Unmarshal(raw, &body); err != nil {
 		return nil, fmt.Errorf("%w: %v", nodeapi.ErrBadRequest, err)
 	}
+	inputs := make([]*orderbook.Input, len(body.Orders))
 	for i, in := range body.Orders {
 		if in == nil {
 			return nil, fmt.Errorf("%w: order %d is empty", nodeapi.ErrBadRequest, i)
 		}
+		inputs[i] = in.Input()
 	}
-	results, err := s.cfg.Orders.Submit(ctx, body.Orders)
+	results, err := s.cfg.Orders.Submit(ctx, inputs)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", nodeapi.ErrBadRequest, err)
 	}
@@ -140,8 +142,9 @@ func (s *Market) nftOrder(_ context.Context, r *http.Request) (any, error) {
 		return nil, err
 	}
 	return map[string]any{
-		"hash": in.Order.Hash(), "input": in, "status": status, "code": code, "reason": orderbook.CodeText(code),
-		"fillable": status == orderbook.StatusOpen && code == orderbook.CodeOK,
+		"hash": in.Order.Hash(), "input": orderbook.ToWireInput(in), "status": status, "code": code, "reason": orderbook.CodeText(code),
+		"fillable":            status == orderbook.StatusOpen && code == orderbook.CodeOK,
+		"observationVerified": code != orderbook.CodeUnchecked,
 	}, nil
 }
 
@@ -179,9 +182,11 @@ func (s *Market) nftOrders(_ context.Context, r *http.Request) (any, error) {
 // orderRows is the book's rows with the names a page shows beside them.
 func (s *Market) orderRows(where string, args []any, order string, limit int) ([]any, error) {
 	q := `SELECT o.hash, o.exchange, o.trader, o.side, o.collection, o.token_id, o.amount, o.filled, o.payment_token,
-		o.price, o.price_num, o.listing_time, o.expiration_time, o.kind, o.status, o.code, o.block, o.timestamp, o.source,
+		o.price, o.price_num, o.listing_time, o.expiration_time, o.kind, o.status, ` + orderbook.EffectiveOrderCodeSQL + `, o.block, o.timestamp, o.source,
+		CASE WHEN m.key IS NOT NULL AND typeof(m.value)='integer' AND m.value>=0 AND o.filled_epoch=m.value THEN 1 ELSE 0 END,
 		COALESCE(t.name,''), COALESCE(t.image,''), COALESCE(c.name,'')
 		FROM nft_orders o
+		LEFT JOIN nft_order_meta m ON m.key='rewind_epoch'
 		LEFT JOIN nft_tokens t ON t.collection = o.collection AND t.token_id = o.token_id
 		LEFT JOIN nft_collections c ON c.address = o.collection
 		WHERE ` + where + ` ORDER BY ` + order + ` LIMIT ?`
@@ -191,19 +196,22 @@ func (s *Market) orderRows(where string, args []any, order string, limit int) ([
 func scanOrderRow(rows *sql.Rows) (any, error) {
 	var hash, exchange, trader, collection, payment, price, status, source, name, image, collectionName string
 	var tokenID sql.NullString
-	var side, amount, filled, opens, expires, kind, code, block, ts int64
+	var side, amount, filled, kind, code, block, ts int64
+	var filledVerified bool
+	var opens, expires orderbook.StoredTime
 	var priceNum float64
 	if err := rows.Scan(&hash, &exchange, &trader, &side, &collection, &tokenID, &amount, &filled, &payment,
 		&price, &priceNum, &opens, &expires, &kind, &status, &code, &block, &ts, &source,
-		&name, &image, &collectionName); err != nil {
+		&filledVerified, &name, &image, &collectionName); err != nil {
 		return nil, err
 	}
 	out := map[string]any{
 		"hash": hash, "exchange": exchange, "trader": trader, "side": map[int64]string{0: "sell", 1: "buy"}[side],
 		"collection": collection, "collectionName": collectionName, "tokenId": nodeapi.NullStr(tokenID),
 		"isCollection": !tokenID.Valid, "amount": amount, "filled": filled, "paymentToken": payment,
-		"price": price, "priceNum": priceNum, "listingTime": opens, "expiry": expires, "kind": kind,
+		"price": price, "priceNum": priceNum, "listingTime": orderbook.TimeJSON(uint64(opens)), "expiry": orderbook.TimeJSON(uint64(expires)), "kind": kind,
 		"status": status, "code": code, "block": block, "timestamp": ts, "source": source,
+		"observationVerified": code != int64(orderbook.CodeUnchecked), "filledVerified": filledVerified,
 		"name": name, "image": image,
 	}
 	if code != 0 {
@@ -430,7 +438,8 @@ func scanItem(rows *sql.Rows) (map[string]any, error) {
 	var mintedBlock int64
 	var best, price, currency, exchange, seller sql.NullString
 	var priceNum sql.NullFloat64
-	var expiry, kind sql.NullInt64
+	var expiry any
+	var kind sql.NullInt64
 	if err := rows.Scan(&tokenID, &owner, &uri, &name, &image, &meta, &mintedBlock, &best,
 		&price, &priceNum, &currency, &exchange, &expiry, &seller, &kind); err != nil {
 		return nil, err
@@ -440,9 +449,13 @@ func scanItem(rows *sql.Rows) (map[string]any, error) {
 		"meta": rawJSON(meta), "mintedBlock": mintedBlock,
 	}
 	if best.Valid {
+		exactExpiry, err := orderbook.TimeFromStorage(expiry)
+		if err != nil {
+			return nil, err
+		}
 		item["listing"] = map[string]any{
 			"hash": best.String, "exchange": exchange.String, "price": price.String, "priceNum": priceNum.Float64,
-			"currency": currency.String, "expiry": expiry.Int64, "seller": seller.String, "kind": kind.Int64,
+			"currency": currency.String, "expiry": orderbook.TimeJSON(exactExpiry), "seller": seller.String, "kind": kind.Int64,
 		}
 	}
 	return item, nil
@@ -513,7 +526,8 @@ func (s *Market) bidRows(where string, args []any, order string, limit int) ([]a
 	return nodeapi.QueryList(s.db, q, append(args, limit), func(rows *sql.Rows) (any, error) {
 		var hash, exchange, collection, bidder, payment, price, status string
 		var tokenID sql.NullString
-		var quantity, filled, expiry, block, ts int64
+		var quantity, filled, block, ts int64
+		var expiry orderbook.StoredTime
 		var priceNum float64
 		if err := rows.Scan(&hash, &exchange, &collection, &tokenID, &bidder, &payment, &price, &priceNum, &quantity, &filled,
 			&expiry, &status, &block, &ts); err != nil {
@@ -522,7 +536,7 @@ func (s *Market) bidRows(where string, args []any, order string, limit int) ([]a
 		return map[string]any{
 			"hash": hash, "exchange": exchange, "collection": collection, "tokenId": nodeapi.NullStr(tokenID), "bidder": bidder,
 			"paymentToken": payment, "price": price, "priceNum": priceNum, "quantity": quantity, "filled": filled,
-			"expiry": expiry, "status": status, "block": block, "timestamp": ts, "isCollection": !tokenID.Valid,
+			"expiry": orderbook.TimeJSON(uint64(expiry)), "status": status, "block": block, "timestamp": ts, "isCollection": !tokenID.Valid,
 		}, nil
 	})
 }

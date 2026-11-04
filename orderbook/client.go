@@ -15,7 +15,11 @@ import (
 // made: no transaction, one HTTP request. It fails if the node refuses any of
 // them, naming the first refusal.
 func Post(ctx context.Context, apiBase string, inputs []*Input) ([]Result, error) {
-	body, err := json.Marshal(map[string]any{"orders": inputs})
+	wire := make([]*WireInput, len(inputs))
+	for i, in := range inputs {
+		wire[i] = ToWireInput(in)
+	}
+	body, err := json.Marshal(map[string]any{"orders": wire})
 	if err != nil {
 		return nil, err
 	}

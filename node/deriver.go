@@ -454,7 +454,13 @@ func (d *Deriver) deriveOne(ctx context.Context, dm *znn.DetailedMomentum) error
 		if err != nil {
 			return fmt.Errorf("getPayload: %w", err)
 		}
-		payload := env.ExecutionPayload
+		if env == nil {
+			return errors.New("getPayload returned no envelope")
+		}
+		payload, err := payloadWithBoundEmptyWithdrawalsRoot(env.ExecutionPayload, beaconRoot, d.chainCfg)
+		if err != nil {
+			return fmt.Errorf("getPayload: %w", err)
+		}
 		// The engine has the last word (D12), and it may take it without
 		// saying anything: a client that skips a transaction it cannot apply
 		// returns a payload shorter than the plan. Whatever came back without
