@@ -1,0 +1,34 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Author: Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>
+ * Busybox port: Nick Fedchik <nick@fedchik.org.ua>
+ */
+//config:config ARPING
+//config:	bool "arping (9.1 kb)"
+//config:	default y
+//config:	help
+//config:	Ping hosts by ARP packets.
+
+//applet:IF_ARPING(APPLET(arping, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_ARPING) += arping.o
+
+//usage:#define arping_trivial_usage
+//usage:       "[-fqbDUA] [-c CNT] [-w TIMEOUT] [-I IFACE] [-s SRC_IP] DST_IP"
+//usage:#define arping_full_usage "\n\n"
+//usage:       "Send ARP requests/replies\n"
+//usage:     "\n	-f		Quit on first ARP reply"
+//usage:     "\n	-q		Quiet"
+//usage:     "\n	-b		Keep broadcasting, don't go unicast"
+//usage:     "\n	-D		Exit with 1 if DST_IP replies"
+//usage:     "\n	-U		Unsolicited ARP mode, update your neighbors"
+//usage:     "\n	-A		ARP answer mode, update your neighbors"
+//usage:     "\n	-c N		Stop after sending N ARP requests"
+//usage:     "\n	-w TIMEOUT	Seconds to wait for ARP reply"
+//NB: in iputils-s20160308, iface is mandatory, no default
+//usage:     "\n	-I IFACE	Interface to use (default eth0)"
+//usage:     "\n	-s SRC_IP	Sender IP address"
+//usage:     "\n	DST_IP		Target IP address"
+

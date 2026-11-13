@@ -1,0 +1,31 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini cmp implementation for busybox
+ *
+ * Copyright (C) 2000,2001 by Matt Kraai <kraai@alumni.carnegiemellon.edu>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config CMP
+//config:	bool "cmp (5.3 kb)"
+//config:	default y
+//config:	help
+//config:	cmp is used to compare two files and returns the result
+//config:	to standard output.
+
+//applet:IF_CMP(APPLET(cmp, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_CMP) += cmp.o
+
+//usage:#define cmp_trivial_usage
+//usage:       "[-ls] [-n NUM] FILE1 [FILE2" IF_DESKTOP(" [SKIP1 [SKIP2]]") "]"
+//usage:#define cmp_full_usage "\n\n"
+//usage:       "Compare FILE1 with FILE2 (or stdin)\n"
+//usage:     "\n	-l	Write the byte numbers (decimal) and values (octal)"
+//usage:     "\n		for all differing bytes"
+//usage:     "\n	-s	Quiet"
+//usage:     "\n	-n NUM	Compare at most NUM bytes"
+
+/* BB_AUDIT SUSv3 (virtually) compliant -- uses nicer GNU format for -l. */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/cmp.html */
+

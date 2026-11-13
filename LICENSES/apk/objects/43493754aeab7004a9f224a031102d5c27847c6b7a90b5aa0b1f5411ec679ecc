@@ -1,0 +1,18 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Report CPU and I/O stats, based on sysstat version 9.1.2 by Sebastien Godard
+ *
+ * Copyright (C) 2010 Marek Polacek <mmpolacek@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config IOSTAT
+//config:	bool "iostat (8 kb)"
+//config:	default y
+//config:	help
+//config:	Report CPU and I/O statistics
+
+//applet:IF_IOSTAT(APPLET(iostat, BB_DIR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_IOSTAT) += iostat.o
+

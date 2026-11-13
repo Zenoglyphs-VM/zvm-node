@@ -1,0 +1,34 @@
+#!/usr/bin/env perl
+# Copyright 2017-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# Keccak-1600 for s390x.
+#
+# June 2017.
+#
+# Below code is [lane complementing] KECCAK_2X implementation (see
+# sha/keccak1600.c) with C[5] and D[5] held in register bank. Though
+# instead of actually unrolling the loop pair-wise I simply flip
+# pointers to T[][] and A[][] at the end of round. Since number of
+# rounds is even, last round writes to A[][] and everything works out.
+# In the nutshell it's transliteration of x86_64 module, because both
+# architectures have similar capabilities/limitations. Performance
+# measurement is problematic as I don't have access to an idle system.
+# It looks like z13 processes one byte [out of long message] in ~14
+# cycles. At least the result is consistent with estimate based on
+# amount of instruction and assumed instruction issue rate. It's ~2.5x
+# faster than compiler-generated code.
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

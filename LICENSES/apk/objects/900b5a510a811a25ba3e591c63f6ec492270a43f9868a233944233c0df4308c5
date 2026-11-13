@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+# Copyright 2025 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+# A python program written to parse (version 1) of the WYCHEPROOF test vectors for
+# ML_DSA. The 6 files that can be processed by this utility can be downloaded
+# from
+#  https://github.com/C2SP/wycheproof/blob/8e7fa6f87e6993d7b613cf48b46512a32df8084a/testvectors_v1/mldsa_*_standard_*_test.json")
+# and output from this utility to
+# test/recipes/30-test_evp_data/evppkey_ml_dsa_44_wycheproof_sign.txt
+# test/recipes/30-test_evp_data/evppkey_ml_dsa_65_wycheproof_sign.txt
+# test/recipes/30-test_evp_data/evppkey_ml_dsa_87_wycheproof_sign.txt
+# test/recipes/30-test_evp_data/evppkey_ml_dsa_44_wycheproof_verify.txt
+# test/recipes/30-test_evp_data/evppkey_ml_dsa_65_wycheproof_verify.txt
+# test/recipes/30-test_evp_data/evppkey_ml_dsa_87_wycheproof_verify.txt
+#
+# e.g. python3 ./test/mldsa_wycheproof_parse.py -alg ML-DSA-44 ./wycheproof/testvectors_v1/mldsa_44_standard_sign_test.json > test/recipes/30-test_evp_data/evppkey_ml_dsa_44_wycheproof_sign.txt
+

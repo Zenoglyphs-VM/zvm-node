@@ -1,0 +1,55 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * wc implementation for busybox
+ *
+ * Copyright (C) 2003  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Mar 16, 2003      Manuel Novoa III   (mjn3@codepoet.org)
+ *
+ * Rewritten to fix a number of problems and do some size optimizations.
+ * Problems in the previous busybox implementation (besides bloat) included:
+ *  1) broken 'wc -c' optimization (read note below)
+ *  2) broken handling of '-' args
+ *  3) no checking of ferror on EOF returns
+ *  4) isprint() wasn't considered when word counting.
+ *
+ * NOTES:
+ *
+ * The previous busybox wc attempted an optimization using stat for the
+ * case of counting chars only.  I omitted that because it was broken.
+ * It didn't take into account the possibility of input coming from a
+ * pipe, or input from a file with file pointer not at the beginning.
+ *
+ * To implement such a speed optimization correctly, not only do you
+ * need the size, but also the file position.  Note also that the
+ * file position may be past the end of file.  Consider the example
+ * (adapted from example in gnu wc.c)
+ *
+ *      echo hello > /tmp/testfile &&
+ *      (dd ibs=1k skip=1 count=0 &> /dev/null; wc -c) < /tmp/testfile
+ *
+ * for which 'wc -c' should output '0'.
+ */
+//config:config WC
+//config:	bool "wc (4.7 kb)"
+//config:	default y
+//config:	help
+//config:	wc is used to print the number of bytes, words, and lines,
+//config:	in specified files.
+//config:
+//config:config FEATURE_WC_LARGE
+//config:	bool "Support very large counts"
+//config:	default y
+//config:	depends on WC
+//config:	help
+//config:	Use "unsigned long long" for counter variables.
+
+//applet:IF_WC(APPLET(wc, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_WC) += wc.o
+
+/* BB_AUDIT SUSv3 compliant. */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/wc.html */
+

@@ -1,0 +1,57 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * readprofile.c - used to read /proc/profile
+ *
+ * Copyright (C) 1994,1996 Alessandro Rubini (rubini@ipvvis.unipv.it)
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+
+/*
+ * 1999-02-22 Arkadiusz Mickiewicz <misiek@pld.ORG.PL>
+ * - added Native Language Support
+ * 1999-09-01 Stephane Eranian <eranian@cello.hpl.hp.com>
+ * - 64bit clean patch
+ * 3Feb2001 Andrew Morton <andrewm@uow.edu.au>
+ * - -M option to write profile multiplier.
+ * 2001-11-07 Werner Almesberger <wa@almesberger.net>
+ * - byte order auto-detection and -n option
+ * 2001-11-09 Werner Almesberger <wa@almesberger.net>
+ * - skip step size (index 0)
+ * 2002-03-09 John Levon <moz@compsoc.man.ac.uk>
+ * - make maplineno do something
+ * 2002-11-28 Mads Martin Joergensen +
+ * - also try /boot/System.map-`uname -r`
+ * 2003-04-09 Werner Almesberger <wa@almesberger.net>
+ * - fixed off-by eight error and improved heuristics in byte order detection
+ * 2003-08-12 Nikita Danilov <Nikita@Namesys.COM>
+ * - added -s option; example of use:
+ * "readprofile -s -m /boot/System.map-test | grep __d_lookup | sort -n -k3"
+ *
+ * Taken from util-linux and adapted for busybox by
+ * Paul Mundt <lethal@linux-sh.org>.
+ */
+//config:config READPROFILE
+//config:	bool "readprofile (7.5 kb)"
+//config:	default y
+//config:	help
+//config:	This allows you to parse /proc/profile for basic profiling.
+
+//applet:IF_READPROFILE(APPLET(readprofile, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_READPROFILE) += readprofile.o
+
+//usage:#define readprofile_trivial_usage
+//usage:       "[OPTIONS]"
+//usage:#define readprofile_full_usage "\n\n"
+//usage:       "	-m MAPFILE	(Default: /boot/System.map)"
+//usage:     "\n	-p PROFILE	(Default: /proc/profile)"
+//usage:     "\n	-M NUM		Set the profiling multiplier to NUM"
+//usage:     "\n	-i		Print only info about the sampling step"
+//usage:     "\n	-v		Verbose"
+//usage:     "\n	-a		Print all symbols, even if count is 0"
+//usage:     "\n	-b		Print individual histogram-bin counts"
+//usage:     "\n	-s		Print individual counters within functions"
+//usage:     "\n	-r		Reset all the counters (root only)"
+//usage:     "\n	-n		Disable byte order auto-detection"
+

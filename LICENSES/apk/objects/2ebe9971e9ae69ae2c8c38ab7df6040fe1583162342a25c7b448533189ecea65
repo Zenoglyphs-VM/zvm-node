@@ -1,0 +1,31 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright (C) 2014 Tito Ragusa <farmatito@tiscali.it>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY!!
+ *
+ * Rewrite of some parts. Main differences are:
+ *
+ * 1) the buffer for getpwuid, getgrgid, getpwnam, getgrnam is dynamically
+ *    allocated.
+ *    If ENABLE_FEATURE_CLEAN_UP is set the buffers are freed at program
+ *    exit using the atexit function to make valgrind happy.
+ * 2) the passwd/group files:
+ *      a) must contain the expected number of fields (as per count of field
+ *         delimiters ":") or we will complain with a error message.
+ *      b) leading and trailing whitespace in fields is stripped.
+ *      c) some fields are not allowed to be empty (e.g. username, uid/gid),
+ *         and in this case NULL is returned and errno is set to EINVAL.
+ *         This behaviour could be easily changed by modifying PW_DEF, GR_DEF,
+ *         SP_DEF strings (uppercase makes a field mandatory).
+ *      d) the string representing uid/gid must be convertible by strtoXX
+ *         functions, or errno is set to EINVAL.
+ *      e) leading and trailing whitespace in group member names is stripped.
+ * 3) the internal function for getgrouplist uses dynamically allocated buffer.
+ * 4) at the moment only the functions really used by busybox code are
+ *    implemented, if you need a particular missing function it should be
+ *    easy to write it by using the internal common code.
+ */

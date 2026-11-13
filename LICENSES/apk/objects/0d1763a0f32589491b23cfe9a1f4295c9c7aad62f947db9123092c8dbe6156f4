@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Tests for unzip.
+# Copyright 2006 Rob Landley <rob@landley.net>
+# Copyright 2006 Glenn McGrath
+# Licensed under GPLv2, see file LICENSE in this source tree.
+

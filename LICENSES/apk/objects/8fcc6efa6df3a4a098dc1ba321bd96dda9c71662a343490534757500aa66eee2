@@ -1,0 +1,45 @@
+#! /usr/bin/env perl
+# Copyright 2008-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Copyright (c) 2008 Andy Polyakov <appro@openssl.org>
+#
+# This module may be used under the terms of either the GNU General
+# Public License version 2 or later, the GNU Lesser General Public
+# License version 2.1 or later, the Mozilla Public License version
+# 1.1 or the BSD License. The exact terms of either license are
+# distributed along with this module. For further details see
+# http://www.openssl.org/~appro/camellia/.
+# ====================================================================
+
+# Performance in cycles per processed byte (less is better) in
+# 'openssl speed ...' benchmark:
+#
+#			AMD K8	Core2	PIII	P4
+# -evp camellia-128-ecb	21.5	22.8	27.0	28.9
+# + over gcc 3.4.6	+90/11% +70/10%	+53/4%	+160/64%
+# + over icc 8.0	+48/19% +21/15%	+21/17%	+55/37%
+#
+# camellia-128-cbc	17.3	21.1	23.9	25.9
+#
+# 128-bit key setup	196	280	256	240	cycles/key
+# + over gcc 3.4.6	+30/0%	+17/11%	+11/0%	+63/40%
+# + over icc 8.0	+18/3%	+10/0%	+10/3%	+21/10%
+#
+# Pairs of numbers in "+" rows represent performance improvement over
+# compiler generated position-independent code, PIC, and non-PIC
+# respectively. PIC results are of greater relevance, as this module
+# is position-independent, i.e. suitable for a shared library or PIE.
+# Position independence "costs" one register, which is why compilers
+# are so close with non-PIC results, they have an extra register to
+# spare. CBC results are better than ECB ones thanks to "zero-copy"
+# private _x86_* interface, and are ~30-40% better than with compiler
+# generated cmll_cbc.o, and reach ~80-90% of x86_64 performance on
+# same CPU (where applicable).
+

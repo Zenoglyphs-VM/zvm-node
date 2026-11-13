@@ -1,0 +1,24 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini lsof implementation for busybox
+ *
+ * Copyright (C) 2012 by Sven Oliver 'SvOlli' Moll <svolli@svolli.de>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config LSOF
+//config:	bool "lsof (3.7 kb)"
+//config:	default y
+//config:	help
+//config:	Show open files in the format of:
+//config:	PID <TAB> /path/to/executable <TAB> /path/to/opened/file
+
+//applet:IF_LSOF(APPLET(lsof, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_LSOF) += lsof.o
+
+//usage:#define lsof_trivial_usage
+//usage:       ""
+//usage:#define lsof_full_usage "\n\n"
+//usage:       "Show all open files"
+

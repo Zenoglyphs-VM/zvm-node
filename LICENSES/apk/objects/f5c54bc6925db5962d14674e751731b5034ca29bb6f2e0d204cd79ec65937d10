@@ -1,0 +1,19 @@
+/*
+ * Copyright 2019-2026 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * This file contains self test data required by FIPS 140-3 IG
+ * 10.3.A Cryptographic Algorithm Self test Requirements
+ *
+ * Note that in the 'General CAST requirements': Note33 Allows individual
+ * self tests for low level algorithms (such as digests) to be omitted, if
+ * they are tested as part of a higher level algorithm (such as HMAC).
+ */
+
+/* Macros to build Self test data */

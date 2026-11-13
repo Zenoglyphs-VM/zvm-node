@@ -1,0 +1,79 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * setpriv implementation for busybox based on linux-utils-ng 2.29
+ *
+ * Copyright (C) 2017 by  <assafgordon@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config SETPRIV
+//config:	bool "setpriv (6.9 kb)"
+//config:	default y
+//config:	select LONG_OPTS
+//config:	help
+//config:	Run a program with different Linux privilege settings.
+//config:	Requires kernel >= 3.5
+//config:
+//config:config FEATURE_SETPRIV_DUMP
+//config:	bool "Support dumping current privilege state"
+//config:	default y
+//config:	depends on SETPRIV
+//config:	help
+//config:	Enables the "--dump" switch to print out the current privilege
+//config:	state. This is helpful for diagnosing problems.
+//config:
+//config:config FEATURE_SETPRIV_CAPABILITIES
+//config:	bool "Support capabilities"
+//config:	default y
+//config:	depends on SETPRIV
+//config:	help
+//config:	Capabilities can be used to grant processes additional rights
+//config:	without the necessity to always execute as the root user.
+//config:	Enabling this option enables "--dump" to show information on
+//config:	capabilities.
+//config:
+//config:config FEATURE_SETPRIV_CAPABILITY_NAMES
+//config:	bool "Support capability names"
+//config:	default y
+//config:	depends on SETPRIV && FEATURE_SETPRIV_CAPABILITIES
+//config:	help
+//config:	Capabilities can be either referenced via a human-readble name,
+//config:	e.g. "net_admin", or using their index, e.g. "cap_12". Enabling
+//config:	this option allows using the human-readable names in addition to
+//config:	the index-based names.
+
+//applet:IF_SETPRIV(APPLET(setpriv, BB_DIR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_SETPRIV) += setpriv.o
+
+//usage:#define setpriv_trivial_usage
+//usage:	"[OPTIONS] PROG ARGS"
+//usage:#define setpriv_full_usage "\n\n"
+//usage:       "Run PROG with different privilege settings\n"
+//usage:	IF_FEATURE_SETPRIV_DUMP(
+//usage:     "\n-d,--dump		Show current capabilities"
+//usage:	)
+//usage:     "\n--nnp,--no-new-privs	Ignore setuid/setgid bits and file capabilities"
+//usage:	IF_FEATURE_SETPRIV_CAPABILITIES(
+//usage:     "\n--inh-caps CAP,CAP	Set inheritable capabilities"
+//usage:     "\n--ambient-caps CAP,CAP	Set ambient capabilities"
+//usage:	)
+
+//setpriv from util-linux 2.28:
+// -d, --dump               show current state (and do not exec anything)
+// --nnp, --no-new-privs    disallow granting new privileges
+// --inh-caps <caps,...>    set inheritable capabilities
+// --bounding-set <caps>    set capability bounding set
+// --ruid <uid>             set real uid
+// --euid <uid>             set effective uid
+// --rgid <gid>             set real gid
+// --egid <gid>             set effective gid
+// --reuid <uid>            set real and effective uid
+// --regid <gid>            set real and effective gid
+// --clear-groups           clear supplementary groups
+// --keep-groups            keep supplementary groups
+// --groups <group,...>     set supplementary groups
+// --securebits <bits>      set securebits
+// --selinux-label <label>  set SELinux label
+// --apparmor-profile <pr>  set AppArmor profile
+

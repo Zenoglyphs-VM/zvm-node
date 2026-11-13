@@ -1,0 +1,73 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * nameif.c - Naming Interfaces based on MAC address for busybox.
+ *
+ * Written 2000 by Andi Kleen.
+ * Busybox port 2002 by Nick Fedchik <nick@fedchik.org.ua>
+ *			Glenn McGrath
+ * Extended matching support 2008 by Nico Erfurth <masta@perlgolf.de>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config NAMEIF
+//config:	bool "nameif (6.9 kb)"
+//config:	default y
+//config:	select FEATURE_SYSLOG
+//config:	help
+//config:	nameif is used to rename network interface by its MAC address.
+//config:	Renamed interfaces MUST be in the down state.
+//config:	It is possible to use a file (default: /etc/mactab)
+//config:	with list of new interface names and MACs.
+//config:	Maximum interface name length: IFNAMSIZ = 16
+//config:	File fields are separated by space or tab.
+//config:	File format:
+//config:		# Comment
+//config:		new_interface_name  XX:XX:XX:XX:XX:XX
+//config:
+//config:config FEATURE_NAMEIF_EXTENDED
+//config:	bool "Extended nameif"
+//config:	default y
+//config:	depends on NAMEIF
+//config:	help
+//config:	This extends the nameif syntax to support the bus_info, driver,
+//config:	phyaddr selectors. The syntax is compatible to the normal nameif.
+//config:	File format:
+//config:		new_interface_name  driver=asix bus=usb-0000:00:08.2-3
+//config:		new_interface_name  bus=usb-0000:00:08.2-3 00:80:C8:38:91:B5
+//config:		new_interface_name  phy_address=2 00:80:C8:38:91:B5
+//config:		new_interface_name  mac=00:80:C8:38:91:B5
+//config:		new_interface_name  00:80:C8:38:91:B5
+
+//applet:IF_NAMEIF(APPLET_NOEXEC(nameif, nameif, BB_DIR_SBIN, BB_SUID_DROP, nameif))
+
+//kbuild:lib-$(CONFIG_NAMEIF) += nameif.o
+
+//usage:#define nameif_trivial_usage
+//usage:	IF_NOT_FEATURE_NAMEIF_EXTENDED(
+//usage:		"[-s] [-c FILE] [IFNAME HWADDR]..."
+//usage:	)
+//usage:	IF_FEATURE_NAMEIF_EXTENDED(
+//usage:		"[-s] [-c FILE] [IFNAME SELECTOR]..."
+//usage:	)
+//usage:#define nameif_full_usage "\n\n"
+//usage:	"Rename network interface while it in the down state."
+//usage:	IF_NOT_FEATURE_NAMEIF_EXTENDED(
+//usage:     "\nThe device with address HWADDR is renamed to IFNAME."
+//usage:	)
+//usage:	IF_FEATURE_NAMEIF_EXTENDED(
+//usage:     "\nThe device matched by SELECTOR is renamed to IFNAME."
+//usage:     "\nSELECTOR can be a combination of:"
+//usage:     "\n	driver=STRING"
+//usage:     "\n	bus=STRING"
+//usage:     "\n	phy_address=NUM"
+//usage:     "\n	[mac=]XX:XX:XX:XX:XX:XX"
+//usage:	)
+//usage:     "\n"
+//usage:     "\n	-c FILE	Configuration file (default: /etc/mactab)"
+//usage:     "\n	-s	Log to syslog"
+//usage:
+//usage:#define nameif_example_usage
+//usage:       "$ nameif -s dmz0 00:A0:C9:8C:F6:3F\n"
+//usage:       " or\n"
+//usage:       "$ nameif -c /etc/my_mactab_file\n"
+

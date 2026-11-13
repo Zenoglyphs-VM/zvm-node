@@ -1,0 +1,42 @@
+#! /usr/bin/env perl
+# Copyright 2013-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# Multi-buffer SHA1 procedure processes n buffers in parallel by
+# placing buffer data to designated lane of SIMD register. n is
+# naturally limited to 4 on pre-AVX2 processors and to 8 on
+# AVX2-capable processors such as Haswell.
+#
+#		this	+aesni(i)	sha1	aesni-sha1	gain(iv)
+# -------------------------------------------------------------------
+# Westmere(ii)	10.7/n	+1.28=3.96(n=4)	5.30	6.66		+68%
+# Atom(ii)	18.1/n	+3.93=8.46(n=4)	9.37	12.8		+51%
+# Sandy Bridge	(8.16	+5.15=13.3)/n	4.99	5.98		+80%
+# Ivy Bridge	(8.08	+5.14=13.2)/n	4.60	5.54		+68%
+# Haswell(iii)	(8.96	+5.00=14.0)/n	3.57	4.55		+160%
+# Skylake	(8.70	+5.00=13.7)/n	3.64	4.20		+145%
+# Bulldozer	(9.76	+5.76=15.5)/n	5.95	6.37		+64%
+#
+# (i)	multi-block CBC encrypt with 128-bit key;
+# (ii)	(HASH+AES)/n does not apply to Westmere for n>3 and Atom,
+#	because of lower AES-NI instruction throughput;
+# (iii)	"this" is for n=8, when we gather twice as much data, result
+#	for n=4 is 8.00+4.44=12.4;
+# (iv)	presented improvement coefficients are asymptotic limits and
+#	in real-life application are somewhat lower, e.g. for 2KB
+#	fragments they range from 30% to 100% (on Haswell);
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

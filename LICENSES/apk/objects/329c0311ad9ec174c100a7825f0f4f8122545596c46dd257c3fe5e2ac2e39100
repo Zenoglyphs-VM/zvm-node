@@ -1,0 +1,8 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * bb_simplify_path implementation for busybox
+ *
+ * Copyright (C) 2001  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */

@@ -1,0 +1,202 @@
+{
+  "notices": [
+    {
+      "bytes": 18011,
+      "path": "pax-utils-1.3.8/COPYING",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "e6d6a009505e345fe949e1310334fcb0747f28dae2856759de102ab66b722cb4",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 241,
+      "path": "pax-utils-1.3.8/dumpelf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "573582514c11515c56cd2f414f3a97bf4b882f29510dc324ada468f7544b4616",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 855,
+      "path": "pax-utils-1.3.8/elf.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e0abb1af884ff7074ee7f1c076a3bd3ff8224406614564f6194ab93f99d69bcf",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 201,
+      "path": "pax-utils-1.3.8/fuzz-ar.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "54bdfe38bee48903f4168e6bc828cb9fa34a73c540f35b8090ee5ebf0fff45ea",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 258,
+      "path": "pax-utils-1.3.8/lddtree.py",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "66f0ba98fac9eacfbb5eda6a99c6521e44aab16db8df400a99023fc548cac2f8",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 177,
+      "path": "pax-utils-1.3.8/lddtree.sh",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b9f36bf78ecb8fac03727d2681f32678e7ef96199f074b386e7b2da8666a214b",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 117,
+      "path": "pax-utils-1.3.8/macho.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f9b645181ecfd051523f7723ee5d1249af7f20eb9bb48d219306cb23a809f13b",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 241,
+      "path": "pax-utils-1.3.8/paxelf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "47794ab2bc0ad8a3cd7c6b45e1b60ddc5bb89c32caa7bae250469c64c5d5c296",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 307,
+      "path": "pax-utils-1.3.8/paxelf.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "14da5d078088d5b1af557486baa7d3e11053c95d748344857b05cc2f4238d18b",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 302,
+      "path": "pax-utils-1.3.8/paxinc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f4405113e68a0a1ed8b96bee312c1534123206d4595520cf30058b5bbbbc6205",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 303,
+      "path": "pax-utils-1.3.8/paxinc.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c9c42c3cdf636298bfa0ee899d2bacdddcebe27e9fcce0108a8e5c7291664342",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 241,
+      "path": "pax-utils-1.3.8/paxldso.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6f043eb7fb9d2bed454c840b3e587e0310ff997592271aef147f1370cbd9eafb",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 241,
+      "path": "pax-utils-1.3.8/paxldso.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6f043eb7fb9d2bed454c840b3e587e0310ff997592271aef147f1370cbd9eafb",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 303,
+      "path": "pax-utils-1.3.8/paxmacho.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "64dd47f9d7323ba79e9a9e4ccf93a2e4458c41c9e4dfe65b2b35f69fc4721e7b",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 372,
+      "path": "pax-utils-1.3.8/paxmacho.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "590544a7d45f412639c94cf6836993312a0da545287d01b049257724b9015d1c",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 307,
+      "path": "pax-utils-1.3.8/porting.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "14da5d078088d5b1af557486baa7d3e11053c95d748344857b05cc2f4238d18b",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 601,
+      "path": "pax-utils-1.3.8/pspax.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2a515c4ef9b70d4775deee8a8cdeebb461fc550724d44ede94775c4c68977853",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 130,
+      "path": "pax-utils-1.3.8/pylint",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9e257ea7f4e1168222b95a7db6f5df67293d6453d4e805fdc994227b5f553538",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 350,
+      "path": "pax-utils-1.3.8/pyproject.toml",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d68dd8201e512e9b18f09defb69daa6a272143b0cab1fc3a44f02826ac550641",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 306,
+      "path": "pax-utils-1.3.8/requirements-dev.txt",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "425cafc3f1ff7889dbc9e56bd38555d205fb5c59fbc91b935aa0212c19b16eb4",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 317,
+      "path": "pax-utils-1.3.8/requirements.txt",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b33d7ca8cc56c52999ecb1a965045760ede7a090594a17bf2fa662626d4641cc",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 241,
+      "path": "pax-utils-1.3.8/scanelf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6f043eb7fb9d2bed454c840b3e587e0310ff997592271aef147f1370cbd9eafb",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 355,
+      "path": "pax-utils-1.3.8/scanmacho.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2190afefe0ea33f28c13b6a82ebe1ff9f24e474a193b88f4733f63f84b5d1be7",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 245,
+      "path": "pax-utils-1.3.8/seccomp-bpf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b6a6b85265233af23c849dba8d5ec3589b2c1fafec0c33851fc54fc36b3c9cf1",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 181,
+      "path": "pax-utils-1.3.8/security.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f407036f31c07d91ee42db509ea9419a73577c5498e4225a92eed3f4c48a068f",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 219,
+      "path": "pax-utils-1.3.8/security.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4d0b6c021cb60e51adca994fc1fe03898293bcdc5ece88e8b7c65250369cf403",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 241,
+      "path": "pax-utils-1.3.8/xfuncs.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6f043eb7fb9d2bed454c840b3e587e0310ff997592271aef147f1370cbd9eafb",
+      "source": "pax-utils-1.3.8.tar.xz"
+    },
+    {
+      "bytes": 241,
+      "path": "pax-utils-1.3.8/xfuncs.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6f043eb7fb9d2bed454c840b3e587e0310ff997592271aef147f1370cbd9eafb",
+      "source": "pax-utils-1.3.8.tar.xz"
+    }
+  ],
+  "origin": "pax-utils",
+  "schema": 1
+}

@@ -1,0 +1,47 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini hostname implementation for busybox
+ *
+ * Copyright (C) 1999 by Randolph Chung <tausq@debian.org>
+ *
+ * Adjusted by Erik Andersen <andersen@codepoet.org> to remove
+ * use of long options and GNU getopt.  Improved the usage info.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config HOSTNAME
+//config:	bool "hostname (5.8 kb)"
+//config:	default y
+//config:	help
+//config:	Show or set the system's host name.
+//config:
+//config:config DNSDOMAINNAME
+//config:	bool "dnsdomainname (3.8 kb)"
+//config:	default y
+//config:	help
+//config:	Alias to "hostname -d".
+
+//                        APPLET_NOEXEC:name           main      location    suid_type     help
+//applet:IF_DNSDOMAINNAME(APPLET_NOEXEC(dnsdomainname, hostname, BB_DIR_BIN, BB_SUID_DROP, dnsdomainname))
+//applet:IF_HOSTNAME(     APPLET_NOEXEC(hostname,      hostname, BB_DIR_BIN, BB_SUID_DROP, hostname     ))
+
+//kbuild: lib-$(CONFIG_HOSTNAME) += hostname.o
+//kbuild: lib-$(CONFIG_DNSDOMAINNAME) += hostname.o
+
+//usage:#define hostname_trivial_usage
+//usage:       "[-sidf] [HOSTNAME | -F FILE]"
+//usage:#define hostname_full_usage "\n\n"
+//usage:       "Show or set hostname or DNS domain name\n"
+//usage:     "\n	-s	Short"
+//usage:     "\n	-i	Addresses for the hostname"
+//usage:     "\n	-d	DNS domain name"
+//usage:     "\n	-f	Fully qualified domain name"
+//usage:     "\n	-F FILE	Use FILE's content as hostname"
+//usage:
+//usage:#define hostname_example_usage
+//usage:       "$ hostname\n"
+//usage:       "sage\n"
+//usage:
+//usage:#define dnsdomainname_trivial_usage NOUSAGE_STR
+//usage:#define dnsdomainname_full_usage ""
+

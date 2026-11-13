@@ -1,0 +1,99 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini df implementation for busybox
+ *
+ * Copyright (C) 1999-2004 by Erik Andersen <andersen@codepoet.org>
+ * based on original code by (I think) Bruce Perens <bruce@pixar.com>.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Mar 16, 2003      Manuel Novoa III   (mjn3@codepoet.org)
+ *
+ * Size reduction.  Removed floating point dependency.  Added error checking
+ * on output.  Output stats on 0-sized filesystems if specifically listed on
+ * the command line.  Properly round *-blocks, Used, and Available quantities.
+ *
+ * Aug 28, 2008      Bernhard Reutner-Fischer
+ *
+ * Implement -P and -B; better coreutils compat; cleanup
+ */
+//config:config DF
+//config:	bool "df (7.1 kb)"
+//config:	default y
+//config:	help
+//config:	df reports the amount of disk space used and available
+//config:	on filesystems.
+//config:
+//config:config FEATURE_DF_FANCY
+//config:	bool "Enable -a, -i, -B"
+//config:	default y
+//config:	depends on DF
+//config:	help
+//config:	-a Show all filesystems
+//config:	-i Inodes
+//config:	-B <SIZE> Blocksize
+//config:
+//config:config FEATURE_SKIP_ROOTFS
+//config:	bool "Skip rootfs in mount table"
+//config:	default y
+//config:	depends on DF
+//config:	help
+//config:	Ignore rootfs entry in mount table.
+//config:
+//config:	In Linux, kernel has a special filesystem, rootfs, which is initially
+//config:	mounted on /. It contains initramfs data, if kernel is configured
+//config:	to have one. Usually, another file system is mounted over / early
+//config:	in boot process, and therefore most tools which manipulate
+//config:	mount table, such as df, will skip rootfs entry.
+//config:
+//config:	However, some systems do not mount anything on /.
+//config:	If you need to configure busybox for one of these systems,
+//config:	you may find it useful to turn this option off to make df show
+//config:	initramfs statistics.
+//config:
+//config:	Otherwise, choose Y.
+
+//applet:IF_DF(APPLET_NOEXEC(df, df, BB_DIR_BIN, BB_SUID_DROP, df))
+
+//kbuild:lib-$(CONFIG_DF) += df.o
+
+/* BB_AUDIT SUSv3 _NOT_ compliant -- option -t missing. */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/df.html */
+
+//usage:#define df_trivial_usage
+//usage:	"[-Pk"
+//usage:	IF_FEATURE_HUMAN_READABLE("mh")
+//usage:	"T"
+//usage:	IF_FEATURE_DF_FANCY("ai] [-B SIZE")
+//usage:	"] [-t TYPE] [FILESYSTEM]..."
+//usage:#define df_full_usage "\n\n"
+//usage:       "Print filesystem usage statistics\n"
+//usage:     "\n	-P	POSIX output format"
+//usage:     "\n	-k	1024-byte blocks (default)"
+//usage:	IF_FEATURE_HUMAN_READABLE(
+//usage:     "\n	-m	1M-byte blocks"
+//usage:     "\n	-h	Human readable (e.g. 1K 243M 2G)"
+//usage:	)
+//usage:     "\n	-T	Print filesystem type"
+//usage:     "\n	-t TYPE	Print only mounts of this type"
+//usage:	IF_FEATURE_DF_FANCY(
+//usage:     "\n	-a	Show all filesystems"
+//usage:     "\n	-i	Inodes"
+//usage:     "\n	-B SIZE	Blocksize"
+//usage:	)
+//usage:
+//usage:#define df_example_usage
+//usage:       "$ df\n"
+//usage:       "Filesystem           1K-blocks      Used Available Use% Mounted on\n"
+//usage:       "/dev/sda3              8690864   8553540    137324  98% /\n"
+//usage:       "/dev/sda1                64216     36364     27852  57% /boot\n"
+//usage:       "$ df /dev/sda3\n"
+//usage:       "Filesystem           1K-blocks      Used Available Use% Mounted on\n"
+//usage:       "/dev/sda3              8690864   8553540    137324  98% /\n"
+//usage:       "$ POSIXLY_CORRECT=sure df /dev/sda3\n"
+//usage:       "Filesystem         512B-blocks      Used Available Use% Mounted on\n"
+//usage:       "/dev/sda3             17381728  17107080    274648  98% /\n"
+//usage:       "$ POSIXLY_CORRECT=yep df -P /dev/sda3\n"
+//usage:       "Filesystem          512-blocks      Used Available Capacity Mounted on\n"
+//usage:       "/dev/sda3             17381728  17107080    274648      98% /\n"
+

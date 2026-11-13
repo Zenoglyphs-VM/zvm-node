@@ -1,0 +1,65 @@
+#!/usr/bin/env perl
+# Copyright 2018-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# X25519 lower-level primitives for x86_64.
+#
+# February 2018.
+#
+# This module implements radix 2^51 multiplication and squaring, and
+# radix 2^64 multiplication, squaring, addition, subtraction and final
+# reduction. Latter radix is used on ADCX/ADOX-capable processors such
+# as Broadwell. On related note one should mention that there are
+# vector implementations that provide significantly better performance
+# on some processors(*), but they are large and overly complex. Which
+# in combination with them being effectively processor-specific makes
+# the undertaking hard to justify. The goal for this implementation
+# is rather versatility and simplicity [and ultimately formal
+# verification].
+#
+# (*)	For example sandy2x should provide ~30% improvement on Sandy
+#	Bridge, but only nominal ~5% on Haswell [and big loss on
+#	Broadwell and successors].
+#
+######################################################################
+# Improvement coefficients:
+#
+#			amd64-51(*)	gcc-5.x(**)
+#
+# P4			+22%		+40%
+# Sandy Bridge		-3%		+11%
+# Haswell		-1%		+13%
+# Broadwell(***)	+30%		+35%
+# Skylake(***)		+33%		+47%
+# Silvermont		+20%		+26%
+# Goldmont		+40%		+50%
+# Bulldozer		+20%		+9%
+# Ryzen(***)		+43%		+40%
+# VIA			+170%		+120%
+#
+# (*)	amd64-51 is popular assembly implementation with 2^51 radix,
+#	only multiplication and squaring subroutines were linked
+#	for comparison, but not complete ladder step; gain on most
+#	processors is because this module refrains from shld, and
+#	minor regression on others is because this does result in
+#	higher instruction count;
+# (**)	compiler is free to inline functions, in assembly one would
+#	need to implement ladder step to do that, and it will improve
+#	performance by several percent;
+# (***)	ADCX/ADOX result for 2^64 radix, there is no corresponding
+#	C implementation, so that comparison is always against
+#	2^51 radix;
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

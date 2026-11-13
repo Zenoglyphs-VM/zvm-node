@@ -1,0 +1,225 @@
+/*
+ * gzlog.c
+ * Copyright (C) 2004, 2008, 2012, 2016, 2019 Mark Adler, all rights reserved
+ * For conditions of distribution and use, see copyright notice in gzlog.h
+ * version 2.3, 25 May 2019
+ */
+
+/*
+   gzlog provides a mechanism for frequently appending short strings to a gzip
+   file that is efficient both in execution time and compression ratio.  The
+   strategy is to write the short strings in an uncompressed form to the end of
+   the gzip file, only compressing when the amount of uncompressed data has
+   reached a given threshold.
+
+   gzlog also provides protection against interruptions in the process due to
+   system crashes.  The status of the operation is recorded in an extra field
+   in the gzip file, and is only updated once the gzip file is brought to a
+   valid state.  The last data to be appended or compressed is saved in an
+   auxiliary file, so that if the operation is interrupted, it can be completed
+   the next time an append operation is attempted.
+
+   gzlog maintains another auxiliary file with the last 32K of data from the
+   compressed portion, which is preloaded for the compression of the subsequent
+   data.  This minimizes the impact to the compression ratio of appending.
+ */
+
+/*
+   Operations Concept:
+
+   Files (log name "foo"):
+   foo.gz -- gzip file with the complete log
+   foo.add -- last message to append or last data to compress
+   foo.dict -- dictionary of the last 32K of data for next compression
+   foo.temp -- temporary dictionary file for compression after this one
+   foo.lock -- lock file for reading and writing the other files
+   foo.repairs -- log file for log file recovery operations (not compressed)
+
+   gzip file structure:
+   - fixed-length (no file name) header with extra field (see below)
+   - compressed data ending initially with empty stored block
+   - uncompressed data filling out originally empty stored block and
+     subsequent stored blocks as needed (16K max each)
+   - gzip trailer
+   - no junk at end (no other gzip streams)
+
+   When appending data, the information in the first three items above plus the
+   foo.add file are sufficient to recover an interrupted append operation.  The
+   extra field has the necessary information to restore the start of the last
+   stored block and determine where to append the data in the foo.add file, as
+   well as the crc and length of the gzip data before the append operation.
+
+   The foo.add file is created before the gzip file is marked for append, and
+   deleted after the gzip file is marked as complete.  So if the append
+   operation is interrupted, the data to add will still be there.  If due to
+   some external force, the foo.add file gets deleted between when the append
+   operation was interrupted and when recovery is attempted, the gzip file will
+   still be restored, but without the appended data.
+
+   When compressing data, the information in the first two items above plus the
+   foo.add file are sufficient to recover an interrupted compress operation.
+   The extra field has the necessary information to find the end of the
+   compressed data, and contains both the crc and length of just the compressed
+   data and of the complete set of data including the contents of the foo.add
+   file.
+
+   Again, the foo.add file is maintained during the compress operation in case
+   of an interruption.  If in the unlikely event the foo.add file with the data
+   to be compressed is missing due to some external force, a gzip file with
+   just the previous compressed data will be reconstructed.  In this case, all
+   of the data that was to be compressed is lost (approximately one megabyte).
+   This will not occur if all that happened was an interruption of the compress
+   operation.
+
+   The third state that is marked is the replacement of the old dictionary with
+   the new dictionary after a compress operation.  Once compression is
+   complete, the gzip file is marked as being in the replace state.  This
+   completes the gzip file, so an interrupt after being so marked does not
+   result in recompression.  Then the dictionary file is replaced, and the gzip
+   file is marked as completed.  This state prevents the possibility of
+   restarting compression with the wrong dictionary file.
+
+   All three operations are wrapped by a lock/unlock procedure.  In order to
+   gain exclusive access to the log files, first a foo.lock file must be
+   exclusively created.  When all operations are complete, the lock is
+   released by deleting the foo.lock file.  If when attempting to create the
+   lock file, it already exists and the modify time of the lock file is more
+   than five minutes old (set by the PATIENCE define below), then the old
+   lock file is considered stale and deleted, and the exclusive creation of
+   the lock file is retried.  To assure that there are no false assessments
+   of the staleness of the lock file, the operations periodically touch the
+   lock file to update the modified date.
+
+   Following is the definition of the extra field with all of the information
+   required to enable the above append and compress operations and their
+   recovery if interrupted.  Multi-byte values are stored little endian
+   (consistent with the gzip format).  File pointers are eight bytes long.
+   The crc's and lengths for the gzip trailer are four bytes long.  (Note that
+   the length at the end of a gzip file is used for error checking only, and
+   for large files is actually the length modulo 2^32.)  The stored block
+   length is two bytes long.  The gzip extra field two-byte identification is
+   "ap" for append.  It is assumed that writing the extra field to the file is
+   an "atomic" operation.  That is, either all of the extra field is written
+   to the file, or none of it is, if the operation is interrupted right at the
+   point of updating the extra field.  This is a reasonable assumption, since
+   the extra field is within the first 52 bytes of the file, which is smaller
+   than any expected block size for a mass storage device (usually 512 bytes or
+   larger).
+
+   Extra field (35 bytes):
+   - Pointer to first stored block length -- this points to the two-byte length
+     of the first stored block, which is followed by the two-byte, one's
+     complement of that length.  The stored block length is preceded by the
+     three-bit header of the stored block, which is the actual start of the
+     stored block in the deflate format.  See the bit offset field below.
+   - Pointer to the last stored block length.  This is the same as above, but
+     for the last stored block of the uncompressed data in the gzip file.
+     Initially this is the same as the first stored block length pointer.
+     When the stored block gets to 16K (see the MAX_STORE define), then a new
+     stored block as added, at which point the last stored block length pointer
+     is different from the first stored block length pointer.  When they are
+     different, the first bit of the last stored block header is eight bits, or
+     one byte back from the block length.
+   - Compressed data crc and length.  This is the crc and length of the data
+     that is in the compressed portion of the deflate stream.  These are used
+     only in the event that the foo.add file containing the data to compress is
+     lost after a compress operation is interrupted.
+   - Total data crc and length.  This is the crc and length of all of the data
+     stored in the gzip file, compressed and uncompressed.  It is used to
+     reconstruct the gzip trailer when compressing, as well as when recovering
+     interrupted operations.
+   - Final stored block length.  This is used to quickly find where to append,
+     and allows the restoration of the original final stored block state when
+     an append operation is interrupted.
+   - First stored block start as the number of bits back from the final stored
+     block first length byte.  This value is in the range of 3..10, and is
+     stored as the low three bits of the final byte of the extra field after
+     subtracting three (0..7).  This allows the last-block bit of the stored
+     block header to be updated when a new stored block is added, for the case
+     when the first stored block and the last stored block are the same.  (When
+     they are different, the numbers of bits back is known to be eight.)  This
+     also allows for new compressed data to be appended to the old compressed
+     data in the compress operation, overwriting the previous first stored
+     block, or for the compressed data to be terminated and a valid gzip file
+     reconstructed on the off chance that a compression operation was
+     interrupted and the data to compress in the foo.add file was deleted.
+   - The operation in process.  This is the next two bits in the last byte (the
+     bits under the mask 0x18).  The are interpreted as 0: nothing in process,
+     1: append in process, 2: compress in process, 3: replace in process.
+   - The top three bits of the last byte in the extra field are reserved and
+     are currently set to zero.
+
+   Main procedure:
+   - Exclusively create the foo.lock file using the O_CREAT and O_EXCL modes of
+     the system open() call.  If the modify time of an existing lock file is
+     more than PATIENCE seconds old, then the lock file is deleted and the
+     exclusive create is retried.
+   - Load the extra field from the foo.gz file, and see if an operation was in
+     progress but not completed.  If so, apply the recovery procedure below.
+   - Perform the append procedure with the provided data.
+   - If the uncompressed data in the foo.gz file is 1MB or more, apply the
+     compress procedure.
+   - Delete the foo.lock file.
+
+   Append procedure:
+   - Put what to append in the foo.add file so that the operation can be
+     restarted if this procedure is interrupted.
+   - Mark the foo.gz extra field with the append operation in progress.
+   + Restore the original last-block bit and stored block length of the last
+     stored block from the information in the extra field, in case a previous
+     append operation was interrupted.
+   - Append the provided data to the last stored block, creating new stored
+     blocks as needed and updating the stored blocks last-block bits and
+     lengths.
+   - Update the crc and length with the new data, and write the gzip trailer.
+   - Write over the extra field (with a single write operation) with the new
+     pointers, lengths, and crc's, and mark the gzip file as not in process.
+     Though there is still a foo.add file, it will be ignored since nothing
+     is in process.  If a foo.add file is leftover from a previously
+     completed operation, it is truncated when writing new data to it.
+   - Delete the foo.add file.
+
+   Compress and replace procedures:
+   - Read all of the uncompressed data in the stored blocks in foo.gz and write
+     it to foo.add.  Also write foo.temp with the last 32K of that data to
+     provide a dictionary for the next invocation of this procedure.
+   - Rewrite the extra field marking foo.gz with a compression in process.
+   * If there is no data provided to compress (due to a missing foo.add file
+     when recovering), reconstruct and truncate the foo.gz file to contain
+     only the previous compressed data and proceed to the step after the next
+     one.  Otherwise ...
+   - Compress the data with the dictionary in foo.dict, and write to the
+     foo.gz file starting at the bit immediately following the last previously
+     compressed block.  If there is no foo.dict, proceed anyway with the
+     compression at slightly reduced efficiency.  (For the foo.dict file to be
+     missing requires some external failure beyond simply the interruption of
+     a compress operation.)  During this process, the foo.lock file is
+     periodically touched to assure that that file is not considered stale by
+     another process before we're done.  The deflation is terminated with a
+     non-last empty static block (10 bits long), that is then located and
+     written over by a last-bit-set empty stored block.
+   - Append the crc and length of the data in the gzip file (previously
+     calculated during the append operations).
+   - Write over the extra field with the updated stored block offsets, bits
+     back, crc's, and lengths, and mark foo.gz as in process for a replacement
+     of the dictionary.
+   @ Delete the foo.add file.
+   - Replace foo.dict with foo.temp.
+   - Write over the extra field, marking foo.gz as complete.
+
+   Recovery procedure:
+   - If not a replace recovery, read in the foo.add file, and provide that data
+     to the appropriate recovery below.  If there is no foo.add file, provide
+     a zero data length to the recovery.  In that case, the append recovery
+     restores the foo.gz to the previous compressed + uncompressed data state.
+     For the compress recovery, a missing foo.add file results in foo.gz being
+     restored to the previous compressed-only data state.
+   - Append recovery:
+     - Pick up append at + step above
+   - Compress recovery:
+     - Pick up compress at * step above
+   - Replace recovery:
+     - Pick up compress at @ step above
+   - Log the repair with a date stamp in foo.repairs
+ */
+

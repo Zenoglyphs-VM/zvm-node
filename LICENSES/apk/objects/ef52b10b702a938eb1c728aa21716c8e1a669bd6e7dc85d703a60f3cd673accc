@@ -1,0 +1,56 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * ftpget
+ *
+ * Mini implementation of FTP to retrieve a remote file.
+ *
+ * Copyright (C) 2002 Jeff Angielski, The PTR Group <jeff@theptrgroup.com>
+ * Copyright (C) 2002 Glenn McGrath
+ *
+ * Based on wget.c by Chip Rosenthal Covad Communications
+ * <chip@laserlink.net>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config FTPGET
+//config:	bool "ftpget (7.9 kb)"
+//config:	default y
+//config:	help
+//config:	Retrieve a remote file via FTP.
+//config:
+//config:config FTPPUT
+//config:	bool "ftpput (7.6 kb)"
+//config:	default y
+//config:	help
+//config:	Store a remote file via FTP.
+//config:
+//config:config FEATURE_FTPGETPUT_LONG_OPTIONS
+//config:	bool "Enable long options in ftpget/ftpput"
+//config:	default y
+//config:	depends on LONG_OPTS && (FTPGET || FTPPUT)
+
+//applet:IF_FTPGET(APPLET_ODDNAME(ftpget, ftpgetput, BB_DIR_USR_BIN, BB_SUID_DROP, ftpget))
+//applet:IF_FTPPUT(APPLET_ODDNAME(ftpput, ftpgetput, BB_DIR_USR_BIN, BB_SUID_DROP, ftpput))
+
+//kbuild:lib-$(CONFIG_FTPGET) += ftpgetput.o
+//kbuild:lib-$(CONFIG_FTPPUT) += ftpgetput.o
+
+//usage:#define ftpget_trivial_usage
+//usage:       "[OPTIONS] HOST [LOCAL_FILE] REMOTE_FILE"
+//usage:#define ftpget_full_usage "\n\n"
+//usage:       "Download a file via FTP\n"
+//usage:     "\n	-c	Continue previous transfer"
+//usage:     "\n	-v	Verbose"
+//usage:     "\n	-u USER	Username"
+//usage:     "\n	-p PASS	Password"
+//usage:     "\n	-P PORT"
+//usage:
+//usage:#define ftpput_trivial_usage
+//usage:       "[OPTIONS] HOST [REMOTE_FILE] LOCAL_FILE"
+//usage:#define ftpput_full_usage "\n\n"
+//usage:       "Upload a file to a FTP server\n"
+//usage:     "\n	-v	Verbose"
+//usage:     "\n	-u USER	Username"
+//usage:     "\n	-p PASS	Password"
+//usage:     "\n	-P PORT"
+

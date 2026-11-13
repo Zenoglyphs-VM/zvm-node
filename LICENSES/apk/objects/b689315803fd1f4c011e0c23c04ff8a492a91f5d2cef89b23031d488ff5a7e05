@@ -1,0 +1,107 @@
+/*
+ * NTP client/server, based on OpenNTPD 3.9p1
+ *
+ * Busybox port author: Adam Tkac (C) 2009 <vonsch@gmail.com>
+ *
+ * OpenNTPd 3.9p1 copyright holders:
+ *   Copyright (c) 2003, 2004 Henning Brauer <henning@openbsd.org>
+ *   Copyright (c) 2004 Alexander Guy <alexander.guy@andern.org>
+ *
+ * OpenNTPd code is licensed under ISC-style licence:
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF MIND, USE, DATA OR PROFITS, WHETHER
+ * IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
+ * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ ***********************************************************************
+ *
+ * Parts of OpenNTPD clock syncronization code is replaced by
+ * code which is based on ntp-4.2.6, which carries the following
+ * copyright notice:
+ *
+ * Copyright (c) University of Delaware 1992-2009
+ *
+ * Permission to use, copy, modify, and distribute this software and
+ * its documentation for any purpose with or without fee is hereby
+ * granted, provided that the above copyright notice appears in all
+ * copies and that both the copyright notice and this permission
+ * notice appear in supporting documentation, and that the name
+ * University of Delaware not be used in advertising or publicity
+ * pertaining to distribution of the software without specific,
+ * written prior permission. The University of Delaware makes no
+ * representations about the suitability this software for any
+ * purpose. It is provided "as is" without express or implied warranty.
+ ***********************************************************************
+ */
+//config:config NTPD
+//config:	bool "ntpd (23 kb)"
+//config:	default y
+//config:	help
+//config:	The NTP client/server daemon.
+//config:
+//config:config FEATURE_NTPD_SERVER
+//config:	bool "Make ntpd usable as a NTP server"
+//config:	default y
+//config:	depends on NTPD
+//config:	help
+//config:	Make ntpd usable as a NTP server. If you disable this option
+//config:	ntpd will be usable only as a NTP client.
+//config:
+//config:config FEATURE_NTPD_CONF
+//config:	bool "Make ntpd understand /etc/ntp.conf"
+//config:	default y
+//config:	depends on NTPD
+//config:	help
+//config:	Make ntpd look in /etc/ntp.conf for peers. Only "server address"
+//config:	is supported.
+//config:
+//config:config FEATURE_NTP_AUTH
+//config:	bool "Support md5/sha1 message authentication codes"
+//config:	default y
+//config:	depends on NTPD
+
+//applet:IF_NTPD(APPLET(ntpd, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_NTPD) += ntpd.o
+
+//usage:#define ntpd_trivial_usage
+//usage:	"[-dnqNw"IF_FEATURE_NTPD_SERVER("l] [-I IFACE")"] [-S PROG]"
+//usage:	IF_NOT_FEATURE_NTP_AUTH(" [-p PEER]...")
+//usage:	IF_FEATURE_NTP_AUTH(" [-k KEYFILE] [-p [keyno:N:]PEER]...")
+//usage:#define ntpd_full_usage "\n\n"
+//usage:       "NTP client/server\n"
+//usage:     "\n	-d[d]	Verbose"
+//usage:     "\n	-n	Run in foreground"
+//usage:     "\n	-q	Quit after clock is set"
+//usage:     "\n	-N	Run at high priority"
+//usage:     "\n	-w	Do not set time (only query peers), implies -n"
+//usage:     "\n	-S PROG	Run PROG after stepping time, stratum change, and every 11 min"
+//usage:	IF_NOT_FEATURE_NTP_AUTH(
+//usage:     "\n	-p PEER	Obtain time from PEER (may be repeated)"
+//usage:	)
+//usage:	IF_FEATURE_NTP_AUTH(
+//usage:     "\n	-k FILE	Key file (ntp.keys compatible)"
+//usage:     "\n	-p [keyno:NUM:]PEER"
+//usage:     "\n		Obtain time from PEER (may be repeated)"
+//usage:     "\n		Use key NUM for authentication"
+//usage:	)
+//usage:	IF_FEATURE_NTPD_CONF(
+//usage:     "\n		If -p is not given, 'server HOST' lines"
+//usage:     "\n		from /etc/ntp.conf are used"
+//usage:	)
+//usage:	IF_FEATURE_NTPD_SERVER(
+//usage:     "\n	-l	Also run as server on port 123"
+//usage:     "\n	-I IFACE Bind server to IFACE, implies -l"
+//usage:	)
+
+// -l and -p options are not compatible with "standard" ntpd:
+// it has them as "-l logfile" and "-p pidfile".
+// -S and -w are not compat either, "standard" ntpd has no such opts.
+

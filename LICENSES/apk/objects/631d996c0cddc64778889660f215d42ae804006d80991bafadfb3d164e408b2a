@@ -1,0 +1,71 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * cat implementation for busybox
+ *
+ * Copyright (C) 2003  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config CAT
+//config:	bool "cat (5.8 kb)"
+//config:	default y
+//config:	help
+//config:	cat is used to concatenate files and print them to the standard
+//config:	output. Enable this option if you wish to enable the 'cat' utility.
+//config:
+//config:config FEATURE_CATN
+//config:	bool "Enable -n and -b options"
+//config:	default y
+//config:	depends on CAT
+//config:	help
+//config:	-n numbers all output lines while -b numbers nonempty output lines.
+//config:
+//config:config FEATURE_CATV
+//config:	bool "cat -v[etA]"
+//config:	default y
+//config:	depends on CAT
+//config:	help
+//config:	Display nonprinting characters as escape sequences
+
+//applet:IF_CAT(APPLET(cat, BB_DIR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_CAT) += cat.o
+
+/* BB_AUDIT SUSv3 compliant */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/cat.html */
+
+//usage:#if ENABLE_FEATURE_CATN || ENABLE_FEATURE_CATV
+//usage:#define cat_trivial_usage
+//usage:       "[-" IF_FEATURE_CATN("nb") IF_FEATURE_CATV("vteA") "] [FILE]..."
+//usage:#else
+//usage:#define cat_trivial_usage
+//usage:       "[FILE]..."
+//usage:#endif
+//usage:#define cat_full_usage "\n\n"
+//usage:       "Print FILEs to stdout\n"
+//usage:	IF_FEATURE_CATN(
+//usage:     "\n	-n	Number output lines"
+//usage:     "\n	-b	Number nonempty lines"
+//usage:	)
+//usage:	IF_FEATURE_CATV(
+//usage:     "\n	-v	Show nonprinting characters as ^x or M-x"
+//usage:     "\n	-t	...and tabs as ^I"
+//usage:     "\n	-e	...and end lines with $"
+//usage:     "\n	-A	Same as -vte"
+//usage:	)
+/*
+  Longopts not implemented yet:
+      --number-nonblank    number nonempty output lines, overrides -n
+      --number             number all output lines
+      --show-nonprinting   use ^ and M- notation, except for LFD and TAB
+      --show-all           equivalent to -vet
+  Not implemented yet:
+  -E, --show-ends          display $ at end of each line (-e sans -v)
+  -T, --show-tabs          display TAB characters as ^I (-t sans -v)
+  -s, --squeeze-blank      suppress repeated empty output lines
+*/
+//usage:
+//usage:#define cat_example_usage
+//usage:       "$ cat /proc/uptime\n"
+//usage:       "110716.72 17.67"
+

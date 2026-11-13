@@ -1,0 +1,42 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * udhcp server
+ * Copyright (C) 1999 Matthew Ramsay <matthewr@moreton.com.au>
+ *			Chris Trew <ctrew@moreton.com.au>
+ *
+ * Rewrite by Russ Dill <Russ.Dill@asu.edu> July 2001
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+//applet:IF_UDHCPD(APPLET(udhcpd, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_UDHCPD) += common.o packet.o signalpipe.o socket.o
+//kbuild:lib-$(CONFIG_UDHCPD) += dhcpd.o arpping.o
+//kbuild:lib-$(CONFIG_FEATURE_UDHCP_RFC3397) += domain_codec.o
+
+//usage:#define udhcpd_trivial_usage
+//usage:       "[-fS] [-I ADDR] [-a MSEC]" IF_FEATURE_UDHCP_PORT(" [-P PORT]") " [CONFFILE]"
+//usage:#define udhcpd_full_usage "\n\n"
+//usage:       "DHCP server\n"
+//usage:     "\n	-f	Run in foreground"
+//usage:     "\n	-S	Log to syslog too"
+//usage:     "\n	-I ADDR	Local address"
+//usage:     "\n	-a MSEC	Timeout for ARP ping (default 2000)"
+//usage:	IF_FEATURE_UDHCP_PORT(
+//usage:     "\n	-P PORT	Use PORT (default 67)"
+//usage:	)
+//usage:     "\nSignals:"
+//usage:     "\n	USR1	Update lease file"
+

@@ -1,0 +1,51 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * cut.c - minimalist version of cut
+ *
+ * Copyright (C) 1999,2000,2001 by Lineo, inc.
+ * Written by Mark Whitley <markw@codepoet.org>
+ * debloated by Bernhard Reutner-Fischer
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config CUT
+//config:	bool "cut (6.7 kb)"
+//config:	default y
+//config:	help
+//config:	cut is used to print selected parts of lines from
+//config:	each file to stdout.
+//config:
+//config:config FEATURE_CUT_REGEX
+//config:	bool "cut -F"
+//config:	default y
+//config:	depends on CUT
+//config:	help
+//config:	Allow regex based delimiters.
+
+//applet:IF_CUT(APPLET_NOEXEC(cut, cut, BB_DIR_USR_BIN, BB_SUID_DROP, cut))
+
+//kbuild:lib-$(CONFIG_CUT) += cut.o
+
+//usage:#define cut_trivial_usage
+//usage:       "[OPTIONS] [FILE]..."
+//usage:#define cut_full_usage "\n\n"
+//usage:       "Print selected fields from FILEs to stdout\n"
+//usage:     "\n	-b LIST	Output only bytes from LIST"
+//usage:     "\n	-c LIST	Output only characters from LIST"
+//usage:     "\n	-d SEP	Field delimiter for input (default -f TAB, -F run of whitespace)"
+//usage:     "\n	-O SEP	Field delimeter for output (default = -d for -f, one space for -F)"
+//usage:     "\n	-D	Don't sort/collate sections or match -fF lines without delimeter"
+//usage:     "\n	-f LIST	Print only these fields (-d is single char)"
+//usage:     IF_FEATURE_CUT_REGEX(
+//usage:     "\n	-F LIST	Print only these fields (-d is regex)"
+//usage:     )
+//usage:     "\n	-s	Output only lines containing delimiter"
+//usage:     "\n	-n	Ignored"
+//(manpage:-n	with -b: don't split multibyte characters)
+//usage:
+//usage:#define cut_example_usage
+//usage:       "$ echo \"Hello world\" | cut -f 1 -d ' '\n"
+//usage:       "Hello\n"
+//usage:       "$ echo \"Hello world\" | cut -f 2 -d ' '\n"
+//usage:       "world\n"
+

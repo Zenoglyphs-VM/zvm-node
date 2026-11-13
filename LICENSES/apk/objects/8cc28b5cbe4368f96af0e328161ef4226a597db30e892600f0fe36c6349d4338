@@ -1,0 +1,15 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * update_passwd
+ *
+ * update_passwd is a common function for passwd and chpasswd applets;
+ * it is responsible for updating password file (i.e. /etc/passwd or
+ * /etc/shadow) for a given user and password.
+ *
+ * Moved from loginutils/passwd.c by Alexander Shishkin <virtuoso@slind.org>
+ *
+ * Modified to be able to add or delete users, groups and users to/from groups
+ * by Tito Ragusa <farmatito@tiscali.it>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */

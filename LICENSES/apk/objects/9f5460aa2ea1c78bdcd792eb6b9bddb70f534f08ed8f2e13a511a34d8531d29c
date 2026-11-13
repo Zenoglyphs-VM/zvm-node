@@ -1,0 +1,49 @@
+/* vi: set sw=4 ts=4:
+ *
+ * Apply a "universal" diff.
+ * Adapted from toybox's patch implementation.
+ *
+ * Copyright 2007 Rob Landley <rob@landley.net>
+ *
+ * see http://www.opengroup.org/onlinepubs/009695399/utilities/patch.html
+ * (But only does -u, because who still cares about "ed"?)
+ *
+ * TODO:
+ * -b backup
+ * -l treat all whitespace as a single space
+ * -d chdir first
+ * -D define wrap #ifdef and #ifndef around changes
+ * -o outfile output here instead of in place
+ * -r rejectfile write rejected hunks to this file
+ *
+ * -f force (no questions asked)
+ * -F fuzz (number, default 2)
+ * [file] which file to patch
+ */
+//config:config PATCH
+//config:	bool "patch (9.6 kb)"
+//config:	default y
+//config:	help
+//config:	Apply a unified diff formatted patch.
+
+//applet:IF_PATCH(APPLET(patch, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_PATCH) += patch.o
+
+//usage:#define patch_trivial_usage
+//usage:       "[-RNE] [-p N] [-i DIFF] [ORIGFILE [PATCHFILE]]"
+//usage:#define patch_full_usage "\n\n"
+//usage:       "	-p N	Strip N leading components from file names"
+//usage:     "\n	-i DIFF	Read DIFF instead of stdin"
+//usage:     "\n	-R	Reverse patch"
+//usage:     "\n	-N	Ignore already applied patches"
+//usage:     "\n	-E	Remove output files if they become empty"
+//usage:	IF_LONG_OPTS(
+//usage:     "\n	--dry-run	Don't actually change files"
+//usage:	)
+/* -u "interpret as unified diff" is supported but not documented: this info is not useful for --help */
+//usage:
+//usage:#define patch_example_usage
+//usage:       "$ patch -p1 < example.diff\n"
+//usage:       "$ patch -p0 -i example.diff"
+

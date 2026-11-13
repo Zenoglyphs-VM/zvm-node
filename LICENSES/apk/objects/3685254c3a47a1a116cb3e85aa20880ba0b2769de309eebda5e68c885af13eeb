@@ -1,0 +1,26 @@
+/*
+ * Copyright 2019-2024 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2019 Red Hat, Inc.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * This implements https://csrc.nist.gov/publications/detail/sp/800-108/final
+ * section 5.1 ("counter mode") and section 5.2 ("feedback mode") in both HMAC
+ * and CMAC.  That document does not name the KDFs it defines; the name is
+ * derived from
+ * https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/Key-Derivation
+ *
+ * Note that section 5.3 ("double-pipeline mode") is not implemented, though
+ * it would be possible to do so in the future.
+ *
+ * These versions all assume the counter is used.  It would be relatively
+ * straightforward to expose a configuration handle should the need arise.
+ *
+ * Variable names attempt to match those of SP800-108.
+ */
+

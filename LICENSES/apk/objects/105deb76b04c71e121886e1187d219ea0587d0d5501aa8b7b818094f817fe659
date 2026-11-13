@@ -1,0 +1,67 @@
+/* origin: OpenBSD /usr/src/lib/libm/src/ld80/e_expl.c */
+/*
+ * Copyright (c) 2008 Stephen L. Moshier <steve@moshier.net>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+/*
+ *      Exponential function, long double precision
+ *
+ *
+ * SYNOPSIS:
+ *
+ * long double x, y, expl();
+ *
+ * y = expl( x );
+ *
+ *
+ * DESCRIPTION:
+ *
+ * Returns e (2.71828...) raised to the x power.
+ *
+ * Range reduction is accomplished by separating the argument
+ * into an integer k and fraction f such that
+ *
+ *     x    k  f
+ *    e  = 2  e.
+ *
+ * A Pade' form of degree 5/6 is used to approximate exp(f) - 1
+ * in the basic range [-0.5 ln 2, 0.5 ln 2].
+ *
+ *
+ * ACCURACY:
+ *
+ *                      Relative error:
+ * arithmetic   domain     # trials      peak         rms
+ *    IEEE      +-10000     50000       1.12e-19    2.81e-20
+ *
+ *
+ * Error amplification in the exponential function can be
+ * a serious matter.  The error propagation involves
+ * exp( X(1+delta) ) = exp(X) ( 1 + X*delta + ... ),
+ * which shows that a 1 lsb error in representing X produces
+ * a relative error of X times 1 lsb in the function.
+ * While the routine gives an accurate result for arguments
+ * that are exactly represented by a long double precision
+ * computer number, the result contains amplified roundoff
+ * error for large arguments not exactly represented.
+ *
+ *
+ * ERROR MESSAGES:
+ *
+ *   message         condition      value returned
+ * exp underflow    x < MINLOG         0.0
+ * exp overflow     x > MAXLOG         MAXNUM
+ *
+ */
+

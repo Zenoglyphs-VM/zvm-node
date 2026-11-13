@@ -1,0 +1,39 @@
+#! /usr/bin/env perl
+# Copyright 2005-2021 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. Rights for redistribution and usage in source and binary
+# forms are granted according to the License.
+# ====================================================================
+#
+# Version 1.1
+#
+# The major reason for undertaken effort was to mitigate the hazard of
+# cache-timing attack. This is [currently and initially!] addressed in
+# two ways. 1. S-boxes are compressed from 5KB to 2KB+256B size each.
+# 2. References to them are scheduled for L2 cache latency, meaning
+# that the tables don't have to reside in L1 cache. Once again, this
+# is an initial draft and one should expect more countermeasures to
+# be implemented...
+#
+# Version 1.1 prefetches T[ed]4 in order to mitigate attack on last
+# round.
+#
+# Even though performance was not the primary goal [on the contrary,
+# extra shifts "induced" by compressed S-box and longer loop epilogue
+# "induced" by scheduling for L2 have negative effect on performance],
+# the code turned out to run in ~23 cycles per processed byte en-/
+# decrypted with 128-bit key. This is pretty good result for code
+# with mentioned qualities and UltraSPARC core. Compared to Sun C
+# generated code my encrypt procedure runs just few percents faster,
+# while decrypt one - whole 50% faster [yes, Sun C failed to generate
+# optimal decrypt procedure]. Compared to GNU C generated code both
+# procedures are more than 60% faster:-)
+

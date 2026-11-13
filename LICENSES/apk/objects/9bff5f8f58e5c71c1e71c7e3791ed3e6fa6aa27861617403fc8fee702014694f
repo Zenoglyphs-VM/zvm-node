@@ -1,0 +1,53 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * linux32/linux64 allows for changing uname emulation.
+ *
+ * Copyright 2002 Andi Kleen, SuSE Labs.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config SETARCH
+//config:	bool "setarch (3.8 kb)"
+//config:	default y
+//config:	help
+//config:	The linux32 utility is used to create a 32bit environment for the
+//config:	specified program (usually a shell). It only makes sense to have
+//config:	this util on a system that supports both 64bit and 32bit userland
+//config:	(like amd64/x86, ppc64/ppc, sparc64/sparc, etc...).
+//config:
+//config:config LINUX32
+//config:	bool "linux32 (3.6 kb)"
+//config:	default y
+//config:	help
+//config:	Alias to "setarch linux32".
+//config:
+//config:config LINUX64
+//config:	bool "linux64 (3.5 kb)"
+//config:	default y
+//config:	help
+//config:	Alias to "setarch linux64".
+
+//applet:IF_SETARCH(APPLET_NOEXEC(setarch, setarch, BB_DIR_BIN, BB_SUID_DROP, setarch))
+//                  APPLET_NOEXEC:name     main     location    suid_type     help
+//applet:IF_LINUX32(APPLET_NOEXEC(linux32, setarch, BB_DIR_BIN, BB_SUID_DROP, linux32))
+//applet:IF_LINUX64(APPLET_NOEXEC(linux64, setarch, BB_DIR_BIN, BB_SUID_DROP, linux64))
+
+//kbuild:lib-$(CONFIG_SETARCH) += setarch.o
+//kbuild:lib-$(CONFIG_LINUX32) += setarch.o
+//kbuild:lib-$(CONFIG_LINUX64) += setarch.o
+
+//usage:#define setarch_trivial_usage
+//usage:       "PERSONALITY [-R] PROG ARGS"
+//usage:#define setarch_full_usage "\n\n"
+//usage:       "PERSONALITY may be:"
+//usage:   "\n""	linux32	Set 32bit uname emulation"
+//usage:   "\n""	linux64	Set 64bit uname emulation"
+//usage:   "\n"
+//usage:   "\n""	-R	Disable address space randomization"
+//usage:
+//usage:#define linux32_trivial_usage NOUSAGE_STR
+//usage:#define linux32_full_usage ""
+//usage:
+//usage:#define linux64_trivial_usage NOUSAGE_STR
+//usage:#define linux64_full_usage ""
+

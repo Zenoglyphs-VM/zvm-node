@@ -1,0 +1,30 @@
+/*
+ * Mini blkdiscard implementation for busybox
+ *
+ * Copyright (C) 2015 by Ari Sundholm <ari@tuxera.com> and Tuxera Inc.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config BLKDISCARD
+//config:	bool "blkdiscard (4.6 kb)"
+//config:	default y
+//config:	help
+//config:	blkdiscard discards sectors on a given device.
+
+//applet:IF_BLKDISCARD(APPLET_NOEXEC(blkdiscard, blkdiscard, BB_DIR_USR_BIN, BB_SUID_DROP, blkdiscard))
+
+//kbuild:lib-$(CONFIG_BLKDISCARD) += blkdiscard.o
+
+//usage:#define blkdiscard_trivial_usage
+//usage:       "[-o OFS] [-l LEN] [-s] DEVICE"
+//usage:#define blkdiscard_full_usage "\n\n"
+//usage:       "Discard sectors on DEVICE\n"
+//usage:     "\n	-o OFS	Byte offset into device"
+//usage:     "\n	-l LEN	Number of bytes to discard"
+//usage:     "\n	-s	Perform a secure discard"
+///////:     "\n	-f	Disable check for mounted filesystem"
+//////////////// -f: accepted but is a nop (we do no check anyway)
+//usage:
+//usage:#define blkdiscard_example_usage
+//usage:	"$ blkdiscard -o 0 -l 1G /dev/sdb"
+

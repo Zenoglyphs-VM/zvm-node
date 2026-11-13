@@ -1,0 +1,67 @@
+#! /usr/bin/env perl
+# Copyright 2016-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# This module implements Poly1305 hash for x86_64.
+#
+# March 2015
+#
+# Initial release.
+#
+# December 2016
+#
+# Add AVX512F+VL+BW code path.
+#
+# November 2017
+#
+# Convert AVX512F+VL+BW code path to pure AVX512F, so that it can be
+# executed even on Knights Landing. Trigger for modification was
+# observation that AVX512 code paths can negatively affect overall
+# Skylake-X system performance. Since we are likely to suppress
+# AVX512F capability flag [at least on Skylake-X], conversion serves
+# as kind of "investment protection". Note that next *lake processor,
+# Cannolake, has AVX512IFMA code path to execute...
+#
+# Numbers are cycles per processed byte with poly1305_blocks alone,
+# measured with rdtsc at fixed clock frequency.
+#
+#		IALU/gcc-4.8(*)	AVX(**)		AVX2	AVX-512
+# P4		4.46/+120%	-
+# Core 2	2.41/+90%	-
+# Westmere	1.88/+120%	-
+# Sandy Bridge	1.39/+140%	1.10
+# Haswell	1.14/+175%	1.11		0.65
+# Skylake[-X]	1.13/+120%	0.96		0.51	[0.35]
+# Silvermont	2.83/+95%	-
+# Knights L	3.60/?		1.65		1.10	0.41(***)
+# Goldmont	1.70/+180%	-
+# VIA Nano	1.82/+150%	-
+# Sledgehammer	1.38/+160%	-
+# Bulldozer	2.30/+130%	0.97
+# Ryzen		1.15/+200%	1.08		1.18
+#
+# (*)	improvement coefficients relative to clang are more modest and
+#	are ~50% on most processors, in both cases we are comparing to
+#	__int128 code;
+# (**)	SSE2 implementation was attempted, but among non-AVX processors
+#	it was faster than integer-only code only on older Intel P4 and
+#	Core processors, 50-30%, less newer processor is, but slower on
+#	contemporary ones, for example almost 2x slower on Atom, and as
+#	former are naturally disappearing, SSE2 is deemed unnecessary;
+# (***)	strangely enough performance seems to vary from core to core,
+#	listed result is best case;
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

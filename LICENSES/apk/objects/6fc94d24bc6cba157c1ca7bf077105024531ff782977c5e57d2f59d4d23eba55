@@ -1,0 +1,31 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * od implementation for busybox
+ * Based on code from util-linux v 2.11l
+ *
+ * Copyright (c) 1990
+ * The Regents of the University of California.  All rights reserved.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Original copyright notice is retained at the end of this file.
+ */
+//config:config OD
+//config:	bool "od (11 kb)"
+//config:	default y
+//config:	help
+//config:	od is used to dump binary files in octal and other formats.
+
+//applet:IF_OD(APPLET(od, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_OD) += od.o
+
+//usage:#if !ENABLE_DESKTOP
+//usage:#define od_trivial_usage
+//usage:       "[-abcdeFfhiloxsv] [FILE]"
+// We also support -BDOHXIL, but they are not documented in coreutils 9.1
+// manpage/help, so don't show them either.
+//usage:#define od_full_usage "\n\n"
+//usage:       "Print FILE (or stdin) unambiguously, as octal bytes by default"
+//usage:#endif
+

@@ -1,0 +1,47 @@
+#! /usr/bin/env perl
+# Copyright 2010-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# AES for MIPS
+
+# October 2010
+#
+# Code uses 1K[+256B] S-box and on single-issue core [such as R5000]
+# spends ~68 cycles per byte processed with 128-bit key. This is ~16%
+# faster than gcc-generated code, which is not very impressive. But
+# recall that compressed S-box requires extra processing, namely
+# additional rotations. Rotations are implemented with lwl/lwr pairs,
+# which is normally used for loading unaligned data. Another cool
+# thing about this module is its endian neutrality, which means that
+# it processes data without ever changing byte order...
+
+# September 2012
+#
+# Add MIPS32R2 (~10% less instructions) and SmartMIPS ASE (further
+# ~25% less instructions) code. Note that there is no run-time switch,
+# instead, code path is chosen upon pre-process time, pass -mips32r2
+# or/and -msmartmips.
+
+# February 2019
+#
+# Normalize MIPS32R2 AES table address calculation by always using EXT
+# instruction. This reduces the standard codebase by another 10%. 
+
+######################################################################
+# There is a number of MIPS ABI in use, O32 and N32/64 are most
+# widely used. Then there is a new contender: NUBI. It appears that if
+# one picks the latter, it's possible to arrange code in ABI neutral
+# manner. Therefore let's stick to NUBI register layout:
+#

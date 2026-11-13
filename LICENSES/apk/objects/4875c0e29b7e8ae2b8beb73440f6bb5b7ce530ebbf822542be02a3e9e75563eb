@@ -1,0 +1,106 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * stat -- display file or file system status
+ *
+ * Copyright (C) 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+ * Copyright (C) 2005 by Erik Andersen <andersen@codepoet.org>
+ * Copyright (C) 2005 by Mike Frysinger <vapier@gentoo.org>
+ * Copyright (C) 2006 by Yoshinori Sato <ysato@users.sourceforge.jp>
+ *
+ * Written by Michael Meskes
+ * Taken from coreutils and turned into a busybox applet by Mike Frysinger
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config STAT
+//config:	bool "stat (11 kb)"
+//config:	default y
+//config:	help
+//config:	display file or filesystem status.
+//config:
+//config:config FEATURE_STAT_FORMAT
+//config:	bool "Enable custom formats (-c)"
+//config:	default y
+//config:	depends on STAT
+//config:	help
+//config:	Without this, stat will not support the '-c format' option where
+//config:	users can pass a custom format string for output. This adds about
+//config:	7k to a nonstatic build on amd64.
+//config:
+//config:config FEATURE_STAT_FILESYSTEM
+//config:	bool "Enable display of filesystem status (-f)"
+//config:	default y
+//config:	depends on STAT
+//config:	help
+//config:	Without this, stat will not support the '-f' option to display
+//config:	information about filesystem status.
+
+//applet:IF_STAT(APPLET_NOEXEC(stat, stat, BB_DIR_BIN, BB_SUID_DROP, stat))
+
+//kbuild:lib-$(CONFIG_STAT) += stat.o
+
+//usage:#define stat_trivial_usage
+//usage:       "[-lt"IF_FEATURE_STAT_FILESYSTEM("f")"] "IF_FEATURE_STAT_FORMAT("[-c FMT] ")"FILE..."
+//usage:#define stat_full_usage "\n\n"
+//usage:       "Display file"
+//usage:            IF_FEATURE_STAT_FILESYSTEM(" (default) or filesystem")
+//usage:            " status\n"
+//usage:	IF_FEATURE_STAT_FORMAT(
+//usage:     "\n	-c FMT	Use the specified format"
+//usage:	)
+//usage:	IF_FEATURE_STAT_FILESYSTEM(
+//usage:     "\n	-f	Display filesystem status"
+//usage:	)
+//usage:     "\n	-L	Follow links"
+//usage:     "\n	-t	Terse display"
+//usage:	IF_SELINUX(
+//usage:     "\n	-Z	Print security context"
+//usage:	)
+//usage:	IF_FEATURE_STAT_FORMAT(
+//usage:       "\n\nFMT sequences"IF_FEATURE_STAT_FILESYSTEM(" for files")":\n"
+//usage:       " %a	Access rights in octal\n"
+//usage:       " %A	Access rights in human readable form\n"
+//usage:       " %b	Number of blocks allocated (see %B)\n"
+//usage:       " %B	Size in bytes of each block reported by %b\n"
+//usage:       " %d	Device number in decimal\n"
+//usage:       " %D	Device number in hex\n"
+//usage:       " %f	Raw mode in hex\n"
+//usage:       " %F	File type\n"
+//usage:       " %g	Group ID\n"
+//usage:       " %G	Group name\n"
+//usage:       " %h	Number of hard links\n"
+//usage:       " %i	Inode number\n"
+//usage:       " %n	File name\n"
+//usage:       " %N	File name, with -> TARGET if symlink\n"
+//usage:       " %o	I/O block size\n"
+//usage:       " %s	Total size in bytes\n"
+//usage:       " %t	Major device type in hex\n"
+//usage:       " %T	Minor device type in hex\n"
+//usage:       " %u	User ID\n"
+//usage:       " %U	User name\n"
+//usage:       " %x	Time of last access\n"
+//usage:       " %X	Time of last access as seconds since Epoch\n"
+//usage:       " %y	Time of last modification\n"
+//usage:       " %Y	Time of last modification as seconds since Epoch\n"
+//usage:       " %z	Time of last change\n"
+//usage:       " %Z	Time of last change as seconds since Epoch\n"
+//usage:	IF_FEATURE_STAT_FILESYSTEM(
+//usage:       "\nFMT sequences for file systems:\n"
+//usage:       " %a	Free blocks available to non-superuser\n"
+//usage:       " %b	Total data blocks\n"
+//usage:       " %c	Total file nodes\n"
+//usage:       " %d	Free file nodes\n"
+//usage:       " %f	Free blocks\n"
+//usage:	IF_SELINUX(
+//usage:       " %C	Security context in selinux\n"
+//usage:	)
+//usage:       " %i	File System ID in hex\n"
+//usage:       " %l	Maximum length of filenames\n"
+//usage:       " %n	File name\n"
+//usage:       " %s	Block size (for faster transfer)\n"
+//usage:       " %S	Fundamental block size (for block counts)\n"
+//usage:       " %t	Type in hex\n"
+//usage:       " %T	Type in human readable form"
+//usage:	)
+//usage:	)
+

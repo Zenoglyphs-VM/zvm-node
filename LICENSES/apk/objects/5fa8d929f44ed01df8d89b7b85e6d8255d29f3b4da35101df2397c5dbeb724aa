@@ -1,0 +1,42 @@
+/*
+ *  Copyright 2024-2025 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ *  Licensed under the Apache License 2.0 (the "License").  You may not use
+ *  this file except in compliance with the License.  You can obtain a copy
+ *  in the file LICENSE in the source distribution or at
+ *  https://www.openssl.org/source/license.html
+ */
+
+/**
+ * @file quic-hq-interop.c
+ * @brief QUIC client interoperability demo using OpenSSL.
+ *
+ * This file contains the implementation of a QUIC client that demonstrates
+ * interoperability with hq-interop servers. It handles connection setup,
+ * session caching, key logging, and sending HTTP GET requests over QUIC.
+ *
+ * The file includes functions for setting up SSL/TLS contexts, managing session
+ * caches, and handling I/O failures. It supports both IPv4 and IPv6 connections
+ * and uses non-blocking mode for QUIC operations.
+ *
+ * The client sends HTTP/1.0 GET requests for specified files and saves the
+ * responses to disk. It demonstrates OpenSSL's QUIC API, including ALPN protocol
+ * settings, peer address management, and SSL handshake and shutdown processes.
+ *
+ * @note This client is intended for demonstration purposes and may require
+ * additional error handling and robustness improvements for production use.
+ *
+ * USAGE
+ * quic-hq-interop <host> <port> <reqfile>
+ * host - The hostname of the server to contact
+ * port - The port that the server is listening on
+ * reqfile - a text file containing a space separated list of paths to fetch
+ *           via http 1.0 GET requests
+ *
+ * ENVIRONMENT VARIABLES
+ * SSLKEYLOGFILE - set to a file path to record keylog exchange with server
+ * SSL_SESSION_FILE - set to a file path to record ssl sessions and restore
+ *                    said sessions on next invocation
+ * SSL_CERT_FILE - The ca file to use when validating a server
+ * SSL_CIPHER_SUITES - The list of cipher suites to use (see openssl-ciphers)
+ */

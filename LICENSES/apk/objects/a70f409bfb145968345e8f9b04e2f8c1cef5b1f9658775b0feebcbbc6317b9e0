@@ -1,0 +1,34 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * chpasswd.c
+ *
+ * Written for SLIND (from passwd.c) by Alexander Shishkin <virtuoso@slind.org>
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config CHPASSWD
+//config:	bool "chpasswd (19 kb)"
+//config:	default y
+//config:	help
+//config:	Reads a file of user name and password pairs from standard input
+//config:	and uses this information to update a group of existing users.
+//config:
+//config:config FEATURE_DEFAULT_PASSWD_ALGO
+//config:	string "Default encryption method (passwd -a, cryptpw -m, chpasswd -c ALG)"
+//config:	default "des"
+//config:	depends on PASSWD || CRYPTPW || CHPASSWD
+//config:	help
+//config:	Possible choices are "d[es]", "m[d5]", "s[ha256]" or "sha512".
+
+//applet:IF_CHPASSWD(APPLET(chpasswd, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_CHPASSWD) += chpasswd.o
+
+//usage:#define chpasswd_trivial_usage
+//usage:	"[-me] [-c ALG] [-R DIR]"
+//usage:#define chpasswd_full_usage "\n\n"
+//usage:       "Read user:password from stdin and update /etc/passwd\n"
+//usage:     "\n	-e	Supplied passwords are in encrypted form"
+//usage:     "\n	-m	Encrypt using md5, not des"
+//usage:     "\n	-c ALG	"CRYPT_METHODS_HELP_STR
+//usage:     "\n	-R DIR	Directory to chroot into"
+

@@ -1,0 +1,10 @@
+/*
+ * Copyright (C) 2017 Denys Vlasenko
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+/* Interface glue between bbox code and minimally tweaked matrixssl
+ * code. All C files (matrixssl and bbox (ones which need TLS))
+ * include this file, and guaranteed to see a consistent API,
+ * defines, types, etc.
+ */

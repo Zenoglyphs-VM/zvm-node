@@ -1,0 +1,145 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini less implementation for busybox
+ *
+ * Copyright (C) 2005 by Rob Sullivan <cogito.ergo.cogito@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/*
+ * TODO:
+ * - Add more regular expression support - search modifiers, certain matches, etc.
+ * - Add more complex bracket searching - currently, nested brackets are
+ *   not considered.
+ * - Add support for "F" as an input. This causes less to act in
+ *   a similar way to tail -f.
+ * - Allow horizontal scrolling.
+ *
+ * Notes:
+ * - the inp file pointer is used so that keyboard input works after
+ *   redirected input has been read from stdin
+ */
+//config:config LESS
+//config:	bool "less (16 kb)"
+//config:	default y
+//config:	help
+//config:	'less' is a pager, meaning that it displays text files. It possesses
+//config:	a wide array of features, and is an improvement over 'more'.
+//config:
+//config:config FEATURE_LESS_MAXLINES
+//config:	int "Max number of input lines less will try to eat"
+//config:	default 9999999
+//config:	depends on LESS
+//config:
+//config:config FEATURE_LESS_BRACKETS
+//config:	bool "Enable bracket searching"
+//config:	default y
+//config:	depends on LESS
+//config:	help
+//config:	This option adds the capability to search for matching left and right
+//config:	brackets, facilitating programming.
+//config:
+//config:config FEATURE_LESS_FLAGS
+//config:	bool "Enable -m/-M"
+//config:	default y
+//config:	depends on LESS
+//config:	help
+//config:	The -M/-m flag enables a more sophisticated status line.
+//config:
+//config:config FEATURE_LESS_TRUNCATE
+//config:	bool "Enable -S"
+//config:	default y
+//config:	depends on LESS
+//config:	help
+//config:	The -S flag causes long lines to be truncated rather than
+//config:	wrapped.
+//config:
+//config:config FEATURE_LESS_MARKS
+//config:	bool "Enable marks"
+//config:	default y
+//config:	depends on LESS
+//config:	help
+//config:	Marks enable positions in a file to be stored for easy reference.
+//config:
+//config:config FEATURE_LESS_REGEXP
+//config:	bool "Enable regular expressions"
+//config:	default y
+//config:	depends on LESS
+//config:	help
+//config:	Enable regular expressions, allowing complex file searches.
+//config:
+//config:config FEATURE_LESS_WINCH
+//config:	bool "Enable automatic resizing on window size changes"
+//config:	default y
+//config:	depends on LESS
+//config:	help
+//config:	Makes less track window size changes.
+//config:
+//config:config FEATURE_LESS_ASK_TERMINAL
+//config:	bool "Use 'tell me cursor position' ESC sequence to measure window"
+//config:	default y
+//config:	depends on FEATURE_LESS_WINCH
+//config:	help
+//config:	Makes less track window size changes.
+//config:	If terminal size can't be retrieved and $LINES/$COLUMNS are not set,
+//config:	this option makes less perform a last-ditch effort to find it:
+//config:	position cursor to 999,999 and ask terminal to report real
+//config:	cursor position using "ESC [ 6 n" escape sequence, then read stdin.
+//config:	This is not clean but helps a lot on serial lines and such.
+//config:
+//config:config FEATURE_LESS_DASHCMD
+//config:	bool "Enable flag changes ('-' command)"
+//config:	default y
+//config:	depends on LESS
+//config:	help
+//config:	This enables the ability to change command-line flags within
+//config:	less itself ('-' keyboard command).
+//config:
+//config:config FEATURE_LESS_LINENUMS
+//config:	bool "Enable -N (dynamic switching of line numbers)"
+//config:	default y
+//config:	depends on FEATURE_LESS_DASHCMD
+//config:
+//config:config FEATURE_LESS_RAW
+//config:	bool "Enable -R ('raw control characters')"
+//config:	default y
+//config:	depends on FEATURE_LESS_DASHCMD
+//config:	help
+//config:	This is essential for less applet to work with tools that use colors
+//config:	and paging, such as git, systemd tools or nmcli.
+//config:
+//config:config FEATURE_LESS_ENV
+//config:	bool "Take options from $LESS environment variable"
+//config:	default y
+//config:	depends on FEATURE_LESS_DASHCMD
+//config:	help
+//config:	This is essential for less applet to work with tools that use colors
+//config:	and paging, such as git, systemd tools or nmcli.
+
+//applet:IF_LESS(APPLET(less, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_LESS) += less.o
+
+//usage:#define less_trivial_usage
+//usage:       "[-EF" IF_FEATURE_LESS_REGEXP("I")IF_FEATURE_LESS_FLAGS("Mm")
+//usage:       "N" IF_FEATURE_LESS_TRUNCATE("S") IF_FEATURE_LESS_RAW("R") "h~] [FILE]..."
+//usage:#define less_full_usage "\n\n"
+//usage:       "View FILE (or stdin) one screenful at a time\n"
+//usage:     "\n	-E	Quit once the end of a file is reached"
+//usage:     "\n	-F	Quit if entire file fits on first screen"
+//usage:	IF_FEATURE_LESS_REGEXP(
+//usage:     "\n	-I	Ignore case in all searches"
+//usage:	)
+//usage:	IF_FEATURE_LESS_FLAGS(
+//usage:     "\n	-M,-m	Display status line with line numbers"
+//usage:     "\n		and percentage through the file"
+//usage:	)
+//usage:     "\n	-N	Prefix line number to each line"
+//usage:	IF_FEATURE_LESS_TRUNCATE(
+//usage:     "\n	-S	Truncate long lines"
+//usage:	)
+//usage:	IF_FEATURE_LESS_RAW(
+//usage:     "\n	-R	Remove color escape codes in input"
+//usage:	)
+//usage:     "\n	-~	Suppress ~s displayed past EOF"
+

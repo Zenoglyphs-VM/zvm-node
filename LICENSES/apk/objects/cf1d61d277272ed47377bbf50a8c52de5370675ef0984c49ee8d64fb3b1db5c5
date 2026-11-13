@@ -1,0 +1,50 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini watchdog implementation for busybox
+ *
+ * Copyright (C) 2003  Paul Mundt <lethal@linux-sh.org>
+ * Copyright (C) 2006  Bernhard Reutner-Fischer <busybox@busybox.net>
+ * Copyright (C) 2008  Darius Augulis <augulis.darius@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config WATCHDOG
+//config:	bool "watchdog (5.7 kb)"
+//config:	default y
+//config:	help
+//config:	The watchdog utility is used with hardware or software watchdog
+//config:	device drivers. It opens the specified watchdog device special file
+//config:	and periodically writes a magic character to the device. If the
+//config:	watchdog applet ever fails to write the magic character within a
+//config:	certain amount of time, the watchdog device assumes the system has
+//config:	hung, and will cause the hardware to reboot.
+//config:
+//config:config FEATURE_WATCHDOG_OPEN_TWICE
+//config:	bool "Open watchdog device twice, closing it gracefully in between"
+//config:	depends on WATCHDOG
+//config:	default n   # this behavior was essentially a hack for a broken driver
+//config:	help
+//config:	When enabled, the watchdog device is opened and then immediately
+//config:	magic-closed, before being opened a second time. This may be necessary
+//config:	for some watchdog devices, but can cause spurious warnings in the
+//config:	kernel log if the nowayout feature is enabled. If this workaround
+//config:	is really needed for you machine to work properly, consider whether
+//config:	it should be fixed in the kernel driver instead. Even when disabled,
+//config:	the behaviour is easily emulated with a "printf 'V' > /dev/watchdog"
+//config:	immediately before starting the busybox watchdog daemon. Say n unless
+//config:	you know that you absolutely need this.
+
+//applet:IF_WATCHDOG(APPLET(watchdog, BB_DIR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_WATCHDOG) += watchdog.o
+
+//usage:#define watchdog_trivial_usage
+//usage:       "[-t N[ms]] [-T N[ms]] [-F] DEV"
+//usage:#define watchdog_full_usage "\n\n"
+//usage:       "Periodically write to watchdog device DEV\n"
+//usage:     "\n	-T N	Reboot after N seconds if not reset (default 60)"
+//usage:     "\n	-t N	Reset every N seconds (default 30)"
+//usage:     "\n	-F	Run in foreground"
+//usage:     "\n"
+//usage:     "\nUse 500ms to specify period in milliseconds"
+

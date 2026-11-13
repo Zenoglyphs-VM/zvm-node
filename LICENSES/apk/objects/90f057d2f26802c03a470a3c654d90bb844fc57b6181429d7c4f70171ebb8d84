@@ -1,0 +1,292 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * httpd implementation for busybox
+ *
+ * Copyright (C) 2002,2003 Glenn Engel <glenne@engel.org>
+ * Copyright (C) 2003-2006 Vladimir Oleynik <dzo@simtreas.ru>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ *****************************************************************************
+ *
+ * Typical usage:
+ * For non root user:
+ *      httpd -p 8080 -h $HOME/public_html
+ * For daemon start from rc script with uid=0:
+ *      httpd -u www
+ * which is equivalent to (assuming user www has uid 80):
+ *      httpd -p 80 -u 80 -h $PWD -c /etc/httpd.conf -r "Web Server Authentication"
+ *
+ * When an url starts with "/cgi-bin/" it is assumed to be a cgi script.
+ * The server changes directory to the location of the script and executes it
+ * after setting QUERY_STRING and other environment variables.
+ *
+ * If directory URL is given, no index.html is found and CGI support is enabled,
+ * cgi-bin/index.cgi will be run. Directory to list is ../$QUERY_STRING.
+ * See httpd_indexcgi.c for an example GCI code.
+ *
+ * Doc:
+ * "CGI Environment Variables": http://hoohoo.ncsa.uiuc.edu/cgi/env.html
+ *
+ * The applet can also be invoked as an url arg decoder and html text encoder
+ * as follows:
+ *      foo=`httpd -d $foo`             # decode "Hello%20World" as "Hello World"
+ *      bar=`httpd -e "<Hello World>"`  # encode as "&#60Hello&#32World&#62"
+ * Note that url encoding for arguments is not the same as html encoding for
+ * presentation.  -d decodes an url-encoded argument while -e encodes in html
+ * for page display.
+ *
+ * httpd.conf has the following format:
+ *
+ * H:/serverroot     # define the server root. It will override -h
+ * A:172.20.         # Allow address from 172.20.0.0/16
+ * A:10.0.0.0/25     # Allow any address from 10.0.0.0-10.0.0.127
+ * A:10.0.0.0/255.255.255.128  # Allow any address that previous set
+ * A:127.0.0.1       # Allow local loopback connections
+ * D:*               # Deny from other IP connections
+ * E404:/path/e404.html # /path/e404.html is the 404 (not found) error page
+ * I:index.html      # Show index.html when a directory is requested
+ *
+ * P:/url:[http://]hostname[:port]/new/path
+ *                   # When /urlXXXXXX is requested, reverse proxy
+ *                   # it to http://hostname[:port]/new/pathXXXXXX
+ *
+ * /cgi-bin:foo:bar  # Require user foo, pwd bar on urls starting with /cgi-bin/
+ * /adm:admin:setup  # Require user admin, pwd setup on urls starting with /adm/
+ * /adm:toor:PaSsWd  # or user toor, pwd PaSsWd on urls starting with /adm/
+ * /adm:root:*       # or user root, pwd from /etc/passwd on urls starting with /adm/
+ * /wiki:*:*         # or any user from /etc/passwd with according pwd on urls starting with /wiki/
+ * .au:audio/basic   # additional mime type for audio.au files
+ * *.php:/path/php   # run xxx.php through an interpreter
+ *
+ * A/D may be as a/d or allow/deny - only first char matters.
+ * Deny/Allow IP logic:
+ *  - Default is to allow all (Allow all (A:*) is a no-op).
+ *  - Deny rules take precedence over allow rules.
+ *  - "Deny all" rule (D:*) is applied last.
+ *
+ * Example:
+ *   1. Allow only specified addresses
+ *     A:172.20          # Allow any address that begins with 172.20.
+ *     A:10.10.          # Allow any address that begins with 10.10.
+ *     A:127.0.0.1       # Allow local loopback connections
+ *     D:*               # Deny from other IP connections
+ *
+ *   2. Only deny specified addresses
+ *     D:1.2.3.        # deny from 1.2.3.0 - 1.2.3.255
+ *     D:2.3.4.        # deny from 2.3.4.0 - 2.3.4.255
+ *     A:*             # (optional line added for clarity)
+ *
+ * If a sub directory contains config file, it is parsed and merged with
+ * any existing settings as if it was appended to the original configuration.
+ *
+ * subdir paths are relative to the containing subdir and thus cannot
+ * affect the parent rules.
+ *
+ * Note that since the sub dir is parsed in the forked thread servicing the
+ * subdir http request, any merge is discarded when the process exits.  As a
+ * result, the subdir settings only have a lifetime of a single request.
+ *
+ * Custom error pages can contain an absolute path or be relative to
+ * 'home_httpd'. Error pages are to be static files (no CGI or script). Error
+ * page can only be defined in the root configuration file and are not taken
+ * into account in local (directories) config files.
+ *
+ * If -c is not set, an attempt will be made to open the default
+ * root configuration file.  If -c is set and the file is not found, the
+ * server exits with an error.
+ */
+//config:config HTTPD
+//config:	bool "httpd (32 kb)"
+//config:	default y
+//config:	help
+//config:	HTTP server.
+//config:
+//config:config FEATURE_HTTPD_PORT_DEFAULT
+//config:	int "Default port"
+//config:	default 80
+//config:	range 1 65535
+//config:	depends on HTTPD
+//config:
+//config:config FEATURE_HTTPD_RANGES
+//config:	bool "Support 'Ranges:' header"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	Makes httpd emit "Accept-Ranges: bytes" header and understand
+//config:	"Range: bytes=NNN-[MMM]" header. Allows for resuming interrupted
+//config:	downloads, seeking in multimedia players etc.
+//config:
+//config:config FEATURE_HTTPD_SETUID
+//config:	bool "Enable -u <user> option"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	This option allows the server to run as a specific user
+//config:	rather than defaulting to the user that starts the server.
+//config:	Use of this option requires special privileges to change to a
+//config:	different user.
+//config:
+//config:config FEATURE_HTTPD_BASIC_AUTH
+//config:	bool "Enable HTTP authentication"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	Utilizes password settings from /etc/httpd.conf for basic
+//config:	authentication on a per url basis.
+//config:	Example for httpd.conf file:
+//config:	/adm:toor:PaSsWd
+//config:
+//config:config FEATURE_HTTPD_AUTH_MD5
+//config:	bool "Support MD5-encrypted passwords in HTTP authentication"
+//config:	default y
+//config:	depends on FEATURE_HTTPD_BASIC_AUTH
+//config:	help
+//config:	Enables encrypted passwords, and wildcard user/passwords
+//config:	in httpd.conf file.
+//config:	User '*' means 'any system user name is ok',
+//config:	password of '*' means 'use system password for this user'
+//config:	Examples:
+//config:	/adm:toor:$1$P/eKnWXS$aI1aPGxT.dJD5SzqAKWrF0
+//config:	/adm:root:*
+//config:	/wiki:*:*
+//config:
+//config:config FEATURE_HTTPD_CGI
+//config:	bool "Support Common Gateway Interface (CGI)"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	This option allows scripts and executables to be invoked
+//config:	when specific URLs are requested.
+//config:
+//config:config FEATURE_HTTPD_CONFIG_WITH_SCRIPT_INTERPR
+//config:	bool "Support running scripts through an interpreter"
+//config:	default y
+//config:	depends on FEATURE_HTTPD_CGI
+//config:	help
+//config:	This option enables support for running scripts through an
+//config:	interpreter. Turn this on if you want PHP scripts to work
+//config:	properly. You need to supply an additional line in your
+//config:	httpd.conf file:
+//config:	*.php:/path/to/your/php
+//config:
+//config:config FEATURE_HTTPD_SET_REMOTE_PORT_TO_ENV
+//config:	bool "Set REMOTE_PORT environment variable for CGI"
+//config:	default y
+//config:	depends on FEATURE_HTTPD_CGI
+//config:	help
+//config:	Use of this option can assist scripts in generating
+//config:	references that contain a unique port number.
+//config:
+//config:config FEATURE_HTTPD_ENCODE_URL_STR
+//config:	bool "Enable -e option (useful for CGIs written as shell scripts)"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	This option allows html encoding of arbitrary strings for display
+//config:	by the browser. Output goes to stdout.
+//config:	For example, httpd -e "<Hello World>" produces
+//config:	"&#60Hello&#32World&#62".
+//config:
+//config:config FEATURE_HTTPD_ERROR_PAGES
+//config:	bool "Support custom error pages"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	This option allows you to define custom error pages in
+//config:	the configuration file instead of the default HTTP status
+//config:	error pages. For instance, if you add the line:
+//config:		E404:/path/e404.html
+//config:	in the config file, the server will respond the specified
+//config:	'/path/e404.html' file instead of the terse '404 NOT FOUND'
+//config:	message.
+//config:
+//config:config FEATURE_HTTPD_PROXY
+//config:	bool "Support reverse proxy"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	This option allows you to define URLs that will be forwarded
+//config:	to another HTTP server. To setup add the following line to the
+//config:	configuration file
+//config:		P:/url/:http://hostname[:port]/new/path/
+//config:	Then a request to /url/myfile will be forwarded to
+//config:	http://hostname[:port]/new/path/myfile.
+//config:
+//config:config FEATURE_HTTPD_GZIP
+//config:	bool "Support GZIP content encoding"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	Makes httpd send files using GZIP content encoding if the
+//config:	client supports it and a pre-compressed <file>.gz exists.
+//config:
+//config:config FEATURE_HTTPD_ETAG
+//config:	bool "Support caching via ETag header"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	If server responds with ETag then next time client (browser)
+//config:	resend it via If-None-Match header.
+//config:	Then httpd will check if file wasn't modified and if not,
+//config:	return 304 Not Modified status code.
+//config:	The ETag value is constructed from last modification date
+//config:	in unix epoch, and size: "hex(last_mod)-hex(file_size)".
+//config:	It's not completely reliable as hash functions but fair enough.
+//config:
+//config:config FEATURE_HTTPD_LAST_MODIFIED
+//config:	bool "Add Last-Modified header to response"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	The Last-Modified header is used for cache validation.
+//config:	The client sends last seen mtime to server in If-Modified-Since.
+//config:	Both headers MUST be an RFC 1123 formatted, which is hard to parse.
+//config:	Use ETag header instead.
+//config:
+//config:config FEATURE_HTTPD_DATE
+//config:	bool "Add Date header to response"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	RFC2616 says that server MUST add Date header to response.
+//config:	But it is almost useless and can be omitted.
+//config:
+//config:config FEATURE_HTTPD_ACL_IP
+//config:	bool "ACL IP"
+//config:	default y
+//config:	depends on HTTPD
+//config:	help
+//config:	Support IP deny/allow rules
+
+//applet:IF_HTTPD(APPLET(httpd, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_HTTPD) += httpd.o
+
+//usage:#define httpd_trivial_usage
+//usage:       "[-ifv[v]]"
+//usage:       " [-c CONFFILE]"
+//usage:       " [-p [IP:]PORT]"
+//usage:	IF_FEATURE_HTTPD_SETUID(" [-u USER[:GRP]]")
+//usage:	IF_FEATURE_HTTPD_BASIC_AUTH(" [-r REALM]")
+//usage:       " [-h HOME]\n"
+//usage:       "or httpd -d/-e" IF_FEATURE_HTTPD_AUTH_MD5("/-m") " STRING"
+//usage:#define httpd_full_usage "\n\n"
+//usage:       "Listen for incoming HTTP requests\n"
+//usage:     "\n	-i		Inetd mode"
+//usage:     "\n	-f		Run in foreground"
+//usage:     "\n	-v[v]		Verbose"
+//usage:     "\n	-p [IP:]PORT	Bind to IP:PORT (default *:"STR(CONFIG_FEATURE_HTTPD_PORT_DEFAULT)")"
+//usage:	IF_FEATURE_HTTPD_SETUID(
+//usage:     "\n	-u USER[:GRP]	Set uid/gid after binding to port")
+//usage:	IF_FEATURE_HTTPD_BASIC_AUTH(
+//usage:     "\n	-r REALM	Authentication Realm for Basic Authentication")
+//usage:     "\n	-h HOME		Home directory (default .)"
+//usage:     "\n	-c FILE		Configuration file (default {/etc,HOME}/httpd.conf)"
+//usage:	IF_FEATURE_HTTPD_AUTH_MD5(
+//usage:     "\n	-m STRING	MD5 crypt STRING")
+//usage:     "\n	-e STRING	HTML encode STRING"
+//usage:     "\n	-d STRING	URL decode STRING"
+
+/* TODO: use TCP_CORK, parse_config() */
+

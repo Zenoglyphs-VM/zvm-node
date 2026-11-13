@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# pidof tests.
+# Copyright 2005 by Bernhard Reutner-Fischer
+# Licensed under GPLv2, see file LICENSE in this source tree.
+
+# AUDIT:
+

@@ -1,0 +1,34 @@
+{
+  "notices": [
+    {
+      "bytes": 105,
+      "path": "musl-obstack-1.2.3/AUTHORS",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "c5c8c57b4e45c6289aff9b7ace58cc8493d361409fb7798a384c5efc56470629",
+      "source": "musl-obstack-1.2.3.tar.gz"
+    },
+    {
+      "bytes": 990,
+      "path": "musl-obstack-1.2.3/COPYING",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "3b53c355562d068ee10e0eced026160e3c6e2042f01d973797c50add01b61fed",
+      "source": "musl-obstack-1.2.3.tar.gz"
+    },
+    {
+      "bytes": 856,
+      "path": "musl-obstack-1.2.3/obstack.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e4d0a8aae3f02b8f495d5cdee07744608100d87c7eb1150089813afd82f6f125",
+      "source": "musl-obstack-1.2.3.tar.gz"
+    },
+    {
+      "bytes": 5002,
+      "path": "musl-obstack-1.2.3/obstack.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a6b524a5dc84968063c3d3b3628245aafc4621b078eac7bcb13ba0989312bd17",
+      "source": "musl-obstack-1.2.3.tar.gz"
+    }
+  ],
+  "origin": "musl-obstack",
+  "schema": 1
+}

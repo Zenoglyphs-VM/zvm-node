@@ -1,0 +1,20 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright (C) 2021 Denys Vlasenko <vda.linux@googlemail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config ASCII
+//config:	bool "ascii (784 bytes)"
+//config:	default y
+//config:	help
+//config:	Print ascii table.
+//config:
+
+//applet:IF_ASCII(APPLET(ascii, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_ASCII) += ascii.o
+
+//usage:#define ascii_trivial_usage NOUSAGE_STR
+//usage:#define ascii_full_usage ""
+

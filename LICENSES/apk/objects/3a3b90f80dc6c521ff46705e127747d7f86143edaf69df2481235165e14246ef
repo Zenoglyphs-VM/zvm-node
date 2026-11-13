@@ -1,0 +1,122 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini diff implementation for busybox, adapted from OpenBSD diff.
+ *
+ * Copyright (C) 2010 by Matheus Izvekov <mizvekov@gmail.com>
+ * Copyright (C) 2006 by Robert Sullivan <cogito.ergo.cogito@hotmail.com>
+ * Copyright (c) 2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ *
+ * Sponsored in part by the Defense Advanced Research Projects
+ * Agency (DARPA) and Air Force Research Laboratory, Air Force
+ * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/*
+ * The following code uses an algorithm due to Harold Stone,
+ * which finds a pair of longest identical subsequences in
+ * the two files.
+ *
+ * The major goal is to generate the match vector J.
+ * J[i] is the index of the line in file1 corresponding
+ * to line i in file0. J[i] = 0 if there is no
+ * such line in file1.
+ *
+ * Lines are hashed so as to work in core. All potential
+ * matches are located by sorting the lines of each file
+ * on the hash (called "value"). In particular, this
+ * collects the equivalence classes in file1 together.
+ * Subroutine equiv replaces the value of each line in
+ * file0 by the index of the first element of its
+ * matching equivalence in (the reordered) file1.
+ * To save space equiv squeezes file1 into a single
+ * array member in which the equivalence classes
+ * are simply concatenated, except that their first
+ * members are flagged by changing sign.
+ *
+ * Next the indices that point into member are unsorted into
+ * array class according to the original order of file0.
+ *
+ * The cleverness lies in routine stone. This marches
+ * through the lines of file0, developing a vector klist
+ * of "k-candidates". At step i a k-candidate is a matched
+ * pair of lines x,y (x in file0, y in file1) such that
+ * there is a common subsequence of length k
+ * between the first i lines of file0 and the first y
+ * lines of file1, but there is no such subsequence for
+ * any smaller y. x is the earliest possible mate to y
+ * that occurs in such a subsequence.
+ *
+ * Whenever any of the members of the equivalence class of
+ * lines in file1 matable to a line in file0 has serial number
+ * less than the y of some k-candidate, that k-candidate
+ * with the smallest such y is replaced. The new
+ * k-candidate is chained (via pred) to the current
+ * k-1 candidate so that the actual subsequence can
+ * be recovered. When a member has serial number greater
+ * that the y of all k-candidates, the klist is extended.
+ * At the end, the longest subsequence is pulled out
+ * and placed in the array J by unravel
+ *
+ * With J in hand, the matches there recorded are
+ * checked against reality to assure that no spurious
+ * matches have crept in due to hashing. If they have,
+ * they are broken, and "jackpot" is recorded--a harmless
+ * matter except that a true match for a spuriously
+ * mated line may now be unnecessarily reported as a change.
+ *
+ * Much of the complexity of the program comes simply
+ * from trying to minimize core utilization and
+ * maximize the range of doable problems by dynamically
+ * allocating what is needed and reusing what is not.
+ * The core requirements for problems larger than somewhat
+ * are (in words) 2*length(file0) + length(file1) +
+ * 3*(number of k-candidates installed), typically about
+ * 6n words for files of length n.
+ */
+//config:config DIFF
+//config:	bool "diff (13 kb)"
+//config:	default y
+//config:	help
+//config:	diff compares two files or directories and outputs the
+//config:	differences between them in a form that can be given to
+//config:	the patch command.
+//config:
+//config:config FEATURE_DIFF_LONG_OPTIONS
+//config:	bool "Enable long options"
+//config:	default y
+//config:	depends on DIFF && LONG_OPTS
+//config:
+//config:config FEATURE_DIFF_DIR
+//config:	bool "Enable directory support"
+//config:	default y
+//config:	depends on DIFF
+//config:	help
+//config:	This option enables support for directory and subdirectory
+//config:	comparison.
+
+//applet:IF_DIFF(APPLET(diff, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_DIFF) += diff.o
+
+//usage:#define diff_trivial_usage
+//usage:       "[-abBdiNqrTstw] [-L LABEL] [-S FILE] [-U LINES] FILE1 FILE2"
+//usage:#define diff_full_usage "\n\n"
+//usage:       "Compare files line by line and output the differences between them.\n"
+//usage:       "This implementation supports unified diffs only.\n"
+//usage:     "\n	-a	Treat all files as text"
+//usage:     "\n	-b	Ignore changes in the amount of whitespace"
+//usage:     "\n	-B	Ignore changes whose lines are all blank"
+//usage:     "\n	-d	Try hard to find a smaller set of changes"
+//usage:     "\n	-i	Ignore case differences"
+//usage:     "\n	-L	Use LABEL instead of the filename in the unified header"
+//usage:     "\n	-N	Treat absent files as empty"
+//usage:     "\n	-q	Output only whether files differ"
+//usage:     "\n	-r	Recurse"
+//usage:     "\n	-S	Start with FILE when comparing directories"
+//usage:     "\n	-T	Make tabs line up by prefixing a tab when necessary"
+//usage:     "\n	-s	Report when two files are the same"
+//usage:     "\n	-t	Expand tabs to spaces in output"
+//usage:     "\n	-U	Output LINES lines of context"
+//usage:     "\n	-w	Ignore all whitespace"
+

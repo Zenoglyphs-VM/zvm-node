@@ -1,0 +1,29 @@
+#!/usr/bin/env perl
+# Copyright 2017-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# [ABI- and endian-neutral] Keccak-1600 for C64x.
+#
+# June 2017.
+#
+# This is straightforward KECCAK_1X_ALT variant (see sha/keccak1600.c)
+# with bit interleaving. 64-bit values are simply split between A- and
+# B-files, with A-file holding least significant halves. This works
+# out perfectly, because all operations including cross-communications
+# [in rotate operations] are always complementary. Performance is
+# [incredible for a 32-bit processor] 10.9 cycles per processed byte
+# for r=1088, which corresponds to SHA3-256. This is >15x faster than
+# compiler-generated KECCAK_1X_ALT code, and >10x than other variants.
+# On average processor ends up issuing ~4.5 instructions per cycle...
+

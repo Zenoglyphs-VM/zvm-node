@@ -1,0 +1,9 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ * Adapted from https://github.com/gavinhoward/bc
+ * Original code copyright (c) 2018 Gavin D. Howard and contributors.
+ */
+//TODO:
+// maybe implement a^b for non-integer b? (see zbc_num_p())
+

@@ -1,0 +1,23 @@
+/* mini man implementation for busybox
+ * Copyright (C) 2008 Denys Vlasenko <vda.linux@googlemail.com>
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config MAN
+//config:	bool "man (26 kb)"
+//config:	default y
+//config:	help
+//config:	Format and display manual pages.
+
+//applet:IF_MAN(APPLET(man, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_MAN) += man.o
+
+//usage:#define man_trivial_usage
+//usage:       "[-aw] [SECTION] MANPAGE[.SECTION]..."
+//usage:#define man_full_usage "\n\n"
+//usage:       "Display manual page\n"
+//usage:     "\n	-a	Display all pages"
+//usage:     "\n	-w	Show page locations"
+//usage:     "\n"
+//usage:     "\n$COLUMNS overrides output width"
+

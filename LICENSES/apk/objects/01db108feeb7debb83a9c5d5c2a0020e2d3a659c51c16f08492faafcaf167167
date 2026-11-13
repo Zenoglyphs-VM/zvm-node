@@ -1,0 +1,30 @@
+#! /usr/bin/env perl
+# Copyright 2006-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# I let hardware handle unaligned input(*), except on page boundaries
+# (see below for details). Otherwise straightforward implementation
+# with X vector in register bank.
+#
+# (*) this means that this module is inappropriate for PPC403? Does
+#     anybody know if pre-POWER3 can sustain unaligned load?
+
+# 			-m64	-m32
+# ----------------------------------
+# PPC970,gcc-4.0.0	+76%	+59%
+# Power6,xlc-7		+68%	+33%
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

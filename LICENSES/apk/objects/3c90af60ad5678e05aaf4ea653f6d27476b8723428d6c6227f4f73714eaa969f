@@ -1,0 +1,418 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini find implementation for busybox
+ *
+ * Copyright (C) 1999-2004 by Erik Andersen <andersen@codepoet.org>
+ *
+ * Reworked by David Douthitt <n9ubh@callsign.net> and
+ *  Matt Kraai <kraai@alumni.carnegiemellon.edu>.
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+/* findutils-4.1.20:
+ *
+ * # find file.txt -exec 'echo {}' '{}  {}' ';'
+ * find: echo file.txt: No such file or directory
+ * # find file.txt -exec 'echo' '{}  {}' '; '
+ * find: missing argument to '-exec'
+ * # find file.txt -exec 'echo {}' '{}  {}' ';' junk
+ * find: paths must precede expression
+ * # find file.txt -exec 'echo {}' '{}  {}' ';' junk ';'
+ * find: paths must precede expression
+ * # find file.txt -exec 'echo' '{}  {}' ';'
+ * file.txt  file.txt
+ * (strace: execve("/bin/echo", ["echo", "file.txt  file.txt"], [ 30 vars ]))
+ * # find file.txt -exec 'echo' '{}  {}' ';' -print -exec pwd ';'
+ * file.txt  file.txt
+ * file.txt
+ * /tmp
+ * # find -name '*.c' -o -name '*.h'
+ * [shows files, *.c and *.h intermixed]
+ * # find file.txt -name '*f*' -o -name '*t*'
+ * file.txt
+ * # find file.txt -name '*z*' -o -name '*t*'
+ * file.txt
+ * # find file.txt -name '*f*' -o -name '*z*'
+ * file.txt
+ *
+ * # find t z -name '*t*' -print -o -name '*z*'
+ * t
+ * # find t z t z -name '*t*' -o -name '*z*' -print
+ * z
+ * z
+ * # find t z t z '(' -name '*t*' -o -name '*z*' ')' -o -print
+ * (no output)
+ */
+/* Testing script
+ * ./busybox find "$@" | tee /tmp/bb_find
+ * echo ==================
+ * /path/to/gnu/find "$@" | tee /tmp/std_find
+ * echo ==================
+ * diff -u /tmp/std_find /tmp/bb_find && echo Identical
+ */
+//config:config FIND
+//config:	bool "find (16 kb)"
+//config:	default y
+//config:	help
+//config:	find is used to search your system to find specified files.
+//config:
+//config:config FEATURE_FIND_PRINT0
+//config:	bool "Enable -print0: NUL-terminated output"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Causes output names to be separated by a NUL character
+//config:	rather than a newline. This allows names that contain
+//config:	newlines and other whitespace to be more easily
+//config:	interpreted by other programs.
+//config:
+//config:config FEATURE_FIND_MTIME
+//config:	bool "Enable -mtime: modification time matching"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Allow searching based on the modification time of
+//config:	files, in days.
+//config:
+//config:config FEATURE_FIND_ATIME
+//config:	bool "Enable -atime: access time matching"
+//config:	default y
+//config:	depends on FEATURE_FIND_MTIME
+//config:	help
+//config:	Allow searching based on the access time of
+//config:	files, in days.
+//config:
+//config:config FEATURE_FIND_CTIME
+//config:	bool "Enable -ctime: status change timestamp matching"
+//config:	default y
+//config:	depends on FEATURE_FIND_MTIME
+//config:	help
+//config:	Allow searching based on the status change timestamp of
+//config:	files, in days.
+//config:
+//config:config FEATURE_FIND_MMIN
+//config:	bool "Enable -mmin: modification time matching by minutes"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Allow searching based on the modification time of
+//config:	files, in minutes.
+//config:
+//config:config FEATURE_FIND_AMIN
+//config:	bool "Enable -amin: access time matching by minutes"
+//config:	default y
+//config:	depends on FEATURE_FIND_MMIN
+//config:	help
+//config:	Allow searching based on the access time of
+//config:	files, in minutes.
+//config:
+//config:config FEATURE_FIND_CMIN
+//config:	bool "Enable -cmin: status change timestamp matching by minutes"
+//config:	default y
+//config:	depends on FEATURE_FIND_MMIN
+//config:	help
+//config:	Allow searching based on the status change timestamp of
+//config:	files, in minutes.
+//config:
+//config:config FEATURE_FIND_PERM
+//config:	bool "Enable -perm: permissions matching"
+//config:	default y
+//config:	depends on FIND
+//config:
+//config:config FEATURE_FIND_TYPE
+//config:	bool "Enable -type: file type matching (file/dir/link/...)"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Enable searching based on file type (file,
+//config:	directory, socket, device, etc.).
+//config:
+//config:config FEATURE_FIND_EXECUTABLE
+//config:	bool "Enable -executable: file is executable"
+//config:	default y
+//config:	depends on FIND
+//config:
+//config:config FEATURE_FIND_XDEV
+//config:	bool "Enable -xdev: 'stay in filesystem'"
+//config:	default y
+//config:	depends on FIND
+//config:
+//config:config FEATURE_FIND_MAXDEPTH
+//config:	bool "Enable -mindepth N and -maxdepth N"
+//config:	default y
+//config:	depends on FIND
+//config:
+//config:config FEATURE_FIND_NEWER
+//config:	bool "Enable -newer: compare file modification times"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Support the 'find -newer' option for finding any files which have
+//config:	modification time that is more recent than the specified FILE.
+//config:
+//config:config FEATURE_FIND_INUM
+//config:	bool "Enable -inum: inode number matching"
+//config:	default y
+//config:	depends on FIND
+//config:
+//config:config FEATURE_FIND_SAMEFILE
+//config:	bool "Enable -samefile: reference file matching"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Support the 'find -samefile' option for searching by a reference file.
+//config:
+//config:config FEATURE_FIND_EXEC
+//config:	bool "Enable -exec: execute commands"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Support the 'find -exec' option for executing commands based upon
+//config:	the files matched.
+//config:
+//config:config FEATURE_FIND_EXEC_PLUS
+//config:	bool "Enable -exec ... {} +"
+//config:	default y
+//config:	depends on FEATURE_FIND_EXEC
+//config:	help
+//config:	Support the 'find -exec ... {} +' option for executing commands
+//config:	for all matched files at once.
+//config:	Without this option, -exec + is a synonym for -exec ;
+//config:	(IOW: it works correctly, but without expected speedup)
+//config:
+//config:config FEATURE_FIND_EXEC_OK
+//config:	bool "Enable -ok: execute confirmed commands"
+//config:	default y
+//config:	depends on FEATURE_FIND_EXEC
+//config:	help
+//config:	Support the 'find -ok' option which prompts before executing.
+//config:
+//config:config FEATURE_FIND_USER
+//config:	bool "Enable -user: username/uid matching"
+//config:	default y
+//config:	depends on FIND
+//config:
+//config:config FEATURE_FIND_GROUP
+//config:	bool "Enable -group: group/gid matching"
+//config:	default y
+//config:	depends on FIND
+//config:
+//config:config FEATURE_FIND_NOT
+//config:	bool "Enable the 'not' (!) operator"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Support the '!' operator to invert the test results.
+//config:	If 'Enable full-blown desktop' is enabled, then will also support
+//config:	the non-POSIX notation '-not'.
+//config:
+//config:config FEATURE_FIND_DEPTH
+//config:	bool "Enable -depth"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Process each directory's contents before the directory itself.
+//config:
+//config:config FEATURE_FIND_PAREN
+//config:	bool "Enable parens in options"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Enable usage of parens '(' to specify logical order of arguments.
+//config:
+//config:config FEATURE_FIND_SIZE
+//config:	bool "Enable -size: file size matching"
+//config:	default y
+//config:	depends on FIND
+//config:
+//config:config FEATURE_FIND_PRUNE
+//config:	bool "Enable -prune: exclude subdirectories"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	If the file is a directory, don't descend into it. Useful for
+//config:	exclusion .svn and CVS directories.
+//config:
+//config:config FEATURE_FIND_QUIT
+//config:	bool "Enable -quit: exit"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	If this action is reached, 'find' exits.
+//config:
+//config:config FEATURE_FIND_DELETE
+//config:	bool "Enable -delete: delete files/dirs"
+//config:	default y
+//config:	depends on FIND && FEATURE_FIND_DEPTH
+//config:	help
+//config:	Support the 'find -delete' option for deleting files and directories.
+//config:	WARNING: This option can do much harm if used wrong. Busybox will not
+//config:	try to protect the user from doing stupid things. Use with care.
+//config:
+//config:config FEATURE_FIND_EMPTY
+//config:	bool "Enable -empty: match empty files or directories"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Support the 'find -empty' option to find empty regular files
+//config:	or directories.
+//config:
+//config:config FEATURE_FIND_PATH
+//config:	bool "Enable -path: match pathname with shell pattern"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	The -path option matches whole pathname instead of just filename.
+//config:
+//config:config FEATURE_FIND_REGEX
+//config:	bool "Enable -regex: match pathname with regex"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	The -regex option matches whole pathname against regular expression.
+//config:
+//config:config FEATURE_FIND_CONTEXT
+//config:	bool "Enable -context: security context matching"
+//config:	default n
+//config:	depends on FIND && SELINUX
+//config:	help
+//config:	Support the 'find -context' option for matching security context.
+//config:
+//config:config FEATURE_FIND_LINKS
+//config:	bool "Enable -links: link count matching"
+//config:	default y
+//config:	depends on FIND
+//config:	help
+//config:	Support the 'find -links' option for matching number of links.
+
+//applet:IF_FIND(APPLET_NOEXEC(find, find, BB_DIR_USR_BIN, BB_SUID_DROP, find))
+
+//kbuild:lib-$(CONFIG_FIND) += find.o
+
+//usage:#define find_trivial_usage
+//usage:       "[-HL] [PATH]... [OPTIONS] [ACTIONS]"
+//usage:#define find_full_usage "\n\n"
+//usage:       "Search for files and perform actions on them.\n"
+//usage:       "First failed action stops processing of current file.\n"
+//usage:       "Defaults: PATH is current directory, action is '-print'\n"
+//usage:     "\n	-L,-follow	Follow symlinks"
+//usage:     "\n	-H		...on command line only"
+//usage:	IF_FEATURE_FIND_XDEV(
+//usage:     "\n	-xdev		Don't descend directories on other filesystems"
+//usage:	)
+//usage:	IF_FEATURE_FIND_MAXDEPTH(
+//usage:     "\n	-maxdepth N	Descend at most N levels. -maxdepth 0 applies"
+//usage:     "\n			actions to command line arguments only"
+//usage:     "\n	-mindepth N	Don't act on first N levels"
+//usage:	)
+//usage:	IF_FEATURE_FIND_DEPTH(
+//usage:     "\n	-depth		Act on directory *after* traversing it"
+//usage:	)
+//usage:     "\n"
+//usage:     "\nActions:"
+//usage:	IF_FEATURE_FIND_PAREN(
+//usage:     "\n	( ACTIONS )	Group actions for -o / -a"
+//usage:	)
+//usage:	IF_FEATURE_FIND_NOT(
+//usage:     "\n	! ACT		Invert ACT's success/failure"
+//usage:	)
+//usage:     "\n	ACT1 [-a] ACT2	If ACT1 fails, stop, else do ACT2"
+//usage:     "\n	ACT1 -o ACT2	If ACT1 succeeds, stop, else do ACT2"
+//usage:     "\n			Note: -a has higher priority than -o"
+//usage:     "\n	-name PATTERN	Match file name (w/o directory name) to PATTERN"
+//usage:     "\n	-iname PATTERN	Case insensitive -name"
+//usage:	IF_FEATURE_FIND_PATH(
+//usage:     "\n	-path PATTERN	Match path to PATTERN"
+//usage:     "\n	-ipath PATTERN	Case insensitive -path"
+//usage:	)
+//usage:	IF_FEATURE_FIND_REGEX(
+//usage:     "\n	-regex PATTERN	Match path to regex PATTERN"
+//usage:	)
+//usage:	IF_FEATURE_FIND_TYPE(
+//usage:     "\n	-type X		File type is X (one of: f,d,l,b,c,s,p)"
+//usage:	)
+//usage:	IF_FEATURE_FIND_EXECUTABLE(
+//usage:     "\n	-executable	File is executable"
+//usage:	)
+//usage:	IF_FEATURE_FIND_PERM(
+//usage:     "\n	-perm MASK	At least one mask bit (+MASK), all bits (-MASK),"
+//usage:     "\n			or exactly MASK bits are set in file's mode"
+//usage:	)
+//usage:	IF_FEATURE_FIND_MTIME(
+//usage:     "\n	-mtime DAYS	mtime is greater than (+N), less than (-N),"
+//usage:     "\n			or exactly N days in the past"
+//usage:	)
+//usage:	IF_FEATURE_FIND_ATIME(
+//usage:     "\n	-atime DAYS	atime +N/-N/N days in the past"
+//usage:	)
+//usage:	IF_FEATURE_FIND_CTIME(
+//usage:     "\n	-ctime DAYS	ctime +N/-N/N days in the past"
+//usage:	)
+//usage:	IF_FEATURE_FIND_MMIN(
+//usage:     "\n	-mmin MINS	mtime is greater than (+N), less than (-N),"
+//usage:     "\n			or exactly N minutes in the past"
+//usage:	)
+//usage:	IF_FEATURE_FIND_AMIN(
+//usage:     "\n	-amin MINS	atime +N/-N/N minutes in the past"
+//usage:	)
+//usage:	IF_FEATURE_FIND_CMIN(
+//usage:     "\n	-cmin MINS	ctime +N/-N/N minutes in the past"
+//usage:	)
+//usage:	IF_FEATURE_FIND_NEWER(
+//usage:     "\n	-newer FILE	mtime is more recent than FILE's"
+//usage:	)
+//usage:	IF_FEATURE_FIND_INUM(
+//usage:     "\n	-inum N		File has inode number N"
+//usage:	)
+//usage:	IF_FEATURE_FIND_SAMEFILE(
+//usage:     "\n	-samefile FILE	File is same as FILE"
+//usage:	)
+//usage:	IF_FEATURE_FIND_USER(
+//usage:     "\n	-user NAME/ID	File is owned by given user"
+//usage:	)
+//usage:	IF_FEATURE_FIND_GROUP(
+//usage:     "\n	-group NAME/ID	File is owned by given group"
+//usage:	)
+//usage:	IF_FEATURE_FIND_SIZE(
+//usage:     "\n	-size N[bck]	File size is N (c:bytes,k:kbytes,b:512 bytes(def.))"
+//usage:     "\n			+/-N: file size is bigger/smaller than N"
+//usage:	)
+//usage:	IF_FEATURE_FIND_LINKS(
+//usage:     "\n	-links N	Number of links is greater than (+N), less than (-N),"
+//usage:     "\n			or exactly N"
+//usage:	)
+//usage:	IF_FEATURE_FIND_CONTEXT(
+//usage:     "\n	-context CTX	File has specified security context"
+//usage:	)
+//usage:	IF_FEATURE_FIND_EMPTY(
+//usage:     "\n	-empty		Match empty file/directory"
+//usage:	)
+//usage:	IF_FEATURE_FIND_PRUNE(
+//usage:     "\n	-prune		If current file is directory, don't descend into it"
+//usage:	)
+//usage:     "\nIf none of the following actions is specified, -print is assumed"
+//usage:     "\n	-print		Print file name"
+//usage:	IF_FEATURE_FIND_PRINT0(
+//usage:     "\n	-print0		Print file name, NUL terminated"
+//usage:	)
+//usage:	IF_FEATURE_FIND_EXEC(
+//usage:     "\n	-exec CMD ARG ;	Run CMD with all instances of {} replaced by"
+//usage:     "\n			file name. Fails if CMD exits with nonzero"
+//usage:	)
+//usage:	IF_FEATURE_FIND_EXEC_PLUS(
+//usage:     "\n	-exec CMD ARG + Run CMD with {} replaced by list of file names"
+//usage:	)
+//usage:	IF_FEATURE_FIND_EXEC_OK(
+//usage:     "\n	-ok CMD ARG ;   Prompt and run CMD with {} replaced"
+//usage:	)
+//usage:	IF_FEATURE_FIND_DELETE(
+//usage:     "\n	-delete		Delete current file/directory. Turns on -depth option"
+//usage:	)
+//usage:	IF_FEATURE_FIND_QUIT(
+//usage:     "\n	-quit		Exit"
+//usage:	)
+//usage:
+//usage:#define find_example_usage
+//usage:       "$ find / -name passwd\n"
+//usage:       "/etc/passwd\n"
+

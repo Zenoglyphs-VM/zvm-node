@@ -1,0 +1,62 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini tr implementation for busybox
+ *
+ * Copyright (c) 1987,1997, Prentice Hall   All rights reserved.
+ *
+ * The name of Prentice Hall may not be used to endorse or promote
+ * products derived from this software without specific prior
+ * written permission.
+ *
+ * Copyright (c) Michiel Huisjes
+ *
+ * This version of tr is adapted from Minix tr and was modified
+ * by Erik Andersen <andersen@codepoet.org> to be used in busybox.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html
+ * TODO: graph, print
+ */
+//config:config TR
+//config:	bool "tr (5.3 kb)"
+//config:	default y
+//config:	help
+//config:	tr is used to squeeze, and/or delete characters from standard
+//config:	input, writing to standard output.
+//config:
+//config:config FEATURE_TR_CLASSES
+//config:	bool "Enable character classes (such as [:upper:])"
+//config:	default y
+//config:	depends on TR
+//config:	help
+//config:	Enable character classes, enabling commands such as:
+//config:	tr [:upper:] [:lower:] to convert input into lowercase.
+//config:
+//config:config FEATURE_TR_EQUIV
+//config:	bool "Enable equivalence classes"
+//config:	default y
+//config:	depends on TR
+//config:	help
+//config:	Enable equivalence classes, which essentially add the enclosed
+//config:	character to the current set. For instance, tr [=a=] xyz would
+//config:	replace all instances of 'a' with 'xyz'. This option is mainly
+//config:	useful for cases when no other way of expressing a character
+//config:	is possible.
+
+//applet:IF_TR(APPLET(tr, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TR) += tr.o
+
+//usage:#define tr_trivial_usage
+//usage:       "[-cds] STRING1 [STRING2]"
+//usage:#define tr_full_usage "\n\n"
+//usage:       "Translate, squeeze, or delete characters from stdin, writing to stdout\n"
+//usage:     "\n	-c	Take complement of STRING1"
+//usage:     "\n	-d	Delete input characters coded STRING1"
+//usage:     "\n	-s	Squeeze multiple output characters of STRING2 into one character"
+//usage:
+//usage:#define tr_example_usage
+//usage:       "$ echo \"gdkkn vnqkc\" | tr [a-y] [b-z]\n"
+//usage:       "hello world\n"
+

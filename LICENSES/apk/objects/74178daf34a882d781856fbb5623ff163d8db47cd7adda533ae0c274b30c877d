@@ -1,0 +1,43 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * mkfs_vfat: utility to create FAT32 filesystem
+ * inspired by dosfstools
+ *
+ * Busybox'ed (2009) by Vladimir Dronnikov <dronnikov@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config MKDOSFS
+//config:	bool "mkdosfs (7.6 kb)"
+//config:	default y
+//config:	help
+//config:	Utility to create FAT32 filesystems.
+//config:
+//config:config MKFS_VFAT
+//config:	bool "mkfs.vfat (7.6 kb)"
+//config:	default y
+//config:	help
+//config:	Alias to "mkdosfs".
+
+//                    APPLET_ODDNAME:name       main       location     suid_type     help
+//applet:IF_MKDOSFS(  APPLET_ODDNAME(mkdosfs,   mkfs_vfat, BB_DIR_SBIN, BB_SUID_DROP, mkfs_vfat))
+//applet:IF_MKFS_VFAT(APPLET_ODDNAME(mkfs.vfat, mkfs_vfat, BB_DIR_SBIN, BB_SUID_DROP, mkfs_vfat))
+
+//kbuild:lib-$(CONFIG_MKDOSFS) += mkfs_vfat.o
+//kbuild:lib-$(CONFIG_MKFS_VFAT) += mkfs_vfat.o
+
+//usage:#define mkfs_vfat_trivial_usage
+//usage:       "[-v] [-n LABEL] BLOCKDEV [KBYTES]"
+/* Accepted but ignored:
+       "[-c] [-C] [-I] [-l bad-block-file] [-b backup-boot-sector] "
+       "[-m boot-msg-file] [-i volume-id] "
+       "[-s sectors-per-cluster] [-S logical-sector-size] [-f number-of-FATs] "
+       "[-h hidden-sectors] [-F fat-size] [-r root-dir-entries] [-R reserved-sectors] "
+*/
+//usage:#define mkfs_vfat_full_usage "\n\n"
+//usage:       "Make a FAT32 filesystem\n"
+/* //usage:  "\n	-c	Check device for bad blocks" */
+//usage:     "\n	-v	Verbose"
+/* //usage:  "\n	-I	Allow to use entire disk device (e.g. /dev/hda)" */
+//usage:     "\n	-n LBL	Volume label"
+

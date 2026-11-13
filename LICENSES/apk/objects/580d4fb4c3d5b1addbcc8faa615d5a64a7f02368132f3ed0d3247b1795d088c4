@@ -1,0 +1,49 @@
+#! /usr/bin/env perl
+# Copyright 2011-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# June 2011
+#
+# This is RC4+MD5 "stitch" implementation. The idea, as spelled in
+# http://download.intel.com/design/intarch/papers/323686.pdf, is that
+# since both algorithms exhibit instruction-level parallelism, ILP,
+# below theoretical maximum, interleaving them would allow to utilize
+# processor resources better and achieve better performance. RC4
+# instruction sequence is virtually identical to rc4-x86_64.pl, which
+# is heavily based on submission by Maxim Perminov, Maxim Locktyukhin
+# and Jim Guilford of Intel. MD5 is fresh implementation aiming to
+# minimize register usage, which was used as "main thread" with RC4
+# weaved into it, one RC4 round per one MD5 round. In addition to the
+# stiched subroutine the script can generate standalone replacement
+# ossl_md5_block_asm_data_order and RC4. Below are performance numbers in
+# cycles per processed byte, less is better, for these the standalone
+# subroutines, sum of them, and stitched one:
+#
+#		RC4	MD5	RC4+MD5	stitch	gain
+# Opteron	6.5(*)	5.4	11.9	7.0	+70%(*)
+# Core2		6.5	5.8	12.3	7.7	+60%
+# Westmere	4.3	5.2	9.5	7.0	+36%
+# Sandy Bridge	4.2	5.5	9.7	6.8	+43%
+# Ivy Bridge	4.1	5.2	9.3	6.0	+54%
+# Haswell	4.0	5.0	9.0	5.7	+60%
+# Skylake	6.3(**)	5.0	11.3	5.3	+110%
+# Atom		9.3	6.5	15.8	11.1	+42%
+# VIA Nano	6.3	5.4	11.7	8.6	+37%
+# Bulldozer	4.5	5.4	9.9	7.7	+29%
+#
+# (*)	rc4-x86_64.pl delivers 5.3 on Opteron, so real improvement
+#	is +53%...
+# (**)	unidentified anomaly;
+

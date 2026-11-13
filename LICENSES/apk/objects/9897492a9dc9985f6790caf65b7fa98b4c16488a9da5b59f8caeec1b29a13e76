@@ -1,0 +1,42 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Sysctl 1.01 - A utility to read and manipulate the sysctl parameters
+ *
+ * Copyright 1999 George Staikos
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Changelog:
+ * v1.01   - added -p <preload> to preload values from a file
+ * v1.01.1 - busybox applet aware by <solar@gentoo.org>
+ */
+//config:config BB_SYSCTL
+//config:	bool "sysctl (7.9 kb)"
+//config:	default y
+//config:	help
+//config:	Configure kernel parameters at runtime.
+
+//applet:IF_BB_SYSCTL(APPLET_NOEXEC(sysctl, sysctl, BB_DIR_SBIN, BB_SUID_DROP, sysctl))
+
+//kbuild:lib-$(CONFIG_BB_SYSCTL) += sysctl.o
+
+//usage:#define sysctl_trivial_usage
+//usage:       "[-enq] { -a | -p [FILE]... | [-w] [KEY[=VALUE]]... }"
+//usage:#define sysctl_full_usage "\n\n"
+//usage:       "Show/set kernel parameters\n"
+//usage:     "\n	-e	Don't warn about unknown keys"
+//usage:     "\n	-n	Don't show key names"
+//usage:     "\n	-q      Quiet"
+//usage:     "\n	-a	Show all values"
+/* Same as -a, no need to show it */
+/* //usage:     "\n	-A	Show all values in table form" */
+//usage:     "\n	-p	Set values from FILEs (default /etc/sysctl.conf)"
+//usage:     "\n	-w	Set values"
+//usage:
+//usage:#define sysctl_example_usage
+//usage:       "sysctl [-n] [-e] variable...\n"
+//usage:       "sysctl [-n] [-e] [-q] -w variable=value...\n"
+//usage:       "sysctl [-n] [-e] -a\n"
+//usage:       "sysctl [-n] [-e] [-q] -p file	(default /etc/sysctl.conf)\n"
+//usage:       "sysctl [-n] [-e] -A\n"
+

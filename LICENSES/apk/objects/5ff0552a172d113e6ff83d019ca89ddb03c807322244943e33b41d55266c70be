@@ -1,0 +1,46 @@
+/*
+ * Copyright 2026 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License"). You may not use
+ * this file except in compliance with the License. You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * Regression test for: CMP server unauthenticated memory/CPU DoS via
+ * cached extraCerts on failed protection checks.
+ *
+ * Root cause (crypto/cmp/cmp_vfy.c, ossl_cmp_msg_check_update(), current
+ * master as of this writing):
+ *
+ *   res = ossl_x509_add_certs_new(&ctx->untrusted, msg->extraCerts, ...);
+ *   ...
+ *   res = OSSL_CMP_validate_msg(ctx, msg) || (cb...);   // may be 0 (rejected)
+ *
+ *   if (ctx->noCacheExtraCerts)                          // <-- rollback is
+ *       while (num_added-- > 0)                          //  gated on this
+ *           X509_free(sk_X509_shift(ctx->untrusted));    //  flag only, NOT
+ *                                                          //  on the
+ *                                                          //  validation
+ *                                                          //  result (res)
+ *
+ *   if (!res) { ...; return 0; }   // certs from a REJECTED msg are kept
+ *
+ * This test exercises ossl_cmp_msg_check_update() directly -- no sockets,
+ * no HTTP server, no apps/cmp.c -- and asserts on the resulting size of
+ * ctx->untrusted. It builds a genuinely PBM-protected OSSL_CMP_MSG using
+ * the project's own internal message-creation function
+ * (ossl_cmp_genm_new(), same one exercised in test/cmp_msg_test.c) so the
+ * message is not hand-crafted to "look" rejectable -- it is rejected for a
+ * real reason (the receiving ctx has no matching secret configured), the
+ * same way OSSL_CMP_validate_msg() would reject any unauthenticated CMP
+ * request in the field.
+ *
+ * Expected results:
+ *   - BEFORE the fix: untrusted_count_after == untrusted_count_before + N
+ *     (every rejected message's extraCerts persist)
+ *   - AFTER the fix:  untrusted_count_after == untrusted_count_before
+ *     (rejected messages leave no residue)
+ */
+

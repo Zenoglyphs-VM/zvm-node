@@ -1,0 +1,24 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * lsscsi implementation for busybox
+ *
+ * Copyright (C) 2017 Markus Gothe <nietzsche@lysator.liu.se>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config LSSCSI
+//config:	bool "lsscsi (2.9 kb)"
+//config:	default y
+//config:	help
+//config:	lsscsi is a utility for displaying information about SCSI buses in the
+//config:	system and devices connected to them.
+//config:
+//config:	This version uses sysfs (/sys/bus/scsi/devices) only.
+
+//applet:IF_LSSCSI(APPLET_NOEXEC(lsscsi, lsscsi, BB_DIR_USR_BIN, BB_SUID_DROP, lsscsi))
+
+//kbuild:lib-$(CONFIG_LSSCSI) += lsscsi.o
+
+//usage:#define lsscsi_trivial_usage NOUSAGE_STR
+//usage:#define lsscsi_full_usage ""
+

@@ -1,0 +1,22 @@
+/*
+ * Copyright (C) 2008 Natanael Copa <natanael.copa@gmail.com>
+ * All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify it 
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation. See http://www.gnu.org/ for details.
+ *
+ */
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <libgen.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <err.h>
+
+#define BBSUID_PATH "/bin/bbsuid"
+

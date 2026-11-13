@@ -1,0 +1,27 @@
+#!/usr/bin/env perl
+# SPDX-License-Identifier: GPL-2.0
+
+# Stolen from Linux kernel :)
+
+#	Check the stack usage of functions
+#
+#	Copyright Joern Engel <joern@lazybastard.org>
+#	Inspired by Linus Torvalds
+#	Original idea maybe from Keith Owens
+#	s390 port and big speedup by Arnd Bergmann <arnd@bergmann-dalldorf.de>
+#	Mips port by Juan Quintela <quintela@mandrakesoft.com>
+#	IA64 port via Andreas Dilger
+#	Arm port by Holger Schurig
+#	sh64 port by Paul Mundt
+#	Random bits by Matt Mackall <mpm@selenic.com>
+#	M68k port by Geert Uytterhoeven and Andreas Schwab
+#	blackfin port by Alex Landau
+#	AArch64, PARISC ports by Kyle McMartin
+#	sparc port by Martin Habets <errandir_news@mph.eclipse.co.uk>
+#	ppc64le port by Breno Leitao <leitao@debian.org>
+#
+#	Usage:
+#	objdump -d vmlinux | scripts/checkstack.pl [arch]
+#
+#	TODO :	Port to all architectures (one regex per arch)
+

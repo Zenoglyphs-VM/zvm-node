@@ -14,6 +14,7 @@ import uuid
 from bounded import ReviewError, file_bytes, run_bounded, save, sha
 from source_closure import source_closure
 from notice_inventory import EXPORT_SCRIPT, APK_SCRIPT, MAX_EXPORT, summarize_export, expected_readme, apk_licenses
+from apk_notices import summarize as summarize_apk_notices
 from container_footprint import (CONTROL_RECIPE, CONTROL_RECIPE_SHA, PARENT, DIGEST_SCRIPT, HEALTH_COMMAND,
     UNHEALTHY_COMMAND, image as checked_image, digest_projection, health_summary, compare)
 
@@ -64,6 +65,7 @@ def main():
             '--cap-drop=ALL', '--security-opt=no-new-privileges']
 
         def observe(role, tag):
+            nonlocal phase
             prefix = '' if role == 'candidate' else 'control-'
             image = checked_image(json.loads(run(prefix + 'image', ['docker', 'image', 'inspect', '--format', template, tag])))
             packages = run(prefix + 'packages', common + ['--entrypoint=/sbin/apk', image['id'], 'info', '-v']).decode().splitlines()
@@ -85,6 +87,9 @@ def main():
             if role == 'candidate':
                 exported = run('notices', common + ['--entrypoint=/bin/sh', image['id'], '-euc', EXPORT_SCRIPT], MAX_EXPORT)
                 result['sourceNotices'] = summarize_export(exported, before, binary[0], expected_readme(),
+                    lambda path, limit: file_bytes(Path(path), limit))
+                phase = 'apk-source-notice-consumer'
+                result['runtimeAPKSourceNotices'] = summarize_apk_notices(exported, result['runtimeAPKLicenseDeclarations'],
                     lambda path, limit: file_bytes(Path(path), limit))
             else:
                 projected = run('control-notice-digests', common + ['--entrypoint=/bin/sh', image['id'], '-euc', DIGEST_SCRIPT], 2 << 20)

@@ -1,0 +1,38 @@
+#! /usr/bin/env perl
+# Copyright 2021-2022 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+# ====================================================================
+# Written by Amitay Isaacs <amitay@ozlabs.org>, Martin Schwenke
+# <martin@meltin.net> & Alastair D'Silva <alastair@d-silva.org> for
+# the OpenSSL project.
+# ====================================================================
+
+#
+# Fixed length (n=6), unrolled PPC Montgomery Multiplication
+#
+
+# 2021
+#
+# Although this is a generic implementation for unrolling Montgomery
+# Multiplication for arbitrary values of n, this is currently only
+# used for n = 6 to improve the performance of ECC p384.
+#
+# Unrolling allows intermediate results to be stored in registers,
+# rather than on the stack, improving performance by ~7% compared to
+# the existing PPC assembly code.
+#
+# The ISA 3.0 implementation uses combination multiply/add
+# instructions (maddld, maddhdu) to improve performance by an
+# additional ~10% on Power 9.
+#
+# Finally, saving non-volatile registers into volatile vector
+# registers instead of onto the stack saves a little more.
+#
+# On a Power 9 machine we see an overall improvement of ~18%.
+#
+

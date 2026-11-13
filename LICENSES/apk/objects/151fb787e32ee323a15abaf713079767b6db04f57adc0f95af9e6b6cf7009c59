@@ -1,0 +1,92 @@
+#! /usr/bin/env perl
+# Copyright 2011-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# June 2011
+#
+# This is AESNI-CBC+SHA1 "stitch" implementation. The idea, as spelled
+# in http://download.intel.com/design/intarch/papers/323686.pdf, is
+# that since AESNI-CBC encrypt exhibit *very* low instruction-level
+# parallelism, interleaving it with another algorithm would allow to
+# utilize processor resources better and achieve better performance.
+# SHA1 instruction sequences(*) are taken from sha1-x86_64.pl and
+# AESNI code is weaved into it. Below are performance numbers in
+# cycles per processed byte, less is better, for standalone AESNI-CBC
+# encrypt, sum of the latter and standalone SHA1, and "stitched"
+# subroutine:
+#
+#		AES-128-CBC	+SHA1		stitch      gain
+# Westmere	3.77[+5.3]	9.07		6.55	    +38%
+# Sandy Bridge	5.05[+5.0(6.1)]	10.06(11.15)	5.98(7.05)  +68%(+58%)
+# Ivy Bridge	5.05[+4.6]	9.65		5.54        +74%
+# Haswell	4.43[+3.6(4.2)]	8.00(8.58)	4.55(5.21)  +75%(+65%)
+# Skylake	2.63[+3.5(4.1)]	6.17(6.69)	4.23(4.44)  +46%(+51%)
+# Bulldozer	5.77[+6.0]	11.72		6.37        +84%
+# Ryzen(**)	2.71[+1.93]	4.64		2.74        +69%
+# Goldmont(**)	3.82[+1.70]	5.52		4.20        +31%
+#
+#		AES-192-CBC
+# Westmere	4.51		9.81		6.80	    +44%
+# Sandy Bridge	6.05		11.06(12.15)	6.11(7.19)  +81%(+69%)
+# Ivy Bridge	6.05		10.65		6.07        +75%
+# Haswell	5.29		8.86(9.44)	5.32(5.32)  +67%(+77%)
+# Bulldozer	6.89		12.84		6.96        +84%
+#
+#		AES-256-CBC
+# Westmere	5.25		10.55		7.21	    +46%
+# Sandy Bridge	7.05		12.06(13.15)	7.12(7.72)  +69%(+70%)
+# Ivy Bridge	7.05		11.65		7.12        +64%
+# Haswell	6.19		9.76(10.34)	6.21(6.25)  +57%(+65%)
+# Skylake	3.62		7.16(7.68)	4.56(4.76)  +57%(+61%)
+# Bulldozer	8.00		13.95		8.25        +69%
+# Ryzen(**)	3.71		5.64		3.72        +52%
+# Goldmont(**)	5.35		7.05		5.76        +22%
+#
+# (*)	There are two code paths: SSSE3 and AVX. See sha1-568.pl for
+#	background information. Above numbers in parentheses are SSSE3
+#	results collected on AVX-capable CPU, i.e. apply on OSes that
+#	don't support AVX.
+# (**)	SHAEXT results.
+#
+# Needless to mention that it makes no sense to implement "stitched"
+# *decrypt* subroutine. Because *both* AESNI-CBC decrypt and SHA1
+# fully utilize parallelism, so stitching would not give any gain
+# anyway. Well, there might be some, e.g. because of better cache
+# locality... For reference, here are performance results for
+# standalone AESNI-CBC decrypt:
+#
+#		AES-128-CBC	AES-192-CBC	AES-256-CBC
+# Westmere	1.25		1.50		1.75
+# Sandy Bridge	0.74		0.91		1.09
+# Ivy Bridge	0.74		0.90		1.11
+# Haswell	0.63		0.76		0.88
+# Bulldozer	0.70		0.85		0.99
+
+# And indeed:
+#
+#		AES-256-CBC	+SHA1		stitch      gain
+# Westmere	1.75		7.20		6.68        +7.8%
+# Sandy Bridge	1.09		6.09(7.22)	5.82(6.95)  +4.6%(+3.9%)
+# Ivy Bridge	1.11		5.70		5.45        +4.6%
+# Haswell	0.88		4.45(5.00)	4.39(4.69)  +1.4%(*)(+6.6%)
+# Bulldozer	0.99		6.95		5.95        +17%(**)
+#
+# (*)	Tiny improvement coefficient on Haswell is because we compare
+#	AVX1 stitch to sum with AVX2 SHA1.
+# (**)	Execution is fully dominated by integer code sequence and
+#	SIMD still hardly shows [in single-process benchmark;-]
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

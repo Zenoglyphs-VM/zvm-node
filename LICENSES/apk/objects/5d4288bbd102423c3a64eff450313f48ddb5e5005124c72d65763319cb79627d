@@ -1,0 +1,23 @@
+/*-
+ * Copyright 2022-2024 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * Example showing how to validate DSA parameters.
+ *
+ * Proper FIPS 186-4 DSA (FFC) parameter validation requires that all
+ * the parameters used during parameter generation are supplied
+ * when doing the validation. Unfortunately saving DSA parameters as
+ * a PEM or DER file does not write out all required fields. Because
+ * of this the default provider normally only does a partial
+ * validation. The FIPS provider will however try to do a full
+ * validation. To force the default provider to use full
+ * validation the 'seed' that is output during generation must be
+ * added to the key. See doc/man7/EVP_PKEY-FFC for more information.
+ */
+

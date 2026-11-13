@@ -1,0 +1,40 @@
+#! /usr/bin/env perl
+# Copyright 2011-2023 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# September 2011
+#
+# Assembler helpers for Padlock engine. Compared to original engine
+# version relying on inline assembler and compiled with gcc 3.4.6 it
+# was measured to provide ~100% improvement on misaligned data in ECB
+# mode and ~75% in CBC mode. For aligned data improvement can be
+# observed for short inputs only, e.g. 45% for 64-byte messages in
+# ECB mode, 20% in CBC. Difference in performance for aligned vs.
+# misaligned data depends on misalignment and is either ~1.8x or 2.9x.
+# These are approximately same factors as for hardware support, so
+# there is little reason to rely on the latter. On the contrary, it
+# might actually hurt performance in mixture of aligned and misaligned
+# buffers, because a) if you choose to flip 'align' flag in control
+# word on per-buffer basis, then you'd have to reload key context,
+# which incurs penalty; b) if you choose to set 'align' flag
+# permanently, it limits performance even for aligned data to ~1/2.
+# All above mentioned results were collected on 1.5GHz C7. Nano on the
+# other hand handles unaligned data more gracefully. Depending on
+# algorithm and how unaligned data is, hardware can be up to 70% more
+# efficient than below software alignment procedures, nor does 'align'
+# flag have affect on aligned performance [if has any meaning at all].
+# Therefore suggestion is to unconditionally set 'align' flag on Nano
+# for optimal performance.
+

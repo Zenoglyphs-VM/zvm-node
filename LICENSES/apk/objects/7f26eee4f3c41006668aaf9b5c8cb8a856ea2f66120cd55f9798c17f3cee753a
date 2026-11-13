@@ -1,0 +1,17 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * modinfo - retrieve module info
+ * Copyright (c) 2008 Pascal Bellard
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config MODINFO
+//config:	bool "modinfo (24 kb)"
+//config:	default y
+//config:	help
+//config:	Show information about a Linux Kernel module
+
+//applet:IF_MODINFO(APPLET_NOEXEC(modinfo, modinfo, BB_DIR_SBIN, BB_SUID_DROP, modinfo))
+
+//kbuild:lib-$(CONFIG_MODINFO) += modinfo.o modutils.o
+

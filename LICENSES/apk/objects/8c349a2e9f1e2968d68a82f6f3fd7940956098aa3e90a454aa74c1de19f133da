@@ -1,0 +1,42 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * arp.c - Manipulate the system ARP cache
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version
+ * 2 of the License, or (at your option) any later version.
+ *
+ * Author: Fred N. van Kempen, <waltje at uwalt.nl.mugnet.org>
+ * Busybox port: Paul van Gool <pvangool at mimotech.com>
+ *
+ * modified for getopt32 by Arne Bernin <arne [at] alamut.de>
+ */
+//config:config ARP
+//config:	bool "arp (10 kb)"
+//config:	default y
+//config:	help
+//config:	Manipulate the system ARP cache.
+
+//applet:IF_ARP(APPLET(arp, BB_DIR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_ARP) += arp.o interface.o
+
+//usage:#define arp_trivial_usage
+//usage:     "\n[-vn]	[-H HWTYPE] [-i IF] -a [HOSTNAME]"
+//usage:     "\n[-v]		    [-i IF] -d HOSTNAME [pub]"
+//usage:     "\n[-v]	[-H HWTYPE] [-i IF] -s HOSTNAME HWADDR [temp]"
+//usage:     "\n[-v]	[-H HWTYPE] [-i IF] -s HOSTNAME HWADDR [netmask MASK] pub"
+//usage:     "\n[-v]	[-H HWTYPE] [-i IF] -Ds HOSTNAME IFACE [netmask MASK] pub"
+//usage:#define arp_full_usage "\n\n"
+//usage:       "Manipulate ARP cache\n"
+//usage:       "\n	-a		Display (all) hosts"
+//usage:       "\n	-d		Delete ARP entry"
+//usage:       "\n	-s		Set new entry"
+//usage:       "\n	-v		Verbose"
+//usage:       "\n	-n		Don't resolve names"
+//usage:       "\n	-i IF		Network interface"
+//usage:       "\n	-D		Read HWADDR from IFACE"
+//usage:       "\n	-A,-p AF	Protocol family"
+//usage:       "\n	-H HWTYPE	Hardware address type"
+

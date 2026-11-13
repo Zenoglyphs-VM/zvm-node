@@ -1,0 +1,16 @@
+/*
+ * volume_id - reads filesystem label and uuid
+ *
+ * Copyright (C) 2020 Norbert Lange <nolange79@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config FEATURE_VOLUMEID_EROFS
+//config:	bool "erofs filesystem"
+//config:	default y
+//config:	depends on VOLUMEID
+//config:	help
+//config:	Erofs is a compressed readonly filesystem for Linux.
+
+//kbuild:lib-$(CONFIG_FEATURE_VOLUMEID_EROFS) += erofs.o
+

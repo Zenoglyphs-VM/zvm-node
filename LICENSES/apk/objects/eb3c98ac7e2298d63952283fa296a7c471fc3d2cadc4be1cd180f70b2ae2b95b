@@ -1,0 +1,37 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * vlock implementation for busybox
+ *
+ * Copyright (C) 2000 by spoon <spoon@ix.netcom.com>
+ * Written by spoon <spon@ix.netcom.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+
+/* Shoutz to Michael K. Johnson <johnsonm@redhat.com>, author of the
+ * original vlock.  I snagged a bunch of his code to write this
+ * minimalistic vlock.
+ */
+/* Fixed by Erik Andersen to do passwords the tinylogin way...
+ * It now works with md5, sha1, etc passwords.
+ */
+//config:config VLOCK
+//config:	bool "vlock (18 kb)"
+//config:	default y
+//config:	help
+//config:	Build the "vlock" applet which allows you to lock (virtual) terminals.
+//config:
+//config:	Note that busybox binary must be setuid root for this applet to
+//config:	work properly.
+
+//applet:/* Needs to be run by root or be suid root - needs to change uid and gid: */
+//applet:IF_VLOCK(APPLET(vlock, BB_DIR_USR_BIN, BB_SUID_REQUIRE))
+
+//kbuild:lib-$(CONFIG_VLOCK) += vlock.o
+
+//usage:#define vlock_trivial_usage
+//usage:       "[-a]"
+//usage:#define vlock_full_usage "\n\n"
+//usage:       "Lock a virtual terminal. A password is required to unlock.\n"
+//usage:     "\n	-a	Lock all VTs"
+

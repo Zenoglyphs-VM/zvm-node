@@ -1,0 +1,33 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * 'time' utility to display resource usage of processes.
+ * Copyright (C) 1990, 91, 92, 93, 96 Free Software Foundation, Inc.
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+/* Originally written by David Keppel <pardo@cs.washington.edu>.
+ * Heavily modified by David MacKenzie <djm@gnu.ai.mit.edu>.
+ * Heavily modified for busybox by Erik Andersen <andersen@codepoet.org>
+ */
+//config:config TIME
+//config:	bool "time (8.1 kb)"
+//config:	default y
+//config:	help
+//config:	The time command runs the specified program with the given arguments.
+//config:	When the command finishes, time writes a message to standard output
+//config:	giving timing statistics about this program run.
+
+//applet:IF_TIME(APPLET(time, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TIME) += time.o
+
+//usage:#define time_trivial_usage
+//usage:       "[-vpa] [-o FILE] PROG ARGS"
+//usage:#define time_full_usage "\n\n"
+//usage:       "Run PROG, display resource usage when it exits\n"
+//usage:     "\n	-v	Verbose"
+//usage:     "\n	-p	POSIX output format"
+//usage:     "\n	-f FMT	Custom format"
+//usage:     "\n	-o FILE	Write result to FILE"
+//usage:     "\n	-a	Append (else overwrite)"
+

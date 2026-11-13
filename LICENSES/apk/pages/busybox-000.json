@@ -1,0 +1,1798 @@
+{
+  "notices": [
+    {
+      "bytes": 523,
+      "path": "bbsuid.c",
+      "selectionScope": "INITIAL_SOURCE_NOTICE",
+      "sha256": "508b5334ce62dd8a16cede81922e46114102e6cf8783fe5489a871fcf84796bd",
+      "source": "bbsuid.c"
+    },
+    {
+      "bytes": 5386,
+      "path": "busybox-1.37.0/AUTHORS",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "384fc3a9cfc7c435bdd9d169e5ec60a7d898d9ef9557ec859394d7f97b4b6f07",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 18348,
+      "path": "busybox-1.37.0/LICENSE",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "bbfc9843646d483c334664f651c208b9839626891d8f17604db2146962f43548",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/applets/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 245,
+      "path": "busybox-1.37.0/applets/applet_tables.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a36e560bd0178d11c7b146efe4ddb733ee0f2d46771ee8c1e1c7ac460063801b",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 220,
+      "path": "busybox-1.37.0/applets/applets.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8f21de3b835bf13ce4584ddc9dde27e471a85fb0545e37c5a989f071834ab5d0",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 503,
+      "path": "busybox-1.37.0/applets/busybox.mksuid",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4a695152cb19fa39b51cc4b7b9711a2758254994b3e981af6726c0980de65a52",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 179,
+      "path": "busybox-1.37.0/applets/individual.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "454a112c9c55daf0bfa6d6027c51fb4e6b98f0122b645f82251e383165803ae5",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 136,
+      "path": "busybox-1.37.0/applets/usage.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "19202034db26fe8a9a4fb2f7ec2d6b8b7c94ad371e48dd06df781082b9e42022",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 136,
+      "path": "busybox-1.37.0/applets/usage_pod.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8136e0e394679497432dbafc0d79f1edc0873a9da43383ec3cec3b31e8116006",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/archival/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1826,
+      "path": "busybox-1.37.0/archival/ar.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "fb5618942386dc61bba4d56075fc40e3fc0e33e5179956cd5ce32982ba7bd5ba",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 622,
+      "path": "busybox-1.37.0/archival/bbunzip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6e7962cdac778f13d1692d52cb935b3f4c79e7fe2341bf8d71fd60669fc8b55f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2531,
+      "path": "busybox-1.37.0/archival/bzip2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2c2fb393477fcec38b815cbf97f8bc1179b37b2ec26e6a38a80c88a95c7c71a4",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 279,
+      "path": "busybox-1.37.0/archival/chksum_and_xwrite_tar_header.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5031f8304a826258f938e24745996ee13d6f9c67ddf430089d66bb362c63c712",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 6674,
+      "path": "busybox-1.37.0/archival/cpio.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8df31a4d257e0f96ea7ad19a10a79a0e1338103e895e4cb7bbc5a58959d63580",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2864,
+      "path": "busybox-1.37.0/archival/dpkg.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8e290649f3d90a8038ceaa220702ca2e857c95fc2904f8c54ad0b3654efbe60a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1243,
+      "path": "busybox-1.37.0/archival/dpkg_deb.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "354da070194c64de3ac9505c1b50c08eb2da4e3dc303e5bd085aae03476668ae",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3361,
+      "path": "busybox-1.37.0/archival/gzip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d2b0c73bee171ff140c5742d668a252682ba6ec88d14b331050d618f7e7196a9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 166,
+      "path": "busybox-1.37.0/archival/libarchive/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1df619dd855d081266300bc0c1b0ccb2ed4f1233d29681c4b80cba1fdd9bac56",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1999,
+      "path": "busybox-1.37.0/archival/libarchive/bz/LICENSE",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "b5a136ed67798e51fe2e0ca0b2a21cb01b904ff0c9f7d563a6292e276607e58f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1024,
+      "path": "busybox-1.37.0/archival/libarchive/bz/blocksort.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "abafd0fbad27b29f6676ec767dfc90e7fccc0f288153b74edbc1c562e3ef2a47",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1667,
+      "path": "busybox-1.37.0/archival/libarchive/bz/bzlib.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "db29696f788ae738d0c8ee4fa7f54dbe58e5977bf228d03468ffb0a83922c03c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 990,
+      "path": "busybox-1.37.0/archival/libarchive/bz/bzlib.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "aa1c72e52882ef4b6a84c95899ea8177c560dc2df7da9d597b6c67310a5253dc",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1042,
+      "path": "busybox-1.37.0/archival/libarchive/bz/bzlib_private.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b6dc15f4584ec1826364b4d5fedc6d8ccdf8b26cc846501cdc6e7f7c5a026969",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1228,
+      "path": "busybox-1.37.0/archival/libarchive/bz/compress.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5149449902a9b00c1feee3b75bb6ab8fb05713c0ea760846ead7212bd5d52c28",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1080,
+      "path": "busybox-1.37.0/archival/libarchive/bz/huffman.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "09634ce94c1d1c6f772c59bea48ec50f3b362593452064141e0a6dced58d2735",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/common.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/data_align.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/data_extract_all.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/data_extract_to_command.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/data_extract_to_stdout.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/data_skip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1526,
+      "path": "busybox-1.37.0/archival/libarchive/decompress_bunzip2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "69e9c128406e4a5523ff95d8cc9ce557264d58249cf5227994b2a70a4def9e0c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1424,
+      "path": "busybox-1.37.0/archival/libarchive/decompress_gunzip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1775aeb300611093032ae445c5e90b231a3b94448fc60b0266335af06e76d6f9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 318,
+      "path": "busybox-1.37.0/archival/libarchive/decompress_unlzma.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9234a06eb8d982f715d980a13ef58bef08e52211dc651a25631e7b85d3af2185",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 362,
+      "path": "busybox-1.37.0/archival/libarchive/decompress_unxz.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "42d54d70a2dd37b4261e5f0650c75d78c87f3dc422ad86b7d9c4b4a35220bf50",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 146,
+      "path": "busybox-1.37.0/archival/libarchive/filter_accept_all.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "703780a9bf59012ab3f1ad05322f854eca65a64514c006e9ddd4d6c5d10b2354",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 146,
+      "path": "busybox-1.37.0/archival/libarchive/filter_accept_list.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "703780a9bf59012ab3f1ad05322f854eca65a64514c006e9ddd4d6c5d10b2354",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 146,
+      "path": "busybox-1.37.0/archival/libarchive/filter_accept_list_reassign.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "703780a9bf59012ab3f1ad05322f854eca65a64514c006e9ddd4d6c5d10b2354",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 146,
+      "path": "busybox-1.37.0/archival/libarchive/filter_accept_reject_list.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "703780a9bf59012ab3f1ad05322f854eca65a64514c006e9ddd4d6c5d10b2354",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 146,
+      "path": "busybox-1.37.0/archival/libarchive/find_list_entry.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "703780a9bf59012ab3f1ad05322f854eca65a64514c006e9ddd4d6c5d10b2354",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 140,
+      "path": "busybox-1.37.0/archival/libarchive/get_header_ar.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c1f09d88181384cb1f7228828dc68119d9d43cb96c8b58ae5b9fb39365be0b3d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 143,
+      "path": "busybox-1.37.0/archival/libarchive/get_header_cpio.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c406b7bad315de103798eb822b3ac9e3e4e5e903a3f4d7fba4ec1d5378c31c67",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 425,
+      "path": "busybox-1.37.0/archival/libarchive/get_header_tar.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3c7f757bddcd4c4782eb3102f5a5b6d52305acad4f78da210844d1bddfc7162e",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/get_header_tar_bz2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/get_header_tar_gz.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 194,
+      "path": "busybox-1.37.0/archival/libarchive/get_header_tar_lzma.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a1f672ec16f0045b41cf127227d2e387b9557aade8d5f89e12fd549a8ba21f2a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/get_header_tar_xz.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/header_list.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/header_skip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/header_verbose_list.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/init_handle.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1011,
+      "path": "busybox-1.37.0/archival/libarchive/liblzo.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d12b00fe6d7bcdc50f5649c44e668eaa2fb37a4aa277af378003551b5aad5ce9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1031,
+      "path": "busybox-1.37.0/archival/libarchive/lzo1x_1.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e7b93fba28b6cfae884da00adcff0a023d91edb2e2e644f31f3d9199ea8ae9cb",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1035,
+      "path": "busybox-1.37.0/archival/libarchive/lzo1x_1o.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e24a34fde8fa6d4af9bf9f7a8ab70d7ffb6be23efe195b4e779be629763f7a04",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1795,
+      "path": "busybox-1.37.0/archival/libarchive/lzo1x_9x.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "fb01c4a459400f151f7cc43e4759705fc603cfd3ef8a5405e235d75006067457",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1243,
+      "path": "busybox-1.37.0/archival/libarchive/lzo1x_c.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "068efd0ca70ad6059df294637e3c665d28dcd56eb2e3af1b4799df8bd6379be6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1063,
+      "path": "busybox-1.37.0/archival/libarchive/lzo1x_d.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "924a228b66b8212245614c9216316cef7dcc023c6f072691bba524dea7369e6e",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/open_transformer.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/seek_by_jump.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/seek_by_read.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/unpack_ar_archive.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/unsafe_prefix.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/archival/libarchive/unsafe_symlink_target.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 227,
+      "path": "busybox-1.37.0/archival/libarchive/unxz/xz.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c7d874f8d4111631303334b3d93abb1ff3b976872b3942947886e0c110f72b02",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 232,
+      "path": "busybox-1.37.0/archival/libarchive/unxz/xz_config.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1f48c1f510c7f1299fe39c52c445e85feea702219de60d7f8ff8ba0f20e23779",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 250,
+      "path": "busybox-1.37.0/archival/libarchive/unxz/xz_dec_bcj.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "10e9229e577d3d3d8605514bc5b6f254f8227eb7a0e0189e460c81205b7d6dc8",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 225,
+      "path": "busybox-1.37.0/archival/libarchive/unxz/xz_dec_lzma2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "541c3429778a350c3c81bd1eefd59148ad46b1bbbf109f5b16b3318a2f60be48",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 185,
+      "path": "busybox-1.37.0/archival/libarchive/unxz/xz_dec_stream.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a4f5078f36a05aee0092ccbbb47e1cf91a5dc0659f3c46f12262c497321a6a91",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 229,
+      "path": "busybox-1.37.0/archival/libarchive/unxz/xz_lzma2.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f4d46a4c7976153fda85566e44e535aa61c7381e58a53428a56f8003329a1f04",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 199,
+      "path": "busybox-1.37.0/archival/libarchive/unxz/xz_private.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8ca8dd49e415eec339c6514e536c3ef75744dc3dde6e44c9d2b03a75f2a75ac6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 211,
+      "path": "busybox-1.37.0/archival/libarchive/unxz/xz_stream.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5765b0bf1979af7b92a8e07a0d9c4ddb8bd2d9071995cfffe57f3abe0d8d1271",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3466,
+      "path": "busybox-1.37.0/archival/lzop.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bcf9863feb188c759b5709f05a6c511ca91c05a71fc9b3a0e860c4223bd51386",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 430,
+      "path": "busybox-1.37.0/archival/rpm.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d28ee1704904ee1e9b51a73a6ace4c07918ae70de483488e213dc35846559d7c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 220,
+      "path": "busybox-1.37.0/archival/rpm.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "35ab9e95e63836a0ba2409e3f957d03388ecc60774730ad9b8d4f589f0e35f4f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 4444,
+      "path": "busybox-1.37.0/archival/tar.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "40bf5ffce596d0557600aeed78cb024c1149623dc5cca5c16ec587938e8421ed",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2545,
+      "path": "busybox-1.37.0/archival/unzip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "890d9af3e0c8e330f3bdbc25ec7f8e438d4434d06eb3f033d9fcc220c5305c3e",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/console-tools/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 708,
+      "path": "busybox-1.37.0/console-tools/chvt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b2c68075459f5f836fac9b2efb65e9a038a171039be9b3ea4f31f73b5f5f09eb",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 614,
+      "path": "busybox-1.37.0/console-tools/clear.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f1136e6c724d13881f4ff7b799268d2586e08754b71e117d87f75629653edb57",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 749,
+      "path": "busybox-1.37.0/console-tools/deallocvt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7f9df8af3a103b9178cb9fc0c24513f530574061497800210208e1bf5f836bb6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 943,
+      "path": "busybox-1.37.0/console-tools/dumpkmap.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0e0039b549bc0758ac69d7227b65c766e5c4c15812cba3e5ed1931d25fd3d0b3",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 656,
+      "path": "busybox-1.37.0/console-tools/fgconsole.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2f528cfcaf7a22240a34cfafa4143c7c93747726cdeaad67a4dd99cad823a4e0",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 985,
+      "path": "busybox-1.37.0/console-tools/kbd_mode.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d000e1a1a480abbe0ce0c70878e799d2bb4bba0fea1231b11f5edcd1081d4ff7",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1849,
+      "path": "busybox-1.37.0/console-tools/loadfont.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4aef619ecb3724e6b2b8e445fb16c8329ce06f1feb249090ff858d9501126a5d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 898,
+      "path": "busybox-1.37.0/console-tools/loadkmap.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a614e863b2012533e45174dc240de742ef18ca617de739239d3cc726cc78744b",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 986,
+      "path": "busybox-1.37.0/console-tools/openvt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "05fd2b1be275b25e7dd0f0dabad9ab0a9aa90dcf186b5f771133d12613fd4fdf",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 840,
+      "path": "busybox-1.37.0/console-tools/reset.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f3580fd01f295d64c99d7102cf4656eedd0422966c1ea7d197fc3464c28691fb",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1052,
+      "path": "busybox-1.37.0/console-tools/resize.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3eb967d2122f71b35cdf6b273a478a177d44ffb46157a48925ec30ff17237797",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1376,
+      "path": "busybox-1.37.0/console-tools/setconsole.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b3bef44fe2d3e3c0e9cdd92fb7eeecf2f3cb283efbb975e5a7543aae04db76a9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1104,
+      "path": "busybox-1.37.0/console-tools/setkeycodes.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "65614950a7c10a08fb8806e8f353237a2b60365ba6eb9a7ec64bc2483ff3b4dc",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1289,
+      "path": "busybox-1.37.0/console-tools/setlogcons.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b9b35cbde94070f1cc2165b5528a9392d38fcfe4d81ab96bea5f39d23818e791",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 771,
+      "path": "busybox-1.37.0/console-tools/showkey.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d988a9d6ec140b4eb9ceca0f604331d341a2017f200e98b3d1c77d1dcbe630b2",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/coreutils/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1605,
+      "path": "busybox-1.37.0/coreutils/basename.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d21b166b9eb7a599c18b1f3c0db69f1417c75cfc3233d46f2e19cf595c58db3b",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2333,
+      "path": "busybox-1.37.0/coreutils/cat.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "631d996c0cddc64778889660f215d42ae804006d80991bafadfb3d164e408b2a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1700,
+      "path": "busybox-1.37.0/coreutils/chgrp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "26f25b0f3a58d1e0d2dbd1fbaab18588c4d73c7b5e6020c5189029699c3548ee",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1703,
+      "path": "busybox-1.37.0/coreutils/chmod.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "34cdbc29f32b61dea1249bae6e52b14cce764b15a968c666b9d24e901c98486a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1992,
+      "path": "busybox-1.37.0/coreutils/chown.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1b77a2f8b5275a97802c44512cff8054bf8cac484342ee5dba328dd72d3d7c44",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1166,
+      "path": "busybox-1.37.0/coreutils/chroot.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "144af36296e2ecd67179e43ccff988bb25ceee1dec2aa790a079360f85b0fc59",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 965,
+      "path": "busybox-1.37.0/coreutils/cksum.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "86160d3d42303946e1b1b3edd8e278a168f39e3b295c3d74831eca5cedf52428",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 828,
+      "path": "busybox-1.37.0/coreutils/comm.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "95a6bc7be682bc22493d8896c7e238e4dd0d2d4ce6e29d92cfc118f2c70d80f6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3598,
+      "path": "busybox-1.37.0/coreutils/cp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "07646523d1e7fefacdc9ee415712d43b22f2370f24c373d23edd4b6fd1bddbba",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1838,
+      "path": "busybox-1.37.0/coreutils/cut.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2568dbc1376fa69e82cc1473fc0535e54cc2e2aca251e7038a05be2090f55ba9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 4795,
+      "path": "busybox-1.37.0/coreutils/date.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9e61fe44777a7e7137c881bb3fed2ae0b2dd6ae16c4327c03a85e2df8b3085c8",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 4011,
+      "path": "busybox-1.37.0/coreutils/dd.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6ec49e23a03d2783d83076be270bd9b32948dcdfc92649d236fefe5049e724db",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3880,
+      "path": "busybox-1.37.0/coreutils/df.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f7960a567ce4c2b75557def04ff72a66a1047235cf4f4447d22e2824b489de58",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 986,
+      "path": "busybox-1.37.0/coreutils/dirname.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6da47d72b844598663750b0dd1af99761e273f75fbc2e612aa780d0f0eeb281a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1701,
+      "path": "busybox-1.37.0/coreutils/dos2unix.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "81a79518262780ff992018982cd0c433ba915bfa432de0ea4f46d581ac846eee",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2980,
+      "path": "busybox-1.37.0/coreutils/du.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e0c01142563cac586b25e09c723975ac7658a51439213fe0261515c7de9bc22a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2223,
+      "path": "busybox-1.37.0/coreutils/echo.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "27836b9dbf9e2a92184573983aa4e1749a8b1d27ded2eeef5b3cfd0e551061a7",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1800,
+      "path": "busybox-1.37.0/coreutils/env.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f4318db5b4f0916d70114d957c7957349b6bd0dcb2b4386c8df23d1cbadc9c5c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2098,
+      "path": "busybox-1.37.0/coreutils/expand.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f4c861fd120ec445d482e330357d5690918c16bb8c417ecb7a5696e8290e3a2d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3354,
+      "path": "busybox-1.37.0/coreutils/expr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ccf98ff86021fa3861d747aa378259ec2690f4132811850171de9c04e7a9c80f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 520,
+      "path": "busybox-1.37.0/coreutils/factor.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d72406de2e86b5c75d5879f24570973b27c33d612af4f9efea2577428ec03ca5",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 843,
+      "path": "busybox-1.37.0/coreutils/false.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0ec47b82349478271bd2074e8d7d0e616cbb3ed86274e0b48e50a0b1857c4346",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 960,
+      "path": "busybox-1.37.0/coreutils/fold.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5e571df27cf7bbb733d628b701f4b32ab871bf48a21cc1d60d31127701261231",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1640,
+      "path": "busybox-1.37.0/coreutils/head.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "372e3fb8aa690569e512eddf6049f2fee4ee32739a36cee1270ab3b4a0c191a2",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 750,
+      "path": "busybox-1.37.0/coreutils/hostid.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "aa35e14a3143197c4b399b46daf26981d02a5d82c70e52c8f1da8d3e282375f3",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1956,
+      "path": "busybox-1.37.0/coreutils/id.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "11c84a6a9126c5cc2b7c02d38b053156f28e5125523b22a0b1ae18c4b3545631",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1296,
+      "path": "busybox-1.37.0/coreutils/install.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2ca9aced1eeaee7035361cff49ffe13be75cb368930803acf22302be74d4feb9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 166,
+      "path": "busybox-1.37.0/coreutils/libcoreutils/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1df619dd855d081266300bc0c1b0ccb2ed4f1233d29681c4b80cba1fdd9bac56",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/coreutils/libcoreutils/coreutils.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 838,
+      "path": "busybox-1.37.0/coreutils/libcoreutils/cp_mv_stat.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "25fe43735aed43c1a665381eb543f139a5c4414e0eec86ee523bce22fa01cd0f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 838,
+      "path": "busybox-1.37.0/coreutils/libcoreutils/getopt_mk_fifo_nod.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "25fe43735aed43c1a665381eb543f139a5c4414e0eec86ee523bce22fa01cd0f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 572,
+      "path": "busybox-1.37.0/coreutils/link.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b1103dda46e221d3c4bf90f9d17e224cb80fc4ecb2ed01bd68202ed46f5079d7",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1458,
+      "path": "busybox-1.37.0/coreutils/ln.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3b5b17711b5ed05a8599e3e77779a43530b221a0fbd966f92acb5b69b1007ce1",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1318,
+      "path": "busybox-1.37.0/coreutils/logname.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c0582c2cbc55b4e7a3fb92aed2e95fc767405ea6721cc072b266ac7ebb228aff",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 5503,
+      "path": "busybox-1.37.0/coreutils/ls.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2f94a50ab2294fe3055e799ad6d3e3c45044a1e6b4175e89c7978310f4228c56",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 5318,
+      "path": "busybox-1.37.0/coreutils/md5_sha1_sum.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8f729619a1f8704053199dba82f78aeae4eb2bded2404760d68e245ef9129c5d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1506,
+      "path": "busybox-1.37.0/coreutils/mkdir.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "47df4d48bcaf66dd9ae98149a50ebebe99535683706f1a7ffdc7bbcf8df7d777",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 936,
+      "path": "busybox-1.37.0/coreutils/mkfifo.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "939bfb666a380ea7ecf0d83d4c25892ec574069785275d12e6470cb894787155",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1220,
+      "path": "busybox-1.37.0/coreutils/mknod.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f66311314f54148ac262e5256f687784b3da83c044818e69ac35db860dea73b6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2487,
+      "path": "busybox-1.37.0/coreutils/mktemp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "64bc9385a16fab45e069a7c14c0de0b957ebb0a5634993dad9155a4a87963021",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1329,
+      "path": "busybox-1.37.0/coreutils/mv.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8fb493933f6e15c4887b881187d7618765887d8db82ee31669bb7faacb531aa9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 701,
+      "path": "busybox-1.37.0/coreutils/nice.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d0f539241d8b55322a50537c25ad67d7e03bf471703f5833425ce745f9c68e8",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1379,
+      "path": "busybox-1.37.0/coreutils/nl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e890bb5e5953a25ccd9281968c9e5ca0a2a37808cf97441e3dc21c5cb1090ee4",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 908,
+      "path": "busybox-1.37.0/coreutils/nohup.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bb784f0ac621838ab3f8bd1b7e651b7333badcf6de400c378e08d8869d82acca",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 691,
+      "path": "busybox-1.37.0/coreutils/nproc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8e1d99d4ce48d9437d9bcd38610ceca18f21cb32a1bcb631aeb498ff861ac7f4",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 945,
+      "path": "busybox-1.37.0/coreutils/od.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6fc94d24bc6cba157c1ca7bf077105024531ff782977c5e57d2f59d4d23eba55",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 953,
+      "path": "busybox-1.37.0/coreutils/od_bloaty.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3c1158289db843ba21748fa243c39f719dd461cc71975bb6b74d51e88311bfb5",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1103,
+      "path": "busybox-1.37.0/coreutils/paste.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a23e9cc9fff323f5bc9824e6ff0fe2e44a67ac7cd2f36dca412746f6c4cb6ef3",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 788,
+      "path": "busybox-1.37.0/coreutils/printenv.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d3cbf0395cdec56addc63350c45f203fd2fc11a2c60dfcf08551aefdcd205e41",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1738,
+      "path": "busybox-1.37.0/coreutils/printf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "67b1027f0c447d65f22ac62ee34646de864121a9a1feb1954b80b743d2474e01",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 718,
+      "path": "busybox-1.37.0/coreutils/pwd.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bf68b9fddcdbd89fc14d6d68ebf881c5b13743016ae966024e3e856e9255e47b",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1221,
+      "path": "busybox-1.37.0/coreutils/readlink.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "61907c06e9c6af5ded7064fdc7c67c43ff64a6d58f86d209dbfd8ce23a7d2da6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 884,
+      "path": "busybox-1.37.0/coreutils/realpath.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d0cf484bf45a52f82293b61ee6656cac59713c347900e1bb96b429ad2d1ae28e",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1054,
+      "path": "busybox-1.37.0/coreutils/rm.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "085e5dbfd2035983e74c1b317bb4775bd493567736b117adc8b89dd54b8004eb",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 937,
+      "path": "busybox-1.37.0/coreutils/rmdir.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b16890157896cbaa301044ca6c911a6ff77c5cb5a7b06577d3424c871dfddd50",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 806,
+      "path": "busybox-1.37.0/coreutils/seq.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "da03a8a7e7fe911488c3a83cf8bda5bc1f2f951e1a3d455969001492e2bf8e6a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1500,
+      "path": "busybox-1.37.0/coreutils/shred.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "662a871bbc474e9c4402ae2e4ec274401d7e5e1e1197706bc94bc0f0f6c51df8",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 933,
+      "path": "busybox-1.37.0/coreutils/shuf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a9918d346dff8c51058ca24774306a6c9702df54b9941ecdfc75c0741790a379",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2296,
+      "path": "busybox-1.37.0/coreutils/sleep.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "44d9110b0ac4ae70f5e2a41299cfcc8c009dcae7cd3a30c35aa6cbbd292a4ff0",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3306,
+      "path": "busybox-1.37.0/coreutils/sort.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "931cc8b9714d0a64e098b4ab2cdc6e2eb7b27d6250b1fb9f8ea785954661b6e8",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1249,
+      "path": "busybox-1.37.0/coreutils/split.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f3e1527514895692629f1f9bd9ff84369aeaf8461c1ebe6e3c1eec095c5c1fb9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 4130,
+      "path": "busybox-1.37.0/coreutils/stat.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4875c0e29b7e8ae2b8beb73440f6bb5b7ce530ebbf822542be02a3e9e75563eb",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1287,
+      "path": "busybox-1.37.0/coreutils/stty.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f6e68162e4d5307f597f6adb19828baa62dabaa0816c5c716c9157593c6a3638",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1087,
+      "path": "busybox-1.37.0/coreutils/sum.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8de2a0f9d0912001208d358e6c9790990319a60e3af2b04c37e519fbecff7702",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1378,
+      "path": "busybox-1.37.0/coreutils/sync.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5366b94a2e93d1984c6772a7d30bccf71b8c2a35407e550859a0fb85bd18bd46",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 907,
+      "path": "busybox-1.37.0/coreutils/tac.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ffce82976293b587377e07cb26dbe2f49813391a9a00b46be45e163d25ab34d5",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2673,
+      "path": "busybox-1.37.0/coreutils/tail.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0cf4c74c5bd9497e8bdce80d2626237dea3e3319693088282425e2f2d48bf836",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1973,
+      "path": "busybox-1.37.0/coreutils/tee.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "72e79b2a047703ee8bc7f3527739eda88788df65a17e3b36f57463f7fb28488f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2645,
+      "path": "busybox-1.37.0/coreutils/test.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7d0c0a35969441f2caa36df16084f13c7580ab469f6a679ea918e4f095740228",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 166,
+      "path": "busybox-1.37.0/coreutils/test_ptr_hack.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2f1f76956d9c62815f9add38ef19e06621709df948eb4a446c472e8c3a567074",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1943,
+      "path": "busybox-1.37.0/coreutils/timeout.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8fc158bb639f48a7e6a1a3e70235df9cd39c667ceea8070473af96b7b3a153b7",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2508,
+      "path": "busybox-1.37.0/coreutils/touch.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "367fbd9849dc3bdc112c383cec740bfd5fcb67868c83231232a48bd1da965dcc",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2207,
+      "path": "busybox-1.37.0/coreutils/tr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "47f24ed63de1d3f3e4b65d8eb2f2c58bf7c373bff4e671b1bb673cc5916b0d8a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 826,
+      "path": "busybox-1.37.0/coreutils/true.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ee6ee0b13ecc059cf747891f22b5b8f7054af8b19c88b7c76a85979a13ddc01d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 845,
+      "path": "busybox-1.37.0/coreutils/truncate.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4456236cccbd1b8d8abd00affb1a374c53db3d66f4a3646eaf1ef98b2495cd37",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 741,
+      "path": "busybox-1.37.0/coreutils/tsort.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "aed3edf796845a4229fa009624759daea4ac9191065e196f437ea3ba237f78ad",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 972,
+      "path": "busybox-1.37.0/coreutils/tty.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b5190b8a3d2b48686c1c2b9af7498ca2841e89c56834a0163a16716d81a804e6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3436,
+      "path": "busybox-1.37.0/coreutils/uname.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5b3d48a54eabb47ddc679818312e4bca67b10bd3134420f31735026bc6ab058d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1312,
+      "path": "busybox-1.37.0/coreutils/uniq.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bef080ddc8a4b39c15569a2eb9c74a14039088bc16fd9757525fb839ada72113",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 586,
+      "path": "busybox-1.37.0/coreutils/unlink.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4387725912d79845f622cf3619ceb7a089467a3faa75770f168d72cba79edea3",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 826,
+      "path": "busybox-1.37.0/coreutils/usleep.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b5e23ba9717114d6ba3cffe406d34613a4511518072510ae5fcaca3a493f1545",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1047,
+      "path": "busybox-1.37.0/coreutils/uudecode.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ebc3b069b06d4e2253b616bf3201d72a86511695b7459e01e818b658fc06f276",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1038,
+      "path": "busybox-1.37.0/coreutils/uuencode.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "88bee0f4b9cba8dc2444dc5b490f3dce903ac26200c11988a48ffd0a3790147e",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1888,
+      "path": "busybox-1.37.0/coreutils/wc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f62606b50f6fd0f50af91cc6baf073933f9d27592367ec3c3f11fc00431f4bf8",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3047,
+      "path": "busybox-1.37.0/coreutils/who.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c64cd3b52f498bfbc1942668f11ad97762ecb405a8686b59eb78f863efa7b7bf",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 762,
+      "path": "busybox-1.37.0/coreutils/whoami.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "39587f3eadffd5a21e53c10d9dfa4b5ccffab8ed1c88815b32fef3f6ef83da4f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 924,
+      "path": "busybox-1.37.0/coreutils/yes.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "faa157d1d4b184a73e735dd4f819a5bd3bfd09f5009bb9f612863d8d7ec5903d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/debianutils/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 620,
+      "path": "busybox-1.37.0/debianutils/pipe_progress.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6bbfaf855437a0d3d93212b9e253baac231b32b01363383ed6ad3182b7dd5eee",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3535,
+      "path": "busybox-1.37.0/debianutils/run_parts.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7544af01067f95185720103d513124d3c569bf51498d91d80c3e00e35134d4fe",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 7862,
+      "path": "busybox-1.37.0/debianutils/start_stop_daemon.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d91fdb061c56c5bb65144ed69d8ceaa5850994e2a13e0ba634c111d4c676967c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 829,
+      "path": "busybox-1.37.0/debianutils/which.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "87dcb2449b996a3cf3ea4d1958859a0b163d115778141b7e4f14f7a70445140c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/e2fsprogs/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1936,
+      "path": "busybox-1.37.0/e2fsprogs/chattr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0c6181ef8cc06bea0ddf4265b46d2df04688a02d86947a5b778b79ceee4995fd",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 140,
+      "path": "busybox-1.37.0/e2fsprogs/e2fs_lib.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "113d406eeba60fe34b8e56c7d8b4ee8e86ed7dcc90b77a3abf63d9565b22dc84",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 203,
+      "path": "busybox-1.37.0/e2fsprogs/e2fs_lib.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9403824c80dee78263c2ef8b73db031bbb369316cf98a267425a7f0c01f78666",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2601,
+      "path": "busybox-1.37.0/e2fsprogs/fsck.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7b255cd53cb8879b01233c26cba1d8aaf58fd8a6071d43fdb8c6371f0dc6bb0c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1202,
+      "path": "busybox-1.37.0/e2fsprogs/lsattr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6042a1470837cacb7a4b3eb05193506ff8c0f49cab82fc43c6a99c8d1e63c867",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1433,
+      "path": "busybox-1.37.0/e2fsprogs/tune2fs.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "380e4c1dc2997f5e28bc467a8b14d56bd016b84969a0ba113bb9fe56e9b9309b",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/editors/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1549,
+      "path": "busybox-1.37.0/editors/awk.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "fb5861212f126d1044c32d8c95355fc2e488e10c446b17e3a1e580cdce79f13b",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1053,
+      "path": "busybox-1.37.0/editors/cmp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "991c3c0534687111307a24bc4422420a32bb7559d7c009a6007d341ceb5d2299",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 5237,
+      "path": "busybox-1.37.0/editors/diff.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3a3b90f80dc6c521ff46705e127747d7f86143edaf69df2481235165e14246ef",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 694,
+      "path": "busybox-1.37.0/editors/ed.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d7e299997621d37c7c7e2ddc4384f7899d7015a82a783a67897f7aec53c60f65",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1609,
+      "path": "busybox-1.37.0/editors/patch.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9f5460aa2ea1c78bdcd792eb6b9bddb70f534f08ed8f2e13a511a34d8531d29c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 701,
+      "path": "busybox-1.37.0/editors/patch_bbox.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f4ed8d4174af54f200787a436cbcdd94281196ee0ca90786024454df042df391",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1411,
+      "path": "busybox-1.37.0/editors/patch_toybox.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2a8bb35d94390739fb929cd9b956c2878e85ce932c740a8d8d6487315f92b942",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3320,
+      "path": "busybox-1.37.0/editors/sed.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2f9d20ab3a1e226780ce440e57799dda900586a8572e442c70ff8df3fcd58cd3",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 7244,
+      "path": "busybox-1.37.0/editors/vi.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ac358ea860a381b27dc7dca7e6e67cd3dc2d487c1b2d43d78be4c27065e7f041",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 193,
+      "path": "busybox-1.37.0/examples/depmod",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7bf93d03fb1deff82eaa2ffdaa0cb2626cdba0c488bfa2585aab09bb47d7e8af",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 636,
+      "path": "busybox-1.37.0/examples/depmod.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3d557679f9a6c5a0a1abb1955dcfa1c9882bfb02c70ed1c19e7be50860ac83f8",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2544,
+      "path": "busybox-1.37.0/examples/inittab",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "00b53bc94ee7012a2d758482f67b7faf34558ab5ba237495faa3f8e0735eaa73",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/findutils/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 14698,
+      "path": "busybox-1.37.0/findutils/find.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3c90af60ad5678e05aaf4ea653f6d27476b8723428d6c6227f4f73714eaa969f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1895,
+      "path": "busybox-1.37.0/findutils/grep.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c18052f1e842cd65e8f7f5e79ce2d7d0b93c15cf69694b88ba765b4c6bf4d260",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 2474,
+      "path": "busybox-1.37.0/findutils/xargs.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6b409a219bc2773d5befc69f86082e90bf5087775eb30424840a90c2d3c11a3f",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/include/applet_metadata.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 117,
+      "path": "busybox-1.37.0/include/ar_.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ac3d0004b03f8de91220325176f3f327fea679b45b53fcd4d1fb4567f738df4a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 281,
+      "path": "busybox-1.37.0/include/bb_e2fs_defs.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5695d55e6f167b9d06c02ee5c8b804e11b49f6c5fb9259e8c51bee97d63f80d6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 104,
+      "path": "busybox-1.37.0/include/busybox.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21942861e28d71c1bc150e4cdc55cf223aff1f76a08600d8ef08f02b2a441696",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 182,
+      "path": "busybox-1.37.0/include/fix_u32.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "38656dffbec8f67f886f2b6d0839ddfa07ddfc091e85b13a3425f708a64bf033",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 963,
+      "path": "busybox-1.37.0/include/grp_.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b5efa49ddb13b205260c441ddb39ea561d3f01cc864a6aeedfe9a03839647010",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 278,
+      "path": "busybox-1.37.0/include/libbb.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4e5da707833dc0e85accfa7e5f08b610a8c1e13d284dcf78f781d78e5aa593fa",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1011,
+      "path": "busybox-1.37.0/include/liblzo_interface.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d12b00fe6d7bcdc50f5649c44e668eaa2fb37a4aa277af378003551b5aad5ce9",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 151,
+      "path": "busybox-1.37.0/include/platform.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3b463db4dcc9ecd4a8e4a074b06c3d605c7bb7a296046b13a9008151741d6d22",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 961,
+      "path": "busybox-1.37.0/include/pwd_.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "cb98faad046a9b19cd71d82054480ad4a848747ab4f6e90252f035a70d917fba",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 163,
+      "path": "busybox-1.37.0/include/rtc_.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "30c457a2d7c05a4091e18f1124e43d590f3ffc0cbaba62fa2557225ab3e0b844",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 962,
+      "path": "busybox-1.37.0/include/shadow_.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "af1fb2affcdb2836e85592cfdf6f2681df5dba023584a812a39e5def9195e034",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 95,
+      "path": "busybox-1.37.0/include/unicode.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e70b4884913a4db1fc0e18a415c4a3cfeca96cb9b92d2a94aa187cfc8b437cd2",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 851,
+      "path": "busybox-1.37.0/include/volume_id.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "98bed260d0054278f268c4f3776ea99d6ae7b2a99e4810f8fcf1c2551c91017d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 211,
+      "path": "busybox-1.37.0/include/xatonum.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "60c279cf8467696794dfb07876f9a5a7f6b06929f990cd71a0a82ff357807692",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 382,
+      "path": "busybox-1.37.0/include/xregex.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c4248dc9ec0a6897487daf80f0407c1822a8682b2438660955a3d6b69cb659e2",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/init/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1982,
+      "path": "busybox-1.37.0/init/bootchartd.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "67b1c16ba25d24cf9c3c83e78a018745bdd3208b9e12261be6f0930505d4af18",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 3315,
+      "path": "busybox-1.37.0/init/halt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bd2343bffc902b2e187eee12d91c61174f2fb4a7bcf25a75ae6551dda61f144d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 5345,
+      "path": "busybox-1.37.0/init/init.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2abd2724a6a7bf2f40104c5ca16e8955095369a3aebe4de469aa82666882c670",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/klibc-utils/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 372,
+      "path": "busybox-1.37.0/klibc-utils/ipconfig.c.txt",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "27c3756061c17b2dcadb37cc8a365588f19f99c06edfe7617b8dd7d9e4828e89",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 349,
+      "path": "busybox-1.37.0/klibc-utils/minips.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9fce55234b86e237990bd0cf61c8d3ba40b87d6d8b9aaf194bfa7fbdd1ecb0fb",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 548,
+      "path": "busybox-1.37.0/klibc-utils/nuke.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8039d6599009fe8995dcb20cfa5e93ed863d293f740ff1235005fdc80e6b91d1",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 409,
+      "path": "busybox-1.37.0/klibc-utils/resume.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d6da814203d15779c3e73b7f642ed124ce173fcff72a7f0428111ed5ba7ac840",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1052,
+      "path": "busybox-1.37.0/klibc-utils/run-init.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b338fb332df76687b463fecc4cda2410a70d97e47d4f793dd6f8431e2e76b132",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 157,
+      "path": "busybox-1.37.0/libbb/Kbuild.src",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab5f1fd50d9ecd23e4d63ea09efdc290ab74c819717678b8024708966f7b1f31",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 159,
+      "path": "busybox-1.37.0/libbb/alloc_affinity.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "01be5e281bb7c19ea0778dcbfed1bec9198f1bc16a17aecc491cd9eb13b14480",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 930,
+      "path": "busybox-1.37.0/libbb/appletlib.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "dedd9fe9354bde4887ba7916db4decf75ed50758286bf1e2ff1624e94ff2f450",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 223,
+      "path": "busybox-1.37.0/libbb/ask_confirmation.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "733a01407d4b12d422b377a1f0c62c11e2f44b203c9237932d3fe390c38b353c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 192,
+      "path": "busybox-1.37.0/libbb/auto_string.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ad3d202d0a6817f893680b1533c222947f2dd053821a78a62b634e74cfc6650d",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 200,
+      "path": "busybox-1.37.0/libbb/bb_askpass.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "33e5577f4e15db64be16fefbfb1d8982ea169640c8665b8aca35de6d33a10566",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 135,
+      "path": "busybox-1.37.0/libbb/bb_bswap_64.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "55bd951f70c5e3afd16c6a591e01417c3e7c37434a1abf7eddef8cd0d6bbe8aa",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 187,
+      "path": "busybox-1.37.0/libbb/bb_cat.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "049e2d7cc36481a0e8405a609fa04315575016973799b533283546f211ec9351",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 191,
+      "path": "busybox-1.37.0/libbb/bb_do_delay.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9bea40628cd7c9a866f58ea049d5c41a56d37d6b0ff2c4d4f88169a792d60c6a",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 169,
+      "path": "busybox-1.37.0/libbb/bb_getgroups.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f6f98f74247f6b59e75c260b4fbc4b46dead60f88c16f19877fbc826677f383c",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 155,
+      "path": "busybox-1.37.0/libbb/bb_getsockname.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "642bc03b0a7f839317f10cbad4b5282126f31895636fd79c2c1dde326ffc8cf8",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 268,
+      "path": "busybox-1.37.0/libbb/bb_pwd.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9aa33fc91d579c14fc1d9a9f023d6aafa4392f69126d5a81b0c3f67c434d2321",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 192,
+      "path": "busybox-1.37.0/libbb/bb_qsort.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0d05ecfba0d399fd21e3a49e4e26d3351806c95ce0d1428443e96dcd7c30f8c6",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 199,
+      "path": "busybox-1.37.0/libbb/bb_strtod.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6279c2d72332aa3d8d988a1ff5d85afc93f31719ca48dfb5d55dba65e1ad8e01",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 199,
+      "path": "busybox-1.37.0/libbb/bb_strtonum.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6279c2d72332aa3d8d988a1ff5d85afc93f31719ca48dfb5d55dba65e1ad8e01",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 479,
+      "path": "busybox-1.37.0/libbb/bbunit.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c48a3be5f5bc83772f2eb45eacd1ef8901f7a0029356b8aae87160c15a21cce5",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 249,
+      "path": "busybox-1.37.0/libbb/capability.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "18e0fa8d77fb008d5996c982064b3f3d9fab4a3d2c659c5177a8f3b37fb3f021",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 1622,
+      "path": "busybox-1.37.0/libbb/change_identity.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ac1d426c20aad4d7752c643703abe25b11c1faa751923483763c783078a3953b",
+      "source": "busybox-1.37.0.tar.bz2"
+    },
+    {
+      "bytes": 223,
+      "path": "busybox-1.37.0/libbb/chomp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "411e9a618673a3743acff1247c777b586e9d546b11107a72fb8fc296e0d3c48b",
+      "source": "busybox-1.37.0.tar.bz2"
+    }
+  ],
+  "origin": "busybox",
+  "schema": 1
+}

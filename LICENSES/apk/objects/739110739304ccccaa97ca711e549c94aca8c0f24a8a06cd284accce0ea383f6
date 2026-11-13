@@ -1,0 +1,34 @@
+#! /usr/bin/env perl
+# Copyright 2009-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# SHA1 block procedure for MIPS.
+
+# Performance improvement is 30% on unaligned input. The "secret" is
+# to deploy lwl/lwr pair to load unaligned input. One could have
+# vectorized Xupdate on MIPSIII/IV, but the goal was to code MIPS32-
+# compatible subroutine. There is room for minor optimization on
+# little-endian platforms...
+
+# September 2012.
+#
+# Add MIPS32r2 code (>25% less instructions).
+
+######################################################################
+# There is a number of MIPS ABI in use, O32 and N32/64 are most
+# widely used. Then there is a new contender: NUBI. It appears that if
+# one picks the latter, it's possible to arrange code in ABI neutral
+# manner. Therefore let's stick to NUBI register layout:
+#

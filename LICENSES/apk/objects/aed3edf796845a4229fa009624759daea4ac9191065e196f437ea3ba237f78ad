@@ -1,0 +1,29 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * tsort implementation for busybox
+ *
+ * public domain -- David Leonard, 2022
+ */
+//config:config TSORT
+//config:	bool "tsort (2.6 kb)"
+//config:	default y
+//config:	help
+//config:	tsort performs a topological sort.
+
+//applet:IF_TSORT(APPLET(tsort, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TSORT) += tsort.o
+
+/* BB_AUDIT SUSv3 compliant */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/tsort.html */
+
+//usage:#define tsort_trivial_usage
+//usage:       "[FILE]"
+//usage:#define tsort_full_usage "\n\n"
+//usage:       "Topological sort"
+//usage:#define tsort_example_usage
+//usage:       "$ echo -e \"a b\\nb c\" | tsort\n"
+//usage:       "a\n"
+//usage:       "b\n"
+//usage:       "c\n"
+

@@ -1,0 +1,19 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright (C) 2022 Roger Knecht <rknecht@pm.me>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config TREE
+//config:	bool "tree (2.5 kb)"
+//config:	default y
+//config:	help
+//config:	List files and directories in a tree structure.
+
+//applet:IF_TREE(APPLET(tree, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TREE) += tree.o
+
+//usage:#define tree_trivial_usage NOUSAGE_STR
+//usage:#define tree_full_usage ""
+

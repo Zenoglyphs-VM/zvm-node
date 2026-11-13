@@ -1,0 +1,601 @@
+{
+  "notices": [
+    {
+      "bytes": 2026,
+      "path": "zlib-1.3.2/BUILD.bazel",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "94656fbc1d250de5da0f5702d158d10c01ee45709914de58958cfd8ad84abcb7",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1002,
+      "path": "zlib-1.3.2/LICENSE",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 515,
+      "path": "zlib-1.3.2/Makefile.in",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "15fe87aa7847ed947e321e34079c12d1bbadf21c36b4804e09a836d3584c6347",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 203,
+      "path": "zlib-1.3.2/adler32.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "dd22ad922aef2e5dac6cfc1076ed22c7c1e112dae43366ae334f368c4de90560",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 131,
+      "path": "zlib-1.3.2/amiga/Makefile.pup",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "376f3c97eabbaaa9e258ff906558a530270df17994967279b7e4c642fdcaa077",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 163,
+      "path": "zlib-1.3.2/amiga/Makefile.sas",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "40756e1badd63afaf16832c426df58da06c359ffe89cbef23092d883c0dfcff2",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 194,
+      "path": "zlib-1.3.2/compress.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0acba6d12eb9ce5f06fbee1dec4885dae1935336c5876476853c577244c4857b",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1270,
+      "path": "zlib-1.3.2/contrib/blast/blast.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e3e350244e8f113f7cadc530b2ea5ab4530dbbdb991b416775c9be30a5c4d4c4",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1000,
+      "path": "zlib-1.3.2/contrib/blast/blast.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a42143755496a03da532274c71cbba7a3f34452f54ccb52441f83d710db12ea3",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 488,
+      "path": "zlib-1.3.2/contrib/crc32vx/crc32_vx.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d6f0e1a9f7fab9c7893aafeabdd78265c5af1ebb368e0c880120f1f596254634",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "zlib-1.3.2/contrib/dotzlib/DotZLib/ChecksumImpl.cs",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c127fe16422da85aae7a4c8d373791cb35afd755a55fc59cbccd7335c5228a6e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "zlib-1.3.2/contrib/dotzlib/DotZLib/CircularBuffer.cs",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c127fe16422da85aae7a4c8d373791cb35afd755a55fc59cbccd7335c5228a6e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "zlib-1.3.2/contrib/dotzlib/DotZLib/CodecBase.cs",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c127fe16422da85aae7a4c8d373791cb35afd755a55fc59cbccd7335c5228a6e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "zlib-1.3.2/contrib/dotzlib/DotZLib/Deflater.cs",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c127fe16422da85aae7a4c8d373791cb35afd755a55fc59cbccd7335c5228a6e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "zlib-1.3.2/contrib/dotzlib/DotZLib/DotZLib.cs",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c127fe16422da85aae7a4c8d373791cb35afd755a55fc59cbccd7335c5228a6e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "zlib-1.3.2/contrib/dotzlib/DotZLib/GZipStream.cs",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c127fe16422da85aae7a4c8d373791cb35afd755a55fc59cbccd7335c5228a6e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "zlib-1.3.2/contrib/dotzlib/DotZLib/Inflater.cs",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c127fe16422da85aae7a4c8d373791cb35afd755a55fc59cbccd7335c5228a6e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 236,
+      "path": "zlib-1.3.2/contrib/dotzlib/DotZLib/UnitTests.cs",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4d938b853ebaadf93d222b93b9e649860cf314fed3bed560e020077082a3f80d",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1359,
+      "path": "zlib-1.3.2/contrib/dotzlib/LICENSE_1_0.txt",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "36266a8fd073568394cb81cdb2b124f7fdae2c64c1a7ed09db34b4d22efa2951",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 2035,
+      "path": "zlib-1.3.2/contrib/gcc_gvmat64/gvmat64.S",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "08bba41b5af2feb22cdb1070116de42c4d1889bbab34c73e9b13f25ddd79d972",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 185,
+      "path": "zlib-1.3.2/contrib/infback9/infback9.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "03fb435669b57aa90fe00c4dbc12d8492ef87b6243427d1e1831006994ee1f80",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 888,
+      "path": "zlib-1.3.2/contrib/infback9/infback9.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "154418725777ab0a3c7202695418a3ea7d9f443891f5d27fd62c098597392e92",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 415,
+      "path": "zlib-1.3.2/contrib/infback9/inflate9.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "67a041ddd8085fa31549cb81f23401bd5fc8440a6161e486868dd334c1d9b600",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 180,
+      "path": "zlib-1.3.2/contrib/infback9/inftree9.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6437e3247639ed55160eddf67825a42c495a169d1ac14723db64f7513c9aeca2",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1216,
+      "path": "zlib-1.3.2/contrib/infback9/inftree9.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "de2e62bdb029a79fa206fd015f5061e7b48260d33336a5d1ccc521a97b3e5479",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 629,
+      "path": "zlib-1.3.2/contrib/iostream2/zstream.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "12a646a422109a1a19914ec1d194aede8b1a5f000d223368ed7657f5e2cfca5e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 3509,
+      "path": "zlib-1.3.2/contrib/minizip/LICENSE.Info-Zip",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "fc686023047ce5ce3a18a9b8a777156f0e475929d3de06bac279f3c025d2b2ca",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1065,
+      "path": "zlib-1.3.2/contrib/minizip/crypt.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "72d519852de5b4772083e6bf06881c05b1c62f7b29d6a9484d4305230b9d5604",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 252,
+      "path": "zlib-1.3.2/contrib/minizip/ints.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8d610fe82ed6959c5d640663947ba952cf3fe10c0125c8953ad7def23c786d47",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 427,
+      "path": "zlib-1.3.2/contrib/minizip/ioapi.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d9920f836b507548cf33c9a10617ea2836e7a6ae801312ae40474e2535a22a02",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 910,
+      "path": "zlib-1.3.2/contrib/minizip/ioapi.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "696505386d087395fead997f2c5984ed1ff86124968e6c2cc62372d2a03c46aa",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 427,
+      "path": "zlib-1.3.2/contrib/minizip/iowin32.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4cbb81e1a4db18131c36e15af887a09864e11c3d11ce2aa0a4eb962c8f879a0f",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 431,
+      "path": "zlib-1.3.2/contrib/minizip/iowin32.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "56931d66ad49ab0e564951a35eb3467d4fe86c2a2d87881118cef11e3f979bb1",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 447,
+      "path": "zlib-1.3.2/contrib/minizip/miniunz.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1f01d47309d2b2ed4ef968d236c4a3d32a5ca37f85b250d22aab25d84469f51e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 448,
+      "path": "zlib-1.3.2/contrib/minizip/minizip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "94edb28cbc5210cd001335235ef4f25a8e11c3d727bde59105f701ac94604a39",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 115,
+      "path": "zlib-1.3.2/contrib/minizip/mztools.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "87bc77b2eeeea0bd8684f70a2bed766ae3a30c26c9fc7781cb9bbca9546970ea",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 104,
+      "path": "zlib-1.3.2/contrib/minizip/mztools.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "692441249627fe71fc8fa016bc88d82534d7e75a35de5c13e2b8b86259daa9a2",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 2420,
+      "path": "zlib-1.3.2/contrib/minizip/skipset.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ab22f44a1ba3dccd8879a412a630d4af5142727d28e53edc02e451a354729826",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 3146,
+      "path": "zlib-1.3.2/contrib/minizip/unzip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "12110280ab0c544f76f9c04ebf1567a99c89d39957807efaf2319458fa37388e",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1666,
+      "path": "zlib-1.3.2/contrib/minizip/unzip.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6d8e6254fde8af748da9653217542c5f944a077ae1a80e2277f2d0b5d177ef43",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1229,
+      "path": "zlib-1.3.2/contrib/minizip/zip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "112ebc27f371b589b6872678af5978b8019c984ce6ade2b4b652695e5d013643",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1527,
+      "path": "zlib-1.3.2/contrib/minizip/zip.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e0f0160f737467ceed98e1a29fbbf0f2bc0c74cc11bbf7bcefc79e4597764de0",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 4479,
+      "path": "zlib-1.3.2/contrib/puff/puff.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "00035a49937a69f47b12eda7e37ba0eeb49c01e5c26e2f346d1d4bef8139fa24",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1033,
+      "path": "zlib-1.3.2/contrib/puff/puff.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "671cb6988484d8ff368c8a0ba61356eeb8f66eb76cb148e3a6875ba5011d7fea",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 603,
+      "path": "zlib-1.3.2/contrib/puff/pufftest.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2c06dcd8b34ed619fe1f56070fe87ea42fa7943909f4d680612b31297d0501b9",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 909,
+      "path": "zlib-1.3.2/crc32.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bd949c364a3268147d712e7b29f10d012e55c6e4c9fdd2a36ed4701f7e31b671",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 2365,
+      "path": "zlib-1.3.2/deflate.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "17522f5a1a10fc1ec9af41b3ae39d0f12e8ae15ec371cb628ca92e27c685be32",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 377,
+      "path": "zlib-1.3.2/deflate.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2c90a6c95c674b465f4420d0f0f53a8413a1d7f5443d9478ad7b99238926129f",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 6342,
+      "path": "zlib-1.3.2/examples/enough.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "01b5620c3f9c1aad54efc2e93c76f763746edeaf0521eb39cd9533db519677c0",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 2821,
+      "path": "zlib-1.3.2/examples/fitblk.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ba9c64da000b58bb5d2895e211ac69263fd916aabfb4ee2795d3dc0e83b87de",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 3031,
+      "path": "zlib-1.3.2/examples/gun.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "053af34af6a665119b534419fcaa19f3ff263a300845c3488215a913de030cf8",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 4098,
+      "path": "zlib-1.3.2/examples/gzappend.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7d61aa2e01422451e1c4b11ad901adbd6e5693167da2540ca81272b3287c6be6",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 2468,
+      "path": "zlib-1.3.2/examples/gzjoin.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ad04443a4bdcae381f0a7bde9a25a8dde611bc6638ce944bc174e9d20511e2a4",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 13205,
+      "path": "zlib-1.3.2/examples/gzlog.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e033c4a9533b1d1aedb425de101902ad3d613914bb9e282d66ca10808393d657",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 2225,
+      "path": "zlib-1.3.2/examples/gzlog.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "beb730eda6de25ff2d26bb73f7fa0f5cd6afa8d6c0253ffe77072e7213c14e3c",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 625,
+      "path": "zlib-1.3.2/examples/gznorm.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "024d79ab01438476930dc1d6dcef72c13cfb7471910d3b80bd04e497fd07d9bf",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 692,
+      "path": "zlib-1.3.2/examples/zpipe.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "82c7f32f4da9f57df3162eb90c6b10c5a9db2c2eae73302c23a31cde8b84b00d",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 3758,
+      "path": "zlib-1.3.2/examples/zran.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5b40bb203b0430ce3174c12ba3f8afc43b73a27da8c026366f456b0c039f7dc7",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 247,
+      "path": "zlib-1.3.2/examples/zran.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1ae655044bce4a0d9507d71ab4d76e4413ea2bee1078650f2c36d7755f1442f1",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 158,
+      "path": "zlib-1.3.2/gzclose.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "08a2b22a735c20227526810487aa32b16bd384960c32aab2bde000ccbff75cd6",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 184,
+      "path": "zlib-1.3.2/gzguts.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2e0757f0059e1c5d472af52483b4baaad3f8ca84f17a9c1b80ad581dd9a41fc6",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 187,
+      "path": "zlib-1.3.2/gzlib.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "75f601bb1b568ce3cf31bebc39635a54d2a54ef3ecd583326ff156ef78f33b11",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 170,
+      "path": "zlib-1.3.2/gzread.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a12d4561c00db3322d7076dde9ca2e6b287a183015ccdc8db8282d6cbdc3e342",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 171,
+      "path": "zlib-1.3.2/gzwrite.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9823c399c0f727bcce6a8f154b1e9044de342396da90c6139d693dd50970b542",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 471,
+      "path": "zlib-1.3.2/infback.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "825b7d4a2250e86dd877d389e6480a550d81f1bc8a983c9416ac5e00f7293d37",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 147,
+      "path": "zlib-1.3.2/inffast.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5bc46fe1e2549e5f171626c0a742ac1308ae99a5379eac37e4d04412ea2d79e6",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 357,
+      "path": "zlib-1.3.2/inffast.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b4914bbd93e6418ef0043d9997b943c512a16824dea730cda4af1d05b63e2d3b",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 3946,
+      "path": "zlib-1.3.2/inflate.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "189871e338fe4291e8e5be2451e8fddaf304b6b6e0d50b4bcd1fcb790f728533",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 616,
+      "path": "zlib-1.3.2/inflate.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "caaf0f40120135f3275fb59690fbeb913893b560aafa9135f9215ddf54fbeb2b",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 180,
+      "path": "zlib-1.3.2/inftrees.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a797c9d921c32fba3f83a9455c00bf183185dac93ac8dea00a70fdf3235267c8",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1216,
+      "path": "zlib-1.3.2/inftrees.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "df5dd25df6631c3ece907176125989323686a99a42ecd9c539507d0b752f0e18",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 959,
+      "path": "zlib-1.3.2/msdos/Makefile.dj2",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4bb53044523d5cc60c476a5440fc045d779e74249cfd1dc77b6ed0f94bff1f70",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 288,
+      "path": "zlib-1.3.2/msdos/Makefile.emx",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "438c97a89b2889ac93f7d0ce4f4a9ce97c1706aafdeac7298bc068569f9e919a",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 202,
+      "path": "zlib-1.3.2/test/example.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f9e965a349ee35ccc098b07b71e8899a9b6b0755484ab3e988ef4ba52143ab75",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 247,
+      "path": "zlib-1.3.2/test/infcover.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3e5b6a10c27c49d1a4f795ae60d43bb2b397661d626518274d82b82360cdf1c7",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 637,
+      "path": "zlib-1.3.2/test/minigzip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6522c91995463e05b93a3393ce637cb07493955faf08a700f83a5328a64600b7",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1192,
+      "path": "zlib-1.3.2/trees.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ef92b46616037d080dfbc2437b3c57eaf2c8a6650b19890e484632f877e37749",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 195,
+      "path": "zlib-1.3.2/uncompr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9b3bf783b47f454eea0aba7109a89ca184a3000f4c239631c236dbedf82767ba",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 924,
+      "path": "zlib-1.3.2/win32/Makefile.gcc",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a1b81e3123b28c1f6c3c3c9774a64b00cfbf0de099f700668b6d320a6752e2c6",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 323,
+      "path": "zlib-1.3.2/win32/Makefile.msc",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "fa2b6d11781bfee8bb08a27be81b801c60abac9ec0d3c18cb57f6d91bca3494b",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 212,
+      "path": "zlib-1.3.2/zconf.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "769f5bac3cfdbb2b4e82ed0daa0046f2cc48065d63a55f20262067da23805fc6",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 212,
+      "path": "zlib-1.3.2/zconf.h.in",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "769f5bac3cfdbb2b4e82ed0daa0046f2cc48065d63a55f20262067da23805fc6",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 1331,
+      "path": "zlib-1.3.2/zlib.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6fe3d7b76f5063c9867ea601dd903a1795096d882d2254ed151cf564f2c8213a",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 217,
+      "path": "zlib-1.3.2/zutil.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a404fc7f824763f80fb5822880ca8a24526fe0b0c830a82dfe44ca59cd9333b7",
+      "source": "zlib-1.3.2.tar.gz"
+    },
+    {
+      "bytes": 424,
+      "path": "zlib-1.3.2/zutil.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2d9b3d31d0384d93e9768b93cee13cb4bc4d3de8e8431b9099cbbf4dc25e7ea6",
+      "source": "zlib-1.3.2.tar.gz"
+    }
+  ],
+  "origin": "zlib",
+  "schema": 1
+}

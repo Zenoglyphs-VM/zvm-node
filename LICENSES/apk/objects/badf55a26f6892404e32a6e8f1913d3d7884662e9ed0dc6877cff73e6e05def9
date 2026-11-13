@@ -1,0 +1,51 @@
+#! /usr/bin/env perl
+# Copyright 2005-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# December 2005
+#
+# Pure SPARCv9/8+ and IALU-only bn_mul_mont implementation. The reasons
+# for undertaken effort are multiple. First of all, UltraSPARC is not
+# the whole SPARCv9 universe and other VIS-free implementations deserve
+# optimized code as much. Secondly, newly introduced UltraSPARC T1,
+# a.k.a. Niagara, has shared FPU and concurrent FPU-intensive paths,
+# such as sparcv9a-mont, will simply sink it. Yes, T1 is equipped with
+# several integrated RSA/DSA accelerator circuits accessible through
+# kernel driver [only(*)], but having decent user-land software
+# implementation is important too. Finally, reasons like desire to
+# experiment with dedicated squaring procedure. Yes, this module
+# implements one, because it was easiest to draft it in SPARCv9
+# instructions...
+
+# (*)	Engine accessing the driver in question is on my TODO list.
+#	For reference, accelerator is estimated to give 6 to 10 times
+#	improvement on single-threaded RSA sign. It should be noted
+#	that 6-10x improvement coefficient does not actually mean
+#	something extraordinary in terms of absolute [single-threaded]
+#	performance, as SPARCv9 instruction set is by all means least
+#	suitable for high performance crypto among other 64 bit
+#	platforms. 6-10x factor simply places T1 in same performance
+#	domain as say AMD64 and IA-64. Improvement of RSA verify don't
+#	appear impressive at all, but it's the sign operation which is
+#	far more critical/interesting.
+
+# You might notice that inner loops are modulo-scheduled:-) This has
+# essentially negligible impact on UltraSPARC performance, it's
+# Fujitsu SPARC64 V users who should notice and hopefully appreciate
+# the advantage... Currently this module surpasses sparcv9a-mont.pl
+# by ~20% on UltraSPARC-III and later cores, but recall that sparcv9a
+# module still have hidden potential [see TODO list there], which is
+# estimated to be larger than 20%...
+

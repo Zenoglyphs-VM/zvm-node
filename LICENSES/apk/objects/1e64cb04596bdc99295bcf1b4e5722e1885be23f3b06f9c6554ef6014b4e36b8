@@ -1,0 +1,115 @@
+#! /usr/bin/env perl
+# Copyright 2005-2023 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# July 2004
+#
+# 2.22x RC4 tune-up:-) It should be noted though that my hand [as in
+# "hand-coded assembler"] doesn't stand for the whole improvement
+# coefficient. It turned out that eliminating RC4_CHAR from config
+# line results in ~40% improvement (yes, even for C implementation).
+# Presumably it has everything to do with AMD cache architecture and
+# RAW or whatever penalties. Once again! The module *requires* config
+# line *without* RC4_CHAR! As for coding "secret," I bet on partial
+# register arithmetic. For example instead of 'inc %r8; and $255,%r8'
+# I simply 'inc %r8b'. Even though optimization manual discourages
+# to operate on partial registers, it turned out to be the best bet.
+# At least for AMD... How IA32E would perform remains to be seen...
+
+# November 2004
+#
+# As was shown by Marc Bevand reordering of couple of load operations
+# results in even higher performance gain of 3.3x:-) At least on
+# Opteron... For reference, 1x in this case is RC4_CHAR C-code
+# compiled with gcc 3.3.2, which performs at ~54MBps per 1GHz clock.
+# Latter means that if you want to *estimate* what to expect from
+# *your* Opteron, then multiply 54 by 3.3 and clock frequency in GHz.
+
+# November 2004
+#
+# Intel P4 EM64T core was found to run the AMD64 code really slow...
+# The only way to achieve comparable performance on P4 was to keep
+# RC4_CHAR. Kind of ironic, huh? As it's apparently impossible to
+# compose blended code, which would perform even within 30% marginal
+# on either AMD and Intel platforms, I implement both cases. See
+# rc4_skey.c for further details...
+
+# April 2005
+#
+# P4 EM64T core appears to be "allergic" to 64-bit inc/dec. Replacing
+# those with add/sub results in 50% performance improvement of folded
+# loop...
+
+# May 2005
+#
+# As was shown by Zou Nanhai loop unrolling can improve Intel EM64T
+# performance by >30% [unlike P4 32-bit case that is]. But this is
+# provided that loads are reordered even more aggressively! Both code
+# paths, AMD64 and EM64T, reorder loads in essentially same manner
+# as my IA-64 implementation. On Opteron this resulted in modest 5%
+# improvement [I had to test it], while final Intel P4 performance
+# achieves respectful 432MBps on 2.8GHz processor now. For reference.
+# If executed on Xeon, current RC4_CHAR code-path is 2.7x faster than
+# RC4_INT code-path. While if executed on Opteron, it's only 25%
+# slower than the RC4_INT one [meaning that if CPU µ-arch detection
+# is not implemented, then this final RC4_CHAR code-path should be
+# preferred, as it provides better *all-round* performance].
+
+# March 2007
+#
+# Intel Core2 was observed to perform poorly on both code paths:-( It
+# apparently suffers from some kind of partial register stall, which
+# occurs in 64-bit mode only [as virtually identical 32-bit loop was
+# observed to outperform 64-bit one by almost 50%]. Adding two movzb to
+# cloop1 boosts its performance by 80%! This loop appears to be optimal
+# fit for Core2 and therefore the code was modified to skip cloop8 on
+# this CPU.
+
+# May 2010
+#
+# Intel Westmere was observed to perform suboptimally. Adding yet
+# another movzb to cloop1 improved performance by almost 50%! Core2
+# performance is improved too, but nominally...
+
+# May 2011
+#
+# The only code path that was not modified is P4-specific one. Non-P4
+# Intel code path optimization is heavily based on submission by Maxim
+# Perminov, Maxim Locktyukhin and Jim Guilford of Intel. I've used
+# some of the ideas even in attempt to optimize the original RC4_INT
+# code path... Current performance in cycles per processed byte (less
+# is better) and improvement coefficients relative to previous
+# version of this module are:
+#
+# Opteron	5.3/+0%(*)
+# P4		6.5
+# Core2		6.2/+15%(**)
+# Westmere	4.2/+60%
+# Sandy Bridge	4.2/+120%
+# Atom		9.3/+80%
+# VIA Nano	6.4/+4%
+# Ivy Bridge	4.1/+30%
+# Bulldozer	4.5/+30%(*)
+#
+# (*)	But corresponding loop has less instructions, which should have
+#	positive effect on upcoming Bulldozer, which has one less ALU.
+#	For reference, Intel code runs at 6.8 cpb rate on Opteron.
+# (**)	Note that Core2 result is ~15% lower than corresponding result
+#	for 32-bit code, meaning that it's possible to improve it,
+#	but more than likely at the cost of the others (see rc4-586.pl
+#	to get the idea)...
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

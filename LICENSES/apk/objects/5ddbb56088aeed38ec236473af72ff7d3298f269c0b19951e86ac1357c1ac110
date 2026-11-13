@@ -1,0 +1,62 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini insmod implementation for busybox
+ *
+ * This version of insmod supports ARM, CRIS, H8/300, x86, ia64, x86_64,
+ * m68k, MIPS, PowerPC, S390, SH3/4/5, Sparc, v850e, and x86_64.
+ *
+ * Copyright (C) 1999-2004 by Erik Andersen <andersen@codepoet.org>
+ * and Ron Alder <alder@lineo.com>
+ *
+ * Rodney Radford <rradford@mindspring.com> 17-Aug-2004.
+ *   Added x86_64 support.
+ *
+ * Miles Bader <miles@gnu.org> added NEC V850E support.
+ *
+ * Modified by Bryan Rittmeyer <bryan@ixiacom.com> to support SH4
+ * and (theoretically) SH3. I have only tested SH4 in little endian mode.
+ *
+ * Modified by Alcove, Julien Gaulmin <julien.gaulmin@alcove.fr> and
+ * Nicolas Ferre <nicolas.ferre@alcove.fr> to support ARM7TDMI.  Only
+ * very minor changes required to also work with StrongArm and presumably
+ * all ARM based systems.
+ *
+ * Yoshinori Sato <ysato@users.sourceforge.jp> 19-May-2004.
+ *   added Renesas H8/300 support.
+ *
+ * Paul Mundt <lethal@linux-sh.org> 08-Aug-2003.
+ *   Integrated support for sh64 (SH-5), from preliminary modutils
+ *   patches from Benedict Gaster <benedict.gaster@superh.com>.
+ *   Currently limited to support for 32bit ABI.
+ *
+ * Magnus Damm <damm@opensource.se> 22-May-2002.
+ *   The plt and got code are now using the same structs.
+ *   Added generic linked list code to fully support PowerPC.
+ *   Replaced the mess in arch_apply_relocation() with architecture blocks.
+ *   The arch_create_got() function got cleaned up with architecture blocks.
+ *   These blocks should be easy maintain and sync with obj_xxx.c in modutils.
+ *
+ * Magnus Damm <damm@opensource.se> added PowerPC support 20-Feb-2001.
+ *   PowerPC specific code stolen from modutils-2.3.16,
+ *   written by Paul Mackerras, Copyright 1996, 1997 Linux International.
+ *   I've only tested the code on mpc8xx platforms in big-endian mode.
+ *   Did some cleanup and added USE_xxx_ENTRIES...
+ *
+ * Quinn Jensen <jensenq@lineo.com> added MIPS support 23-Feb-2001.
+ *   based on modutils-2.4.2
+ *   MIPS specific support for Elf loading and relocation.
+ *   Copyright 1996, 1997 Linux International.
+ *   Contributed by Ralf Baechle <ralf@gnu.ai.mit.edu>
+ *
+ * Based almost entirely on the Linux modutils-2.3.11 implementation.
+ *   Copyright 1996, 1997 Linux International.
+ *   New implementation contributed by Richard Henderson <rth@tamu.edu>
+ *   Based on original work by Bjorn Ekwall <bj0rn@blox.se>
+ *   Restructured (and partly rewritten) by:
+ *   Björn Ekwall <bj0rn@blox.se> February 1999
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+
+//kbuild:lib-$(CONFIG_FEATURE_2_4_MODULES) += modutils-24.o
+

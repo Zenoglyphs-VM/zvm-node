@@ -1,0 +1,32 @@
+# Copyright 2021-2026 The OpenSSL Project Authors. All Rights Reserved.
+# Copyright (c) 2021, Intel Corporation. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+#
+# This implementation is based on the AES-GCM code (AVX512VAES + VPCLMULQDQ)
+# from Intel(R) Multi-Buffer Crypto for IPsec Library v1.1
+# (https://github.com/intel/intel-ipsec-mb).
+# Original author is Tomasz Kantecki <tomasz.kantecki@intel.com>.
+#
+# References:
+#  [1] Vinodh Gopal et. al. Optimized Galois-Counter-Mode Implementation on
+#      Intel Architecture Processors. August, 2010.
+#  [2] Erdinc Ozturk et. al. Enabling High-Performance Galois-Counter-Mode on
+#      Intel Architecture Processors. October, 2012.
+#  [3] Shay Gueron et. al. Intel Carry-Less Multiplication Instruction and its
+#      Usage for Computing the GCM Mode. May, 2010.
+#
+#
+# December 2021
+#
+# Initial release.
+#
+# GCM128_CONTEXT structure has storage for 16 hkeys only, but this
+# implementation can use up to 48.  To avoid extending the context size,
+# precompute and store in the context first 16 hkeys only, and compute the rest
+# on demand keeping them in the local frame.
+#

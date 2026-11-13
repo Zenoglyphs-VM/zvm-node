@@ -1,0 +1,74 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini du implementation for busybox
+ *
+ * Copyright (C) 1999,2000,2001 by Lineo, inc. and John Beppu
+ * Copyright (C) 1999,2000,2001 by John Beppu <beppu@codepoet.org>
+ * Copyright (C) 2002  Edward Betts <edward@debian.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Mar 16, 2003      Manuel Novoa III   (mjn3@codepoet.org)
+ *
+ * Mostly rewritten for SUSv3 compliance and to fix bugs/defects.
+ * 1) Added support for SUSv3 -a, -H, -L, gnu -c, and (busybox) -d options.
+ *    The -d option allows setting of max depth (similar to gnu --max-depth).
+ * 2) Fixed incorrect size calculations for links and directories, especially
+ *    when errors occurred.  Calculates sizes should now match gnu du output.
+ * 3) Added error checking of output.
+ * 4) Fixed busybox bug #1284 involving long overflow with human_readable.
+ */
+//config:config DU
+//config:	bool "du (6.5 kb)"
+//config:	default y
+//config:	help
+//config:	du is used to report the amount of disk space used
+//config:	for specified files.
+//config:
+//config:config FEATURE_DU_DEFAULT_BLOCKSIZE_1K
+//config:	bool "Use default blocksize of 1024 bytes (else it's 512 bytes)"
+//config:	default y
+//config:	depends on DU
+
+//applet:IF_DU(APPLET(du, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_DU) += du.o
+
+/* BB_AUDIT SUSv3 compliant (unless default blocksize set to 1k) */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/du.html */
+
+//usage:#define du_trivial_usage
+//usage:       "[-aHLdclsx" IF_FEATURE_HUMAN_READABLE("hm") "k] [FILE]..."
+//usage:#define du_full_usage "\n\n"
+//usage:       "Summarize disk space used for FILEs (or directories)\n"
+//usage:     "\n	-a	Show file sizes too"
+//usage:     "\n	-b	Apparent size (including holes)"
+//usage:     "\n	-L	Follow all symlinks"
+//usage:     "\n	-H	Follow symlinks on command line"
+//usage:     "\n	-d N	Limit output to directories (and files with -a) of depth < N"
+//usage:     "\n	-c	Show grand total"
+//usage:     "\n	-l	Count sizes many times if hard linked"
+//usage:     "\n	-s	Display only a total for each argument"
+//usage:     "\n	-x	Skip directories on different filesystems"
+//usage:	IF_FEATURE_HUMAN_READABLE(
+//usage:     "\n	-h	Sizes in human readable format (e.g., 1K 243M 2G)"
+//usage:     "\n	-m	Sizes in megabytes"
+//usage:	)
+//usage:     "\n	-k	Sizes in kilobytes" IF_FEATURE_DU_DEFAULT_BLOCKSIZE_1K(" (default)")
+//usage:	IF_NOT_FEATURE_DU_DEFAULT_BLOCKSIZE_1K(
+//usage:     "\n		Default unit is 512 bytes"
+//usage:	)
+//usage:
+//usage:#define du_example_usage
+//usage:       "$ du\n"
+//usage:       "16      ./CVS\n"
+//usage:       "12      ./kernel-patches/CVS\n"
+//usage:       "80      ./kernel-patches\n"
+//usage:       "12      ./tests/CVS\n"
+//usage:       "36      ./tests\n"
+//usage:       "12      ./scripts/CVS\n"
+//usage:       "16      ./scripts\n"
+//usage:       "12      ./docs/CVS\n"
+//usage:       "104     ./docs\n"
+//usage:       "2417    .\n"
+

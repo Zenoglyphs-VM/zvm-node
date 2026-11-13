@@ -1,0 +1,24 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Safe gethostname implementation for busybox
+ *
+ * Copyright (C) 2008 Tito Ragusa <farmatito@tiscali.it>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/*
+ * SUSv2 guarantees that "Host names are limited to 255 bytes"
+ * POSIX.1-2001 guarantees that "Host names (not including the terminating
+ * null byte) are limited to HOST_NAME_MAX bytes" (64 bytes on my box).
+ *
+ * RFC1123 says:
+ *
+ * The syntax of a legal Internet host name was specified in RFC-952
+ * [DNS:4].  One aspect of host name syntax is hereby changed: the
+ * restriction on the first character is relaxed to allow either a
+ * letter or a digit.  Host software MUST support this more liberal
+ * syntax.
+ *
+ * Host software MUST handle host names of up to 63 characters and
+ * SHOULD handle host names of up to 255 characters.
+ */

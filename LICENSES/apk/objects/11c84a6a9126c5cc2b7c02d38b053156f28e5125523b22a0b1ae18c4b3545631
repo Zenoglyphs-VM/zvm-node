@@ -1,0 +1,60 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini id implementation for busybox
+ *
+ * Copyright (C) 2000 by Randolph Chung <tausq@debian.org>
+ * Copyright (C) 2008 by Tito Ragusa <farmatito@tiscali.it>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Hacked by Tito Ragusa (C) 2004 to handle usernames of whatever
+ * length and to be more similar to GNU id.
+ * -Z option support: by Yuichi Nakamura <ynakam@hitachisoft.jp>
+ * Added -G option Tito Ragusa (C) 2008 for SUSv3.
+ */
+//config:config ID
+//config:	bool "id (7.1 kb)"
+//config:	default y
+//config:	help
+//config:	id displays the current user and group ID names.
+//config:
+//config:config GROUPS
+//config:	bool "groups (6.8 kb)"
+//config:	default y
+//config:	help
+//config:	Print the group names associated with current user id.
+
+//applet:IF_GROUPS(APPLET_NOEXEC(groups, id, BB_DIR_USR_BIN, BB_SUID_DROP, groups))
+//applet:IF_ID(    APPLET_NOEXEC(id,     id, BB_DIR_USR_BIN, BB_SUID_DROP, id    ))
+
+//kbuild:lib-$(CONFIG_GROUPS) += id.o
+//kbuild:lib-$(CONFIG_ID)     += id.o
+
+/* BB_AUDIT SUSv3 compliant. */
+
+//usage:#define id_trivial_usage
+//usage:       "[-ugGnr"IF_SELINUX("Z")"] [USER]"
+//usage:#define id_full_usage "\n\n"
+//usage:       "Print information about USER or the current user\n"
+//usage:	IF_SELINUX(
+//usage:     "\n	-Z	Security context"
+//usage:	)
+//usage:     "\n	-u	User ID"
+//usage:     "\n	-g	Group ID"
+//usage:     "\n	-G	Supplementary group IDs"
+//usage:     "\n	-n	Print names instead of numbers"
+//usage:     "\n	-r	Print real ID instead of effective ID"
+//usage:
+//usage:#define id_example_usage
+//usage:       "$ id\n"
+//usage:       "uid=1000(andersen) gid=1000(andersen)\n"
+
+//usage:#define groups_trivial_usage
+//usage:       "[USER]"
+//usage:#define groups_full_usage "\n\n"
+//usage:       "Print the groups USER is in"
+//usage:
+//usage:#define groups_example_usage
+//usage:       "$ groups\n"
+//usage:       "andersen lp dialout cdrom floppy\n"
+

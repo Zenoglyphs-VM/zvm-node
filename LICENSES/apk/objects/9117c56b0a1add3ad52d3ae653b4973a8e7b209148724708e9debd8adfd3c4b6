@@ -1,0 +1,38 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Stripped down version of net-tools for busybox.
+ *
+ * Author: Ignacio Garcia Perez (iggarpe at gmail dot com)
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * There are some differences from the standard net-tools slattach:
+ *
+ * - The -l option is not supported.
+ *
+ * - The -F options allows disabling of RTS/CTS flow control.
+ */
+//config:config SLATTACH
+//config:	bool "slattach (6.3 kb)"
+//config:	default y
+//config:	help
+//config:	slattach configures serial line as SLIP network interface.
+
+//applet:IF_SLATTACH(APPLET(slattach, BB_DIR_SBIN, BB_SUID_DROP))
+/* shouldn't be NOEXEC: may sleep indefinitely */
+
+//kbuild:lib-$(CONFIG_SLATTACH) += slattach.o
+
+//usage:#define slattach_trivial_usage
+//usage:       "[-ehmLF] [-c SCRIPT] [-s BAUD] [-p PROTOCOL] SERIAL_DEVICE"
+//usage:#define slattach_full_usage "\n\n"
+//usage:       "Configure serial line as SLIP network interface\n"
+//usage:     "\n	-p PROT	Protocol: slip, cslip (default), slip6, clisp6, adaptive"
+//usage:     "\n	-s BAUD	Line speed"
+//usage:     "\n	-e	Exit after initialization"
+//usage:     "\n	-h	Exit if carrier is lost (else never exits)"
+//usage:     "\n	-c PROG	Run PROG on carrier loss"
+//usage:     "\n	-m	Do NOT set raw 8bit mode"
+//usage:     "\n	-L	Enable 3-wire operation"
+//usage:     "\n	-F	Disable RTS/CTS flow control"
+

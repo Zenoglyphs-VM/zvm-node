@@ -1,0 +1,21 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Utility routines.
+ *
+ * Copyright (C) 2018 Denys Vlasenko
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config FLOAT_DURATION
+//config:	bool "Enable fractional duration arguments"
+//config:	default y
+//config:	help
+//config:	Allow sleep N.NNN, top -d N.NNN etc.
+
+//kbuild:lib-$(CONFIG_SLEEP)   += duration.o
+//kbuild:lib-$(CONFIG_TOP)     += duration.o
+//kbuild:lib-$(CONFIG_TIMEOUT) += duration.o
+//kbuild:lib-$(CONFIG_PING)    += duration.o
+//kbuild:lib-$(CONFIG_PING6)   += duration.o
+//kbuild:lib-$(CONFIG_WATCH)   += duration.o
+

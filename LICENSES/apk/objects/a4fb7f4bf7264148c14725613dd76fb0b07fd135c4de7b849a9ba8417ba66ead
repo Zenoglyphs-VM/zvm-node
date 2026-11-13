@@ -1,0 +1,32 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * setsid.c -- execute a command in a new session
+ * Rick Sladkey <jrs@world.std.com>
+ * In the public domain.
+ *
+ * 1999-02-22 Arkadiusz Mickiewicz <misiek@pld.ORG.PL>
+ * - added Native Language Support
+ *
+ * 2001-01-18 John Fremlin <vii@penguinpowered.com>
+ * - fork in case we are process group leader
+ *
+ * 2004-11-12 Paul Fox
+ * - busyboxed
+ */
+//config:config SETSID
+//config:	bool "setsid (3.8 kb)"
+//config:	default y
+//config:	help
+//config:	setsid runs a program in a new session
+
+//applet:IF_SETSID(APPLET(setsid, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_SETSID) += setsid.o
+
+//usage:#define setsid_trivial_usage
+//usage:       "[-c] PROG ARGS"
+//usage:#define setsid_full_usage "\n\n"
+//usage:       "Run PROG in a new session. PROG will have no controlling terminal\n"
+//usage:       "and will not be affected by keyboard signals (^C etc).\n"
+//usage:     "\n	-c	Set controlling terminal to stdin"
+

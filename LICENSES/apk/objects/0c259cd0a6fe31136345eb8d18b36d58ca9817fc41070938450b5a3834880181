@@ -1,0 +1,16 @@
+/*
+ * Copyright (C) 2013 Rolf Fokkens <rolf@fokkens.nl>
+ *
+ * This file may be redistributed under the terms of the
+ * GNU Lesser General Public License.
+ *
+ * Based on code fragments from bcache-tools by Kent Overstreet:
+ * http://evilpiepirate.org/git/bcache-tools.git
+ */
+//config:config FEATURE_VOLUMEID_BCACHE
+//config:	bool "bcache filesystem"
+//config:	default y
+//config:	depends on VOLUMEID
+
+//kbuild:lib-$(CONFIG_FEATURE_VOLUMEID_BCACHE) += bcache.o
+

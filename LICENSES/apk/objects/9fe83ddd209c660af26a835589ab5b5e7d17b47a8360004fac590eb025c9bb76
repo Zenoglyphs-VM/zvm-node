@@ -1,0 +1,29 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * lspci implementation for busybox
+ *
+ * Copyright (C) 2009  Malek Degachi <malek-degachi@laposte.net>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config LSPCI
+//config:	bool "lspci (6.4 kb)"
+//config:	default y
+//config:	help
+//config:	lspci is a utility for displaying information about PCI buses in the
+//config:	system and devices connected to them.
+//config:
+//config:	This version uses sysfs (/sys/bus/pci/devices) only.
+
+//applet:IF_LSPCI(APPLET_NOEXEC(lspci, lspci, BB_DIR_USR_BIN, BB_SUID_DROP, lspci))
+
+//kbuild:lib-$(CONFIG_LSPCI) += lspci.o
+
+//usage:#define lspci_trivial_usage
+//usage:       "[-mk]"
+//usage:#define lspci_full_usage "\n\n"
+//usage:       "List all PCI devices"
+//usage:     "\n"
+//usage:     "\n	-m	Parsable output"
+//usage:     "\n	-k	Show driver"
+

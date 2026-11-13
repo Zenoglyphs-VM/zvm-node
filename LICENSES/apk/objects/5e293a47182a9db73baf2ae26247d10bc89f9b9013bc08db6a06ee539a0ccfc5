@@ -1,0 +1,17 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * CRC32 table fill function
+ * Copyright (C) 2006 by Rob Sullivan <cogito.ergo.cogito@gmail.com>
+ * (I can't really claim much credit however, as the algorithm is
+ * very well-known)
+ *
+ * The following function creates a CRC32 table depending on whether
+ * a big-endian (0x04c11db7) or little-endian (0xedb88320) CRC32 is
+ * required. Admittedly, there are other CRC32 polynomials floating
+ * around, but Busybox doesn't use them.
+ *
+ * endian = 1: big-endian
+ * endian = 0: little-endian
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */

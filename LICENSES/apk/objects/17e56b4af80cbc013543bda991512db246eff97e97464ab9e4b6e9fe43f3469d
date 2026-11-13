@@ -1,0 +1,54 @@
+#!/usr/bin/env perl
+# Copyright 2017-2024 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# Keccak-1600 for x86_64.
+#
+# June 2017.
+#
+# Below code is [lane complementing] KECCAK_2X implementation (see
+# sha/keccak1600.c) with C[5] and D[5] held in register bank. Though
+# instead of actually unrolling the loop pair-wise I simply flip
+# pointers to T[][] and A[][] at the end of round. Since number of
+# rounds is even, last round writes to A[][] and everything works out.
+# How does it compare to x86_64 assembly module in Keccak Code Package?
+# Depending on processor it's either as fast or faster by up to 15%...
+#
+########################################################################
+# Numbers are cycles per processed byte out of large message.
+#
+#			r=1088(*)
+#
+# P4			25.8
+# Core 2		12.9
+# Westmere		13.7
+# Sandy Bridge		12.9(**)
+# Haswell		9.6
+# Skylake		9.4
+# Silvermont		22.8
+# Goldmont		15.8
+# VIA Nano		17.3
+# Sledgehammer		13.3
+# Bulldozer		16.5
+# Ryzen			8.8
+#
+# (*)	Corresponds to SHA3-256. Improvement over compiler-generate
+#	varies a lot, most common coefficient is 15% in comparison to
+#	gcc-5.x, 50% for gcc-4.x, 90% for gcc-3.x.
+# (**)	Sandy Bridge has broken rotate instruction. Performance can be
+#	improved by 14% by replacing rotates with double-precision
+#	shift with same register as source and destination.
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

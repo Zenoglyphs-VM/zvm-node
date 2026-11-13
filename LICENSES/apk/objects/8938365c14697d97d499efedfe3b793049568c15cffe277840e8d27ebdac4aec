@@ -1,0 +1,22 @@
+/*
+ * Copyright (C) 2017 Denys Vlasenko
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config TLS
+//config:	bool #No description makes it a hidden option
+//config:	default n
+//Note:
+//Config.src also defines FEATURE_TLS_SHA1 option
+
+//kbuild:lib-$(CONFIG_TLS) += tls.o
+//kbuild:lib-$(CONFIG_TLS) += tls_pstm.o
+//kbuild:lib-$(CONFIG_TLS) += tls_pstm_montgomery_reduce.o
+//kbuild:lib-$(CONFIG_TLS) += tls_pstm_mul_comba.o
+//kbuild:lib-$(CONFIG_TLS) += tls_pstm_sqr_comba.o
+//kbuild:lib-$(CONFIG_TLS) += tls_aes.o
+//kbuild:lib-$(CONFIG_TLS) += tls_aesgcm.o
+//kbuild:lib-$(CONFIG_TLS) += tls_rsa.o
+//kbuild:lib-$(CONFIG_TLS) += tls_fe.o
+//kbuild:lib-$(CONFIG_TLS) += tls_sp_c32.o
+

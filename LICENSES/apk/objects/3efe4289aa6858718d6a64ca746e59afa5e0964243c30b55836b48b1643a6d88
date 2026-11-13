@@ -1,0 +1,30 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * tiny fuser implementation
+ *
+ * Copyright 2004 Tony J. White
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config FUSER
+//config:	bool "fuser (7.3 kb)"
+//config:	default y
+//config:	help
+//config:	fuser lists all PIDs (Process IDs) that currently have a given
+//config:	file open. fuser can also list all PIDs that have a given network
+//config:	(TCP or UDP) port open.
+
+//applet:IF_FUSER(APPLET(fuser, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_FUSER) += fuser.o
+
+//usage:#define fuser_trivial_usage
+//usage:       "[-msk46] [-SIGNAL] FILE or PORT/PROTO"
+//usage:#define fuser_full_usage "\n\n"
+//usage:       "Find processes which use FILEs or PORTs\n"
+//usage:     "\n	-m	Find processes which use same fs as FILEs"
+//usage:     "\n	-4,-6	Search only IPv4/IPv6 space"
+//usage:     "\n	-s	Don't display PIDs"
+//usage:     "\n	-k	Kill found processes"
+//usage:     "\n	-SIGNAL	Signal to send (default: KILL)"
+

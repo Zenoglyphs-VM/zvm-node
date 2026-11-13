@@ -1,0 +1,18 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * makemime: create MIME-encoded message
+ *
+ * Copyright (C) 2008 by Vladimir Dronnikov <dronnikov@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config MAKEMIME
+//config:	bool "makemime (5.6 kb)"
+//config:	default y
+//config:	help
+//config:	Create MIME-formatted messages.
+
+//applet:IF_MAKEMIME(APPLET(makemime, BB_DIR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_MAKEMIME) += makemime.o mail.o
+

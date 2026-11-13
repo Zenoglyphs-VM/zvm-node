@@ -1,0 +1,22 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * parse_mode implementation for busybox
+ *
+ * Copyright (C) 2003  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Mar 5, 2003    Manuel Novoa III
+ *
+ * This is the main work function for the 'mkdir' applet.  As such, it
+ * strives to be SUSv3 compliant in it's behaviour when recursively
+ * making missing parent dirs, and in it's mode setting of the final
+ * directory 'path'.
+ *
+ * To recursively build all missing intermediate directories, make
+ * sure that (flags & FILEUTILS_RECUR) is non-zero.  Newly created
+ * intermediate directories will have at least u+wx perms.
+ *
+ * To set specific permissions on 'path', pass the appropriate 'mode'
+ * val.  Otherwise, pass -1 to get default permissions.
+ */

@@ -1,0 +1,41 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini weak password checker implementation for busybox
+ *
+ * Copyright (C) 2006 Tito Ragusa <farmatito@tiscali.it>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+
+/*	A good password:
+	1)	should contain at least six characters (man passwd);
+	2)	empty passwords are not permitted;
+	3)	should contain a mix of four different types of characters
+		upper case letters,
+		lower case letters,
+		numbers,
+		special characters such as !@#$%^&*,;".
+	This password types should not  be permitted:
+	a)	pure numbers: birthdates, social security number, license plate, phone numbers;
+	b)	words and all letters only passwords (uppercase, lowercase or mixed)
+		as palindromes, consecutive or repetitive letters
+		or adjacent letters on your keyboard;
+	c)	username, real name, company name or (e-mail?) address
+		in any form (as-is, reversed, capitalized, doubled, etc.).
+		(we can check only against username, gecos and hostname)
+	d)	common and obvious letter-number replacements
+		(e.g. replace the letter O with number 0)
+		such as "M1cr0$0ft" or "P@ssw0rd" (CAVEAT: we cannot check for them
+		without the use of a dictionary).
+
+	For each missing type of characters an increase of password length is
+	requested.
+
+	If user is root we warn only.
+
+	CAVEAT: some older versions of crypt() truncates passwords to 8 chars,
+	so that aaaaaaaa1Q$ is equal to aaaaaaaa making it possible to fool
+	some of our checks. We don't test for this special case as newer versions
+	of crypt do not truncate passwords.
+*/
+

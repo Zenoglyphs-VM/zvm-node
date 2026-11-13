@@ -1,0 +1,11 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Match fstypes for use in mount unmount
+ * We accept notmpfs,nfs but not notmpfs,nonfs
+ * This allows us to match fstypes that start with no like so
+ *   mount -at ,noddy
+ *
+ * Returns 1 for a match, otherwise 0
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */

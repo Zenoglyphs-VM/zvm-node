@@ -1,0 +1,69 @@
+/* vi: set sw=4 ts=4: */
+/*
+ *  mini dpkg implementation for busybox.
+ *  this is not meant as a replacement for dpkg
+ *
+ *  written by glenn mcgrath with the help of others
+ *  copyright (c) 2001 by glenn mcgrath
+ *
+ *  parts of the version comparison code is plucked from the real dpkg
+ *  application which is licensed GPLv2 and
+ *  copyright (c) 1995 Ian Jackson <ian@chiark.greenend.org.uk>
+ *
+ *  started life as a busybox implementation of udpkg
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/*
+ * known difference between busybox dpkg and the official dpkg that i don't
+ * consider important, its worth keeping a note of differences anyway, just to
+ * make it easier to maintain.
+ *  - the first value for the confflile: field isn't placed on a new line.
+ *  - when installing a package the status: field is placed at the end of the
+ *      section, rather than just after the package: field.
+ *
+ * bugs that need to be fixed
+ *  - (unknown, please let me know when you find any)
+ */
+//config:config DPKG
+//config:	bool "dpkg (43 kb)"
+//config:	default y
+//config:	select FEATURE_SEAMLESS_GZ
+//config:	help
+//config:	dpkg is a medium-level tool to install, build, remove and manage
+//config:	Debian packages.
+//config:
+//config:	This implementation of dpkg has a number of limitations,
+//config:	you should use the official dpkg if possible.
+
+//applet:IF_DPKG(APPLET(dpkg, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_DPKG) += dpkg.o
+
+//usage:#define dpkg_trivial_usage
+//usage:       "[-ilCPru] [-F OPT] PACKAGE"
+//usage:#define dpkg_full_usage "\n\n"
+//usage:       "Install, remove and manage Debian packages\n"
+//usage:	IF_LONG_OPTS(
+//usage:     "\n	-i,--install	Install the package"
+//usage:     "\n	-l,--list	List of installed packages"
+//usage:     "\n	--configure	Configure an unpackaged package"
+//usage:     "\n	-P,--purge	Purge all files of a package"
+//usage:     "\n	-r,--remove	Remove all but the configuration files for a package"
+//usage:     "\n	--unpack	Unpack a package, but don't configure it"
+//usage:     "\n	--force-depends	Ignore dependency problems"
+//usage:     "\n	--force-confnew	Overwrite existing config files when installing"
+//usage:     "\n	--force-confold	Keep old config files when installing"
+//usage:	)
+//usage:	IF_NOT_LONG_OPTS(
+//usage:     "\n	-i		Install the package"
+//usage:     "\n	-l		List of installed packages"
+//usage:     "\n	-C		Configure an unpackaged package"
+//usage:     "\n	-P		Purge all files of a package"
+//usage:     "\n	-r		Remove all but the configuration files for a package"
+//usage:     "\n	-u		Unpack a package, but don't configure it"
+//usage:     "\n	-F depends	Ignore dependency problems"
+//usage:     "\n	-F confnew	Overwrite existing config files when installing"
+//usage:     "\n	-F confold	Keep old config files when installing"
+//usage:	)
+

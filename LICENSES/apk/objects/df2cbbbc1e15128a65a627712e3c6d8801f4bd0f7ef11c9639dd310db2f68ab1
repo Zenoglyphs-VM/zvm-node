@@ -1,0 +1,28 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * wall - write a message to all logged-in users
+ * Copyright (c) 2009 Bernhard Reutner-Fischer
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config WALL
+//config:	bool "wall (2.9 kb)"
+//config:	default y
+//config:	depends on FEATURE_UTMP
+//config:	help
+//config:	Write a message to all users that are logged in.
+
+/* Needs to be run by root or be suid root - needs to write to /dev/TTY: */
+//applet:IF_WALL(APPLET(wall, BB_DIR_USR_BIN, BB_SUID_REQUIRE))
+
+//kbuild:lib-$(CONFIG_WALL) += wall.o
+
+//usage:#define wall_trivial_usage
+//usage:	"[FILE]"
+//usage:#define wall_full_usage "\n\n"
+//usage:	"Write content of FILE or stdin to all logged-in users"
+//usage:
+//usage:#define wall_sample_usage
+//usage:	"echo foo | wall\n"
+//usage:	"wall ./mymessage"
+

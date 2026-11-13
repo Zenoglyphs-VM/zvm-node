@@ -1,0 +1,42 @@
+/*
+ * chcon -- change security context, based on coreutils-5.97-13
+ *
+ * Port to busybox: KaiGai Kohei <kaigai@kaigai.gr.jp>
+ *
+ * Copyright (C) 2006 - 2007 KaiGai Kohei <kaigai@kaigai.gr.jp>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config CHCON
+//config:	bool "chcon (8.9 kb)"
+//config:	default n
+//config:	depends on SELINUX
+//config:	help
+//config:	Enable support to change the security context of file.
+
+//applet:IF_CHCON(APPLET(chcon, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_CHCON) += chcon.o
+
+//usage:#define chcon_trivial_usage
+//usage:       "[-chfRv] CONTEXT FILE..."
+//usage:       "\n	chcon [-chfRv] [-u USER] [-r ROLE] [-l RANGE] [-t TYPE] FILE..."
+//usage:	IF_LONG_OPTS(
+//usage:       "\n	chcon [-chfRv] --reference=RFILE FILE..."
+//usage:	)
+//usage:
+//usage:#define chcon_full_usage "\n\n"
+//usage:       "Change the security context of FILEs to CONTEXT\n"
+//usage:     "\n	-v	Verbose"
+//usage:     "\n	-c	Report changes made"
+//usage:     "\n	-h	Affect symlinks instead of their targets"
+//usage:     "\n	-f	Suppress most error messages"
+//usage:	IF_LONG_OPTS(
+//usage:     "\n	--reference RFILE Use RFILE's group instead of using a CONTEXT value"
+//usage:	)
+//usage:     "\n	-u USER	Set user/role/type/range in the target security context"
+//usage:     "\n	-r ROLE"
+//usage:     "\n	-t TYPE"
+//usage:     "\n	-l RANGE"
+//usage:     "\n	-R	Recurse"
+

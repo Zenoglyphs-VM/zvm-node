@@ -1,0 +1,61 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * fsck --- A generic, parallelizing front-end for the fsck program.
+ * It will automatically try to run fsck programs in parallel if the
+ * devices are on separate spindles.  It is based on the same ideas as
+ * the generic front end for fsck by David Engel and Fred van Kempen,
+ * but it has been completely rewritten from scratch to support
+ * parallel execution.
+ *
+ * Written by Theodore Ts'o, <tytso@mit.edu>
+ *
+ * Miquel van Smoorenburg (miquels@drinkel.ow.org) 20-Oct-1994:
+ *   o Changed -t fstype to behave like with mount when -A (all file
+ *     systems) or -M (like mount) is specified.
+ *   o fsck looks if it can find the fsck.type program to decide
+ *     if it should ignore the fs type. This way more fsck programs
+ *     can be added without changing this front-end.
+ *   o -R flag skip root file system.
+ *
+ * Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+ *      2001, 2002, 2003, 2004, 2005 by  Theodore Ts'o.
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+
+/* All filesystem specific hooks have been removed.
+ * If filesystem cannot be determined, we will execute
+ * "fsck.auto". Currently this also happens if you specify
+ * UUID=xxx or LABEL=xxx as an object to check.
+ * Detection code for that is also probably has to be in fsck.auto.
+ *
+ * In other words, this is _really_ is just a driver program which
+ * spawns actual fsck.something for each filesystem to check.
+ * It doesn't guess filesystem types from on-disk format.
+ */
+//config:config FSCK
+//config:	bool "fsck (7.6 kb)"
+//config:	default y
+//config:	help
+//config:	fsck is used to check and optionally repair one or more filesystems.
+//config:	In actuality, fsck is simply a front-end for the various file system
+//config:	checkers (fsck.fstype) available under Linux.
+
+//applet:IF_FSCK(APPLET(fsck, BB_DIR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_FSCK) += fsck.o
+
+//usage:#define fsck_trivial_usage
+//usage:       "[-ANPRTV] [-t FSTYPE] [FS_OPTS] [BLOCKDEV]..."
+//usage:#define fsck_full_usage "\n\n"
+//usage:       "Check and repair filesystems\n"
+//usage:     "\n	-A	Walk /etc/fstab and check all filesystems"
+//usage:     "\n	-N	Don't execute, just show what would be done"
+//usage:     "\n	-P	With -A, check filesystems in parallel"
+//usage:     "\n	-R	With -A, skip the root filesystem"
+//usage:     "\n	-T	Don't show title on startup"
+//usage:     "\n	-V	Verbose"
+//DO_PROGRESS_INDICATOR is off:
+////usage:     "\n	-C FD	Write status information to specified file descriptor"
+//usage:     "\n	-t TYPE	List of filesystem types to check"
+

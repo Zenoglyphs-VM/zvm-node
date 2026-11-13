@@ -1,0 +1,36 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright 2005 Rob Landley <rob@landley.net>
+ *
+ * Switch from rootfs to another filesystem as the root of the mount tree.
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config SWITCH_ROOT
+//config:	bool "switch_root (5.7 kb)"
+//config:	default y
+//config:	help
+//config:	The switch_root utility is used from initramfs to select a new
+//config:	root device. Under initramfs, you have to use this instead of
+//config:	pivot_root. (Stop reading here if you don't care why.)
+//config:
+//config:	Booting with initramfs extracts a gzipped cpio archive into rootfs
+//config:	(which is a variant of ramfs/tmpfs). Because rootfs can't be moved
+//config:	or unmounted*, pivot_root will not work from initramfs. Instead,
+//config:	switch_root deletes everything out of rootfs (including itself),
+//config:	does a mount --move that overmounts rootfs with the new root, and
+//config:	then execs the specified init program.
+//config:
+//config:	* Because the Linux kernel uses rootfs internally as the starting
+//config:	and ending point for searching through the kernel's doubly linked
+//config:	list of active mount points. That's why.
+//config:
+// RUN_INIT config item is in klibc-utils
+
+//applet:IF_SWITCH_ROOT(APPLET(switch_root, BB_DIR_SBIN, BB_SUID_DROP))
+//                      APPLET_ODDNAME:name      main         location     suid_type     help
+//applet:IF_RUN_INIT(   APPLET_ODDNAME(run-init, switch_root, BB_DIR_SBIN, BB_SUID_DROP, run_init))
+
+//kbuild:lib-$(CONFIG_SWITCH_ROOT) += switch_root.o
+//kbuild:lib-$(CONFIG_RUN_INIT)    += switch_root.o
+

@@ -1,0 +1,88 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini run-parts implementation for busybox
+ *
+ * Copyright (C) 2007 Bernhard Reutner-Fischer
+ *
+ * Based on a older version that was in busybox which was 1k big.
+ *   Copyright (C) 2001 by Emanuele Aina <emanuele.aina@tiscali.it>
+ *
+ * Based on the Debian run-parts program, version 1.15
+ *   Copyright (C) 1996 Jeff Noxon <jeff@router.patch.net>,
+ *   Copyright (C) 1996-1999 Guy Maor <maor@debian.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+
+/* This is my first attempt to write a program in C (well, this is my first
+ * attempt to write a program! :-) . */
+
+/* This piece of code is heavily based on the original version of run-parts,
+ * taken from debian-utils. I've only removed the long options and the
+ * report mode. As the original run-parts support only long options, I've
+ * broken compatibility because the BusyBox policy doesn't allow them.
+ */
+//config:config RUN_PARTS
+//config:	bool "run-parts (6.2 kb)"
+//config:	default y
+//config:	help
+//config:	run-parts is a utility designed to run all the scripts in a directory.
+//config:
+//config:	It is useful to set up a directory like cron.daily, where you need to
+//config:	execute all the scripts in that directory.
+//config:
+//config:	In this implementation of run-parts some features (such as report
+//config:	mode) are not implemented.
+//config:
+//config:	Unless you know that run-parts is used in some of your scripts
+//config:	you can safely say N here.
+//config:
+//config:config FEATURE_RUN_PARTS_LONG_OPTIONS
+//config:	bool "Enable long options"
+//config:	default y
+//config:	depends on RUN_PARTS && LONG_OPTS
+//config:
+//config:config FEATURE_RUN_PARTS_FANCY
+//config:	bool "Support additional arguments"
+//config:	default y
+//config:	depends on RUN_PARTS
+//config:	help
+//config:	Support additional options:
+//config:	-l --list print the names of the all matching files (not
+//config:	limited to executables), but don't actually run them.
+
+//applet:IF_RUN_PARTS(APPLET_ODDNAME(run-parts, run_parts, BB_DIR_BIN, BB_SUID_DROP, run_parts))
+
+//kbuild:lib-$(CONFIG_RUN_PARTS) += run_parts.o
+
+//usage:#define run_parts_trivial_usage
+//usage:       "[-a ARG]... [-u UMASK] "
+//usage:       IF_FEATURE_RUN_PARTS_LONG_OPTIONS("[--reverse] [--test] [--exit-on-error] "IF_FEATURE_RUN_PARTS_FANCY("[--list] "))
+//usage:       "DIRECTORY"
+//usage:#define run_parts_full_usage "\n\n"
+//usage:       "Run a bunch of scripts in DIRECTORY\n"
+//usage:     "\n	-a ARG		Pass ARG as argument to scripts"
+//usage:     "\n	-u UMASK	Set UMASK before running scripts"
+//usage:	IF_FEATURE_RUN_PARTS_LONG_OPTIONS(
+//usage:     "\n	--reverse	Reverse execution order"
+//usage:     "\n	--test		Dry run"
+//usage:     "\n	--exit-on-error	Exit if a script exits with non-zero"
+//usage:	IF_FEATURE_RUN_PARTS_FANCY(
+//usage:     "\n	--list		Print names of matching files even if they are not executable"
+//usage:	)
+//usage:	)
+//usage:
+//usage:#define run_parts_example_usage
+//usage:       "$ run-parts -a start /etc/init.d\n"
+//usage:       "$ run-parts -a stop=now /etc/init.d\n\n"
+//usage:       "Let's assume you have a script foo/dosomething:\n"
+//usage:       "#!/bin/sh\n"
+//usage:       "for i in $*; do eval $i; done; unset i\n"
+//usage:       "case \"$1\" in\n"
+//usage:       "start*) echo starting something;;\n"
+//usage:       "stop*) set -x; shutdown -h $stop;;\n"
+//usage:       "esac\n\n"
+//usage:       "Running this yields:\n"
+//usage:       "$run-parts -a stop=+4m foo/\n"
+//usage:       "+ shutdown -h +4m"
+

@@ -1,0 +1,48 @@
+/*
+ * Copyright 2020-2024 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * Helper functions for 128 bit CBC CTS ciphers (Currently AES and Camellia).
+ *
+ * The function dispatch tables are embedded into cipher_aes.c
+ * and cipher_camellia.c using cipher_aes_cts.inc and cipher_camellia_cts.inc
+ */
+
+/*
+ * Refer to SP800-38A-Addendum
+ *
+ * Ciphertext stealing encrypts plaintext using a block cipher, without padding
+ * the message to a multiple of the block size, so the ciphertext is the same
+ * size as the plaintext.
+ * It does this by altering processing of the last two blocks of the message.
+ * The processing of all but the last two blocks is unchanged, but a portion of
+ * the second-last block's ciphertext is "stolen" to pad the last plaintext
+ * block. The padded final block is then encrypted as usual.
+ * The final ciphertext for the last two blocks, consists of the partial block
+ * (with the "stolen" portion omitted) plus the full final block,
+ * which are the same size as the original plaintext.
+ * Decryption requires decrypting the final block first, then restoring the
+ * stolen ciphertext to the partial block, which can then be decrypted as usual.
+
+ * AES_CBC_CTS has 3 variants:
+ *  (1) CS1 The NIST variant.
+ *      If the length is a multiple of the blocksize it is the same as CBC mode.
+ *      otherwise it produces C1||C2||(C(n-1))*||Cn.
+ *      Where C(n-1)* is a partial block.
+ *  (2) CS2
+ *      If the length is a multiple of the blocksize it is the same as CBC mode.
+ *      otherwise it produces C1||C2||Cn||(C(n-1))*.
+ *      Where C(n-1)* is a partial block.
+ *  (3) CS3 The Kerberos5 variant.
+ *      Produces C1||C2||Cn||(C(n-1))* regardless of the length.
+ *      If the length is a multiple of the blocksize it looks similar to CBC mode
+ *      with the last 2 blocks swapped.
+ *      Otherwise it is the same as CS2.
+ */
+

@@ -1,0 +1,84 @@
+#! /usr/bin/env perl
+# Copyright 2007-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# December 2007
+
+# The reason for undertaken effort is basically following. Even though
+# Power 6 CPU operates at incredible 4.7GHz clock frequency, its PKI
+# performance was observed to be less than impressive, essentially as
+# fast as 1.8GHz PPC970, or 2.6 times(!) slower than one would hope.
+# Well, it's not surprising that IBM had to make some sacrifices to
+# boost the clock frequency that much, but no overall improvement?
+# Having observed how much difference did switching to FPU make on
+# UltraSPARC, playing same stunt on Power 6 appeared appropriate...
+# Unfortunately the resulting performance improvement is not as
+# impressive, ~30%, and in absolute terms is still very far from what
+# one would expect from 4.7GHz CPU. There is a chance that I'm doing
+# something wrong, but in the lack of assembler level micro-profiling
+# data or at least decent platform guide I can't tell... Or better
+# results might be achieved with VMX... Anyway, this module provides
+# *worse* performance on other PowerPC implementations, ~40-15% slower
+# on PPC970 depending on key length and ~40% slower on Power 5 for all
+# key lengths. As it's obviously inappropriate as "best all-round"
+# alternative, it has to be complemented with run-time CPU family
+# detection. Oh! It should also be noted that unlike other PowerPC
+# implementation IALU ppc-mont.pl module performs *suboptimally* on
+# >=1024-bit key lengths on Power 6. It should also be noted that
+# *everything* said so far applies to 64-bit builds! As far as 32-bit
+# application executed on 64-bit CPU goes, this module is likely to
+# become preferred choice, because it's easy to adapt it for such
+# case and *is* faster than 32-bit ppc-mont.pl on *all* processors.
+
+# February 2008
+
+# Micro-profiling assisted optimization results in ~15% improvement
+# over original ppc64-mont.pl version, or overall ~50% improvement
+# over ppc.pl module on Power 6. If compared to ppc-mont.pl on same
+# Power 6 CPU, this module is 5-150% faster depending on key length,
+# [hereafter] more for longer keys. But if compared to ppc-mont.pl
+# on 1.8GHz PPC970, it's only 5-55% faster. Still far from impressive
+# in absolute terms, but it's apparently the way Power 6 is...
+
+# December 2009
+
+# Adapted for 32-bit build this module delivers 25-120%, yes, more
+# than *twice* for longer keys, performance improvement over 32-bit
+# ppc-mont.pl on 1.8GHz PPC970. However! This implementation utilizes
+# even 64-bit integer operations and the trouble is that most PPC
+# operating systems don't preserve upper halves of general purpose
+# registers upon 32-bit signal delivery. They do preserve them upon
+# context switch, but not signalling:-( This means that asynchronous
+# signals have to be blocked upon entry to this subroutine. Signal
+# masking (and of course complementary unmasking) has quite an impact
+# on performance, naturally larger for shorter keys. It's so severe
+# that 512-bit key performance can be as low as 1/3 of expected one.
+# This is why this routine can be engaged for longer key operations
+# only on these OSes, see crypto/ppccap.c for further details. MacOS X
+# is an exception from this and doesn't require signal masking, and
+# that's where above improvement coefficients were collected. For
+# others alternative would be to break dependence on upper halves of
+# GPRs by sticking to 32-bit integer operations...
+
+# December 2012
+
+# Remove above mentioned dependence on GPRs' upper halves in 32-bit
+# build. No signal masking overhead, but integer instructions are
+# *more* numerous... It's still "universally" faster than 32-bit
+# ppc-mont.pl, but improvement coefficient is not as impressive
+# for longer keys...
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

@@ -1,0 +1,96 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * mkfs.c - make a linux (minix) file-system.
+ *
+ * (C) 1991 Linus Torvalds.
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+
+/*
+ * DD.MM.YY
+ *
+ * 24.11.91  -	Time began. Used the fsck sources to get started.
+ *
+ * 25.11.91  -	Corrected some bugs. Added support for ".badblocks"
+ *		The algorithm for ".badblocks" is a bit weird, but
+ *		it should work. Oh, well.
+ *
+ * 25.01.92  -	Added the -l option for getting the list of bad blocks
+ *		out of a named file. (Dave Rivers, rivers@ponds.uucp)
+ *
+ * 28.02.92  -	Added %-information when using -c.
+ *
+ * 28.02.93  -	Added support for other namelengths than the original
+ *		14 characters so that I can test the new kernel routines..
+ *
+ * 09.10.93  -	Make exit status conform to that required by fsutil
+ *		(Rik Faith, faith@cs.unc.edu)
+ *
+ * 31.10.93  -	Added inode request feature, for backup floppies: use
+ *		32 inodes, for a news partition use more.
+ *		(Scott Heavner, sdh@po.cwru.edu)
+ *
+ * 03.01.94  -	Added support for file system valid flag.
+ *		(Dr. Wettstein, greg%wind.uucp@plains.nodak.edu)
+ *
+ * 30.10.94  -  added support for v2 filesystem
+ *	        (Andreas Schwab, schwab@issan.informatik.uni-dortmund.de)
+ *
+ * 09.11.94  -	Added test to prevent overwrite of mounted fs adapted
+ *		from Theodore Ts'o's (tytso@athena.mit.edu) mke2fs
+ *		program.  (Daniel Quinlan, quinlan@yggdrasil.com)
+ *
+ * 03.20.95  -	Clear first 512 bytes of filesystem to make certain that
+ *		the filesystem is not misidentified as a MS-DOS FAT filesystem.
+ *		(Daniel Quinlan, quinlan@yggdrasil.com)
+ *
+ * 02.07.96  -  Added small patch from Russell King to make the program a
+ *		good deal more portable (janl@math.uio.no)
+ *
+ * Usage:  mkfs [-c | -l filename ] [-v] [-nXX] [-iXX] device [size-in-blocks]
+ *
+ *	-c for readability checking (SLOW!)
+ *      -l for getting a list of bad blocks from a file.
+ *	-n for namelength (currently the kernel only uses 14 or 30)
+ *	-i for number of inodes
+ *	-v for v2 filesystem
+ *
+ * The device may be a block device or a image of one, but this isn't
+ * enforced (but it's not much fun on a character device :-).
+ *
+ * Modified for BusyBox by Erik Andersen <andersen@debian.org> --
+ *	removed getopt based parser and added a hand rolled one.
+ */
+//config:config MKFS_MINIX
+//config:	bool "mkfs.minix (10 kb)"
+//config:	default y
+//config:	help
+//config:	The minix filesystem is a nice, small, compact, read-write filesystem
+//config:	with little overhead. If you wish to be able to create minix
+//config:	filesystems this utility will do the job for you.
+//config:
+//config:config FEATURE_MINIX2
+//config:	bool "Support Minix fs v2 (fsck_minix/mkfs_minix)"
+//config:	default y
+//config:	depends on FSCK_MINIX || MKFS_MINIX
+//config:	help
+//config:	If you wish to be able to create version 2 minix filesystems, enable
+//config:	this. If you enabled 'mkfs_minix' then you almost certainly want to
+//config:	be using the version 2 filesystem support.
+
+//                     APPLET_ODDNAME:name        main        location     suid_type     help
+//applet:IF_MKFS_MINIX(APPLET_ODDNAME(mkfs.minix, mkfs_minix, BB_DIR_SBIN, BB_SUID_DROP, mkfs_minix))
+
+//kbuild:lib-$(CONFIG_MKFS_MINIX) += mkfs_minix.o
+
+//usage:#define mkfs_minix_trivial_usage
+//usage:       "[-c | -l FILE] [-nXX] [-iXX] BLOCKDEV [KBYTES]"
+//usage:#define mkfs_minix_full_usage "\n\n"
+//usage:       "Make a MINIX filesystem\n"
+//usage:     "\n	-c		Check device for bad blocks"
+//usage:     "\n	-n [14|30]	Maximum length of filenames"
+//usage:     "\n	-i INODES	Number of inodes for the filesystem"
+//usage:     "\n	-l FILE		Read bad blocks list from FILE"
+//usage:     "\n	-v		Make version 2 filesystem"
+

@@ -1,0 +1,40 @@
+#! /usr/bin/env perl
+# Copyright 2008-2024 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Copyright (c) 2008 Andy Polyakov <appro@openssl.org>
+#
+# This module may be used under the terms of either the GNU General
+# Public License version 2 or later, the GNU Lesser General Public
+# License version 2.1 or later, the Mozilla Public License version
+# 1.1 or the BSD License. The exact terms of either license are
+# distributed along with this module. For further details see
+# http://www.openssl.org/~appro/camellia/.
+# ====================================================================
+
+# Performance in cycles per processed byte (less is better) in
+# 'openssl speed ...' benchmark:
+#
+#			AMD64	Core2	EM64T
+# -evp camellia-128-ecb	16.7	21.0	22.7
+# + over gcc 3.4.6	+25%	+5%	0%
+#
+# camellia-128-cbc	15.7	20.4	21.1
+#
+# 128-bit key setup	128	216	205	cycles/key
+# + over gcc 3.4.6	+54%	+39%	+15%
+#
+# Numbers in "+" rows represent performance improvement over compiler
+# generated code. Key setup timings are impressive on AMD and Core2
+# thanks to 64-bit operations being covertly deployed. Improvement on
+# EM64T, pre-Core2 Intel x86_64 CPU, is not as impressive, because it
+# apparently emulates some of 64-bit operations in [32-bit] microcode.
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

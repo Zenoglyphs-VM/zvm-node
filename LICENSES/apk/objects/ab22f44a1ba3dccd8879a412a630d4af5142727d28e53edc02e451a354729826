@@ -1,0 +1,54 @@
+/* skipset.h -- set operations using a skiplist
+// Copyright (C) 2024-2026 Mark Adler
+// See MiniZip_info.txt for the license.
+
+// This implements a skiplist set, i.e. just keys, no data, with ~O(log n) time
+// insert and search operations. The application defines the type of a key, and
+// provides a function to compare two keys.
+
+// This header is not definitions of functions found in another source file --
+// it creates the set functions, with the application's key type, right where
+// the #include is. Before this header is #included, these must be defined:
+//
+// 1. A macro or typedef for set_key_t, the type of a key.
+// 2. A macro or function set_cmp(a, b) to compare two keys. The return values
+//    are < 0 for a < b, 0 for a == b, and > 0 for a > b.
+// 3. A macro or function set_drop(s, k) to release the key k's resources, if
+//    any, when doing a set_end() or set_clear(). s is a pointer to the set
+//    that key is in, for use with set_free() if desired.
+//
+// Example usage:
+//
+//      typedef int set_key_t;
+//      #define set_cmp(a, b) ((a) < (b) ? -1 : (a) == (b) ? 0 : 1)
+//      #define set_drop(s, k)
+//      #include "skipset.h"
+//
+//      int test(void) {        // return 0: good, 1: bad, -1: out of memory
+//          set_t set;
+//          if (setjmp(set.env))
+//              return -1;
+//          set_start(&set);
+//          set_insert(&set, 2);
+//          set_insert(&set, 1);
+//          set_insert(&set, 7);
+//          int bad = !set_found(&set, 2);
+//          bad = bad || set_found(&set, 5);
+//          set_end(&set);
+//          return bad;
+//      }
+//
+// Interface summary (see more details below):
+// - set_t is the type of the set being operated on (a set_t pointer is passed)
+// - set_start() initializes a new, empty set (initialize set.env first)
+// - set_insert() inserts a new key into the set, or not if it's already there
+// - set_found() determines whether or not a key is in the set
+// - set_end() ends the use of the set, freeing all memory
+// - set_clear() empties the set, equivalent to set_end() and then set_start()
+// - set_ok() checks if set appears to be usable, i.e. started and not ended
+//
+// Auxiliary functions available to the application:
+// - set_alloc() allocates memory with optional tracking (#define SET_TRACK)
+// - set_free() deallocates memory allocated by set_alloc()
+// - set_rand() returns 32 random bits (seeded by set_start()) */
+

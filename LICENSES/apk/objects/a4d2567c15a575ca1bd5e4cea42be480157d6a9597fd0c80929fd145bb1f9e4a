@@ -1,0 +1,28 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * ionice implementation for busybox based on linux-utils-ng 2.14
+ *
+ * Copyright (C) 2008 by  <u173034@informatik.uni-oldenburg.de>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config IONICE
+//config:	bool "ionice (4 kb)"
+//config:	default y
+//config:	help
+//config:	Set/set program io scheduling class and priority
+//config:	Requires kernel >= 2.6.13
+
+//applet:IF_IONICE(APPLET_NOEXEC(ionice, ionice, BB_DIR_BIN, BB_SUID_DROP, ionice))
+
+//kbuild:lib-$(CONFIG_IONICE) += ionice.o
+
+//usage:#define ionice_trivial_usage
+//usage:	"[-c 1-3] [-n 0-7] [-t] { -p PID | PROG ARGS }"
+//TODO: | -P PGID | -u UID; also -pPu can take _list of_ IDs
+//usage:#define ionice_full_usage "\n\n"
+//usage:       "Change I/O priority and class\n"
+//usage:     "\n	-c N	Class. 1:realtime 2:best-effort 3:idle"
+//usage:     "\n	-n N	Priority"
+//usage:     "\n	-t	Ignore errors"
+

@@ -1,0 +1,51 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini ipcalc implementation for busybox
+ *
+ * By Jordan Crouse <jordan@cosmicpenguin.net>
+ *    Stephan Linz  <linz@li-pro.net>
+ *
+ * This is a complete reimplementation of the ipcalc program
+ * from Red Hat.  I didn't look at their source code, but there
+ * is no denying that this is a loving reimplementation
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config IPCALC
+//config:	bool "ipcalc (4.6 kb)"
+//config:	default y
+//config:	help
+//config:	ipcalc takes an IP address and netmask and calculates the
+//config:	resulting broadcast, network, and host range.
+//config:
+//config:config FEATURE_IPCALC_LONG_OPTIONS
+//config:	bool "Enable long options"
+//config:	default y
+//config:	depends on IPCALC && LONG_OPTS
+//config:
+//config:config FEATURE_IPCALC_FANCY
+//config:	bool "Fancy IPCALC, more options, adds 1 kbyte"
+//config:	default y
+//config:	depends on IPCALC
+//config:	help
+//config:	Adds the options hostname, prefix and silent to the output of
+//config:	"ipcalc".
+
+//applet:IF_IPCALC(APPLET_NOEXEC(ipcalc, ipcalc, BB_DIR_BIN, BB_SUID_DROP, ipcalc))
+
+//kbuild:lib-$(CONFIG_IPCALC) += ipcalc.o
+
+//usage:#define ipcalc_trivial_usage
+//usage:       "[-bnm"IF_FEATURE_IPCALC_FANCY("phs")"] ADDRESS"
+//usage:       IF_FEATURE_IPCALC_FANCY("[/PREFIX]") " [NETMASK]"
+//usage:#define ipcalc_full_usage "\n\n"
+//usage:       "Calculate and display network settings from IP address\n"
+//usage:     "\n	-b	Broadcast address"
+//usage:     "\n	-n	Network address"
+//usage:     "\n	-m	Default netmask for IP"
+//usage:	IF_FEATURE_IPCALC_FANCY(
+//usage:     "\n	-p	Prefix for IP/NETMASK"
+//usage:     "\n	-h	Resolved host name"
+//usage:     "\n	-s	No error messages"
+//usage:	)
+

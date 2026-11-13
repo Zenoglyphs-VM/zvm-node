@@ -1,0 +1,8 @@
+/*
+ * Copyright (C) 2017 by  <assafgordon@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//kbuild:lib-$(CONFIG_FEATURE_SETPRIV_CAPABILITIES) += capability.o
+//kbuild:lib-$(CONFIG_RUN_INIT) += capability.o
+

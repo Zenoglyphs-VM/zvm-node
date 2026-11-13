@@ -1,0 +1,32 @@
+#! /usr/bin/env perl
+# Copyright 2016-2023 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+#			IALU(*)/gcc-4.4		NEON
+#
+# ARM11xx(ARMv6)	7.78/+100%		-
+# Cortex-A5		6.35/+130%		3.00
+# Cortex-A8		6.25/+115%		2.36
+# Cortex-A9		5.10/+95%		2.55
+# Cortex-A15		3.85/+85%		1.25(**)
+# Snapdragon S4		5.70/+100%		1.48(**)
+#
+# (*)	this is for -march=armv6, i.e. with bunch of ldrb loading data;
+# (**)	these are trade-off results, they can be improved by ~8% but at
+#	the cost of 15/12% regression on Cortex-A5/A7, it's even possible
+#	to improve Cortex-A9 result, but then A5/A7 loose more than 20%;
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

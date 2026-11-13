@@ -1,0 +1,8 @@
+/*
+ * Copyright (C) 2021 Denys Vlasenko <vda.linux@googlemail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//kbuild:lib-$(CONFIG_FEATURE_TAR_CREATE) += chksum_and_xwrite_tar_header.o
+//kbuild:lib-$(CONFIG_SMEMCAP) += chksum_and_xwrite_tar_header.o
+

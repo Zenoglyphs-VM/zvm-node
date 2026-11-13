@@ -1,0 +1,29 @@
+/*
+ * Copyright 2016-2026 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * Unit test for Cisco DTLS1_BAD_VER session resume, as used by
+ * AnyConnect VPN protocol.
+ *
+ * This is designed to exercise the code paths in
+ * http://git.infradead.org/users/dwmw2/openconnect.git/blob/HEAD:/dtls.c
+ * which have frequently been affected by regressions in DTLS1_BAD_VER
+ * support.
+ *
+ * Note that unlike other SSL tests, we don't test against our own SSL
+ * server method. Firstly because we don't have one; we *only* support
+ * DTLS1_BAD_VER as a client. And secondly because even if that were
+ * fixed up it's the wrong thing to test against - because if changes
+ * are made in generic DTLS code which don't take DTLS1_BAD_VER into
+ * account, there's plenty of scope for making those changes such that
+ * they break *both* the client and the server in the same way.
+ *
+ * So we handle the server side manually. In a session resume there isn't
+ * much to be done anyway.
+ */

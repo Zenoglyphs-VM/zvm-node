@@ -1,0 +1,72 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini touch implementation for busybox
+ *
+ * Copyright (C) 1999-2004 by Erik Andersen <andersen@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Mar 16, 2003      Manuel Novoa III   (mjn3@codepoet.org)
+ *
+ * Previous version called open() and then utime().  While this will be
+ * be necessary to implement -r and -t, it currently only makes things bigger.
+ * Also, exiting on a failure was a bug.  All args should be processed.
+ */
+//config:config TOUCH
+//config:	bool "touch (6.1 kb)"
+//config:	default y
+//config:	help
+//config:	touch is used to create or change the access and/or
+//config:	modification timestamp of specified files.
+//config:
+//config:config FEATURE_TOUCH_SUSV3
+//config:	bool "Add support for SUSV3 features (-a -d -m -t -r)"
+//config:	default y
+//config:	depends on TOUCH
+//config:	help
+//config:	Enable touch to use a reference file or a given date/time argument.
+
+//applet:IF_TOUCH(APPLET_NOFORK(touch, touch, BB_DIR_BIN, BB_SUID_DROP, touch))
+
+//kbuild:lib-$(CONFIG_TOUCH) += touch.o
+
+//usage:#define touch_trivial_usage
+//usage:       "[-ch" IF_FEATURE_TOUCH_SUSV3("am") "]"
+//usage:       IF_FEATURE_TOUCH_SUSV3(" [-d DATE] [-t DATE] [-r FILE]")
+//usage:       " FILE..."
+//usage:#define touch_full_usage "\n\n"
+//usage:       "Update mtime of FILEs\n"
+//usage:     "\n	-c	Don't create files"
+//usage:     "\n	-h	Don't follow links"
+//usage:	IF_FEATURE_TOUCH_SUSV3(
+//usage:     "\n	-a	Change only atime"
+//usage:     "\n	-m	Change only mtime"
+//usage:     "\n	-d DT	Date/time to use"
+//usage:     "\n	-t DT	Date/time to use"
+//usage:     "\n	-r FILE	Use FILE's date/time"
+//usage:	)
+//usage:
+//usage:#define touch_example_usage
+//usage:       "$ ls -l /tmp/foo\n"
+//usage:       "/bin/ls: /tmp/foo: No such file or directory\n"
+//usage:       "$ touch /tmp/foo\n"
+//usage:       "$ ls -l /tmp/foo\n"
+//usage:       "-rw-rw-r--    1 andersen andersen        0 Apr 15 01:11 /tmp/foo\n"
+
+/* coreutils implements:
+ * -a   change only the access time
+ * -c, --no-create
+ *      do not create any files
+ * -d, --date=STRING
+ *      parse STRING and use it instead of current time
+ * -f   (ignored, BSD compat)
+ * -m   change only the modification time
+ * -h, --no-dereference
+ * -r, --reference=FILE
+ *      use this file's times instead of current time
+ * -t STAMP
+ *      use [[CC]YY]MMDDhhmm[.ss] instead of current time
+ * --time=WORD
+ *      change the specified time: WORD is access, atime, or use
+ */
+

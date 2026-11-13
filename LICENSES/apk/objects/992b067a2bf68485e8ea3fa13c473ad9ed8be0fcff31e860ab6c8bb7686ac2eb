@@ -1,0 +1,170 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * wget - retrieve a file using HTTP or FTP
+ *
+ * Chip Rosenthal Covad Communications <chip@laserlink.net>
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ *
+ * Copyright (C) 2010 Bradley M. Kuhn <bkuhn@ebb.org>
+ * Kuhn's copyrights are licensed GPLv2-or-later.  File as a whole remains GPLv2.
+ */
+//config:config WGET
+//config:	bool "wget (41 kb)"
+//config:	default y
+//config:	help
+//config:	wget is a utility for non-interactive download of files from HTTP
+//config:	and FTP servers.
+//config:
+//config:config FEATURE_WGET_LONG_OPTIONS
+//config:	bool "Enable long options"
+//config:	default y
+//config:	depends on WGET && LONG_OPTS
+//config:
+//config:config FEATURE_WGET_STATUSBAR
+//config:	bool "Enable progress bar (+2k)"
+//config:	default y
+//config:	depends on WGET
+//config:
+//config:config FEATURE_WGET_FTP
+//config:	bool "Enable FTP protocol (+1k)"
+//config:	default y
+//config:	depends on WGET
+//config:	help
+//config:	To support FTPS, enable FEATURE_WGET_HTTPS as well.
+//config:
+//config:config FEATURE_WGET_AUTHENTICATION
+//config:	bool "Enable HTTP authentication"
+//config:	default y
+//config:	depends on WGET
+//config:	help
+//config:	Support authenticated HTTP transfers.
+//config:
+//config:config FEATURE_WGET_TIMEOUT
+//config:	bool "Enable timeout option -T SEC"
+//config:	default y
+//config:	depends on WGET
+//config:	help
+//config:	Supports network read and connect timeouts for wget,
+//config:	so that wget will give up and timeout, through the -T
+//config:	command line option.
+//config:
+//config:	Currently only connect and network data read timeout are
+//config:	supported (i.e., timeout is not applied to the DNS query). When
+//config:	FEATURE_WGET_LONG_OPTIONS is also enabled, the --timeout option
+//config:	will work in addition to -T.
+//config:
+//config:config FEATURE_WGET_HTTPS
+//config:	bool "Support HTTPS using internal TLS code"
+//config:	default y
+//config:	depends on WGET
+//config:	select TLS
+//config:	help
+//config:	wget will use internal TLS code to connect to https:// URLs.
+//config:	It also enables FTPS support, but it's not well tested yet.
+//config:	Note:
+//config:	On NOMMU machines, ssl_helper applet should be available
+//config:	in the $PATH for this to work. Make sure to select that applet.
+//config:
+//config:	Note: currently, TLS code only makes TLS I/O work, it
+//config:	does *not* check that the peer is who it claims to be, etc.
+//config:	IOW: it uses peer-supplied public keys to establish encryption
+//config:	and signing keys, then encrypts and signs outgoing data and
+//config:	decrypts incoming data.
+//config:	It does not check signature hashes on the incoming data:
+//config:	this means that attackers manipulating TCP packets can
+//config:	send altered data and we unknowingly receive garbage.
+//config:	(This check might be relatively easy to add).
+//config:	It does not check public key's certificate:
+//config:	this means that the peer may be an attacker impersonating
+//config:	the server we think we are talking to.
+//config:
+//config:	If you think this is unacceptable, consider this. As more and more
+//config:	servers switch to HTTPS-only operation, without such "crippled"
+//config:	TLS code it is *impossible* to simply download a kernel source
+//config:	from kernel.org. Which can in real world translate into
+//config:	"my small automatic tooling to build cross-compilers from sources
+//config:	no longer works, I need to additionally keep a local copy
+//config:	of ~4 megabyte source tarball of a SSL library and ~2 megabyte
+//config:	source of wget, need to compile and built both before I can
+//config:	download anything. All this despite the fact that the build
+//config:	is done in a QEMU sandbox on a machine with absolutely nothing
+//config:	worth stealing, so I don't care if someone would go to a lot
+//config:	of trouble to intercept my HTTPS download to send me an altered
+//config:	kernel tarball".
+//config:
+//config:	If you still think this is unacceptable, send patches.
+//config:
+//config:	If you still think this is unacceptable, do not want to send
+//config:	patches, but do want to waste bandwidth expaining how wrong
+//config:	it is, you will be ignored.
+//config:
+//config:	FEATURE_WGET_OPENSSL does implement TLS verification
+//config:	using the certificates available to OpenSSL.
+//config:
+//config:config FEATURE_WGET_OPENSSL
+//config:	bool "Try to connect to HTTPS using openssl"
+//config:	default y
+//config:	depends on WGET
+//config:	help
+//config:	Try to use openssl to handle HTTPS.
+//config:
+//config:	OpenSSL has a simple SSL client for debug purposes.
+//config:	If you select this option, wget will effectively run:
+//config:	"openssl s_client -quiet -connect hostname:443
+//config:	-servername hostname 2>/dev/null" and pipe its data
+//config:	through it. -servername is not used if hostname is numeric.
+//config:	Note inconvenient API: host resolution is done twice,
+//config:	and there is no guarantee openssl's idea of IPv6 address
+//config:	format is the same as ours.
+//config:	Another problem is that s_client prints debug information
+//config:	to stderr, and it needs to be suppressed. This means
+//config:	all error messages get suppressed too.
+//config:	openssl is also a big binary, often dynamically linked
+//config:	against ~15 libraries.
+//config:
+//config:	If openssl can't be executed, internal TLS code will be used
+//config:	(if you enabled it); if openssl can be executed but fails later,
+//config:	wget can't detect this, and download will fail.
+//config:
+//config:	By default TLS verification is performed, unless
+//config:	--no-check-certificate option is passed.
+
+//applet:IF_WGET(APPLET(wget, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_WGET) += wget.o
+
+//usage:#define wget_trivial_usage
+//usage:	IF_FEATURE_WGET_LONG_OPTIONS(
+//usage:       "[-cqS] [--spider] [-O FILE] [-o LOGFILE] [--header STR]\n"
+//usage:       "	[--post-data STR | --post-file FILE] [-Y on/off]\n"
+/* Since we ignore these opts, we don't show them in --help */
+/* //usage:    "	[--no-cache] [--passive-ftp] [-t TRIES]" */
+/* //usage:    "	[-nv] [-nc] [-nH] [-np]" */
+//usage:       "	"IF_FEATURE_WGET_OPENSSL("[--no-check-certificate] ")"[-P DIR] [-U AGENT]"IF_FEATURE_WGET_TIMEOUT(" [-T SEC]")" URL..."
+//usage:	)
+//usage:	IF_NOT_FEATURE_WGET_LONG_OPTIONS(
+//usage:       "[-cqS] [-O FILE] [-o LOGFILE] [-Y on/off] [-P DIR] [-U AGENT]"IF_FEATURE_WGET_TIMEOUT(" [-T SEC]")" URL..."
+//usage:	)
+//usage:#define wget_full_usage "\n\n"
+//usage:       "Retrieve files via HTTP or FTP\n"
+//usage:	IF_FEATURE_WGET_LONG_OPTIONS(
+//usage:     "\n	--spider	Only check URL existence: $? is 0 if exists"
+//usage:     "\n	--header STR	Add STR (of form 'header: value') to headers"
+//usage:     "\n	--post-data STR	Send STR using POST method"
+//usage:     "\n	--post-file FILE	Send FILE using POST method"
+//usage:	IF_FEATURE_WGET_OPENSSL(
+//usage:     "\n	--no-check-certificate	Don't validate the server's certificate"
+//usage:	)
+//usage:	)
+//usage:     "\n	-c		Continue retrieval of aborted transfer"
+//usage:     "\n	-q		Quiet"
+//usage:     "\n	-P DIR		Save to DIR (default .)"
+//usage:     "\n	-S    		Show server response"
+//usage:	IF_FEATURE_WGET_TIMEOUT(
+//usage:     "\n	-T SEC		Network read timeout is SEC seconds"
+//usage:	)
+//usage:     "\n	-O FILE		Save to FILE ('-' for stdout)"
+//usage:     "\n	-o LOGFILE	Log messages to FILE"
+//usage:     "\n	-U STR		Use STR for User-Agent header"
+//usage:     "\n	-Y on/off	Use proxy"
+

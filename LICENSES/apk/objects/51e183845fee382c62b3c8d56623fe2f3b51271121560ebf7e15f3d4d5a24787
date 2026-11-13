@@ -1,0 +1,34 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * adjtimex.c - read, and possibly modify, the Linux kernel 'timex' variables.
+ *
+ * Originally written: October 1997
+ * Last hack: March 2001
+ * Copyright 1997, 2000, 2001 Larry Doolittle <LRDoolittle@lbl.gov>
+ *
+ * busyboxed 20 March 2001, Larry Doolittle <ldoolitt@recycle.lbl.gov>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config ADJTIMEX
+//config:	bool "adjtimex (4.9 kb)"
+//config:	default y
+//config:	help
+//config:	Adjtimex reads and optionally sets adjustment parameters for
+//config:	the Linux clock adjustment algorithm.
+
+//applet:IF_ADJTIMEX(APPLET_NOFORK(adjtimex, adjtimex, BB_DIR_SBIN, BB_SUID_DROP, adjtimex))
+
+//kbuild:lib-$(CONFIG_ADJTIMEX) += adjtimex.o
+
+//usage:#define adjtimex_trivial_usage
+//usage:       "[-q] [-o OFS] [-f FREQ] [-p TCONST] [-t TICK]"
+//usage:#define adjtimex_full_usage "\n\n"
+//usage:       "Read or set kernel time variables. See adjtimex(2)\n"
+//usage:     "\n	-q	Quiet"
+//usage:     "\n	-o OFF	Time offset, microseconds"
+//usage:     "\n	-f FREQ	Frequency adjust, integer kernel units (65536 is 1ppm)"
+//usage:     "\n	-t TICK	Microseconds per tick, usually 10000"
+//usage:     "\n		(positive -t or -f values make clock run faster)"
+//usage:     "\n	-p TCONST"
+

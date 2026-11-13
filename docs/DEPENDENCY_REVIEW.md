@@ -218,6 +218,45 @@ names/versions are independently matched to their declared license, origin and
 package checksum fields, with a count-bound end marker. Maintainer metadata is
 not included in this APK projection.
 
+The checked-in [`LICENSES/apk`](../LICENSES/apk/README.txt) catalog adds original
+APK source notice candidates through the collector's existing module notice
+directory support. Its manifest binds the installed names, versions,
+architectures, package checksums, declared source commits, license expressions
+and installed-byte declarations. Each source origin records its exact aports
+recipe commit/blob/hash and recipe-checksummed source input references. Original
+archive notice files and initial source-preamble notices retain their bytes;
+identical payloads share the existing digest store. Recipes and patches are
+inspected as data and are not executed during acquisition or image collection.
+
+Bounded occurrence pages retain the source member paths for archive notice files
+and initial copyright/license preambles, including files without a license-like
+name. Page hashes, exact origin ownership, source-input references and payload
+counts are checked. The scoped Git attributes disable newline conversion for
+original notice and reference-document payloads.
+
+Versioned reference documents are tracked separately from recipe-checksummed
+source inputs. The original [MPL 2.0 reference](https://www.mozilla.org/MPL/2.0/index.txt)
+is retained for the ca-certificates origin alongside its observed source
+preambles. A reference document does not establish the origin or completeness
+of the packaged source.
+
+`apk_notices.py` consumes the same exported packet, checks every catalog and
+notice file against the reviewed checkout, and matches the complete candidate
+APK inventory. Changed installed metadata, recipe/source references, missing or
+rewritten payloads, unexpected files and acceptance flags stop validation.
+Origins without an observed notice candidate and unresolved source inputs stay
+explicit. The source archives and acquisition evidence are retained separately;
+the image carries the selected notices and their references. Both comparison
+recipes collect the current catalog. Validation binds the candidate inventory;
+the control's additional packages remain outside that catalog.
+
+The catalog keeps origin authentication, complete copyright/license coverage,
+corresponding-source distribution, legal review and release acceptance false.
+Notice text collection does not supply a source offer or settle source,
+relinking and compatibility obligations. For example, GPLv2's
+[binary distribution terms](https://spdx.org/licenses/GPL-2.0-only.html)
+include separate source conditions that require the appropriate review.
+
 These observations do not establish legal classification, compatibility,
 corresponding-source/relinking requirements, complete APK notice text, complete
 SBOM coverage or release approval. Missing candidate notices remain explicit and

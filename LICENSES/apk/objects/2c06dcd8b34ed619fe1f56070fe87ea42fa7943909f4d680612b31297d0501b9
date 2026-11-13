@@ -1,0 +1,17 @@
+/*
+ * pufftest.c
+ * Copyright (C) 2002-2026 Mark Adler
+ * For conditions of distribution and use, see copyright notice in puff.h
+ */
+
+/* Example of how to use puff().
+
+   Usage: puff [-w] [-f] [-nnn] file
+          ... | puff [-w] [-f] [-nnn]
+
+   where file is the input file with deflate data, nnn is the number of bytes
+   of input to skip before inflating (e.g. to skip a zlib or gzip header), and
+   -w is used to write the decompressed data to stdout.  -f is for coverage
+   testing, and causes pufftest to fail with not enough output space (-f does
+   a write like -w, so -w is not required). */
+

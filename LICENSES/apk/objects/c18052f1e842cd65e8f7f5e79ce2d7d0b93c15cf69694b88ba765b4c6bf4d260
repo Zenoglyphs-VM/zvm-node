@@ -1,0 +1,55 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini grep implementation for busybox using libc regex.
+ *
+ * Copyright (C) 1999,2000,2001 by Lineo, inc. and Mark Whitley
+ * Copyright (C) 1999,2000,2001 by Mark Whitley <markw@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* BB_AUDIT SUSv3 defects - unsupported option -x "match whole line only". */
+/* BB_AUDIT GNU defects - always acts as -a.  */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/grep.html */
+/*
+ * 2004,2006 (C) Vladimir Oleynik <dzo@simtreas.ru> -
+ * correction "-e pattern1 -e pattern2" logic and more optimizations.
+ * precompiled regex
+ *
+ * (C) 2006 Jac Goudsmit added -o option
+ */
+//config:config GREP
+//config:	bool "grep (8.9 kb)"
+//config:	default y
+//config:	help
+//config:	grep is used to search files for a specified pattern.
+//config:
+//config:config EGREP
+//config:	bool "egrep (8 kb)"
+//config:	default y
+//config:	help
+//config:	Alias to "grep -E".
+//config:
+//config:config FGREP
+//config:	bool "fgrep (8 kb)"
+//config:	default y
+//config:	help
+//config:	Alias to "grep -F".
+//config:
+//config:config FEATURE_GREP_CONTEXT
+//config:	bool "Enable before and after context flags (-A, -B and -C)"
+//config:	default y
+//config:	depends on GREP || EGREP || FGREP
+//config:	help
+//config:	Print the specified number of leading (-B) and/or trailing (-A)
+//config:	context surrounding our matching lines.
+//config:	Print the specified number of context lines (-C).
+
+//applet:IF_GREP(APPLET(grep, BB_DIR_BIN, BB_SUID_DROP))
+//                APPLET_ODDNAME:name   main  location    suid_type     help
+//applet:IF_EGREP(APPLET_ODDNAME(egrep, grep, BB_DIR_BIN, BB_SUID_DROP, egrep))
+//applet:IF_FGREP(APPLET_ODDNAME(fgrep, grep, BB_DIR_BIN, BB_SUID_DROP, fgrep))
+
+//kbuild:lib-$(CONFIG_GREP) += grep.o
+//kbuild:lib-$(CONFIG_EGREP) += grep.o
+//kbuild:lib-$(CONFIG_FGREP) += grep.o
+

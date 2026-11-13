@@ -1,0 +1,66 @@
+#! /usr/bin/env perl
+# Copyright 1998-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# [Re]written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# At some point it became apparent that the original SSLeay RC4
+# assembler implementation performs suboptimally on latest IA-32
+# microarchitectures. After re-tuning performance has changed as
+# following:
+#
+# Pentium	-10%
+# Pentium III	+12%
+# AMD		+50%(*)
+# P4		+250%(**)
+#
+# (*)	This number is actually a trade-off:-) It's possible to
+#	achieve	+72%, but at the cost of -48% off PIII performance.
+#	In other words code performing further 13% faster on AMD
+#	would perform almost 2 times slower on Intel PIII...
+#	For reference! This code delivers ~80% of rc4-amd64.pl
+#	performance on the same Opteron machine.
+# (**)	This number requires compressed key schedule set up by
+#	RC4_set_key [see commentary below for further details].
+
+# May 2011
+#
+# Optimize for Core2 and Westmere [and incidentally Opteron]. Current
+# performance in cycles per processed byte (less is better) and
+# improvement relative to previous version of this module is:
+#
+# Pentium	10.2			# original numbers
+# Pentium III	7.8(*)
+# Intel P4	7.5
+#
+# Opteron	6.1/+20%		# new MMX numbers
+# Core2		5.3/+67%(**)
+# Westmere	5.1/+94%(**)
+# Sandy Bridge	5.0/+8%
+# Atom		12.6/+6%
+# VIA Nano	6.4/+9%
+# Ivy Bridge	4.9/±0%
+# Bulldozer	4.9/+15%
+#
+# (*)	PIII can actually deliver 6.6 cycles per byte with MMX code,
+#	but this specific code performs poorly on Core2. And vice
+#	versa, below MMX/SSE code delivering 5.8/7.1 on Core2 performs
+#	poorly on PIII, at 8.0/14.5:-( As PIII is not a "hot" CPU
+#	[anymore], I chose to discard PIII-specific code path and opt
+#	for original IALU-only code, which is why MMX/SSE code path
+#	is guarded by SSE2 bit (see below), not MMX/SSE.
+# (**)	Performance vs. block size on Core2 and Westmere had a maximum
+#	at ... 64 bytes block size. And it was quite a maximum, 40-60%
+#	in comparison to largest 8KB block size. Above improvement
+#	coefficients are for the largest block size.
+

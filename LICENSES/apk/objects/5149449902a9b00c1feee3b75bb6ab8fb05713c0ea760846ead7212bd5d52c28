@@ -1,0 +1,34 @@
+/*
+ * bzip2 is written by Julian Seward <jseward@bzip.org>.
+ * Adapted for busybox by Denys Vlasenko <vda.linux@googlemail.com>.
+ * See README and LICENSE files in this directory for more information.
+ */
+
+/*-------------------------------------------------------------*/
+/*--- Compression machinery (not incl block sorting)        ---*/
+/*---                                            compress.c ---*/
+/*-------------------------------------------------------------*/
+
+/* ------------------------------------------------------------------
+This file is part of bzip2/libbzip2, a program and library for
+lossless, block-sorting data compression.
+
+bzip2/libbzip2 version 1.0.4 of 20 December 2006
+Copyright (C) 1996-2006 Julian Seward <jseward@bzip.org>
+
+Please read the WARNING, DISCLAIMER and PATENTS sections in the
+README file.
+
+This program is released under the terms of the license contained
+in the file LICENSE.
+------------------------------------------------------------------ */
+
+/* CHANGES
+ * 0.9.0    -- original version.
+ * 0.9.0a/b -- no changes in this file.
+ * 0.9.0c   -- changed setting of nGroups in sendMTFValues()
+ *             so as to do a bit better on small files
+*/
+
+/* #include "bzlib_private.h" */
+

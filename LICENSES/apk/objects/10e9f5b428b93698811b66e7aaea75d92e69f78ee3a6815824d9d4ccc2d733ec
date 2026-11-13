@@ -1,0 +1,21 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * ipcrm.c - utility to allow removal of IPC objects and data structures.
+ *
+ * 01 Sept 2004 - Rodney Radford <rradford@mindspring.com>
+ * Adapted for busybox from util-linux-2.12a.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config IPCRM
+//config:	bool "ipcrm (3.5 kb)"
+//config:	default y
+//config:	help
+//config:	The ipcrm utility allows the removal of System V interprocess
+//config:	communication (IPC) objects and the associated data structures
+//config:	from the system.
+
+//applet:IF_IPCRM(APPLET_NOEXEC(ipcrm, ipcrm, BB_DIR_USR_BIN, BB_SUID_DROP, ipcrm))
+
+//kbuild:lib-$(CONFIG_IPCRM) += ipcrm.o
+

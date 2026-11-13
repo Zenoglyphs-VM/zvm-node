@@ -1,0 +1,15 @@
+/*
+ * Copyright 2010 Rob Landley <rob@landley.net>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config NBDCLIENT
+//config:	bool "nbd-client (6.3 kb)"
+//config:	default y
+//config:	help
+//config:	Network block device client
+
+//applet:IF_NBDCLIENT(APPLET_NOEXEC(nbd-client, nbdclient, BB_DIR_USR_SBIN, BB_SUID_DROP, nbdclient))
+
+//kbuild:lib-$(CONFIG_NBDCLIENT) += nbd-client.o
+

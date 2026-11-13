@@ -1,0 +1,48 @@
+/*
+ * Copyright 2016-2024 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * This module is meant to be used as template for non-x87 floating-
+ * point assembly modules. The template itself is x86_64-specific
+ * though, as it was debugged on x86_64. So that implementer would
+ * have to recognize platform-specific parts, UxTOy and inline asm,
+ * and act accordingly.
+ *
+ * Huh? x86_64-specific code as template for non-x87? Note seven, which
+ * is not a typo, but reference to 80-bit precision. This module on the
+ * other hand relies on 64-bit precision operations, which are default
+ * for x86_64 code. And since we are at it, just for sense of it,
+ * large-block performance in cycles per processed byte for *this* code
+ * is:
+ *                      gcc-4.8         icc-15.0        clang-3.4(*)
+ *
+ * Westmere             4.96            5.09            4.37
+ * Sandy Bridge         4.95            4.90            4.17
+ * Haswell              4.92            4.87            3.78
+ * Bulldozer            4.67            4.49            4.68
+ * VIA Nano             7.07            7.05            5.98
+ * Silvermont           10.6            9.61            12.6
+ *
+ * (*)  clang managed to discover parallelism and deployed SIMD;
+ *
+ * And for range of other platforms with unspecified gcc versions:
+ *
+ * Freescale e300       12.5
+ * PPC74x0              10.8
+ * POWER6               4.92
+ * POWER7               4.50
+ * POWER8               4.10
+ *
+ * z10                  11.2
+ * z196+                7.30
+ *
+ * UltraSPARC III       16.0
+ * SPARC T4             16.1
+ */
+

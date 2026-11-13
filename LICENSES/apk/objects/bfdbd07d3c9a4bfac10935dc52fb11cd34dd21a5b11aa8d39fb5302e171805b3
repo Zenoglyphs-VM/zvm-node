@@ -1,0 +1,59 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini pgrep/pkill implementation for busybox
+ *
+ * Copyright (C) 2007 Loic Grenie <loic.grenie@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config PGREP
+//config:	bool "pgrep (6.8 kb)"
+//config:	default y
+//config:	help
+//config:	Look for processes by name.
+//config:
+//config:config PKILL
+//config:	bool "pkill (7.8 kb)"
+//config:	default y
+//config:	help
+//config:	Send signals to processes by name.
+
+//applet:IF_PGREP(APPLET_ODDNAME(pgrep, pgrep, BB_DIR_USR_BIN, BB_SUID_DROP, pgrep))
+//                APPLET_ODDNAME:name   main   location        suid_type     help
+//applet:IF_PKILL(APPLET_ODDNAME(pkill, pgrep, BB_DIR_USR_BIN, BB_SUID_DROP, pkill))
+/* can't be noexec: can find _itself_ under wrong name, since after fork only,
+ * /proc/PID/cmdline and comm are wrong! Can fix comm (prctl(PR_SET_NAME)),
+ * but cmdline?
+ */
+
+//kbuild:lib-$(CONFIG_PGREP) += pgrep.o
+//kbuild:lib-$(CONFIG_PKILL) += pgrep.o
+
+//usage:#define pgrep_trivial_usage
+//usage:       "[-flanovx] [-s SID|-P PPID|PATTERN]"
+//usage:#define pgrep_full_usage "\n\n"
+//usage:       "Display process(es) selected by regex PATTERN\n"
+//usage:     "\n	-l	Show command name too"
+//usage:     "\n	-a	Show command line too"
+//usage:     "\n	-f	Match against entire command line"
+//usage:     "\n	-n	Show the newest process only"
+//usage:     "\n	-o	Show the oldest process only"
+//usage:     "\n	-v	Negate the match"
+//usage:     "\n	-x	Match whole name (not substring)"
+//usage:     "\n	-s	Match session ID (0 for current)"
+//usage:     "\n	-P	Match parent process ID"
+//usage:
+//usage:#define pkill_trivial_usage
+//usage:       "[-l|-SIGNAL] [-xfvnoe] [-s SID|-P PPID|PATTERN]"
+//usage:#define pkill_full_usage "\n\n"
+//usage:       "Send signal to processes selected by regex PATTERN\n"
+//usage:     "\n	-l	List all signals"
+//usage:     "\n	-x	Match whole name (not substring)"
+//usage:     "\n	-f	Match against entire command line"
+//usage:     "\n	-s SID	Match session ID (0 for current)"
+//usage:     "\n	-P PPID	Match parent process ID"
+//usage:     "\n	-v	Negate the match"
+//usage:     "\n	-n	Signal the newest process only"
+//usage:     "\n	-o	Signal the oldest process only"
+//usage:     "\n	-e	Display name and PID of the process being killed"
+

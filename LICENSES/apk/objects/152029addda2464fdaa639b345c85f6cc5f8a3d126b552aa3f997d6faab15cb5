@@ -1,0 +1,345 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * A prototype Bourne shell grammar parser.
+ * Intended to follow the original Thompson and Ritchie
+ * "small and simple is beautiful" philosophy, which
+ * incidentally is a good match to today's BusyBox.
+ *
+ * Copyright (C) 2000,2001  Larry Doolittle <larry@doolittle.boa.org>
+ * Copyright (C) 2008,2009  Denys Vlasenko <vda.linux@googlemail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Credits:
+ *      The parser routines proper are all original material, first
+ *      written Dec 2000 and Jan 2001 by Larry Doolittle.  The
+ *      execution engine, the builtins, and much of the underlying
+ *      support has been adapted from busybox-0.49pre's lash, which is
+ *      Copyright (C) 1999-2004 by Erik Andersen <andersen@codepoet.org>
+ *      written by Erik Andersen <andersen@codepoet.org>.  That, in turn,
+ *      is based in part on ladsh.c, by Michael K. Johnson and Erik W.
+ *      Troan, which they placed in the public domain.  I don't know
+ *      how much of the Johnson/Troan code has survived the repeated
+ *      rewrites.
+ *
+ * Other credits:
+ *      o_addchr derived from similar w_addchar function in glibc-2.2.
+ *      parse_redirect, redirect_opt_num, and big chunks of main
+ *      and many builtins derived from contributions by Erik Andersen.
+ *      Miscellaneous bugfixes from Matt Kraai.
+ *
+ * There are two big (and related) architecture differences between
+ * this parser and the lash parser.  One is that this version is
+ * actually designed from the ground up to understand nearly all
+ * of the Bourne grammar.  The second, consequential change is that
+ * the parser and input reader have been turned inside out.  Now,
+ * the parser is in control, and asks for input as needed.  The old
+ * way had the input reader in control, and it asked for parsing to
+ * take place as needed.  The new way makes it much easier to properly
+ * handle the recursion implicit in the various substitutions, especially
+ * across continuation lines.
+ *
+ * TODOs:
+ *      grep for "TODO" and fix (some of them are easy)
+ *      make complex ${var%...} constructs support optional
+ *      make here documents optional
+ *      special variables (done: PWD, PPID, RANDOM)
+ *      follow IFS rules more precisely, including update semantics
+ *      tilde expansion
+ *      aliases
+ *      "command" missing features:
+ *          command -p CMD: run CMD using default $PATH
+ *              (can use this to override standalone shell as well?)
+ *          command BLTIN: disables special-ness (e.g. errors do not abort)
+ *          command -V CMD1 CMD2 CMD3 (multiple args) (not in standard)
+ *      builtins mandated by standards we don't support:
+ *          [un]alias, fc:
+ *          fc -l[nr] [BEG] [END]: list range of commands in history
+ *          fc [-e EDITOR] [BEG] [END]: edit/rerun range of commands
+ *          fc -s [PAT=REP] [CMD]: rerun CMD, replacing PAT with REP
+ *
+ * Bash compat TODO:
+ *      redirection of stdout+stderr: &> and >&
+ *      reserved words: function select
+ *      advanced test: [[ ]]
+ *      process substitution: <(list) and >(list)
+ *      let EXPR [EXPR...]
+ *          Each EXPR is an arithmetic expression (ARITHMETIC EVALUATION)
+ *          If the last arg evaluates to 0, let returns 1; 0 otherwise.
+ *          NB: let `echo 'a=a + 1'` - error (IOW: multi-word expansion is used)
+ *      ((EXPR))
+ *          The EXPR is evaluated according to ARITHMETIC EVALUATION.
+ *          This is exactly equivalent to let "EXPR".
+ *      $[EXPR]: synonym for $((EXPR))
+ *      indirect expansion: ${!VAR}
+ *      substring op on @: ${@:n:m}
+ *
+ * Won't do:
+ *      Some builtins mandated by standards:
+ *          newgrp [GRP]: not a builtin in bash but a suid binary
+ *              which spawns a new shell with new group ID
+ *
+ * Status of [[ support:
+ * [[ args ]] are CMD_SINGLEWORD_NOGLOB:
+ *   v='a b'; [[ $v = 'a b' ]]; echo 0:$?
+ *   [[ /bin/n* ]]; echo 0:$?
+ *   = is glob match operator, not equality operator: STR = GLOB
+ *   == same as =
+ *   =~ is regex match operator: STR =~ REGEX
+ * TODO:
+ * quoting needs to be considered (-f is an operator, "-f" and ""-f are not; etc)
+ * in word = GLOB, quoting should be significant on char-by-char basis: a*cd"*"
+ */
+//config:config HUSH
+//config:	bool "hush (70 kb)"
+//config:	default y
+//config:	select SHELL_HUSH
+//config:	help
+//config:	hush is a small shell. It handles the normal flow control
+//config:	constructs such as if/then/elif/else/fi, for/in/do/done, while loops,
+//config:	case/esac. Redirections, here documents, $((arithmetic))
+//config:	and functions are supported.
+//config:
+//config:	It will compile and work on no-mmu systems.
+//config:
+//config:	It does not handle select, aliases, tilde expansion,
+//config:	&>file and >&file redirection of stdout+stderr.
+//config:
+// This option is visible (has a description) to make it possible to select
+// a "scripted" applet (such as NOLOGIN) but avoid selecting any shells:
+//config:config SHELL_HUSH
+//config:	bool "Internal shell for embedded script support"
+//config:	default n
+//config:
+//config:# hush options
+//config:# It's only needed to get "nice" menuconfig indenting.
+//config:if SHELL_HUSH || HUSH || SH_IS_HUSH || BASH_IS_HUSH
+//config:
+//config:config HUSH_BASH_COMPAT
+//config:	bool "bash-compatible extensions"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_BRACE_EXPANSION
+//config:	bool "Brace expansion"
+//config:	default y
+//config:	depends on HUSH_BASH_COMPAT
+//config:	help
+//config:	Enable {abc,def} extension.
+//config:
+//config:config HUSH_BASH_SOURCE_CURDIR
+//config:	bool "'source' and '.' builtins search current directory after $PATH"
+//config:	default n   # do not encourage non-standard behavior
+//config:	depends on HUSH_BASH_COMPAT
+//config:	help
+//config:	This is not compliant with standards. Avoid if possible.
+//config:
+//config:config HUSH_LINENO_VAR
+//config:	bool "$LINENO variable (bashism)"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_INTERACTIVE
+//config:	bool "Interactive mode"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:	help
+//config:	Enable interactive mode (prompt and command editing).
+//config:	Without this, hush simply reads and executes commands
+//config:	from stdin just like a shell script from a file.
+//config:	No prompt, no PS1/PS2 magic shell variables.
+//config:
+//config:config HUSH_SAVEHISTORY
+//config:	bool "Save command history to .hush_history"
+//config:	default y
+//config:	depends on HUSH_INTERACTIVE && FEATURE_EDITING_SAVEHISTORY
+//config:
+//config:config HUSH_JOB
+//config:	bool "Job control"
+//config:	default y
+//config:	depends on HUSH_INTERACTIVE
+//config:	help
+//config:	Enable job control: Ctrl-Z backgrounds, Ctrl-C interrupts current
+//config:	command (not entire shell), fg/bg builtins work. Without this option,
+//config:	"cmd &" still works by simply spawning a process and immediately
+//config:	prompting for next command (or executing next command in a script),
+//config:	but no separate process group is formed.
+//config:
+//config:config HUSH_TICK
+//config:	bool "Support command substitution"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:	help
+//config:	Enable `command` and $(command).
+//config:
+//config:config HUSH_IF
+//config:	bool "Support if/then/elif/else/fi"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_LOOPS
+//config:	bool "Support for, while and until loops"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_CASE
+//config:	bool "Support case ... esac statement"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:	help
+//config:	Enable case ... esac statement. +400 bytes.
+//config:
+//config:config HUSH_FUNCTIONS
+//config:	bool "Support funcname() { commands; } syntax"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:	help
+//config:	Enable support for shell functions. +800 bytes.
+//config:
+//config:config HUSH_LOCAL
+//config:	bool "local builtin"
+//config:	default y
+//config:	depends on HUSH_FUNCTIONS
+//config:	help
+//config:	Enable support for local variables in functions.
+//config:
+//config:config HUSH_RANDOM_SUPPORT
+//config:	bool "Pseudorandom generator and $RANDOM variable"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:	help
+//config:	Enable pseudorandom generator and dynamic variable "$RANDOM".
+//config:	Each read of "$RANDOM" will generate a new pseudorandom value.
+//config:
+//config:config HUSH_MODE_X
+//config:	bool "Support 'hush -x' option and 'set -x' command"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:	help
+//config:	This instructs hush to print commands before execution.
+//config:	Adds ~300 bytes.
+//config:
+//config:config HUSH_ECHO
+//config:	bool "echo builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_PRINTF
+//config:	bool "printf builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_TEST
+//config:	bool "test builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_HELP
+//config:	bool "help builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_EXPORT
+//config:	bool "export builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_EXPORT_N
+//config:	bool "Support 'export -n' option"
+//config:	default y
+//config:	depends on HUSH_EXPORT
+//config:	help
+//config:	export -n unexports variables. It is a bash extension.
+//config:
+//config:config HUSH_READONLY
+//config:	bool "readonly builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:	help
+//config:	Enable support for read-only variables.
+//config:
+//config:config HUSH_KILL
+//config:	bool "kill builtin (supports kill %jobspec)"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_WAIT
+//config:	bool "wait builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_COMMAND
+//config:	bool "command builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_TRAP
+//config:	bool "trap builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_TYPE
+//config:	bool "type builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_TIMES
+//config:	bool "times builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_READ
+//config:	bool "read builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_SET
+//config:	bool "set builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_UNSET
+//config:	bool "unset builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_ULIMIT
+//config:	bool "ulimit builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_UMASK
+//config:	bool "umask builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_GETOPTS
+//config:	bool "getopts builtin"
+//config:	default y
+//config:	depends on SHELL_HUSH
+//config:
+//config:config HUSH_MEMLEAK
+//config:	bool "memleak builtin (debugging)"
+//config:	default n
+//config:	depends on SHELL_HUSH
+//config:
+//config:endif # hush options
+
+//applet:IF_HUSH(APPLET(hush, BB_DIR_BIN, BB_SUID_DROP))
+//                       APPLET_ODDNAME:name  main  location    suid_type     help
+//applet:IF_SH_IS_HUSH(  APPLET_ODDNAME(sh,   hush, BB_DIR_BIN, BB_SUID_DROP, hush))
+//applet:IF_BASH_IS_HUSH(APPLET_ODDNAME(bash, hush, BB_DIR_BIN, BB_SUID_DROP, hush))
+
+//kbuild:lib-$(CONFIG_SHELL_HUSH) += hush.o match.o shell_common.o
+//kbuild:lib-$(CONFIG_HUSH_RANDOM_SUPPORT) += random.o
+
+/* -i (interactive) is also accepted,
+ * but does nothing, therefore not shown in help.
+ * NOMMU-specific options are not meant to be used by users,
+ * therefore we don't show them either.
+ */
+//usage:#define hush_trivial_usage
+//usage:	"[-enxl] [-c 'SCRIPT' [ARG0 ARGS] | FILE ARGS | -s ARGS]"
+//usage:#define hush_full_usage "\n\n"
+//usage:	"Unix shell interpreter"
+

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# unit test for sum.
+# Copyright 2007 by Bernhard Reutner-Fischer
+# Licensed under GPLv2 or later, see file LICENSE in this source tree.
+
+# AUDIT: Unit tests for sum
+

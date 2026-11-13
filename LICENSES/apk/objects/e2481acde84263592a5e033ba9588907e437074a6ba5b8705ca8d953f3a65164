@@ -1,0 +1,10 @@
+/* app_list.c - Alpine Package Keeper (APK)
+ *
+ * Copyright (C) 2005-2009 Natanael Copa <n@tanael.org>
+ * Copyright (C) 2008-2011 Timo Teräs <timo.teras@iki.fi>
+ * Copyright (C) 2018 William Pitcock <nenolod@dereferenced.org>
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ */
+
