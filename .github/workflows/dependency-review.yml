@@ -1,0 +1,97 @@
+name: Dependency review
+
+on:
+  push:
+    paths:
+      - '**/*.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.gitmodules'
+      - 'zvm-core'
+      - 'tools/dependency-review/**'
+      - '.github/workflows/dependency-review.yml'
+  pull_request:
+    paths:
+      - '**/*.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.gitmodules'
+      - 'zvm-core'
+      - 'tools/dependency-review/**'
+      - '.github/workflows/dependency-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOTOOLCHAIN: local
+      GOWORK: 'off'
+      GOTELEMETRY: 'off'
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 1536MiB
+      PYTHONDONTWRITEBYTECODE: '1'
+      GO_DOWNLOAD_BASE_URL: ''
+      REVIEW_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          submodules: true
+          persist-credentials: false
+          allow-unsafe-pr-checkout: false
+      - name: Verify the exact Node and Core source closure and credential policy
+        run: python3 -B tools/dependency-review/source_closure.py --source-commit "$REVIEW_SOURCE_COMMIT"
+      - name: Exercise protocol and process-budget controls
+        run: python3 -B -m unittest discover -s tools/dependency-review -p 'test_*.py' -v
+      - name: Select scanner build SDK
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.4'
+          cache: false
+      - name: Build the pinned scanner outside the application module
+        env:
+          GOBIN: ${{ runner.temp }}/govulncheck-bin
+          GOMODCACHE: ${{ runner.temp }}/govulncheck-modules
+          GOCACHE: ${{ runner.temp }}/govulncheck-build-cache
+        run: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+      - name: Select the source analysis SDK
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.11'
+          cache-dependency-path: |
+            go.mod
+            go.sum
+            zvm-core/go.mod
+            zvm-core/go.sum
+      - name: Review source and Node root-module test findings
+        id: scan
+        run: |
+          python3 -B tools/dependency-review/govulncheck_review.py \
+            --scanner "$RUNNER_TEMP/govulncheck-bin/govulncheck" \
+            --output "$RUNNER_TEMP/dependency-review" \
+            --source-commit "$REVIEW_SOURCE_COMMIT" \
+            --go-version go1.26.11
+      - name: Record the selected CLI and test import graphs without module downloads
+        if: ${{ !cancelled() && steps.scan.outcome != 'skipped' }}
+        run: |
+          python3 -B tools/dependency-review/import_graph.py \
+            --source-commit "$REVIEW_SOURCE_COMMIT" \
+            --go-version go1.26.11 \
+            --entry-package github.com/Zenoglyphs-VM/zvm-node/cmd/zvm-node \
+            --output "$RUNNER_TEMP/dependency-review/import-graph"
+      - name: Retain this attempt's reports, including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dependency-review-source-go1.26.11
+          path: ${{ runner.temp }}/dependency-review/
+          if-no-files-found: error
+          retention-days: 14
+          archive: true
+          overwrite: false
+          include-hidden-files: false
+          compression-level: 6

@@ -143,3 +143,50 @@ vulnerability scan, compiler-service isolation test, signed output or release.
 The existing image entrypoint and operator user policy remain unchanged. No
 service, live chain, compiler download, image publication or deployment is
 performed by this usage control.
+
+## Node source and test vulnerability review
+
+The read-permission `Dependency review` workflow builds govulncheck v1.9.0 with
+Go 1.27.4 outside the application module, then selects Go 1.26.11 for source
+analysis. It scans `./...` with Node root-module tests and CGO disabled. Imported
+Core production packages remain included; Core's separate nested-module test
+suite is outside that pattern. The complete Node/Core source profile runs before
+and after observations. A 600-second scanner deadline and 8 MiB/256 KiB stream
+caps preserve actual exits, EOF, failures and incomplete results.
+
+`local_core.py` binds the actual projected Core module selection to the reviewed
+commit, tree, canonical URL and both Core lock hashes. The only local replacement
+profile is the declared `./zvm-core` with an empty effective version and nominal
+`github.com/Zenoglyphs-VM/zvm-core v0.0.0`. Other local paths, aliases, changed
+Core source, changed replacement versions and missing inventory records require
+review. Local Core SBOM occurrences and findings stay in the report. The profile
+adds source identity; it does not waive a finding or establish advisory coverage.
+The producer's source claims still require independent Git-object comparison
+when consuming its artifact.
+
+The scanner consumer requires its expected protocol, SDK, database identity,
+module inventory and advisory references. It distinguishes module, package and
+source-call findings, keeps raw occurrence counts, and omits source locations
+from its summary. Exit 1 means findings require review; exit 2 means failure or
+incomplete evidence. A zero result means only that no matches were reported by
+that particular scan. Database origin, replacement-fork advisory coverage,
+exercised reachability, runtime safety and release acceptance remain separate.
+
+After any executed scan attempt, including one reporting findings, a separate
+metadata producer records closed CLI and Node test import graphs. It uses a
+fixed Go template containing public package and nominal/effective module IDs,
+not filesystem/cache paths. Package/edge bounds, test-variant identities,
+acyclic closure, the exact local Core profile and before/after source/lock pins
+are checked. Metadata commands each have a 120-second deadline; package output
+is capped at 4 MiB and module archives are not downloaded in this graph step.
+Repeated import IDs retain occurrence counts. Import presence is not exercised
+function or exploit reachability, and no waiver is generated. Failed graph
+observations remain failures even if a source scan completed.
+
+This attempt's raw source scan, module-binding observations, execution receipts,
+summary and import graphs are retained in one explicit ZIP for fourteen days,
+including failures when available. Current qualification requires inspection of
+that exact head, run/attempt, archive digest and complete streams. Existing Core
+results and earlier Node native/container results are historical evidence for
+their original source; they are not fresh qualification of this workflow or its
+findings.
