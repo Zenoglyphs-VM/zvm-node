@@ -193,6 +193,37 @@ results and earlier Node native/container results are historical evidence for
 their original source; they are not fresh qualification of this workflow or its
 findings.
 
+## Upstream advisory aliases for the replacement fork
+
+The effective op-geth namespace can have an empty advisory query while upstream
+Geth records still require assessment. The committed fact projection in
+`tools/dependency-review/upstream-advisory-snapshot.json` preserves six complete
+selected queries: upstream/effective module records, the effective source commit,
+both repositories' public security channels, and the legacy Geth JSON feed.
+Provider response hashes and individual record hashes bind the captured facts;
+descriptions, credit names and personal data are omitted. This is a dated
+snapshot, not a live feed or authenticated independent origin.
+
+After graph collection, `upstream_advisories.py` replays the original profile,
+local Core selection and closed Go import graph from complete, pinned streams.
+The graph source must match the independently checked current Node/Core trees.
+The catalog must be the source-bound repository file. The mapper joins explicit
+aliases transitively and retains each provider occurrence, withdrawn record,
+upstream fix-version note and explicit upstream commit reference. Package
+annotations distinguish CLI, test-only and unobserved inclusion; recorded platform
+constraints remain visible. Missing annotations stay unknown.
+
+A successful mapping exits zero with
+`UPSTREAM_ALIAS_MAPPING_RECORDED_REVIEW_REQUIRED`. It records review work and
+never grants an advisory waiver or release approval. Upstream version ranges
+are not compared numerically with fork versions; package absence, ancestry and
+empty effective-namespace queries cannot establish that the fork is unaffected.
+A changed selected fork version does not relabel the snapshot's original query.
+Freshness policy, upstream fix semantics, function execution, additional build
+profiles and independent assessment remain required. The same bounded artifact
+retains `upstream-advisories/review.json` and `execution.json`; the mapper makes
+no network requests or native Go calls.
+
 ## Reviewed networking library migration
 
 The selected op-geth v1.101702.3 release is a library release. Its 38-path source

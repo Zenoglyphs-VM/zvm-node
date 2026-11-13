@@ -76,6 +76,7 @@ jobs:
             --source-commit "$REVIEW_SOURCE_COMMIT" \
             --go-version go1.26.11
       - name: Record the selected CLI and test import graphs without module downloads
+        id: graph
         if: ${{ !cancelled() && steps.scan.outcome != 'skipped' }}
         run: |
           python3 -B tools/dependency-review/import_graph.py \
@@ -83,6 +84,15 @@ jobs:
             --go-version go1.26.11 \
             --entry-package github.com/Zenoglyphs-VM/zvm-node/cmd/zvm-node \
             --output "$RUNNER_TEMP/dependency-review/import-graph"
+      - name: Map frozen upstream advisory aliases to the replayed import graph
+        if: ${{ !cancelled() && steps.graph.outcome == 'success' }}
+        run: |
+          python3 -B tools/dependency-review/upstream_advisories.py \
+            --source-commit "$REVIEW_SOURCE_COMMIT" \
+            --go-version go1.26.11 \
+            --graph "$RUNNER_TEMP/dependency-review/import-graph" \
+            --snapshot tools/dependency-review/upstream-advisory-snapshot.json \
+            --output "$RUNNER_TEMP/dependency-review/upstream-advisories"
       - name: Retain this attempt's reports, including failures
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
