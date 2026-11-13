@@ -11,8 +11,14 @@ permissions:
 jobs:
   go:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     env:
+      GOTOOLCHAIN: local
+      GOWORK: 'off'
+      GOTELEMETRY: 'off'
+      GOFLAGS: '-mod=readonly'
+      GOMAXPROCS: '2'
+      PYTHONDONTWRITEBYTECODE: '1'
       GO_DOWNLOAD_BASE_URL: ''
       REVIEW_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
@@ -27,13 +33,81 @@ jobs:
 
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version-file: go.mod
+          go-version: '1.26.11'
           cache-dependency-path: |
             go.mod
             go.sum
             zvm-core/go.mod
             zvm-core/go.sum
 
-      - run: go build ./...
-      - run: go vet ./...
-      - run: go test ./...
+      - name: Exercise source-profile and evidence refusal controls
+        run: python3 -B -m unittest discover -s tools/dependency-review -p 'test_*.py' -v
+      - name: Verify locks, build, vet and run complete normal and race suites
+        run: |
+          python3 -B tools/dependency-review/native_qualification.py \
+            --source-commit "$REVIEW_SOURCE_COMMIT" \
+            --output "$RUNNER_TEMP/node-native-qualification"
+      - name: Retain this attempt's bounded native evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: node-native-qualification
+          path: ${{ runner.temp }}/node-native-qualification/
+          if-no-files-found: error
+          retention-days: 14
+          archive: true
+          overwrite: false
+          include-hidden-files: false
+          compression-level: 6
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOCKER_BUILDKIT: '1'
+      REVIEW_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          submodules: true
+          persist-credentials: false
+          allow-unsafe-pr-checkout: false
+      - name: Verify the exact Node and Core source closure and credential policy
+        run: python3 -B tools/dependency-review/source_closure.py --source-commit "$REVIEW_SOURCE_COMMIT"
+      - name: Build the CLI image with the pinned SDK builder
+        run: timeout 720s docker build --progress=plain --tag zvm-node:ci .
+      - name: Exercise CLI usage without a service or network
+        run: |
+          python3 -B - <<'PY'
+          import hashlib, json, subprocess
+          done = subprocess.run([
+              'docker', 'run', '--rm', '--network=none', '--read-only',
+              '--user=65534:65534', '--cap-drop=ALL',
+              '--security-opt=no-new-privileges', 'zvm-node:ci', '--help',
+          ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20)
+          assert done.returncode == 2 and not done.stdout
+          assert done.stderr.startswith(b'usage: zvm-node [command] [flags]   (default: node)\n')
+          assert len(done.stderr) <= 65536
+          print(json.dumps({'expectedExit': 2, 'actualExit': done.returncode,
+              'stderrBytes': len(done.stderr),
+              'stderrSha256': hashlib.sha256(done.stderr).hexdigest(),
+              'scope': 'CLI usage only; no service, live chain or deployment'}))
+          PY
+      - name: Observe the exact local image and installed packages
+        run: |
+          python3 -B tools/dependency-review/container_inventory.py \
+            --source-commit "$REVIEW_SOURCE_COMMIT" \
+            --output "$RUNNER_TEMP/container-input-review"
+      - name: Retain this attempt's image observations, including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: container-input-review
+          path: ${{ runner.temp }}/container-input-review/
+          if-no-files-found: error
+          retention-days: 14
+          archive: true
+          overwrite: false
+          include-hidden-files: false
+          compression-level: 6

@@ -52,9 +52,9 @@ corresponding source obligations remain separate acceptance work.
 
 An SBOM and provenance statement must identify the particular built output and
 its resolved inputs. Review the compiler binaries fetched by the compiler
-service as separate execution inputs. The existing `ubuntu-latest` label,
-Docker base tags, package repositories and downloaded Go toolchain are mutable;
-action pins do not make those inputs immutable. Container/platform checks,
+service as separate execution inputs. The `ubuntu-latest` runner, package repository contents, transitive APK inputs
+and downloaded Go toolchain need independent origin and content review; full
+action and selected image pins do not qualify every execution input. Container/platform checks,
 output-bound notices, release signing and real operator/chain acceptance need
 their own qualification.
 
@@ -71,9 +71,8 @@ and [Dependabot options](https://docs.github.com/en/code-security/reference/supp
 The selected CI actions are checkout 7.0.1, setup-go 7.0.0 and upload-artifact
 7.0.2 at full commit pins. The checkout source was also inspected for the
 submodule profile: submodule credentials are not persisted, temporary global
-authentication is removed, and unsafe PR checkout remains disabled. Hosted
-execution must qualify this actual profile; another repository's action success
-does not qualify Node. Enabled Go caches include both Node and Core lock files.
+authentication is removed, and unsafe PR checkout remains disabled. Hosted execution must qualify this actual profile at each selected source;
+another repository's action success does not qualify Node. Enabled Go caches include both Node and Core lock files.
 
 `tools/dependency-review/source_closure.py` verifies the exact selected Node
 commit, every tracked regular-file blob and mode, and the one allowed Core
@@ -85,23 +84,62 @@ values and private checkout paths are not printed. This profile preserves the
 existing Core source; it does not adopt the separately proposed Core dependency
 or Engine-authentication changes.
 
-## Temporary exact lock preparation
+## Node SDK, locks and native qualification
 
-The read-permission `Dependency lock preparation` workflow selects Go 1.26.11
-without automatic toolchain switching and generates proposed Node locks in its
-disposable checkout. The recipe is bound to the original root lock hashes and
-selects reviewed brotli, websocket, compress, OpenTelemetry, x/crypto and x/text
-versions. The ordinary Node SDK/locks are unchanged until that candidate is
-independently inspected and committed for a fresh native qualification.
+The root module and ordinary CI select Go 1.26.11. `GOTOOLCHAIN=local`,
+`GOWORK=off`, `GOFLAGS=-mod=readonly` and disabled telemetry prevent automatic
+SDK selection, workspace replacement and incidental build-time lock changes.
+The SDK environment, checksum verification, tidy diff, build, vet and complete
+normal/race suites are recorded by `native_qualification.py`. Test result caching
+is disabled for both suites. The receipt preserves actual exits, stream EOF and
+caps, failed/skipped test identities, and package outcomes. Counts include parent
+tests and subtests, rather than independent scenarios. A 900-second aggregate
+command budget and 8 MiB/256 KiB per-command stdout/stderr caps bound evidence.
+Both source closures must match again after qualification. Failure and incomplete
+outputs remain distinct from success. The workflow retains an explicit ZIP for
+fourteen days, including failure receipts when available.
 
-The producer permits only root `go.mod` and `go.sum` changes, then rechecks the
-complete Node/Core source closure. It verifies the resolved selections, original
-module/replacement identities and checksum consistency. Public module projections
-omit cache paths. A 540-second aggregate command budget and individual stream
-caps bound collection. Actual exits, completeness, source/lock pins, generated
-locks and failures are retained for fourteen days in an explicit ZIP archive.
-The producer does not execute a build, tests, vulnerability scan, release or
-repository writeback. Native compatibility, Node advisory coverage and shipped
-notice/license review remain separate requirements. The temporary preparation
-workflow and recipe are removed after their outputs are adopted; original Git
-revisions and qualification records remain historical evidence.
+The locks were produced in the exact-source temporary preparation at commit
+`9ce62c6def67b0d7ac9ab377500b06b6ff3fe35e`, automatic fork run
+[`43409369521`](https://github.com/edgepillar/zvm-node/actions/runs/43409369521),
+artifact `14029235859`, ZIP SHA-256
+`c80794a1ff78751fb06efb6e4ca55e7455c94da7c1945c7364a63676fdbac6de`.
+That bounded producer selected brotli 1.2.7, websocket 1.5.3, compress 1.20.2,
+OpenTelemetry root/metric/trace 1.44.0, x/crypto 0.59.0 and x/text 0.44.0. The
+actual resolved graph and original module/replacement identities are checked
+before adoption. The temporary workflow, recipe and preparation helper are
+removed after adoption; their Git revision and original receipts remain
+historical evidence. Producing or inspecting locks does not qualify their native
+compatibility; a subsequent exact-head run is required.
+
+The Core Gitlink remains `29e6d9b30be94de3772c850c7a1e9811585a8833` at its canonical
+upstream URL. The effective op-geth selection remains v1.101702.2. Node's
+simulated-backend tests still select the older networking dependency closure,
+including DTLS v2.2.7. Node-specific advisory and call-reachability review remains
+open. The separately proposed Core source scan result does not transfer to this
+Node/Core source combination. No advisory waiver or reachability exclusion is
+introduced by these lock updates.
+
+## Container input observations
+
+The Docker frontend, Go 1.26.11 Alpine builder and Alpine 3.22.8 runtime use
+reviewed manifest-index digests. The builder checks its exact SDK and verifies
+module checksums before the existing static CLI build. Direct runtime selections
+are ca-certificates 20261020-r0, wget 1.25.0-r1 and gcompat 1.1.0-r4; the latter
+preserves the existing compiler-service compatibility dependency. Their primary
+package metadata is available from Alpine's
+[ca-certificates](https://pkgs.alpinelinux.org/package/v3.22/main/x86_64/ca-certificates),
+[wget](https://pkgs.alpinelinux.org/package/v3.22/main/x86_64/wget) and
+[gcompat](https://pkgs.alpinelinux.org/package/v3.22/main/x86_64/gcompat) records.
+These pins do not freeze every transitive package or establish image provenance.
+
+The separate hosted container job builds a local image and exercises only
+`zvm-node --help`, expecting exit 2. It runs without network access, with a
+read-only root filesystem, UID/GID 65534, dropped capabilities and no new
+privileges. `container_inventory.py` records the immutable local image ID,
+platform, installed package versions and CLI digest with bounded command
+receipts. This is a build/input observation, not a complete SBOM, container
+vulnerability scan, compiler-service isolation test, signed output or release.
+The existing image entrypoint and operator user policy remain unchanged. No
+service, live chain, compiler download, image publication or deployment is
+performed by this usage control.
