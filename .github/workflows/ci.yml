@@ -76,7 +76,10 @@ jobs:
       - name: Verify the exact Node and Core source closure and credential policy
         run: python3 -B tools/dependency-review/source_closure.py --source-commit "$REVIEW_SOURCE_COMMIT"
       - name: Build the CLI image with the pinned SDK builder
-        run: timeout 720s docker build --progress=plain --tag zvm-node:ci .
+        run: |
+          timeout 720s docker build --progress=plain --tag zvm-node:ci \
+            --build-arg NOTICE_SOURCE_COMMIT="$REVIEW_SOURCE_COMMIT" \
+            --build-arg NOTICE_CORE_COMMIT="$(git rev-parse HEAD:zvm-core)" .
       - name: Exercise CLI usage without a service or network
         run: |
           python3 -B - <<'PY'

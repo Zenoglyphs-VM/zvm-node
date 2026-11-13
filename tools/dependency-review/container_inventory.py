@@ -11,6 +11,7 @@ import sys
 
 from bounded import ReviewError, file_bytes, run_bounded, save
 from source_closure import source_closure
+from notice_inventory import EXPORT_SCRIPT, APK_SCRIPT, MAX_EXPORT, summarize_export, expected_readme, apk_licenses
 
 
 def main():
@@ -31,20 +32,20 @@ def main():
         before = source_closure(args.source_commit)
         receipt["source"] = before
 
-        def run(label, argv):
+        def run(label, argv, stdout_limit=65536):
             nonlocal phase
             phase = label
             directory = args.output / label
             directory.mkdir()
             result = run_bounded(argv, directory, timeout=30,
-                                 stdout_limit=65536, stderr_limit=65536)
+                                 stdout_limit=stdout_limit, stderr_limit=65536)
             for name, pin in result["streams"].items():
                 (directory / pin["path"]).rename(directory / name)
                 pin["path"] = label + "/" + name
             receipt["commands"].append({"label": label, "process": result})
             if result["actualExit"] != 0 or not result["outputComplete"]:
                 raise ReviewError("image observation command did not complete")
-            return file_bytes(directory / "stdout", 65536)
+            return file_bytes(directory / "stdout", stdout_limit)
 
         template = ('{"id":{{json .Id}},"os":{{json .Os}},'
                     '"architecture":{{json .Architecture}},'
@@ -64,12 +65,18 @@ def main():
         digest = run("binary", common + ["--entrypoint=/bin/busybox", image["id"], "sha256sum", "/usr/local/bin/zvm-node"]).decode().split()
         if len(digest) != 2 or not re.fullmatch(r"[0-9a-f]{64}", digest[0]) or digest[1] != "/usr/local/bin/zvm-node":
             raise ReviewError("invalid CLI binary digest")
+        declarations = run("apk-licenses", common + ["--entrypoint=/bin/sh", image["id"], "-euc", APK_SCRIPT], stdout_limit=2 << 20)
+        apk_license_records = apk_licenses(declarations, packages)
+        exported = run("notices", common + ["--entrypoint=/bin/sh", image["id"], "-euc", EXPORT_SCRIPT], stdout_limit=MAX_EXPORT)
+        notice_summary = summarize_export(exported, before, digest[0], expected_readme(),
+            lambda path, limit: file_bytes(Path(path), limit))
         phase = "source_after"
         if source_closure(args.source_commit) != before:
             raise ReviewError("source changed during image observation")
         receipt.update(status="IMAGE_AND_PACKAGE_INPUTS_OBSERVED", image=image,
                        installedPackages=sorted(packages), cliBinarySha256=digest[0],
-                       hostPathsOrConfigValuesRecorded=False)
+                       hostPathsOrConfigValuesRecorded=False, sourceNotices=notice_summary,
+                       runtimeAPKLicenseDeclarations=apk_license_records, legalReviewComplete=False)
         result = 0
     except (ReviewError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
         receipt.update(failureStage=phase, errorType=type(error).__name__)

@@ -146,6 +146,43 @@ The existing image entrypoint and operator user policy remain unchanged. No
 service, live chain, compiler download, image publication or deployment is
 performed by this usage control.
 
+## Source notices in the runtime image
+
+The runtime image retains `/usr/share/doc/zvm-node/notices`. Its manifest binds
+the actual CLI digest and build profile to selected non-test packages, nominal
+and effective module identities, source/embedded-file hashes and copied notice
+objects. The builder's existing Go SDK and module/build caches are reused;
+collection makes one bounded offline package query and verifies cached modules
+before and after observation. Binary Go metadata must select the same modules.
+No additional SDK or runtime Python installation is introduced.
+
+The collector preserves the original Node/Core LICENSE and NOTICE files, the
+SDK license, matching package-ancestor notice files/directories and initial
+source-comment notice candidates. Each distinct payload is copied once under
+its SHA-256 name, without editing attribution or text. Regular-file identity,
+link, traversal, size, count and aggregate limits bound the collection. Selected
+source and embedded files are recorded separately; ignored build profiles and
+compiler intermediates are outside this inventory.
+
+CI reads the packet from the immutable local image without network access,
+privileges or host mounts. A framed stream carries each payload once; no tar or
+second extracted packet is created. The consumer rehashes every object, matches
+the CLI digest, source revisions and lock pairs, and compares copied first-party
+notices plus selected Node/Core inputs with the checked source. Installed APK
+names/versions are independently matched to their declared license, origin and
+package checksum fields, with a count-bound end marker. Maintainer metadata is
+not included in this APK projection.
+
+These observations do not establish legal classification, compatibility,
+corresponding-source/relinking requirements, complete APK notice text, complete
+SBOM coverage or release approval. Missing candidate notices remain explicit and
+every module requires review. Caller-provided source revisions need independent
+checkout binding; they are not authenticated by the manifest itself. The packet
+contains all selected embedded-file hashes, including contract artifacts, whose
+source and license provenance still needs the appropriate review. See Go's
+[binary metadata](https://pkg.go.dev/debug/buildinfo) and
+[module archive rules](https://go.dev/ref/mod#zip-files) for input semantics.
+
 ## Node source and test vulnerability review
 
 The read-permission `Dependency review` workflow builds govulncheck v1.9.0 with

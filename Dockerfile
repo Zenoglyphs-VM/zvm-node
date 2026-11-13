@@ -20,6 +20,12 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /out/zvm-node ./cmd/zvm-node
+ARG NOTICE_SOURCE_COMMIT
+ARG NOTICE_CORE_COMMIT
+RUN --network=none --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOPROXY=off GOSUMDB=off go run ./tools/noticebundle \
+      --binary /out/zvm-node --output /out/notices \
+      --source-commit "$NOTICE_SOURCE_COMMIT" --core-commit "$NOTICE_CORE_COMMIT"
 
 FROM alpine:3.22.8@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
 # gcompat: contract verification runs solc releases fetched from
@@ -30,4 +36,5 @@ RUN apk add --no-cache ca-certificates=20261020-r0 wget=1.25.0-r1 gcompat=1.1.0-
 # mounted there inherits this ownership, so it can write.
 RUN mkdir -p /solc && chown 65534:65534 /solc
 COPY --from=build /out/zvm-node /usr/local/bin/zvm-node
+COPY --from=build /out/notices /usr/share/doc/zvm-node/notices
 ENTRYPOINT ["zvm-node"]
