@@ -1,0 +1,60 @@
+name: Dependency lock preparation
+
+on:
+  push:
+    paths:
+      - 'tools/dependency-review/**'
+      - '.github/workflows/dependency-lock-preparation.yml'
+  pull_request:
+    paths:
+      - 'tools/dependency-review/**'
+      - '.github/workflows/dependency-lock-preparation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      GOTOOLCHAIN: local
+      GOTELEMETRY: 'off'
+      GO_DOWNLOAD_BASE_URL: ''
+      REVIEW_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          submodules: true
+          persist-credentials: false
+          allow-unsafe-pr-checkout: false
+      - name: Exercise explicit source-tree profile controls
+        run: python3 -B -m unittest discover -s tools/dependency-review -p 'test_*.py' -v
+      - name: Verify the exact Node and Core source closure and credential policy
+        run: python3 -B tools/dependency-review/source_closure.py --source-commit "$REVIEW_SOURCE_COMMIT"
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.11'
+          cache: false
+      - name: Generate exact candidate locks without repository writeback
+        env:
+          GOMODCACHE: ${{ runner.temp }}/lock-preparation-modules
+          GOCACHE: ${{ runner.temp }}/lock-preparation-build-cache
+        run: |
+          python3 -B tools/dependency-review/prepare_remediation_locks.py \
+            --source-commit "$REVIEW_SOURCE_COMMIT" \
+            --output "$RUNNER_TEMP/dependency-lock-preparation"
+      - name: Retain candidate locks and actual command receipts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dependency-lock-candidate-go1.26.11
+          path: ${{ runner.temp }}/dependency-lock-preparation/
+          if-no-files-found: error
+          retention-days: 14
+          archive: true
+          overwrite: false
+          include-hidden-files: false
+          compression-level: 6

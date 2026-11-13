@@ -1,6 +1,6 @@
 # Dependency and distribution review
 
-CI action implementations use full commit pins with readable major-version
+CI action implementations use full commit pins with readable release-version
 comments. Weekly Dependabot proposals cover Actions, the root Go module and the
 contracts npm lock, with at most two open ordinary version-update pull requests
 per ecosystem. Each update needs source review and qualification before
@@ -65,3 +65,43 @@ sanitized summaries. Successful CI does not approve a deployment or release.
 
 References: [GitHub Actions secure use](https://docs.github.com/en/actions/reference/security/secure-use)
 and [Dependabot options](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference).
+
+## Exact Node and Core source profile
+
+The selected CI actions are checkout 7.0.1, setup-go 7.0.0 and upload-artifact
+7.0.2 at full commit pins. The checkout source was also inspected for the
+submodule profile: submodule credentials are not persisted, temporary global
+authentication is removed, and unsafe PR checkout remains disabled. Hosted
+execution must qualify this actual profile; another repository's action success
+does not qualify Node. Enabled Go caches include both Node and Core lock files.
+
+`tools/dependency-review/source_closure.py` verifies the exact selected Node
+commit, every tracked regular-file blob and mode, and the one allowed Core
+Gitlink. It independently checks Core commit
+`29e6d9b30be94de3772c850c7a1e9811585a8833`, its configured public URL, source tree,
+lock hashes and regular files. Other Gitlinks, links, changed indices,
+untracked/ignored inputs or local authentication config require review. Config
+values and private checkout paths are not printed. This profile preserves the
+existing Core source; it does not adopt the separately proposed Core dependency
+or Engine-authentication changes.
+
+## Temporary exact lock preparation
+
+The read-permission `Dependency lock preparation` workflow selects Go 1.26.11
+without automatic toolchain switching and generates proposed Node locks in its
+disposable checkout. The recipe is bound to the original root lock hashes and
+selects reviewed brotli, websocket, compress, OpenTelemetry, x/crypto and x/text
+versions. The ordinary Node SDK/locks are unchanged until that candidate is
+independently inspected and committed for a fresh native qualification.
+
+The producer permits only root `go.mod` and `go.sum` changes, then rechecks the
+complete Node/Core source closure. It verifies the resolved selections, original
+module/replacement identities and checksum consistency. Public module projections
+omit cache paths. A 540-second aggregate command budget and individual stream
+caps bound collection. Actual exits, completeness, source/lock pins, generated
+locks and failures are retained for fourteen days in an explicit ZIP archive.
+The producer does not execute a build, tests, vulnerability scan, release or
+repository writeback. Native compatibility, Node advisory coverage and shipped
+notice/license review remain separate requirements. The temporary preparation
+workflow and recipe are removed after their outputs are adopted; original Git
+revisions and qualification records remain historical evidence.
