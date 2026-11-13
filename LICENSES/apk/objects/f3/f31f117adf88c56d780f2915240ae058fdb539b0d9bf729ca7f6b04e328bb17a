@@ -1,0 +1,27 @@
+/*
+ * pstree.c - display process tree
+ *
+ * Copyright (C) 1993-2002 Werner Almesberger
+ * Copyright (C) 2002-2009 Craig Small
+ * Copyright (C) 2010 Lauri Kasanen
+ *
+ * Based on pstree (PSmisc) 22.13.
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config PSTREE
+//config:	bool "pstree (9.4 kb)"
+//config:	default y
+//config:	help
+//config:	Display a tree of processes.
+
+//applet:IF_PSTREE(APPLET_NOEXEC(pstree, pstree, BB_DIR_USR_BIN, BB_SUID_DROP, pstree))
+
+//kbuild:lib-$(CONFIG_PSTREE) += pstree.o
+
+//usage:#define pstree_trivial_usage
+//usage:	"[-p] [PID|USER]"
+//usage:#define pstree_full_usage "\n\n"
+//usage:       "Display process tree, optionally start from USER or PID\n"
+//usage:     "\n	-p	Show pids"
+

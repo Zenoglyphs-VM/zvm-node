@@ -1,0 +1,70 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini tail implementation for busybox
+ *
+ * Copyright (C) 2001 by Matt Kraai <kraai@alumni.carnegiemellon.edu>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Mar 16, 2003      Manuel Novoa III   (mjn3@codepoet.org)
+ *
+ * Pretty much rewritten to fix numerous bugs and reduce realloc() calls.
+ * Bugs fixed (although I may have forgotten one or two... it was pretty bad)
+ * 1) mixing printf/write without fflush()ing stdout
+ * 2) no check that any open files are present
+ * 3) optstring had -q taking an arg
+ * 4) no error checking on write in some cases, and a warning even then
+ * 5) q and s interaction bug
+ * 6) no check for lseek error
+ * 7) lseek attempted when count==0 even if arg was +0 (from top)
+ */
+//config:config TAIL
+//config:	bool "tail (7.2 kb)"
+//config:	default y
+//config:	help
+//config:	tail is used to print the last specified number of lines
+//config:	from files.
+//config:
+//config:config FEATURE_FANCY_TAIL
+//config:	bool "Enable -q, -s, -v, and -F options"
+//config:	default y
+//config:	depends on TAIL
+//config:	help
+//config:	These options are provided by GNU tail, but
+//config:	are not specified in the SUSv3 standard:
+//config:		-q      Never output headers giving file names
+//config:		-s SEC  Wait SEC seconds between reads with -f
+//config:		-v      Always output headers giving file names
+//config:		-F      Same as -f, but keep retrying
+
+//applet:IF_TAIL(APPLET(tail, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TAIL) += tail.o
+
+/* BB_AUDIT SUSv3 compliant (need fancy for -c) */
+/* BB_AUDIT GNU compatible -c, -q, and -v options in 'fancy' configuration. */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/tail.html */
+
+//usage:#define tail_trivial_usage
+//usage:       "[OPTIONS] [FILE]..."
+//usage:#define tail_full_usage "\n\n"
+//usage:       "Print last 10 lines of FILEs (or stdin) to.\n"
+//usage:       "With more than one FILE, precede each with a filename header.\n"
+//usage:     "\n	-c [+]N[bkm]	Print last N bytes"
+//usage:     "\n	-n N[bkm]	Print last N lines"
+//usage:     "\n	-n +N[bkm]	Start on Nth line and print the rest"
+//usage:     "\n			(b:*512 k:*1024 m:*1024^2)"
+//usage:	IF_FEATURE_FANCY_TAIL(
+//usage:     "\n	-q		Never print headers"
+//usage:     "\n	-v		Always print headers"
+//usage:	)
+//usage:     "\n	-f		Print data as file grows"
+//usage:	IF_FEATURE_FANCY_TAIL(
+//usage:     "\n	-F		Same as -f, but keep retrying"
+//usage:     "\n	-s SECONDS	Wait SECONDS between reads with -f"
+//usage:	)
+//usage:
+//usage:#define tail_example_usage
+//usage:       "$ tail -n 1 /etc/resolv.conf\n"
+//usage:       "nameserver 10.0.0.1\n"
+

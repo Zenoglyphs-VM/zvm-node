@@ -1,0 +1,52 @@
+/*
+ * Copyright 2024-2026 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ *
+ *
+ *
+ * Notes On hash table design and layout
+ * This hashtable uses a hopscotch algorithm to do indexing.  The data structure
+ * looks as follows:
+ *
+ *   hash          +--------------+
+ *   value+------->+ HT_VALUE     |
+ *      +          +--------------+
+ *  +-------+
+ *  |       |
+ *  +---------------------------------------------------------+
+ *  |       |       |       |       |                         |
+ *  | entry | entry | entry | entry |                         |
+ *  |       |       |       |       |                         |
+ *  +---------------------------------------------------------+
+ *  |                               |                         |
+ *  |                               |                         |
+ *  +---------------------------------------------------------+
+ *  |              +                             +            +
+ *  |        neighborhood[0]               neighborhood[1]    |
+ *  |                                                         |
+ *  |                                                         |
+ *  +---------------------------------------------------------+
+ *                              |
+ *                              +
+ *                         neighborhoods
+ *
+ * On lookup/insert/delete, the items key is hashed to a 64 bit value
+ * and the result is masked to provide an index into the neighborhoods
+ * table.  Once a neighborhood is determined, an in-order search is done
+ * of the elements in the neighborhood indexes entries for a matching hash
+ * value, if found, the corresponding HT_VALUE is used for the respective
+ * operation.  The number of entries in a neighborhood is determined at build
+ * time based on the cacheline size of the target CPU.  The intent is for a
+ * neighborhood to have all entries in the neighborhood fit into a single cache
+ * line to speed up lookups.  If all entries in a neighborhood are in use at the
+ * time of an insert, the table is expanded and rehashed.
+ *
+ * Lockless reads hash table is based on the same design but does not
+ * allow growing and deletion. Thus subsequent neighborhoods are always
+ * searched for a match until an empty entry is found.
+ */
+

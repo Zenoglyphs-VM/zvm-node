@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# mkfs.minix tests.
+# Copyright 2007 by Denys Vlasenko
+# Licensed under GPLv2, see file LICENSE in this source tree.
+

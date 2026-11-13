@@ -1,0 +1,20 @@
+/*
+ * Copyright 2017-2022 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * This version of ctype.h provides a standardised and platform
+ * independent implementation that supports seven bit ASCII characters.
+ * The specific intent is to not pass extended ASCII characters (> 127)
+ * even if the host operating system would.
+ *
+ * There is EBCDIC support included for machines which use this.  However,
+ * there are a number of concerns about how well EBCDIC is supported
+ * throughout the rest of the source code.  Refer to issue #4154 for
+ * details.
+ */

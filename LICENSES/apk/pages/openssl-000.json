@@ -1,0 +1,1798 @@
+{
+  "notices": [
+    {
+      "bytes": 391,
+      "path": "openssl-3.5.9/.ctags.d/add-dir.ctags",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2408180e7ebe4c10dafa933c8256661a6800a8770eddef3aa9ca621ec21fd5d5",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 384,
+      "path": "openssl-3.5.9/.ctags.d/exclude.ctags",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "31c0bf682643c313744e654e7498459c4362f31952251194802279d444371a03",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 377,
+      "path": "openssl-3.5.9/.ctags.d/openssl-stage1/10extrac-macrodefs.ctags",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "70a5038f57db1773de25bc9def88e93e0217af4daa9a3063abee7bc1688cccb4",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 322,
+      "path": "openssl-3.5.9/.ctags.d/openssl-stage2/10expand-macros.ctags",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "58322f05312100a42c6b725690702eaf798f638c961656063fb6a2fed676b581",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1022,
+      "path": "openssl-3.5.9/AUTHORS.md",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "b9f638dfc06b59c2d3b808186c3b30f713805a5db390f5b77b1703ac58acb83e",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 542,
+      "path": "openssl-3.5.9/Configurations/shared-info.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "49fe4c0e4051fe0b07162b2a924b00b09fd22fb532af1adf2f7b66ecfac435e9",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 426,
+      "path": "openssl-3.5.9/Configure",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8959dbe78ede674405d01f3ea1c42424a0ede42b8d67fcd54c85b6b19b761607",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 10175,
+      "path": "openssl-3.5.9/LICENSE.txt",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 346,
+      "path": "openssl-3.5.9/VMS/VMSify-conf.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "12e3068371d718109f73181962c74fc9c058a67fe08eceb62ccb0e76288fdc86",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1181,
+      "path": "openssl-3.5.9/VMS/translatesyms.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "164d8c94b41cb987d4881134c05a787b709b7e65965ae329ba9ac7d2a00bcb6f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 444,
+      "path": "openssl-3.5.9/apps/CA.pl.in",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ce0fd3a1b676c0db61773718994fb80e5d9e8ada62f55d462f6ebc9f8703f0a1",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/asn1parse.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "31e5bec079d662a5a9f33651ced8d920d1dfb950ea851696f0c84dd067ed2e0e",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 336,
+      "path": "openssl-3.5.9/apps/ca.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "213c2e46e640c34d7a585e12605cc685e8accc66a813a911cee0d18736e31fef",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/ciphers.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "173ba8affe5d79a287bfb4821f0e5ea045d7431503ebf78abd1124e731c76039",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 459,
+      "path": "openssl-3.5.9/apps/cmp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "af9df6d1bfb702d97b48a514d34bf4bd5a5e4d76328d699e76f44260d85e54d1",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 365,
+      "path": "openssl-3.5.9/apps/cms.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "10d4c3563f8524397821d09628222cbaea0a84b5c71e6d99641734aae34c4ba2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/crl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d8b9d4f3ec5580d061c4eec5a5356114a61a6f6b5ac3df67ab1c2db172c82b8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/crl2pkcs7.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "31e5bec079d662a5a9f33651ced8d920d1dfb950ea851696f0c84dd067ed2e0e",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/dgst.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/dhparam.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/dsa.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/dsaparam.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/ec.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "193751c438f7cc8e3e4be60cec907fddb872b18613a0e707ee446aefdfac0504",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 410,
+      "path": "openssl-3.5.9/apps/ecparam.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "18a746a065e598f072aba3247f7ea0faa2f40ee8947e20094dbf3ec9e677d45d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/enc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 386,
+      "path": "openssl-3.5.9/apps/engine.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8eb348536b752fc4da7f6f3d82ac3212ee3ed06a06f1af7acc9f749b814b7c34",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/errstr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "888e5c5004bf179b6d6116a3cdcd1b8e3a97064716dcaebd787adccca09c868d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/fipsinstall.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e757b087e50b1e688ff00a60e73fa8ab445f58484448ec39ab06a04ef99f2cf9",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/gendsa.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/genpkey.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7de9667873debe67d10e9fd9703b8c87fa21807515179613aaad2a861a3de061",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/genrsa.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 600,
+      "path": "openssl-3.5.9/apps/include/__DECC_INCLUDE_EPILOGUE.H",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6cb64bd7e583f9d96fb1ae8674f18b3abe29f0cc80d3e85a4e0504953197cf02",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 600,
+      "path": "openssl-3.5.9/apps/include/__DECC_INCLUDE_PROLOGUE.H",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6cb64bd7e583f9d96fb1ae8674f18b3abe29f0cc80d3e85a4e0504953197cf02",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 332,
+      "path": "openssl-3.5.9/apps/include/app_libctx.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7d0dcc9df86807c215764f77376878fb08fc3bd872104d5c6cc810acfd59d2ac",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/app_params.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "83b313be742efbae6c2f2becb40d08f700f019b29c5dd8e16b4e8ce87fe90389",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/apps.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/apps_ui.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "510e371c10a3a415759ed08ef14d1be6cd6a57e070587ea0792413cc186ffe64",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 371,
+      "path": "openssl-3.5.9/apps/include/cmp_mock_srv.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "25ded309959a3177de95f96b2110eac388e7ac827168be3a8dc2a064a8e4467a",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/ec_common.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6db1781b90030df6aa1bd93b012e6a99a48b4c18fdc51d6ce9c4682ea8ec8a33",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 336,
+      "path": "openssl-3.5.9/apps/include/engine_loader.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0e3d9450ef1e860364c3d38fb4c48a1348938f281ffcd76b32532706128fb0c2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 561,
+      "path": "openssl-3.5.9/apps/include/fmt.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0cffbe6ba317c2e1b08af8260d28be7533d298e9a6984947b5ed6d430ad844c7",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/function.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "83b313be742efbae6c2f2becb40d08f700f019b29c5dd8e16b4e8ce87fe90389",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/http_server.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "173ba8affe5d79a287bfb4821f0e5ea045d7431503ebf78abd1124e731c76039",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/log.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "173ba8affe5d79a287bfb4821f0e5ea045d7431503ebf78abd1124e731c76039",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 332,
+      "path": "openssl-3.5.9/apps/include/names.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3301200a1dc2ba3002b83e4f4f3c3043b18bfac07f9f9a45253096ee5e488392",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 336,
+      "path": "openssl-3.5.9/apps/include/opt.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2c7eece53fe4351959a0e71045d7bb22b21fe5bd13f106d3ffb58f9269799a6f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/platform.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e757b087e50b1e688ff00a60e73fa8ab445f58484448ec39ab06a04ef99f2cf9",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/include/s_apps.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 390,
+      "path": "openssl-3.5.9/apps/include/vms_term_sock.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3f95c8772e0f2729749ebd7d0e0bdcec1d9872d4cc6e5d716949eac96d33ec08",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/info.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e757b087e50b1e688ff00a60e73fa8ab445f58484448ec39ab06a04ef99f2cf9",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/kdf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8f8a7bae8937b08aa71f4fabbfdaa6867258e1a84b717075f64081c4133d5f9c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 336,
+      "path": "openssl-3.5.9/apps/lib/app_libctx.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "61c3395fa47e540a6f7fe98bd675297d912e5c4b7e0e162efcd4241c4fecc443",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/app_params.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "83b313be742efbae6c2f2becb40d08f700f019b29c5dd8e16b4e8ce87fe90389",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/app_provider.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a0be2f71f4629afb7ed9f5b4f55e15c350c32f02a00521df336e009cac767fe8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/app_rand.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/app_x509.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6db1781b90030df6aa1bd93b012e6a99a48b4c18fdc51d6ce9c4682ea8ec8a33",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/apps.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 332,
+      "path": "openssl-3.5.9/apps/lib/apps_opt_printf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "cc835a384a94e222a316acfad8479c110a3b5e10e045807bbc032d1b8b4deae0",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/apps_ui.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3e364b22f82e08e341c4ffcf75744c707b5c52a8bec44315729077a470e68d0d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 372,
+      "path": "openssl-3.5.9/apps/lib/cmp_mock_srv.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2d35850a8e2d4382c2c2cf0d8e5431c4c2d0e15d0a171e38e2701b01585bb562",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/columns.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c7643d1f928b8918919725a72b35dfc50e5ddcaddb29aebad7092ae54f557907",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 514,
+      "path": "openssl-3.5.9/apps/lib/engine.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8257d6ad44f1a96a95f0141f8b8241353c17c3f8d1c68d05801c76fc45d21d84",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 574,
+      "path": "openssl-3.5.9/apps/lib/engine_loader.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d3b618ab94c79420bdca1fcb38d34c64c1ffd918e8143ff906e2af06f8c2ddbc",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/fmt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "510e371c10a3a415759ed08ef14d1be6cd6a57e070587ea0792413cc186ffe64",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 367,
+      "path": "openssl-3.5.9/apps/lib/http_server.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3c94c05658bf7c6879dfb583ecd31dfe25a74b113b6432fec26417ba9cecf7b4",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/log.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "49e35bbb28ac819261306ec132eaf76b7b1cee003dd35fb430894c09aa19f585",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/names.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ea5708988acb77e1dba2ecaf1bf902f1ccd26197c08fc1a9e64268dae3a6cddd",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 415,
+      "path": "openssl-3.5.9/apps/lib/opt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ced0289f11ddf9811ec98fc551634416210d0ccb222fd8702469dde55f807938",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 454,
+      "path": "openssl-3.5.9/apps/lib/s_cb.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "777b8e4bfbf176da855bc7469a2658d36e5bb481b0b1416c1bb6d8e89c1255ba",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 398,
+      "path": "openssl-3.5.9/apps/lib/s_socket.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b4a9cad13788eda17ffc1f3a1be517b8738b1e01d0d8ae9a116fb8a369d95f78",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 658,
+      "path": "openssl-3.5.9/apps/lib/tlssrp_depr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e573120d5fe79ac53bd9bd8b528198126055aba956829f085608ed49b75b7854",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/vms_decc_argv.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9b501daa35afbd26d65eed9d253b2f03ed7b3b651e08d4f048aac112c7f0db60",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 395,
+      "path": "openssl-3.5.9/apps/lib/vms_term_sock.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "033fcfbd2e89bc81ea346f2364fa61975745983fce97fab02d3ffcf3b0d65c9e",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/lib/win32_init.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9e2770f6a04958dd53d1eb30aca0bd5561b2ecb2e720ad329c4cc5b266c6a7d6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 379,
+      "path": "openssl-3.5.9/apps/list.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8fc85b65b380081fdcb2142d207dcbed28bb2b61f7088091094eeac96dc3accf",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/mac.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f6a3afc4b77865fd1159d62410a66556906d2657e7bba09a9965acafe8e0336f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/nseq.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "efdc147d15a321892eb18313398acc890a0ae4c5c2ee0a004ee2555280dfff62",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/ocsp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9186a120bb333c8e5d1781c983491e16e59094c6db209c721078d9dfa2679811",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/openssl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/passwd.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "436a821be40f54a24e2f21f4c53e89e5e90f20d102e1896d1ba26976ba93d5b3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/pkcs12.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3673ad8449fcea582150dbffe4431c8c2302b0a0c6d88a208bd7dc9c067f4c6b",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/pkcs7.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "173ba8affe5d79a287bfb4821f0e5ea045d7431503ebf78abd1124e731c76039",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/pkcs8.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3fdadcddfe9f53b9faff854e2f12d076760a6e82599503a7f74645ee308fbd62",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/pkey.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5eaf1dc43695e7bd82d0f86c52595440225f65733041039bea3160ae74f9b643",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/pkeyparam.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "52ab5f3d18f90fa4cbf8e1d9e5c74e51da9271570f7b3e9198ffe85ef18d827f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/pkeyutl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d0e6c1e87a2e0d6b11f1b05d7354bb250a071fc03c9c9c670ab81112c4a717cb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/prime.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ef5f9cda9db162c846b181a50f35068d6c0a049f2f209b6d75361e648cc9a04",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 448,
+      "path": "openssl-3.5.9/apps/progs.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "74831d3b28266396d3a41db920e35b47769c29d171a5151adc7f93a167afe5dc",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/rand.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e5280e395b34d388c217c035a8ec9ca718964b0bf97e59e4c857a35cc63a4b7a",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 399,
+      "path": "openssl-3.5.9/apps/rehash.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "11e18199dd8977f6154e1405e3bf61f7213fbb81eecac93bf7b7dadd334464a3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/req.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d8b9d4f3ec5580d061c4eec5a5356114a61a6f6b5ac3df67ab1c2db172c82b8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 386,
+      "path": "openssl-3.5.9/apps/rsa.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b532a19c4dc7e0108fc3fe010e1864f34cb0c99fcb3943e6f8f30dba6f626ea5",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/rsautl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f751900692c7a20f691771b71418df821293d0edfcf793e0de9f69c4e15b179c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 383,
+      "path": "openssl-3.5.9/apps/s_client.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f0fe008f903c0eb8b52c1d5188f3fff8921ac9da6a48a87d48fdf17f79b99ee7",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 456,
+      "path": "openssl-3.5.9/apps/s_server.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8a17cffec4fba7e6afb3db78808ffd4411c0130abf66454dd391b95493a7d456",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/s_time.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "31e5bec079d662a5a9f33651ced8d920d1dfb950ea851696f0c84dd067ed2e0e",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/sess_id.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8b94c776f90a9dc533be461f1328d68c3db63bbaaff04fd8075f376ef651c3c2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/skeyutl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "23b895b0abc6875cbf65d25a3a67b17974d825163e3c7b02ff9d0f3502c50484",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 368,
+      "path": "openssl-3.5.9/apps/smime.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6eb8140c8f5a9eaaec76d96a17003c4324670d84adb3dea01fdf1c85ce9c9786",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 410,
+      "path": "openssl-3.5.9/apps/speed.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d55a742bcef11ea4ba34581cc5e19cef86e7e1ac7786314d9f7287639e11ceb7",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/spkac.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3fdadcddfe9f53b9faff854e2f12d076760a6e82599503a7f74645ee308fbd62",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 568,
+      "path": "openssl-3.5.9/apps/srp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9806ad7c0a93a6149dec1f92301a7dd70fbb195105f6b2da0ab2dd0a6fc86b47",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/storeutl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e83df332d95e909818eb80aea18efb18db29254e17a2bb9cec1154d5f8ad6065",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/testdsa.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b1edb95925ad8a3c5dc680b664fe3026817749813864c5703bdffae4c78fef30",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/testrsa.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/timeouts.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21e03e855157b4037a20adff749eb96735d30da6903aa3b54c7ecd652f996515",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/ts.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d0e6c1e87a2e0d6b11f1b05d7354bb250a071fc03c9c9c670ab81112c4a717cb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 417,
+      "path": "openssl-3.5.9/apps/tsget.in",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "395f6b68d68e1ea2c73b789d77b370a93d09324c11473553ff3b4bc8d25ba236",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/verify.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "173ba8affe5d79a287bfb4821f0e5ea045d7431503ebf78abd1124e731c76039",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/version.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d8b9d4f3ec5580d061c4eec5a5356114a61a6f6b5ac3df67ab1c2db172c82b8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/vms_decc_init.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "53d70bc08d18bf90ba3e7676356632da4d858e2a53a2972b4f6c33e1f8b88c38",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/apps/x509.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "31e5bec079d662a5a9f33651ced8d920d1dfb950ea851696f0c84dd067ed2e0e",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 330,
+      "path": "openssl-3.5.9/config",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6303f3aa71a99ca62c0454a2241c8c39cd6a75298b1045915ed256eaf2ea21c5",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1804,
+      "path": "openssl-3.5.9/crypto/LPdir_nyi.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "42c58bf116ea05e3cdfa4811cb067e8e816ad0015ad3ca6392c5952b094b2ce2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1827,
+      "path": "openssl-3.5.9/crypto/LPdir_unix.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "16e2af79441d47daee3505efb0dc1bb7886fd07b15701b36a99e887d3b8a71e6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1821,
+      "path": "openssl-3.5.9/crypto/LPdir_vms.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1fb2f49b404d8356a4dce02394eb5a9bcd4fc52be3cc9fb643496cd8f057192c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1821,
+      "path": "openssl-3.5.9/crypto/LPdir_win.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1fb2f49b404d8356a4dce02394eb5a9bcd4fc52be3cc9fb643496cd8f057192c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1821,
+      "path": "openssl-3.5.9/crypto/LPdir_win32.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1fb2f49b404d8356a4dce02394eb5a9bcd4fc52be3cc9fb643496cd8f057192c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1821,
+      "path": "openssl-3.5.9/crypto/LPdir_wince.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1fb2f49b404d8356a4dce02394eb5a9bcd4fc52be3cc9fb643496cd8f057192c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 522,
+      "path": "openssl-3.5.9/crypto/aes/aes_cbc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2fbbc7d13df3d023be4acd23ac9b06b55ca9565917b5d783f64143a9d1594992",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 442,
+      "path": "openssl-3.5.9/crypto/aes/aes_cfb.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2161af1fcb272562b82a0fd2a611307eb4556278e1793c7d83a3bc40e44ec9ab",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1642,
+      "path": "openssl-3.5.9/crypto/aes/aes_core.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "cb6f49102933b5bb497b6c8910e1c24cffcd4d97940d6f37f07bd6710c6a3397",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/aes/aes_ecb.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ee58d70fd84814364c567fe082d06341e648627dc592a143581c166842b366c3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 444,
+      "path": "openssl-3.5.9/crypto/aes/aes_ige.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "308f12684b972ebdcb5458b8e670bdc7ae3791c5c927cf8f28e53ac92493133c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/aes/aes_local.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a9f040a836d350917a85878fe52e526d53be63a9629e296cc1eff446e0be8e46",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/aes/aes_misc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ee58d70fd84814364c567fe082d06341e648627dc592a143581c166842b366c3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 432,
+      "path": "openssl-3.5.9/crypto/aes/aes_ofb.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "aa7adf73ad9d5691ca175118eb556e49abafec68c1836e80c97af944f0865f65",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 444,
+      "path": "openssl-3.5.9/crypto/aes/aes_wrap.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9fc7c5eb50c7a76123f85417e4851e7745e8b2b1433b26b5aef2eca15682b67c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 10773,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-586.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ba026f33580a3adb0f86c2a0adb873592e83d6a4362a3a32fe8d034a7f5f452f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1671,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-armv4.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6e80c5f29521a6f8fa93fba68e4daea47ae5e5c619f5dd26814a3b27acc094e0",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1989,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-c64xplus.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d3f22d8d2ee90179e2382c91f52f5cef4ae1bbd46710ed81f9ded7cde91efa36",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1908,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-ia64.S",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "45cff22d40ee05cd646d8a6dec7b21d942848bbb4c48eca143e67072e10622e4",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2051,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-mips.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2c542f5c26ce27c9d1e6dd7724beb1a1db9efa86de58095581c8040b93ac7c96",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1434,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-parisc.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bc336511f3d4827eb33949c8921b266b3f4b8455c3507fb475d87401a33ace85",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1975,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-ppc.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ac94d944cedb2dc4a9d5bb5c22e88d343441276ec8dc86c8b2817a984082cef4",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1916,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-riscv32-zkn.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a4a005d696a6e82d9fdc060c4788f099c0fe8d08662c8b29ef2a4d9fa1e649bd",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1775,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-riscv64-zkn.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6eb581758f2197b8f7266356fefd37589dc939836684bbe8f972cdc10f62c45d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2037,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-riscv64-zvbb-zvkg-zvkned.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3e7b85cee3328c68b14d67c8c5ee599a2bae7e3391523b47b4b91701f58132de",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2004,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-riscv64-zvkb-zvkned.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f6a24f8f48af0450fea963d4df9cfd9064eb57dab03e68e4db2b4493be2b531b",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1950,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-riscv64-zvkned.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b623cb369ab57de90cd6557a499d0293b916945e046f9e1b437d21f52243e18b",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 486,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-riscv64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6b73aa8cbb71f0eb0edf0cc7038d067eafdb206c0088584cb28571127320c90d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 4195,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-s390x.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "66d6f48175c0c0e7a6e9789175afb927fcbfe1f4db846543844f9eb0aef0065c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1860,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-sparcv9.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "068c8cae74149d96eacae50a8e84949ca4551164fa00ec0a4757e733a282b571",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1553,
+      "path": "openssl-3.5.9/crypto/aes/asm/aes-x86_64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b8b4de44e03e32f9377f6e6784a50bc91ca775377c1e08930351fa73d2fab78c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1402,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesfx-sparcv9.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "01818e06897994db527178e6553ce946531cb4fed6c3e9acaa663c274725394f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1798,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesni-mb-x86_64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "05b8baba57edab634883584f107f7590d0b31bcae2eafe1e819aa4e77692fbd2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 3936,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesni-sha1-x86_64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "151fb787e32ee323a15abaf713079767b6db04f57adc0f95af9e6b6cf7009c59",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2396,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesni-sha256-x86_64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9bc39b4c60bec09e1d30966f28bce404a7e0a9d42df1791afb410a1ccfe3559f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2802,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesni-x86.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "388288eb4fd62e9d47e1dc85acdd609aeaef93d7d2f8ee7f38790524b36cc32d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 9516,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesni-x86_64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3e55b3a67574d8bb08b2a683edd8ab08d9e66fb2cef269880f1703ae3701ce15",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1308,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesni-xts-avx512.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "dcf331c6c8672c3e54195d936b3567960f68af37ec1784e6b78863ef6d86f871",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2195,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesp8-ppc.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "532d0df5bd6bc8747f0d3d228aa04ef1529d22bbab47e2277f5cc7f02d9ffa01",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 3111,
+      "path": "openssl-3.5.9/crypto/aes/asm/aest4-sparcv9.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "701be94bedf4b73d40b51809aa93623cdbd2f63e4e2eff06b73f1bd1947f7208",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2812,
+      "path": "openssl-3.5.9/crypto/aes/asm/aesv8-armx.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "54b50a89b9117dcc0e01da4fbedc9bcfc33d90d110fa9c8e969e7d3befaa4417",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2311,
+      "path": "openssl-3.5.9/crypto/aes/asm/bsaes-armv7.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b143c2f991f74fc0e5c574d4f2f1ac48661873db31a512772607d8766af639b7",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 344,
+      "path": "openssl-3.5.9/crypto/aes/asm/bsaes-armv8.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b57ec1bfda935adebbf1a34523b7926f0596e156adda6c788dd0a5720149c196",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 3885,
+      "path": "openssl-3.5.9/crypto/aes/asm/bsaes-x86_64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2db9ff64fb1dc25425deaa33c58e5d134031691a74d0ff3b295fa9ab93a46529",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1856,
+      "path": "openssl-3.5.9/crypto/aes/asm/vpaes-armv8.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b7f8b54ff580048033307f794500c9fc1a61faf98ac331a46fa941d0768114f7",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 841,
+      "path": "openssl-3.5.9/crypto/aes/asm/vpaes-loongarch64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "15b513ce95eb725c8c27f69660718b41ac909823b68be4da947c41972da66d13",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 1493,
+      "path": "openssl-3.5.9/crypto/aes/asm/vpaes-ppc.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5ff06cb6c5a3a3f2d351d0a30033081dc6070ac6803c6e5627e18dbb60f1f026",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2144,
+      "path": "openssl-3.5.9/crypto/aes/asm/vpaes-x86.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a31bce9e1f153b239925d14f2812d1ce90bf3c5b4ec1e9b212507e04f7e2cc03",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 2310,
+      "path": "openssl-3.5.9/crypto/aes/asm/vpaes-x86_64.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "48e7bb0cfb88b0fee77b2e622eb58e26001eff0a4a479c990076f4be38f704ef",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 346,
+      "path": "openssl-3.5.9/crypto/alphacpuid.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "24386fa5b468f7964c9b5a2c970b8458f48d23ff0ffdbf411d2802e555e675d9",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 674,
+      "path": "openssl-3.5.9/crypto/aria/aria.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e36cddd61b057b936939c0d365bca8eabb3c6bffb6940f0b51298e8ea84744c5",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 487,
+      "path": "openssl-3.5.9/crypto/arm64cpuid.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "999b661f85e88aec4c42dd64184af7fda991f8652a7a79738390e2e74bbad73c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/arm_arch.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "04373be08412a414588500a5ad374f2f70c5898d19d2dcceaff8c982b6eb988f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/armcap.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "da1a9a8ccf55ee3537bdd7b4dbae8299073ae05e3ef1ff43ea2d0dea7f9d5a65",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 487,
+      "path": "openssl-3.5.9/crypto/armv4cpuid.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "228fffdbfa4039140fc0e9892569bda38406eec8a37eea4242304334c90dea50",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_bitstr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_d2i_fp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 386,
+      "path": "openssl-3.5.9/crypto/asn1/a_digest.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7d62b15fc193f73a31260462bb52363f777c9e7291e97847ac44e2fff56c7af0",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_dup.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 397,
+      "path": "openssl-3.5.9/crypto/asn1/a_gentm.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b37b0adde7f82ff21db155fa92d8c501c0dae9418a230b0283a4d96c885d06f8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_i2d_fp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d8b9d4f3ec5580d061c4eec5a5356114a61a6f6b5ac3df67ab1c2db172c82b8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_int.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8b94c776f90a9dc533be461f1328d68c3db63bbaaff04fd8075f376ef651c3c2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_mbstr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3673ad8449fcea582150dbffe4431c8c2302b0a0c6d88a208bd7dc9c067f4c6b",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_object.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d8b9d4f3ec5580d061c4eec5a5356114a61a6f6b5ac3df67ab1c2db172c82b8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_octet.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "33c84b60295f2e354833213523323ff375cdb222d7f59a14423f1e1158bd32eb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_print.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8b94c776f90a9dc533be461f1328d68c3db63bbaaff04fd8075f376ef651c3c2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_sign.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "173ba8affe5d79a287bfb4821f0e5ea045d7431503ebf78abd1124e731c76039",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_strex.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "436a821be40f54a24e2f21f4c53e89e5e90f20d102e1896d1ba26976ba93d5b3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_strnid.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b89f347c0668be206659b39f42e06e2990a4c98df9df281e2a6e3cc336b4e385",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 509,
+      "path": "openssl-3.5.9/crypto/asn1/a_time.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "92d580c0ef9f5600ed45c29192672e2fed0c6e476fa08063c1513952bcf599ab",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_type.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8b94c776f90a9dc533be461f1328d68c3db63bbaaff04fd8075f376ef651c3c2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_utctm.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8b94c776f90a9dc533be461f1328d68c3db63bbaaff04fd8075f376ef651c3c2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_utf8.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8b94c776f90a9dc533be461f1328d68c3db63bbaaff04fd8075f376ef651c3c2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/a_verify.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d8b9d4f3ec5580d061c4eec5a5356114a61a6f6b5ac3df67ab1c2db172c82b8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 386,
+      "path": "openssl-3.5.9/crypto/asn1/ameth_lib.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "94531343c8de839b6e4134b6b7bb6f9e26187cd7ab979a689f2c26884b8fa586",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 379,
+      "path": "openssl-3.5.9/crypto/asn1/asn1_err.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c23d29109b8a80c070a4ad2f2bef23450363a809bcbc6bf22b2523fb7b8e68c2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/asn1_gen.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6c083ceb39d0126e1c97e5e9009149cd93bad5f915334e1958ebf80862fda89e",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 406,
+      "path": "openssl-3.5.9/crypto/asn1/asn1_item_list.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f84e9169013234c10a9090448adf33ed05e535a2d6bc1db5f8cb2d35aaf3036c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/asn1_item_list.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "436a821be40f54a24e2f21f4c53e89e5e90f20d102e1896d1ba26976ba93d5b3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/asn1_lib.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 408,
+      "path": "openssl-3.5.9/crypto/asn1/asn1_local.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3008340728cc9e14adde1680ac030d2ab22e9aceed761f46107a3bf2608e3485",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/asn1_parse.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ffd57e70cc1b764e93e9be8671ca60114b8a367a5b63bd904e396643df89a76",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/asn_mime.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2800bf3d1f096a31118d444f34552850d52f234fa0451eef949dbd0b646e6a2d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/asn_moid.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ee58d70fd84814364c567fe082d06341e648627dc592a143581c166842b366c3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/asn_mstbl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4b5ee825f3e4be8fb30fb13a85fe130c0f2b0be2ae8b110457278b016272fea1",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/asn_pack.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3fdadcddfe9f53b9faff854e2f12d076760a6e82599503a7f74645ee308fbd62",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 537,
+      "path": "openssl-3.5.9/crypto/asn1/bio_asn1.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1fad21170f1e8c6ff93b9fe15830ddbea7f377c4d6f87d570a85ca64a34f4c26",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/bio_ndef.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4ec8ade93af22d2ab6c5c343c5de82d9c5b3935b9906f6f6f9d62f7b65faaf3c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 404,
+      "path": "openssl-3.5.9/crypto/asn1/charmap.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "dac3dc25dcd62a6356780f44f65b1553ebd8dd17b226941b8376309f1a35b49d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 345,
+      "path": "openssl-3.5.9/crypto/asn1/charmap.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a378ef806708aaf5d8be3e5ac7f01b1b9853cbc5c3c0d33a0cc88d23a2341514",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/d2i_param.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8f8a7bae8937b08aa71f4fabbfdaa6867258e1a84b717075f64081c4133d5f9c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 386,
+      "path": "openssl-3.5.9/crypto/asn1/d2i_pr.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e17999fdb5a2cf2a02ae6e96bdef8fa3e7b95bddf751d27055da539ec5091c4a",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 431,
+      "path": "openssl-3.5.9/crypto/asn1/d2i_pu.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "513bf11bbc2dd74ac9b61998fc0d72dfd94d73a2bf3abb6b78efdedd2b7c039d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/evp_asn1.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/f_int.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d8b9d4f3ec5580d061c4eec5a5356114a61a6f6b5ac3df67ab1c2db172c82b8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/f_string.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5d8b9d4f3ec5580d061c4eec5a5356114a61a6f6b5ac3df67ab1c2db172c82b8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 427,
+      "path": "openssl-3.5.9/crypto/asn1/i2d_evp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a1b2f55efd386609630f48baf5327413919d154117d08602291bb8e7013a4dce",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/n_pkey.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5044a02c6018b5ab7aff141434ba1f2fadc00031a6d05333f4fe039809076ca6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/nsseq.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21e03e855157b4037a20adff749eb96735d30da6903aa3b54c7ecd652f996515",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/p5_pbe.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3fdadcddfe9f53b9faff854e2f12d076760a6e82599503a7f74645ee308fbd62",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/p5_pbev2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c40b3979491689b0b992606a5a91060c95b92c5f2369101ffa1ddfc13cb1b020",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/p5_scrypt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a0f1ccda2e183dd860cc9047dc42a2c25b2f1bfd90ef559bd93cb6e61da8d8e3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/p8_pkey.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b89f347c0668be206659b39f42e06e2990a4c98df9df281e2a6e3cc336b4e385",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 504,
+      "path": "openssl-3.5.9/crypto/asn1/standard_methods.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e1a367b41285d1172cb54d2c868162f025d4161b77bf210772a469e885d7102c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/t_bitst.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "21e03e855157b4037a20adff749eb96735d30da6903aa3b54c7ecd652f996515",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/t_pkey.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "33c84b60295f2e354833213523323ff375cdb222d7f59a14423f1e1158bd32eb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/t_spki.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "efdc147d15a321892eb18313398acc890a0ae4c5c2ee0a004ee2555280dfff62",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/tasn_dec.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "61a033a0892981e3d5ef10e49774b885134920f2d1ab2814891fcd779d9fac2f",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/tasn_enc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8f1bf6ca04557a9120ebf00384814c5c7dde1a337705d08277de8e7e1e5ccd6b",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/tasn_fre.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "436a821be40f54a24e2f21f4c53e89e5e90f20d102e1896d1ba26976ba93d5b3",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/tasn_new.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "35b6e74a03eb40c499ce18eb07b4ac99452de19b2a270cbcb16eeec2b7b01a98",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/tasn_prn.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "35b6e74a03eb40c499ce18eb07b4ac99452de19b2a270cbcb16eeec2b7b01a98",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/tasn_scn.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "19b586981f077ecbec2e28172d4fc883f3f2dfe9cc0f5f1e55861d9c8971fd54",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/tasn_typ.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "896defb0e8f460c1b8972685eeb01dc7ef4660cb4e5f63bcb39d586c3394ffb2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/tasn_utl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f751900692c7a20f691771b71418df821293d0edfcf793e0de9f69c4e15b179c",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 399,
+      "path": "openssl-3.5.9/crypto/asn1/tbl_standard.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6cf138e2865f27ca322694a0ee3107e478a3f22c529ba34079d5d66e5c301a6e",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_algor.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d2a10b8ee0c0e2ff1ebe276c273eff7f3e9924b4a1b3296895836f9926265516",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_bignum.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "896defb0e8f460c1b8972685eeb01dc7ef4660cb4e5f63bcb39d586c3394ffb2",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_info.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3e364b22f82e08e341c4ffcf75744c707b5c52a8bec44315729077a470e68d0d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_int64.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0253c37a2aa676f9e946b8404bf85c1694f7d4253c89274e52465f576dc87609",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_long.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "cd2300e0233978e8d389f935d7daaf5517de7e9d1fa968baecc7b98f2221b0a7",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_pkey.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3e364b22f82e08e341c4ffcf75744c707b5c52a8bec44315729077a470e68d0d",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_sig.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "33c84b60295f2e354833213523323ff375cdb222d7f59a14423f1e1158bd32eb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_spki.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "33c84b60295f2e354833213523323ff375cdb222d7f59a14423f1e1158bd32eb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/asn1/x_val.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "33c84b60295f2e354833213523323ff375cdb222d7f59a14423f1e1158bd32eb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 566,
+      "path": "openssl-3.5.9/crypto/asn1_dsa.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1006fd81270dde8d53bd5e366c05c45e7ced8dc60c4668544b404763d221e2ca",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 380,
+      "path": "openssl-3.5.9/crypto/async/arch/async_null.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a9fde0ff064cb885119d50c81585e6a89b8f05aa14917cb04467dcda2585f253",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/async/arch/async_null.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f5813ae8ce43b852831a5da6eb9e31ff39bdbaadc2a23814c01db4818cdd7d36",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 380,
+      "path": "openssl-3.5.9/crypto/async/arch/async_posix.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a9fde0ff064cb885119d50c81585e6a89b8f05aa14917cb04467dcda2585f253",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/async/arch/async_posix.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f4ade24f81eb5665b97d333efcd4251aeabb55ae95bae99e74e23930932bdb06",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 380,
+      "path": "openssl-3.5.9/crypto/async/arch/async_win.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a9fde0ff064cb885119d50c81585e6a89b8f05aa14917cb04467dcda2585f253",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 466,
+      "path": "openssl-3.5.9/crypto/async/arch/async_win.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e678c5957c197cbb77564f4bedbcd4b787755c1948826fe204c4a4017cc2a7da",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 606,
+      "path": "openssl-3.5.9/crypto/async/async.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "74cf1f2b1a8333cbcd08e3b8dc7e95b0c3171e4988e5beee492fee4dceb0faf5",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 379,
+      "path": "openssl-3.5.9/crypto/async/async_err.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "cb0165c6f2cf302b86efd1e827802f3e0b8b6dc9b8e4e4a7d8f6d2c3ab766776",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 475,
+      "path": "openssl-3.5.9/crypto/async/async_local.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9ba118bb5365ff0fda9198727939844fd5d88f8d54b27a002ed9b54fa14cceb6",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 380,
+      "path": "openssl-3.5.9/crypto/async/async_wait.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3c5773025c2fbff81c7f2bbb0be83e8ba228d9f578295bcf7ae2da5736b573cb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 346,
+      "path": "openssl-3.5.9/crypto/bf/asm/bf-586.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9c6522b12ab70fdbe2d2a43d7ea4d546ddd69eb1bd47761b08fda7dc4d1ed805",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 430,
+      "path": "openssl-3.5.9/crypto/bf/bf_cfb64.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e4f999e1780cb69e5aa6d335e7c537caaf81db290967c85201d3d0ce5bdbe755",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 430,
+      "path": "openssl-3.5.9/crypto/bf/bf_ecb.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "20be6ac8c223a0f952558d76a366b661616be4b68b627961070b3d6fe85168e8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 430,
+      "path": "openssl-3.5.9/crypto/bf/bf_enc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "20be6ac8c223a0f952558d76a366b661616be4b68b627961070b3d6fe85168e8",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/bf/bf_local.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "33c84b60295f2e354833213523323ff375cdb222d7f59a14423f1e1158bd32eb",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 430,
+      "path": "openssl-3.5.9/crypto/bf/bf_ofb64.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e4f999e1780cb69e5aa6d335e7c537caaf81db290967c85201d3d0ce5bdbe755",
+      "source": "openssl-3.5.9.tar.gz"
+    },
+    {
+      "bytes": 337,
+      "path": "openssl-3.5.9/crypto/bf/bf_pi.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "33c84b60295f2e354833213523323ff375cdb222d7f59a14423f1e1158bd32eb",
+      "source": "openssl-3.5.9.tar.gz"
+    }
+  ],
+  "origin": "openssl",
+  "schema": 1
+}

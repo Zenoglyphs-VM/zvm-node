@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2017 Denys Vlasenko <vda.linux@googlemail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config IPCONFIG
+//config:	bool "ipconfig"
+//config:	default y
+//config:	help
+//config:	(Auto)configure network.
+
+//applet:IF_IPCONFIG(APPLET(ipconfig, BB_DIR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_IPCONFIG) += ipconfig.o
+

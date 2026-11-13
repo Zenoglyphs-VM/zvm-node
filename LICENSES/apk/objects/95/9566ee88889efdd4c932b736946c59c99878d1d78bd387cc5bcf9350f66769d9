@@ -1,0 +1,35 @@
+# Simple test harness infrastructure for BusyBox
+#
+# Copyright 2005 by Rob Landley
+#
+# License is GPLv2, see LICENSE in the busybox tarball for full license text.
+
+# This file defines two functions, "testing" and "optional"
+# and a couple more...
+
+# The following environment variables may be set to enable optional behavior
+# in "testing":
+#    VERBOSE - Print the diff -u of each failed test case.
+#    DEBUG - Enable command tracing.
+#    SKIP - do not perform this test (this is set by "optional")
+#
+# The "testing" function takes five arguments:
+#	$1) Test description
+#	$2) Command(s) to run. May have pipes, redirects, etc
+#	$3) Expected result on stdout
+#	$4) Data to be written to file "input"
+#	$5) Data to be written to stdin
+#
+# The exit value of testing is the exit value of $2 it ran.
+#
+# The environment variable "FAILCOUNT" contains a cumulative total of the
+# number of failed tests.
+
+# The "optional" function is used to skip certain tests, ala:
+#   optional FEATURE_THINGY
+#
+# The "optional" function checks the environment variable "OPTIONFLAGS",
+# which is either empty (in which case it always clears SKIP) or
+# else contains a colon-separated list of features (in which case the function
+# clears SKIP if the flag was found, or sets it to 1 if the flag was not found).
+

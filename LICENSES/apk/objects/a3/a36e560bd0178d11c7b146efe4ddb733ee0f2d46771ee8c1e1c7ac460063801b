@@ -1,0 +1,9 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Applet table generator.
+ * Runs on host and produces include/applet_tables.h
+ *
+ * Copyright (C) 2007 Denys Vlasenko <vda.linux@googlemail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */

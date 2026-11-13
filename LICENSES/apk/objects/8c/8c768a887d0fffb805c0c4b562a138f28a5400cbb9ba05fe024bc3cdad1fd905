@@ -1,0 +1,28 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * whois - tiny client for the whois directory service
+ *
+ * Copyright (c) 2011 Pere Orga <gotrunks@gmail.com>
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* TODO
+ * Add ipv6 support
+ * Add proxy support
+ */
+//config:config WHOIS
+//config:	bool "whois (6.5 kb)"
+//config:	default y
+//config:	help
+//config:	whois is a client for the whois directory service
+
+//applet:IF_WHOIS(APPLET(whois, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_WHOIS) += whois.o
+
+//usage:#define whois_trivial_usage
+//usage:       "[-i] [-h SERVER] [-p PORT] NAME..."
+//usage:#define whois_full_usage "\n\n"
+//usage:       "Query WHOIS info about NAME\n"
+//usage:     "\n	-i	Show redirect results too"
+//usage:     "\n	-h,-p	Server to query"
+

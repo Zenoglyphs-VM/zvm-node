@@ -1,0 +1,40 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * renice implementation for busybox
+ *
+ * Copyright (C) 2005  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Notes:
+ *   Setting an absolute priority was obsoleted in SUSv2 and removed
+ *   in SUSv3.  However, the common linux version of renice does
+ *   absolute and not relative.  So we'll continue supporting absolute,
+ *   although the stdout logging has been removed since both SUSv2 and
+ *   SUSv3 specify that stdout isn't used.
+ *
+ *   This version is lenient in that it doesn't require any IDs.  The
+ *   options -p, -g, and -u are treated as mode switches for the
+ *   following IDs (if any).  Multiple switches are allowed.
+ */
+//config:config RENICE
+//config:	bool "renice (4.4 kb)"
+//config:	default y
+//config:	help
+//config:	Renice alters the scheduling priority of one or more running
+//config:	processes.
+
+//applet:IF_RENICE(APPLET_NOEXEC(renice, renice, BB_DIR_USR_BIN, BB_SUID_DROP, renice))
+
+//kbuild:lib-$(CONFIG_RENICE) += renice.o
+
+//usage:#define renice_trivial_usage
+//usage:       "[-n] PRIORITY [[-p|g|u] ID...]..."
+//usage:#define renice_full_usage "\n\n"
+//usage:       "Change scheduling priority of a running process\n"
+//usage:     "\n	-n	Add PRIORITY to current nice value"
+//usage:     "\n		Without -n, nice value is set to PRIORITY"
+//usage:     "\n	-p	Process ids (default)"
+//usage:     "\n	-g	Process group ids"
+//usage:     "\n	-u	Process user names"
+

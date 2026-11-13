@@ -1,0 +1,31 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * script implementation for busybox
+ *
+ * pascal.bellard@ads-lu.com
+ *
+ * Based on code from util-linux v 2.12r
+ * Copyright (c) 1980
+ * The Regents of the University of California.  All rights reserved.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config SCRIPT
+//config:	bool "script (8.8 kb)"
+//config:	default y
+//config:	help
+//config:	The script makes typescript of terminal session.
+
+//applet:IF_SCRIPT(APPLET(script, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_SCRIPT) += script.o
+
+//usage:#define script_trivial_usage
+//usage:       "[-afq] [-t[FILE]] [-c PROG] [OUTFILE]"
+//usage:#define script_full_usage "\n\n"
+//usage:       "Default OUTFILE is 'typescript'"
+//usage:     "\n"
+//usage:     "\n	-a	Append output"
+//usage:     "\n	-c PROG	Run PROG, not shell"
+/* Accepted but has no effect (we never buffer output) */
+/*/

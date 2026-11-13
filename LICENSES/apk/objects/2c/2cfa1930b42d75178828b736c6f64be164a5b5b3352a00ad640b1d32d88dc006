@@ -1,0 +1,18 @@
+# Copyright 2024-2026 The OpenSSL Project Authors. All Rights Reserved.
+# Copyright (c) 2024, Intel Corporation. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+# Written by Zhiguo Zhou <zhiguo.zhou@intel.com> and Wangyang Guo <wangyang.guo@intel.com>.
+# Special thanks to Tomasz Kantecki <tomasz.kantecki@intel.com> for his valuable suggestions.
+#
+# October 2024
+#
+# Initial release.
+#
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

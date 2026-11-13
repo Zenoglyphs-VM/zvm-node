@@ -1,0 +1,9 @@
+/* commit.c - Alpine Package Keeper (APK)
+ * Apply solver calculated changes to database.
+ *
+ * Copyright (C) 2008-2013 Timo Teräs <timo.teras@iki.fi>
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ */
+

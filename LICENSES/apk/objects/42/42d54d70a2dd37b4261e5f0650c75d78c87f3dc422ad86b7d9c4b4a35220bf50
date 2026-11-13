@@ -1,0 +1,11 @@
+/*
+ * This file uses XZ Embedded library code which is written
+ * by Lasse Collin <lasse.collin@tukaani.org>
+ * and Igor Pavlov <http://7-zip.org/>
+ *
+ * See README file in unxz/ directory for more information.
+ *
+ * This file is:
+ * Copyright (C) 2010 Denys Vlasenko <vda.linux@googlemail.com>
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */

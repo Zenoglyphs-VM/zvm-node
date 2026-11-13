@@ -1,0 +1,47 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * COPYING NOTES
+ *
+ * timeout.c -- a timeout handler for shell commands
+ *
+ * Copyright (C) 2005-6, Roberto A. Foglietta <me@roberto.foglietta.name>
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; version 2 of the License.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * REVISION NOTES:
+ * released 17-11-2005 by Roberto A. Foglietta
+ * talarm   04-12-2005 by Roberto A. Foglietta
+ * modified 05-12-2005 by Roberto A. Foglietta
+ * sizerdct 06-12-2005 by Roberto A. Foglietta
+ * splitszf 12-05-2006 by Roberto A. Foglietta
+ * rewrite  14-11-2008 vda
+ */
+//config:config TIMEOUT
+//config:	bool "timeout (6.5 kb)"
+//config:	default y
+//config:	help
+//config:	Runs a program and watches it. If it does not terminate in
+//config:	specified number of seconds, it is sent a signal.
+
+//applet:IF_TIMEOUT(APPLET(timeout, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TIMEOUT) += timeout.o
+
+//usage:#define timeout_trivial_usage
+//usage:       "[-s SIG] [-k KILL_SECS] SECS PROG ARGS"
+//usage:#define timeout_full_usage "\n\n"
+//usage:       "Run PROG. Send SIG to it if it is not gone in SECS seconds.\n"
+//usage:       "Default SIG: TERM."
+//usage:       "If it still exists in KILL_SECS seconds, send KILL.\n"
+

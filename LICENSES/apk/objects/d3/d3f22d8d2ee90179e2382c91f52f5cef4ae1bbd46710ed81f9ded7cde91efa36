@@ -1,0 +1,39 @@
+#! /usr/bin/env perl
+# Copyright 2012-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# [Endian-neutral] AES for C64x+.
+#
+# Even though SPLOOPs are scheduled for 13 cycles, and thus expected
+# performance is ~8.5 cycles per byte processed with 128-bit key,
+# measured performance turned to be ~10 cycles per byte. Discrepancy
+# must be caused by limitations of L1D memory banking(*), see SPRU871
+# TI publication for further details. If any consolation it's still
+# ~20% faster than TI's linear assembly module anyway... Compared to
+# aes_core.c compiled with cl6x 6.0 with -mv6400+ -o2 options this
+# code is 3.75x faster and almost 3x smaller (tables included).
+#
+# (*)	This means that there might be subtle correlation between data
+#	and timing and one can wonder if it can be ... attacked:-(
+#	On the other hand this also means that *if* one chooses to
+#	implement *4* T-tables variant [instead of 1 T-table as in
+#	this implementation, or in addition to], then one ought to
+#	*interleave* them. Even though it complicates addressing,
+#	references to interleaved tables would be guaranteed not to
+#	clash. I reckon that it should be possible to break 8 cycles
+#	per byte "barrier," i.e. improve by ~20%, naturally at the
+#	cost of 8x increased pressure on L1D. 8x because you'd have
+#	to interleave both Te and Td tables...
+

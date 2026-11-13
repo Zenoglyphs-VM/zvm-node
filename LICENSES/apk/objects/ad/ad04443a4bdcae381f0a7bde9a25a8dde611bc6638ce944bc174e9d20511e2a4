@@ -1,0 +1,55 @@
+/* gzjoin -- command to join gzip files into one gzip file
+
+  Copyright (C) 2004, 2005, 2012 Mark Adler, all rights reserved
+  version 1.2, 14 Aug 2012
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the author be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+
+  Mark Adler    madler@alumni.caltech.edu
+ */
+
+/*
+ * Change history:
+ *
+ * 1.0  11 Dec 2004     - First version
+ * 1.1  12 Jun 2005     - Changed ssize_t to long for portability
+ * 1.2  14 Aug 2012     - Clean up for z_const usage
+ */
+
+/*
+   gzjoin takes one or more gzip files on the command line and writes out a
+   single gzip file that will uncompress to the concatenation of the
+   uncompressed data from the individual gzip files.  gzjoin does this without
+   having to recompress any of the data and without having to calculate a new
+   crc32 for the concatenated uncompressed data.  gzjoin does however have to
+   decompress all of the input data in order to find the bits in the compressed
+   data that need to be modified to concatenate the streams.
+
+   gzjoin does not do an integrity check on the input gzip files other than
+   checking the gzip header and decompressing the compressed data.  They are
+   otherwise assumed to be complete and correct.
+
+   Each joint between gzip files removes at least 18 bytes of previous trailer
+   and subsequent header, and inserts an average of about three bytes to the
+   compressed data in order to connect the streams.  The output gzip file
+   has a minimal ten-byte gzip header with no file name or modification time.
+
+   This program was written to illustrate the use of the Z_BLOCK option of
+   inflate() and the crc32_combine() function.  gzjoin will not compile with
+   versions of zlib earlier than 1.2.3.
+ */
+

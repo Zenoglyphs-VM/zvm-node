@@ -1,0 +1,17 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * bbunit: Simple unit-testing framework for Busybox.
+ *
+ * Copyright (C) 2014 by Bartosz Golaszewski <bartekgola@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//applet:IF_UNIT_TEST(APPLET(unit, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_UNIT_TEST) += bbunit.o
+
+//usage:#define unit_trivial_usage
+//usage:       ""
+//usage:#define unit_full_usage "\n\n"
+//usage:       "Run the unit-test suite"
+

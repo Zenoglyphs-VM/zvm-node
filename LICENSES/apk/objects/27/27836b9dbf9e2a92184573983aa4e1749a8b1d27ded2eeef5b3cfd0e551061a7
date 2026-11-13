@@ -1,0 +1,62 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * echo implementation for busybox
+ *
+ * Copyright (c) 1991, 1993
+ *	The Regents of the University of California.  All rights reserved.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Original copyright notice is retained at the end of this file.
+ */
+/* Mar 16, 2003      Manuel Novoa III   (mjn3@codepoet.org)
+ *
+ * Because of behavioral differences, implemented configurable SUSv3
+ * or 'fancy' gnu-ish behaviors.  Also, reduced size and fixed bugs.
+ * 1) In handling '\c' escape, the previous version only suppressed the
+ *     trailing newline.  SUSv3 specifies _no_ output after '\c'.
+ * 2) SUSv3 specifies that octal escapes are of the form \0{#{#{#}}}.
+ *    The previous version did not allow 4-digit octals.
+ */
+//config:config ECHO
+//config:	bool "echo (2 kb)"
+//config:	default y
+//config:	help
+//config:	echo prints a specified string to stdout.
+//config:
+//config:# this entry also appears in shell/Config.in, next to the echo builtin
+//config:config FEATURE_FANCY_ECHO
+//config:	bool "Enable -n and -e options"
+//config:	default y
+//config:	depends on ECHO || ASH_ECHO || HUSH_ECHO
+
+//applet:IF_ECHO(APPLET_NOFORK(echo, echo, BB_DIR_BIN, BB_SUID_DROP, echo))
+
+//kbuild:lib-$(CONFIG_ECHO) += echo.o
+
+//kbuild:lib-$(CONFIG_ASH_ECHO)  += echo.o
+//kbuild:lib-$(CONFIG_HUSH_ECHO) += echo.o
+
+/* BB_AUDIT SUSv3 compliant -- unless configured as fancy echo. */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/echo.html */
+
+//usage:#define echo_trivial_usage
+//usage:	IF_FEATURE_FANCY_ECHO("[-neE] ") "[ARG]..."
+//usage:#define echo_full_usage "\n\n"
+//usage:       "Print ARGs to stdout"
+//usage:	IF_FEATURE_FANCY_ECHO( "\n"
+//usage:     "\n	-n	No trailing newline"
+//usage:     "\n	-e	Interpret backslash escapes (\\t=tab etc)"
+//usage:     "\n	-E	Don't interpret backslash escapes (default)"
+//usage:	)
+//usage:
+//usage:#define echo_example_usage
+//usage:       "$ echo \"Erik is cool\"\n"
+//usage:       "Erik is cool\n"
+//usage:	IF_FEATURE_FANCY_ECHO("$ echo -e \"Erik\\nis\\ncool\"\n"
+//usage:       "Erik\n"
+//usage:       "is\n"
+//usage:       "cool\n"
+//usage:       "$ echo \"Erik\\nis\\ncool\"\n"
+//usage:       "Erik\\nis\\ncool\n")
+

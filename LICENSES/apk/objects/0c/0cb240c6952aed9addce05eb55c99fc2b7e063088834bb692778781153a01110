@@ -1,0 +1,37 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini nsenter implementation for busybox.
+ *
+ * Copyright (C) 2016 by Bartosz Golaszewski <bartekgola@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config NSENTER
+//config:	bool "nsenter (6.8 kb)"
+//config:	default y
+//config:	help
+//config:	Run program with namespaces of other processes.
+
+//applet:IF_NSENTER(APPLET(nsenter, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_NSENTER) += nsenter.o
+
+//usage:#define nsenter_trivial_usage
+//usage:       "[OPTIONS] [PROG ARGS]"
+//usage:#define nsenter_full_usage "\n"
+//usage:     "\n	-t PID		Target process to get namespaces from"
+//usage:     "\n	-m[FILE]	Enter mount namespace"
+//usage:     "\n	-u[FILE]	Enter UTS namespace (hostname etc)"
+//usage:     "\n	-i[FILE]	Enter System V IPC namespace"
+//usage:     "\n	-n[FILE]	Enter network namespace"
+//usage:     "\n	-p[FILE]	Enter pid namespace"
+//usage:     "\n	-U[FILE]	Enter user namespace"
+//usage:     "\n	-S UID		Set uid in entered namespace"
+//usage:     "\n	-G GID		Set gid in entered namespace"
+//usage:	IF_LONG_OPTS(
+//usage:     "\n	--preserve-credentials	Don't touch uids or gids"
+//usage:	)
+//usage:     "\n	-r[DIR]		Set root directory"
+//usage:     "\n	-w[DIR]		Set working directory"
+//usage:     "\n	-F		Don't fork before exec'ing PROG"
+

@@ -1,0 +1,23 @@
+/*-
+ * Copyright 2019-2024 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*-
+ * Example of using EVP_MD_fetch and EVP_Digest* methods to calculate
+ * a digest of static buffers
+ * You can find SHA3 test vectors from NIST here:
+ * https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/sha3/sha-3bytetestvectors.zip
+ * For example, contains these lines:
+    Len = 80
+    Msg = 1ca984dcc913344370cf
+    MD = 6915ea0eeffb99b9b246a0e34daf3947852684c3d618260119a22835659e4f23d4eb66a15d0affb8e93771578f5e8f25b7a5f2a55f511fb8b96325ba2cd14816
+ * use xxd convert the hex message string to binary input for EVP_MD_stdin:
+ * echo "1ca984dcc913344370cf" | xxd -r -p | ./EVP_MD_stdin
+ * and then verify the output matches MD above.
+ */
+

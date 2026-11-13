@@ -1,0 +1,65 @@
+#! /usr/bin/env perl
+# Copyright 2005-2021 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# October 2005
+#
+# "Teaser" Montgomery multiplication module for UltraSPARC. Why FPU?
+# Because unlike integer multiplier, which simply stalls whole CPU,
+# FPU is fully pipelined and can effectively emit 48 bit partial
+# product every cycle. Why not blended SPARC v9? One can argue that
+# making this module dependent on UltraSPARC VIS extension limits its
+# binary compatibility. Well yes, it does exclude SPARC64 prior-V(!)
+# implementations from compatibility matrix. But the rest, whole Sun
+# UltraSPARC family and brand new Fujitsu's SPARC64 V, all support
+# VIS extension instructions used in this module. This is considered
+# good enough to not care about HAL SPARC64 users [if any] who have
+# integer-only pure SPARCv9 module to "fall down" to.
+
+# USI&II cores currently exhibit uniform 2x improvement [over pre-
+# bn_mul_mont codebase] for all key lengths and benchmarks. On USIII
+# performance improves few percents for shorter keys and worsens few
+# percents for longer keys. This is because USIII integer multiplier
+# is >3x faster than USI&II one, which is harder to match [but see
+# TODO list below]. It should also be noted that SPARC64 V features
+# out-of-order execution, which *might* mean that integer multiplier
+# is pipelined, which in turn *might* be impossible to match... On
+# additional note, SPARC64 V implements FP Multiply-Add instruction,
+# which is perfectly usable in this context... In other words, as far
+# as Fujitsu SPARC64 V goes, talk to the author:-)
+
+# The implementation implies following "non-natural" limitations on
+# input arguments:
+# - num may not be less than 4;
+# - num has to be even;
+# Failure to meet either condition has no fatal effects, simply
+# doesn't give any performance gain.
+
+# TODO:
+# - modulo-schedule inner loop for better performance (on in-order
+#   execution core such as UltraSPARC this shall result in further
+#   noticeable(!) improvement);
+# - dedicated squaring procedure[?];
+
+######################################################################
+# November 2006
+#
+# Modulo-scheduled inner loops allow to interleave floating point and
+# integer instructions and minimize Read-After-Write penalties. This
+# results in *further* 20-50% performance improvement [depending on
+# key length, more for longer keys] on USI&II cores and 30-80% - on
+# USIII&IV.
+
+# $output is the last argument if it looks like a file (it has an extension)

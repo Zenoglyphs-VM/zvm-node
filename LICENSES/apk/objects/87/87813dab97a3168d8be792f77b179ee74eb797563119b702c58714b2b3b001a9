@@ -1,0 +1,19 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * setserial implementation for busybox
+ *
+ *
+ * Copyright (C) 2011 Marek Bečka <yuen@klacno.sk>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config SETSERIAL
+//config:	bool "setserial (7.1 kb)"
+//config:	default y
+//config:	help
+//config:	Retrieve or set Linux serial port.
+
+//applet:IF_SETSERIAL(APPLET_NOEXEC(setserial, setserial, BB_DIR_BIN, BB_SUID_DROP, setserial))
+
+//kbuild:lib-$(CONFIG_SETSERIAL) += setserial.o
+

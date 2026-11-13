@@ -1,0 +1,426 @@
+{
+  "notices": [
+    {
+      "bytes": 61,
+      "path": "apk-tools-v2.14.13/AUTHORS",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "c238557e70557a79ea0ac30ea6d05342144f02b07ae4e9988171f70de3d66f2e",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 17622,
+      "path": "apk-tools-v2.14.13/LICENSE",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "b3c87315aae4c9f276c37168f2655dd8bd990544d7a0bbfb929664155c7ab257",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 1782,
+      "path": "apk-tools-v2.14.13/libfetch/common.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b368f6038bf4b0465f575092a8dcbdbf45788fbe36ca9c06ebf5412cc031a73f",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 1650,
+      "path": "apk-tools-v2.14.13/libfetch/common.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "41541550887276f23a7b6ae538420ba41ba2572fbc1afd9a956db608f1c04b8d",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 1708,
+      "path": "apk-tools-v2.14.13/libfetch/fetch.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1ed84c210d3c2fd82cc240bf1efeef56a1159e7b8a647608d1cc714d1bf324ad",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 1648,
+      "path": "apk-tools-v2.14.13/libfetch/fetch.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e90a4c8b5f65e693dd75eb444f6f88112bbe19cf38628f66cc590cf6e647743a",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 1712,
+      "path": "apk-tools-v2.14.13/libfetch/file.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ff7a3b4bce3a38b0970df14ac622fad7143778ace3f4fdddf750286a5272d599",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 2532,
+      "path": "apk-tools-v2.14.13/libfetch/ftp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d1d290884955048174f8be720525d6430274583ead6272ea6775528564abb6c5",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 3335,
+      "path": "apk-tools-v2.14.13/libfetch/http.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8fdf7fb9e86a000e50b20f67abb53211c517dee6277fe06b5afb9557b8ee3ba3",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 230,
+      "path": "apk-tools-v2.14.13/src/apk.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "45f73c9f41309737ad832f550bb8c874e4c90f2fe07945b5acfc671066ddc9e2",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 237,
+      "path": "apk-tools-v2.14.13/src/apk_applet.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "03e72591d78f36b92f4b50a90e19a31b7715442642aa1de4ebe28d293c441940",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 238,
+      "path": "apk-tools-v2.14.13/src/apk_archive.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "98616ed6904853a288c721830a510ef5213c2b9059a12566f1835ec350628cd5",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "apk-tools-v2.14.13/src/apk_atom.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "02bed60fc3b5db9bf047c486440f9af6d65300e95d185261ecc0e605cec20c93",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "apk-tools-v2.14.13/src/apk_blob.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "5c0638d15a473e30eb158a4d1a221fa060478050dc2a76e1a5480b3f9be78332",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 239,
+      "path": "apk-tools-v2.14.13/src/apk_database.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f23bd82abbf07b05f3527b73faab3c92c52dd9fc31b26d0eb51242d218846f12",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 238,
+      "path": "apk-tools-v2.14.13/src/apk_defines.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "00dd7968288cd77a04799d36b6186f2ccb9f11efbeccc84e88789d344a38d014",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "apk-tools-v2.14.13/src/apk_hash.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3fe71cacff36a015e35124e8c6976e8b3847a1c1a86e2424794b8e947296fc3a",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 177,
+      "path": "apk-tools-v2.14.13/src/apk_io.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "aa0e3383317d03370e63e44212e03c9b84fdf258025ad87a40d0a5b130928836",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 238,
+      "path": "apk-tools-v2.14.13/src/apk_openssl.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "339ac87df29cfeb6b9941af6807f185502b429ecb616fcbb75cae7bf67951682",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 238,
+      "path": "apk-tools-v2.14.13/src/apk_package.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "05abdab6c2958e406265c1391834235a3533fbf3dd2da787fece486d5f034d70",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 236,
+      "path": "apk-tools-v2.14.13/src/apk_print.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7ed154076af4295d184ed0c3877645a49ce8ca3f0d538a6676ac2d5a3fe3e7b8",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 244,
+      "path": "apk-tools-v2.14.13/src/apk_provider_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ce902785ef4e74812e37e26246a0a187a4b5acadaa674cc136162df217b5f439",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 237,
+      "path": "apk-tools-v2.14.13/src/apk_solver.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3727a4a346d5d2841fb8a7b324b98c3e49e70064dbb0bbb73cb3774facdcec1d",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 242,
+      "path": "apk-tools-v2.14.13/src/apk_solver_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1f72ccb61a323ccc455ef99d42677cf7462c8c22d15bd88d7dd0c0426f7675f6",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 238,
+      "path": "apk-tools-v2.14.13/src/apk_version.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9517a0a07a4ada67aefced1f6716858d7bf4fe7477018dad8f9625e3078edbdf",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 234,
+      "path": "apk-tools-v2.14.13/src/app_add.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "662fe63e335d6d8f5606701e9ab12a5713db3cd80577e2290763aff98e223cec",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 236,
+      "path": "apk-tools-v2.14.13/src/app_audit.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c773a8134803559eb11e1e0db1e734a328213b22aaceda0d5ab75fbeb989cee6",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 236,
+      "path": "apk-tools-v2.14.13/src/app_cache.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bff95ff04779fac95c7b2447a9d9551a07290054c41f0464b57bbc092dcce4a1",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 234,
+      "path": "apk-tools-v2.14.13/src/app_del.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6f16bd1082cbd2ecfde752640d54d4e5bfe227065a05a094c0ae826306cf60d4",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 178,
+      "path": "apk-tools-v2.14.13/src/app_dot.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c266cda4f6e04ecc90c5e70b5161ef0e0e841b94b86bb91491f5c60cae739894",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 236,
+      "path": "apk-tools-v2.14.13/src/app_fetch.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "adb108227a3ecfdc3006c27695470512979526fbceb00d250c01ed969d653db5",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 234,
+      "path": "apk-tools-v2.14.13/src/app_fix.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "54fe35b89c7a3c76738fb44195950bc019f456288a3e9855ee851ef77c1c1d85",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 236,
+      "path": "apk-tools-v2.14.13/src/app_index.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "24deef135152b3209fb14c2bd4b01c195e2b60b6607db06f95a162c58c5f2c52",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "apk-tools-v2.14.13/src/app_info.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "05b7b9853b0c2fd7af642558dec0cf1e1429fbb898a557d2e3dfd81acf78e75c",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 300,
+      "path": "apk-tools-v2.14.13/src/app_list.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e2481acde84263592a5e033ba9588907e437074a6ba5b8705ca8d953f3a65164",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 304,
+      "path": "apk-tools-v2.14.13/src/app_manifest.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d17df5e0b1cfbd2e13da96c6196e38fc37e0ed8b30a0ffedc227b33cb98099f1",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 176,
+      "path": "apk-tools-v2.14.13/src/app_policy.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a246fee24a16a00bedf0bd18dec7a9c4c29fa53822e30cc72463c4523a9bf22c",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 237,
+      "path": "apk-tools-v2.14.13/src/app_search.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "fc760039c218f11e033cf4b8a906d402d05ec4497c5f8c02150aa0587b7f0859",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 175,
+      "path": "apk-tools-v2.14.13/src/app_stats.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "300ed91524a5b87ca5f1255667e8925431e9efbc63da4a99767c901bbcce659d",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 237,
+      "path": "apk-tools-v2.14.13/src/app_update.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0bf3dc86a3463f3e6a06533e0db33e0550a17ba325448dd309a3a719df931937",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 238,
+      "path": "apk-tools-v2.14.13/src/app_upgrade.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "df164cd72324bfbaf7e11ccbac24dc8f490500acf6b22376d18de99864ea1bac",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 181,
+      "path": "apk-tools-v2.14.13/src/app_verify.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "944f4d3c5fafb4dc89727c2d699b1031696ccddcba8f6d2d43c2bf837ba1ea09",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 238,
+      "path": "apk-tools-v2.14.13/src/app_version.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2d3b67cb91fcbeb4a74f4bc1a758e33c94d5056b8931c00a14c1cd64417188cb",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "apk-tools-v2.14.13/src/atom.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "99b974658fc35e9e54d676e502f94d4efd93e0f0a5c34dece3648b7f086bc918",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 231,
+      "path": "apk-tools-v2.14.13/src/blob.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0b5d657a46a9fd4ac4d7eb7c2ceed027cd1380571398376ae3979f1abd9a6b2f",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 225,
+      "path": "apk-tools-v2.14.13/src/commit.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8883463d7936ab456b020a3bf3617ccac61e77dd51a3a063daeb19dd5caa04d8",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 177,
+      "path": "apk-tools-v2.14.13/src/common.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "32a0de217ded4a94852d56cf7a20fb4f7b5fc8b72d435ed60dafc87e551f9179",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "apk-tools-v2.14.13/src/database.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "883ed252293a0b2af6b33e1ef1b51e68f8e0318d83307ecb61923a935c068dff",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 231,
+      "path": "apk-tools-v2.14.13/src/hash.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "cb3209d478e0afc72ffe0aa22fb52efb6305a62f92a40b79b94de7eb00d971a6",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 170,
+      "path": "apk-tools-v2.14.13/src/help.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7a79234c4dc119054d104616b2ab2c6feb1d300d06e0b67d8db2caa3556b01ad",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 229,
+      "path": "apk-tools-v2.14.13/src/io.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6bba8c2093e18214976426e02dff22fc3f975e238bd03818c4f3c34fe504d3c9",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 237,
+      "path": "apk-tools-v2.14.13/src/io_archive.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6b5b354d97ad19c34676120a94a198820f3bc877e458fa04c4617998c6137264",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 180,
+      "path": "apk-tools-v2.14.13/src/io_gunzip.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "670665b08b8300723b84b9d03246841f9203524ebd2bd0c132bdd5e25f313929",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 233,
+      "path": "apk-tools-v2.14.13/src/io_url.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2a54feaa789d0dbeb01b746e66c20dc8b68504401dbe8999c948693182db4157",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 238,
+      "path": "apk-tools-v2.14.13/src/lua-apk.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e585ef14550f5dcd00f2ed328852a9c669daa93ef1306e27eb1eb9bb35f38cff",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 234,
+      "path": "apk-tools-v2.14.13/src/package.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6c1d970ec7c9ebff574cad8b896ac408c5e07546cbb6a88295400d8e476aaf2b",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 232,
+      "path": "apk-tools-v2.14.13/src/print.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d2a3bdc896d28f7c88ca10806fcf83a5074110a6c43f84876b4919fc5d7ad180",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 256,
+      "path": "apk-tools-v2.14.13/src/solver.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "88c0599add8c02f3677857082f7d5e4d36c6395760be2a5d467c1ba5e6d0e265",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 235,
+      "path": "apk-tools-v2.14.13/src/template.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1b3bd972aab6c7ad52e1a094a42d8f7aea288c56be55c359852359c16bfa4b40",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    },
+    {
+      "bytes": 233,
+      "path": "apk-tools-v2.14.13/src/version.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "df2ef7bb4b1ad221bc2d2e8c0a65d5b3ca9851721377570443dd8cebe2096af1",
+      "source": "apk-tools-v2.14.13.tar.gz"
+    }
+  ],
+  "origin": "apk-tools",
+  "schema": 1
+}

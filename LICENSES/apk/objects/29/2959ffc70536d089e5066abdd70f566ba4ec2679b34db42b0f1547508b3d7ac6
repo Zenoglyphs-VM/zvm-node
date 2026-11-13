@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# SUSv3 compliant sed tests.
+# Copyright 2005 by Rob Landley <rob@landley.net>
+# Licensed under GPLv2, see file LICENSE in this source tree.
+

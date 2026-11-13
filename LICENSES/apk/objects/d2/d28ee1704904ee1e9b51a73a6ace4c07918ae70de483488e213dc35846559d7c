@@ -1,0 +1,18 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini rpm applet for busybox
+ *
+ * Copyright (C) 2001,2002 by Laurence Anderson
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config RPM
+//config:	bool "rpm (32 kb)"
+//config:	default y
+//config:	help
+//config:	Mini RPM applet - queries and extracts RPM packages.
+
+//applet:IF_RPM(APPLET(rpm, BB_DIR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_RPM) += rpm.o
+

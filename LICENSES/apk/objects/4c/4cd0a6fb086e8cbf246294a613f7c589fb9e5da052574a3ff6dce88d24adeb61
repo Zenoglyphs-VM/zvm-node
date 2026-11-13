@@ -1,0 +1,41 @@
+#!/usr/bin/env perl
+# Copyright 2017-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# Keccak-1600 for PPC64.
+#
+# June 2017.
+#
+# This is straightforward KECCAK_1X_ALT implementation that works on
+# *any* PPC64. Then PowerISA 2.07 adds 2x64-bit vector rotate, and
+# it's possible to achieve performance better than below, but that is
+# naturally option only for POWER8 and successors...
+#
+######################################################################
+# Numbers are cycles per processed byte.
+#
+#		r=1088(*)
+#
+# PPC970/G5	14.0/+130%
+# POWER7	9.7/+110%
+# POWER8	10.6/+100%
+# POWER9	8.2/+66%
+#
+# (*)	Corresponds to SHA3-256. Percentage after slash is improvement
+#	over gcc-4.x-generated KECCAK_1X_ALT code. Newer compilers do
+#	much better (but watch out for them generating code specific
+#	to processor they execute on).
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

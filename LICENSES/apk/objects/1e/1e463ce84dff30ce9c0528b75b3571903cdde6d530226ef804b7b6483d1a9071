@@ -1,0 +1,54 @@
+/* origin: OpenBSD /usr/src/lib/libm/src/ld80/e_log2l.c */
+/*
+ * Copyright (c) 2008 Stephen L. Moshier <steve@moshier.net>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+/*
+ *      Base 2 logarithm, long double precision
+ *
+ *
+ * SYNOPSIS:
+ *
+ * long double x, y, log2l();
+ *
+ * y = log2l( x );
+ *
+ *
+ * DESCRIPTION:
+ *
+ * Returns the base 2 logarithm of x.
+ *
+ * The argument is separated into its exponent and fractional
+ * parts.  If the exponent is between -1 and +1, the (natural)
+ * logarithm of the fraction is approximated by
+ *
+ *     log(1+x) = x - 0.5 x**2 + x**3 P(x)/Q(x).
+ *
+ * Otherwise, setting  z = 2(x-1)/x+1),
+ *
+ *     log(x) = z + z**3 P(z)/Q(z).
+ *
+ *
+ * ACCURACY:
+ *
+ *                      Relative error:
+ * arithmetic   domain     # trials      peak         rms
+ *    IEEE      0.5, 2.0     30000      9.8e-20     2.7e-20
+ *    IEEE     exp(+-10000)  70000      5.4e-20     2.3e-20
+ *
+ * In the tests over the interval exp(+-10000), the logarithms
+ * of the random arguments were uniformly distributed over
+ * [-10000, +10000].
+ */
+

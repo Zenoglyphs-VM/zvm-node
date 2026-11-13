@@ -1,0 +1,13 @@
+{
+  "fixturePath": "tools/dependency-review/fixtures/with-gnu-wget.Dockerfile",
+  "schema": 1,
+  "scope": "Frozen parent recipe built with current source for a same-run comparison; not qualification of the historical parent image.",
+  "sourceCommit": "7e190b62461fc6645ed1f95a1d65630e4047b70e",
+  "sourcePath": "Dockerfile",
+  "sourcePin": {
+    "bytes": 1998,
+    "gitBlob": "d302c58c6462ba551196dc7123fc51359149a545",
+    "sha256": "2797696d8ff61a1cbed4f40f69325e4660a3211a000f8ce32329fc3589b05ff2"
+  },
+  "sourceRepository": "https://github.com/edgepillar/zvm-node"
+}

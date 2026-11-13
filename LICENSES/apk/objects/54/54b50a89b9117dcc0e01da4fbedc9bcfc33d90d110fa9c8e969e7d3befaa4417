@@ -1,0 +1,60 @@
+#! /usr/bin/env perl
+# Copyright 2014-2025 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# This module implements support for ARMv8 AES instructions. The
+# module is endian-agnostic in sense that it supports both big- and
+# little-endian cases. As does it support both 32- and 64-bit modes
+# of operation. Latter is achieved by limiting amount of utilized
+# registers to 16, which implies additional NEON load and integer
+# instructions. This has no effect on mighty Apple A7, where results
+# are literally equal to the theoretical estimates based on AES
+# instruction latencies and issue rates. On Cortex-A53, an in-order
+# execution core, this costs up to 10-15%, which is partially
+# compensated by implementing dedicated code path for 128-bit
+# CBC encrypt case. On Cortex-A57 parallelizable mode performance
+# seems to be limited by sheer amount of NEON instructions...
+#
+# April 2019
+#
+# Key to performance of parallelize-able modes is round instruction
+# interleaving. But which factor to use? There is optimal one for
+# each combination of instruction latency and issue rate, beyond
+# which increasing interleave factor doesn't pay off. While on cons
+# side we have code size increase and resource waste on platforms for
+# which interleave factor is too high. In other words you want it to
+# be just right. So far interleave factor of 3x was serving well all
+# platforms. But for ThunderX2 optimal interleave factor was measured
+# to be 5x...
+#
+# Performance in cycles per byte processed with 128-bit key:
+#
+#		CBC enc		CBC dec		CTR
+# Apple A7	2.39		1.20		1.20
+# Cortex-A53	1.32		1.17/1.29(**)	1.36/1.46
+# Cortex-A57(*)	1.95		0.82/0.85	0.89/0.93
+# Cortex-A72	1.33		0.85/0.88	0.92/0.96
+# Denver	1.96		0.65/0.86	0.76/0.80
+# Mongoose	1.33		1.23/1.20	1.30/1.20
+# Kryo		1.26		0.87/0.94	1.00/1.00
+# ThunderX2	5.95		1.25		1.30
+#
+# (*)	original 3.64/1.34/1.32 results were for r0p0 revision
+#	and are still same even for updated module;
+# (**)	numbers after slash are for 32-bit code, which is 3x-
+#	interleaved;
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

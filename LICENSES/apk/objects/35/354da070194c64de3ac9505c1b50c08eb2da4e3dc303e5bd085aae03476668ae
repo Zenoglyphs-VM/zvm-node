@@ -1,0 +1,35 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * dpkg-deb packs, unpacks and provides information about Debian archives.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config DPKG_DEB
+//config:	bool "dpkg-deb (29 kb)"
+//config:	default y
+//config:	select FEATURE_SEAMLESS_GZ
+//config:	help
+//config:	dpkg-deb unpacks and provides information about Debian archives.
+//config:
+//config:	This implementation of dpkg-deb cannot pack archives.
+//config:
+//config:	Unless you have a specific application which requires dpkg-deb,
+//config:	say N here.
+
+//applet:IF_DPKG_DEB(APPLET_ODDNAME(dpkg-deb, dpkg_deb, BB_DIR_USR_BIN, BB_SUID_DROP, dpkg_deb))
+
+//kbuild:lib-$(CONFIG_DPKG_DEB) += dpkg_deb.o
+
+//usage:#define dpkg_deb_trivial_usage
+//usage:       "[-cefxX] FILE [DIR]"
+//usage:#define dpkg_deb_full_usage "\n\n"
+//usage:       "Perform actions on Debian packages (.deb)\n"
+//usage:     "\n	-c	List files"
+//usage:     "\n	-f	Print control fields"
+//usage:     "\n	-e	Extract control files to DIR (default: ./DEBIAN)"
+//usage:     "\n	-x	Extract files to DIR (no default)"
+//usage:     "\n	-X	Verbose extract"
+//usage:
+//usage:#define dpkg_deb_example_usage
+//usage:       "$ dpkg-deb -X ./busybox_0.48-1_i386.deb /tmp\n"
+

@@ -1,0 +1,75 @@
+{
+  "entries": [
+    {
+      "commit": "cb834897ed3b94c6a6fb37ec57bc7cdd651c6c32",
+      "completeSourceCoverage": false,
+      "independentOriginAuthenticated": false,
+      "legalReviewComplete": false,
+      "module": {
+        "effectivePath": "github.com/holiman/bloomfilter/v2",
+        "effectiveVersion": "v2.0.3",
+        "main": false,
+        "path": "github.com/holiman/bloomfilter/v2",
+        "version": "v2.0.3"
+      },
+      "moduleGoMod": {
+        "bytes": 50,
+        "gitBlob": "d18cd96b24388c55202aec8dca47735bbcf42d81",
+        "sha256": "52ffcb9061c749c8c6d035838038fbdb6bf637a0137c80a2badc1d8dfa4ecdf6"
+      },
+      "moduleSubdirectory": "v2",
+      "notice": {
+        "bytes": 1091,
+        "gitBlob": "ccf77fe465c8a4105c78954c94f9ed336cf4e3bc",
+        "path": "MIT-LICENSE.txt",
+        "sha256": "f9e93a3c8d61e448bffac8f9c1d45b6418494ab2b683b13425158b9826dab048",
+        "sourcePath": "tools/noticebundle/supplements/holiman-bloomfilter-v2/MIT-LICENSE.txt"
+      },
+      "repository": "https://github.com/holiman/bloomfilter",
+      "selectedFiles": {
+        "binarymarshaler.go": {
+          "bytes": 2888,
+          "gitBlob": "c031d1d6f5fe57ff5b31b1bd82caa8a7f89b4bb5",
+          "sha256": "672eeec88cdac7c4253481586c09fd9579121d5f7f0e9f6ee8b898e70ba41c1b"
+        },
+        "binaryunmarshaler.go": {
+          "bytes": 3008,
+          "gitBlob": "081f3faec67ebc1a61d2ce9da8d2a68e98f02c90",
+          "sha256": "c6cb5c77ea9033b4f13940d1b28ef17839089ee178ab8b6532a9f110949c2b24"
+        },
+        "bloomfilter.go": {
+          "bytes": 3295,
+          "gitBlob": "1b8bc0e73d31f3e4a6cb0ce3ae526eaaed742a0c",
+          "sha256": "f861099cd9fb6c68968f9c267827ac844e437d211cf01e05ae9e5f8633b748f8"
+        },
+        "conformance.go": {
+          "bytes": 762,
+          "gitBlob": "56da57aa1a7fad1d07062f858d6ab8ecf954e374",
+          "sha256": "15c4f9e31394b8ced71f11c8728e369b50b9ef93395e1e7abbb580d5265a6389"
+        },
+        "fileio.go": {
+          "bytes": 2791,
+          "gitBlob": "b2a761dbfc9bcdf41f7aba138b798f784a42bd49",
+          "sha256": "9124be0171c4cf222210c427aa5158c67ab4f996695b08543bee78ff5ac11ee5"
+        },
+        "iscompatible.go": {
+          "bytes": 823,
+          "gitBlob": "9a4946b8aff0a0fb5d575d6973cc88f13deb0a22",
+          "sha256": "e03f8c888ff4ec2b579bdecee19a97489969cc784c609e58bf8267795c667cf5"
+        },
+        "new.go": {
+          "bytes": 3032,
+          "gitBlob": "7a162c30e06718d8efb372309dd3a3b2e5941f58",
+          "sha256": "e49e1227658429e51bc686fbc73808aa5a70897b621f8d1c3f2ae4045f8f6a2c"
+        },
+        "statistics.go": {
+          "bytes": 1140,
+          "gitBlob": "682ec2e8f3894e324166d7f15ea62d773dc5e56d",
+          "sha256": "925a820f13a702b9a46268598a55e4657c191a0c5c9c1bc36bcc71d2267a2092"
+        }
+      },
+      "status": "UPSTREAM_SOURCE_BYTES_MATCHED_REVIEW_REQUIRED"
+    }
+  ],
+  "schema": 1
+}

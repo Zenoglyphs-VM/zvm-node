@@ -1,0 +1,21 @@
+/*
+ * Copyright 2026 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright (c) 2016 David Gwynne <david@gwynne.id.au>
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * The code here comes from David Gwynne <david@gwynne.id.au>. The original
+ * version can be found:
+ *    https://github.com/dgwynne/data-structures/
+ * file bst.h. The same code is also part of OpenBSD OS where it is shipped
+ * under BSD license.
+ *
+ * David Gwynne agrees to include modified version to OpenSSL and ship it
+ * under OpenSSL Apache 2.0 license.
+ */
+

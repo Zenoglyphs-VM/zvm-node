@@ -1,0 +1,81 @@
+#! /usr/bin/env perl
+# Copyright 2012-2021 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by David S. Miller and Andy Polyakov
+# The module is licensed under 2-clause BSD license.
+# November 2012. All rights reserved.
+# ====================================================================
+
+######################################################################
+# Montgomery squaring-n-multiplication module for SPARC T4.
+#
+# The module consists of three parts:
+#
+# 1) collection of "single-op" subroutines that perform single
+#    operation, Montgomery squaring or multiplication, on 512-,
+#    1024-, 1536- and 2048-bit operands;
+# 2) collection of "multi-op" subroutines that perform 5 squaring and
+#    1 multiplication operations on operands of above lengths;
+# 3) fall-back and helper VIS3 subroutines.
+#
+# RSA sign is dominated by multi-op subroutine, while RSA verify and
+# DSA - by single-op. Special note about 4096-bit RSA verify result.
+# Operands are too long for dedicated hardware and it's handled by
+# VIS3 code, which is why you don't see any improvement. It's surely
+# possible to improve it [by deploying 'mpmul' instruction], maybe in
+# the future...
+#
+# Performance improvement.
+#
+# 64-bit process, VIS3:
+#                   sign    verify    sign/s verify/s
+# rsa 1024 bits 0.000628s 0.000028s   1592.4  35434.4
+# rsa 2048 bits 0.003282s 0.000106s    304.7   9438.3
+# rsa 4096 bits 0.025866s 0.000340s     38.7   2940.9
+# dsa 1024 bits 0.000301s 0.000332s   3323.7   3013.9
+# dsa 2048 bits 0.001056s 0.001233s    946.9    810.8
+#
+# 64-bit process, this module:
+#                   sign    verify    sign/s verify/s
+# rsa 1024 bits 0.000256s 0.000016s   3904.4  61411.9
+# rsa 2048 bits 0.000946s 0.000029s   1056.8  34292.7
+# rsa 4096 bits 0.005061s 0.000340s    197.6   2940.5
+# dsa 1024 bits 0.000176s 0.000195s   5674.7   5130.5
+# dsa 2048 bits 0.000296s 0.000354s   3383.2   2827.6
+#
+######################################################################
+# 32-bit process, VIS3:
+#                   sign    verify    sign/s verify/s
+# rsa 1024 bits 0.000665s 0.000028s   1504.8  35233.3
+# rsa 2048 bits 0.003349s 0.000106s    298.6   9433.4
+# rsa 4096 bits 0.025959s 0.000341s     38.5   2934.8
+# dsa 1024 bits 0.000320s 0.000341s   3123.3   2929.6
+# dsa 2048 bits 0.001101s 0.001260s    908.2    793.4
+#
+# 32-bit process, this module:
+#                   sign    verify    sign/s verify/s
+# rsa 1024 bits 0.000301s 0.000017s   3317.1  60240.0
+# rsa 2048 bits 0.001034s 0.000030s    966.9  33812.7
+# rsa 4096 bits 0.005244s 0.000341s    190.7   2935.4
+# dsa 1024 bits 0.000201s 0.000205s   4976.1   4879.2
+# dsa 2048 bits 0.000328s 0.000360s   3051.1   2774.2
+#
+# 32-bit code is prone to performance degradation as interrupt rate
+# dispatched to CPU executing the code grows. This is because in
+# standard process of handling interrupt in 32-bit process context
+# upper halves of most integer registers used as input or output are
+# zeroed. This renders result invalid, and operation has to be re-run.
+# If CPU is "bothered" with timer interrupts only, the penalty is
+# hardly measurable. But in order to mitigate this problem for higher
+# interrupt rates contemporary Linux kernel recognizes biased stack
+# even in 32-bit process context and preserves full register contents.
+# See http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=517ffce4e1a03aea979fe3a18a3dd1761a24fafb
+# for details.
+

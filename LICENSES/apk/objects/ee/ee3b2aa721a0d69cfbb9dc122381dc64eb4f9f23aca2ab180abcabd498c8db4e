@@ -1,0 +1,7 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini getpty implementation for busybox
+ * Bjorn Wesen, Axis Communications AB (bjornw@axis.com)
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */

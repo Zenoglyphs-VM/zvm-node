@@ -1,0 +1,8 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright (C) 2017 Denys Vlasenko <vda.linux@googlemail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//kbuild:lib-y += print_numbered_lines.o
+

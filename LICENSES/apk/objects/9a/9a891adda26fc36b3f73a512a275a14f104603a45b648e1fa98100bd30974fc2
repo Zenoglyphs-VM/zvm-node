@@ -1,0 +1,92 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * micro lpd
+ *
+ * Copyright (C) 2008 by Vladimir Dronnikov <dronnikov@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+
+/*
+ * A typical usage of BB lpd looks as follows:
+ * # tcpsvd -E 0 515 lpd [SPOOLDIR] [HELPER-PROG [ARGS...]]
+ *
+ * This starts TCP listener on port 515 (default for LP protocol).
+ * When a client connection is made (via lpr) lpd first changes its
+ * working directory to SPOOLDIR (current dir is the default).
+ *
+ * SPOOLDIR is the spool directory which contains printing queues
+ * and should have the following structure:
+ *
+ * SPOOLDIR/
+ *      <queue1>
+ *      ...
+ *      <queueN>
+ *
+ * <queueX> can be of two types:
+ *      A. a printer character device, an ordinary file or a link to such;
+ *      B. a directory.
+ *
+ * In case A lpd just dumps the data it receives from client (lpr) to the
+ * end of queue file/device. This is non-spooling mode.
+ *
+ * In case B lpd enters spooling mode. It reliably saves client data along
+ * with control info in two unique files under the queue directory. These
+ * files are named dfAXXXHHHH and cfAXXXHHHH, where XXX is the job number
+ * and HHHH is the client hostname. Unless a printing helper application
+ * is specified lpd is done at this point.
+ *
+ * NB: file names are produced by peer! They actually may be anything at all.
+ * lpd only sanitizes them (by removing most non-alphanumerics).
+ *
+ * If HELPER-PROG (with optional arguments) is specified then lpd continues
+ * to process client data:
+ *      1. it reads and parses control file (cfA...). The parse process
+ *      results in setting environment variables whose values were passed
+ *      in control file; when parsing is complete, lpd deletes control file.
+ *      2. it spawns specified helper application. It is then
+ *      the helper application who is responsible for both actual printing
+ *      and deleting of processed data file.
+ *
+ * A good lpr passes control files which when parsed provides the following
+ * variables:
+ * $H = host which issues the job
+ * $P = user who prints
+ * $C = class of printing (what is printed on banner page)
+ * $J = the name of the job
+ * $L = print banner page
+ * $M = the user to whom a mail should be sent if a problem occurs
+ *
+ * We specifically filter out and NOT provide:
+ * $l = name of datafile ("dfAxxx") - file whose content are to be printed
+ *
+ * lpd provides $DATAFILE instead - the ACTUAL name
+ * of the datafile under which it was saved.
+ * $l would be not reliable (you would be at mercy of remote peer).
+ *
+ * Thus, a typical helper can be something like this:
+ * #!/bin/sh
+ * cat ./"$DATAFILE" >/dev/lp0
+ * mv -f ./"$DATAFILE" save/
+ */
+//config:config LPD
+//config:	bool "lpd (5.7 kb)"
+//config:	default y
+//config:	help
+//config:	lpd is a print spooling daemon.
+
+//applet:IF_LPD(APPLET(lpd, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_LPD) += lpd.o
+
+//usage:#define lpd_trivial_usage
+//usage:       "SPOOLDIR [HELPER [ARGS]]"
+//usage:#define lpd_full_usage "\n\n"
+//usage:       "SPOOLDIR must contain (symlinks to) device nodes or directories"
+//usage:     "\nwith names matching print queue names. In the first case, jobs are"
+//usage:     "\nsent directly to the device. Otherwise each job is stored in queue"
+//usage:     "\ndirectory and HELPER program is called. Name of file to print"
+//usage:     "\nis passed in $DATAFILE variable."
+//usage:     "\nExample:"
+//usage:     "\n	tcpsvd -E 0 515 softlimit -m 999999 lpd /var/spool ./print"
+

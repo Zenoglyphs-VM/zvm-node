@@ -1,0 +1,944 @@
+{
+  "notices": [
+    {
+      "bytes": 1762,
+      "path": "getconf.c",
+      "selectionScope": "INITIAL_SOURCE_NOTICE",
+      "sha256": "05f2f4e628f0b49b13a46df24585e96df76b4a522ccc4ec9b21b73de9a83985d",
+      "source": "getconf.c"
+    },
+    {
+      "bytes": 2052,
+      "path": "getent.c",
+      "selectionScope": "INITIAL_SOURCE_NOTICE",
+      "sha256": "2251203c6c80eeda598bf347c7500c28acd7e3f94a30faa36e3976a1d83a0b97",
+      "source": "getent.c"
+    },
+    {
+      "bytes": 332,
+      "path": "iconv.c",
+      "selectionScope": "INITIAL_SOURCE_NOTICE",
+      "sha256": "819c0d7dea934beb0d7e659830387353c73ddeedc1e0101ed0071b96fa3c50dd",
+      "source": "iconv.c"
+    },
+    {
+      "bytes": 6204,
+      "path": "musl-1.2.5/COPYRIGHT",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1426,
+      "path": "musl-1.2.5/src/complex/__cexp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4185407562b2745b52609fc1aee8640d21b96d56c6d43be8d72342b7d3de5bf8",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1427,
+      "path": "musl-1.2.5/src/complex/__cexpf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "929182ed1db73ac897a93d2921ab99b66a8e8e473fa5d8c3333b1fa05c89101f",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1814,
+      "path": "musl-1.2.5/src/complex/catan.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "283bf32d75c4f711231481b6efc8b880a702e83c7e4f0b5507d35a1610a8b0d2",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1580,
+      "path": "musl-1.2.5/src/complex/catanf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "de92718eb20e81ae55faddffe195eb36d9fd3aeff067e714d94fb32600d0a869",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1799,
+      "path": "musl-1.2.5/src/complex/catanl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "270316857d829acc88d3b5a2190d630826ef9a9c726064b59ddfdda4cc661fdc",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1689,
+      "path": "musl-1.2.5/src/complex/ccosh.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b5680ddf6458413c09519c65cee8ce6bfeb46c872268939075399d20e76ad5cb",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1492,
+      "path": "musl-1.2.5/src/complex/ccoshf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d5e1ce612bddc55a2e86ff9fa4e74755d963270716e2ec23552177b7b6282d2c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1427,
+      "path": "musl-1.2.5/src/complex/cexp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d2daf290be2ddd3ae6f19400c624c347b478a10c064c92c42b5df243676cf80c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1428,
+      "path": "musl-1.2.5/src/complex/cexpf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0730245c061cd9cd7ab21bf32a5e8baaf5296f86a3680be9cf9f897ede74e150",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1687,
+      "path": "musl-1.2.5/src/complex/csinh.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c954df6562dfc6b43e5357585369d227dc0478578d33adf005049f6ded2f806d",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1492,
+      "path": "musl-1.2.5/src/complex/csinhf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9e79aee05d7fe85ccbd26b3dcb486477b50875a1d3d0bcc01eb5f51740eef538",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1428,
+      "path": "musl-1.2.5/src/complex/csqrt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a314853abf46777e192cd204cd77cfbe93e41e8d9573ceb4a030f36979207379",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1429,
+      "path": "musl-1.2.5/src/complex/csqrtf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "967b2da1d781226db594cd54f246b53368627e6f40af569827591eebd30e6b58",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2490,
+      "path": "musl-1.2.5/src/complex/ctanh.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "083617f0162ff523023feb471a1aacb7a6f3ddbd04571b2d48617f34965d7ea0",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1474,
+      "path": "musl-1.2.5/src/complex/ctanhf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "afc68428f18621ce0d02fb0d8dd29c271e53ba0ea49797dba347a3c492be57a3",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2186,
+      "path": "musl-1.2.5/src/crypt/crypt_blowfish.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8e178cd4324cf31ec3cdcc9c8db9de584d970a19eb967860145339b7fe818b30",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2777,
+      "path": "musl-1.2.5/src/crypt/crypt_des.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1ea3b48775f547b8ad7c4eca104e8a931a91cd6eff8c54de29ce6a4d51066960",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 371,
+      "path": "musl-1.2.5/src/crypt/crypt_sha256.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3a7552806d351a14123aadcb56588504b196c2633e2ee5899f7e22ccc218ced0",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 371,
+      "path": "musl-1.2.5/src/crypt/crypt_sha512.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "123d0f2e5ece8c6ac740c7fbc8574174be29f654b4d89d86763931753c962d62",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2264,
+      "path": "musl-1.2.5/src/math/__cos.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "27047e42e3a4b71c63b76080ffe0717310b91d38ef4d15c940bbadc1eb8ff420",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 562,
+      "path": "musl-1.2.5/src/math/__cosdf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2c5ca50ddd8ea3d2e5d6a02e212842567aae377abd6ed57e0d0e8888c9fb94ae",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 562,
+      "path": "musl-1.2.5/src/math/__cosl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "143a675d5409a23faa8a6853e69b9a06d7dbde9060869d0c67322114176e4333",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1738,
+      "path": "musl-1.2.5/src/math/__polevll.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "623dd725dd81582fa9a4c57a7be715056559a30d453ded9e8ce25a4036a71fd5",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 589,
+      "path": "musl-1.2.5/src/math/__rem_pio2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0bd9382fac6f493f9dc5f4eaa4c2012cc04951048f045aea7121e5540b08d871",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 4831,
+      "path": "musl-1.2.5/src/math/__rem_pio2_large.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "82c5481a6eed4acef10144da0860ed303595437a9f054254ece6bc1584b0c89d",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 732,
+      "path": "musl-1.2.5/src/math/__rem_pio2f.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d35098402c1cc702758ebd75de69e834e6f24efe2c38ff419d7fbb9eb476bec8",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 544,
+      "path": "musl-1.2.5/src/math/__rem_pio2l.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d487153f0370371447fac301eb2ae8003e9cf763ff4bc9c3a6bdd7ef500edf8e",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1710,
+      "path": "musl-1.2.5/src/math/__sin.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e651c1164fa50852a81332d2a3962dd0de64c64735f47b2f0e846f94f1da8d38",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 549,
+      "path": "musl-1.2.5/src/math/__sindf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "701b472045d066eaeab43d5a94c692d87aecf5401ecab9064dfbf93a6a1a0c2e",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 561,
+      "path": "musl-1.2.5/src/math/__sinl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "07408ceca7418281d9fdf2684d448079541295866020dd09c4469a881adaf881",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1916,
+      "path": "musl-1.2.5/src/math/__tan.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "daeafcdba6eed4bac3fb9ab78e2e410f7bd5a8a9c733558645ec392725eb0b6b",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 484,
+      "path": "musl-1.2.5/src/math/__tandf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "cd8d03dca6657c0e15589067270f1d0760deb456d630c76b53929e8d3f151d23",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 495,
+      "path": "musl-1.2.5/src/math/__tanl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c060e5c6efa98c3267ee67929e4ec242161f972875c863a1087c826c78db6582",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1194,
+      "path": "musl-1.2.5/src/math/acos.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "00e4450ab1ffd72751892acf5f406e6ef14dc25e31b9d2409091c27805a41153",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 518,
+      "path": "musl-1.2.5/src/math/acosf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "26f635e6704ab557c488f52d4bcf04448189831625e3877867528f73fdd6336c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 534,
+      "path": "musl-1.2.5/src/math/acosl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6cc7ef54b91edb77d086b0316f30a33bde2f22daff74ad4367a984354dd38d9c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1546,
+      "path": "musl-1.2.5/src/math/asin.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "16e4c9d33a06c014651a46f607bc777d8f92cb625aeebca97fbf2efb6441a8c5",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 517,
+      "path": "musl-1.2.5/src/math/asinf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4d883695a193d68437dce3c3239958e7b4b342c1f5ecc0ef17af9c3becfc1b68",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 534,
+      "path": "musl-1.2.5/src/math/asinl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b76dcdbac1883c9ec0637f40f09c5d203a2c3a18c8dec98f02860283d6bcc56f",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1308,
+      "path": "musl-1.2.5/src/math/atan.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "79d56218788d2a27bcb1cf05f51446c763f65d4c8f419a3bbcd074e464b735f5",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1503,
+      "path": "musl-1.2.5/src/math/atan2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "02552e5f14ecd5d6ed4c022f38c88890f2e11e5722751f039032638ab3c663c4",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 519,
+      "path": "musl-1.2.5/src/math/atan2f.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "24e7fb6b73a5c519659bb305a4e668e8459d9cab949c9cde283b570d29d77a64",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 539,
+      "path": "musl-1.2.5/src/math/atan2l.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a3ff443831c1771ea8af843ac0b7215bcd5a932752eb1f09b64b5698a4ce4481",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 519,
+      "path": "musl-1.2.5/src/math/atanf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "78aa5bd1e4ac60fe0658e3571bf5e29fed01c342e6e2f03e06b38248c04694f2",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 533,
+      "path": "musl-1.2.5/src/math/atanl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "efa46dd83d1c949b3b9d30c2b8183f3892a49fc0167e6aad12296e465b09deb0",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 509,
+      "path": "musl-1.2.5/src/math/cbrt.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8b96b75f42c2319887a8f8a25a0dfe058539ef538d2e0741115b9804ceb61c51",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 604,
+      "path": "musl-1.2.5/src/math/cbrtf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "709082ccdab6291906c65f4e24b8537219e8e4183e4afba2cf6ce947e03ff5ed",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 665,
+      "path": "musl-1.2.5/src/math/cbrtl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4378762e10156c2fc17283dbc2434beb44f47ea186f47a5e3585681edaff7c58",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1489,
+      "path": "musl-1.2.5/src/math/cos.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3a74ecd1eabada0e4a750c7866b3e7c8d8fe48577b98baf10113cada5acc49a6",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 549,
+      "path": "musl-1.2.5/src/math/cosf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b678cacff093c1956507564f4b9ad9a1951cfb46cb87aebd88ee2031b25f9667",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 4309,
+      "path": "musl-1.2.5/src/math/erf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a72a3ee825eb58aeb048aca60e1a15226450d24a4738e919d06d33a21f6a452e",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 517,
+      "path": "musl-1.2.5/src/math/erff.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c9c0a35502ede5e105aa60388a3716bd442a917826ec4162c20667469dbe7d6e",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 4133,
+      "path": "musl-1.2.5/src/math/erfl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3a46e7e1ba545e8ee9ffd00960eb758e46fc5ade4231bb4808ac91fa379c2df9",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 113,
+      "path": "musl-1.2.5/src/math/exp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "d879464986502f5a108b0b25095f85968c7fe617f656407b6ebb2d8b1be9874f",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 113,
+      "path": "musl-1.2.5/src/math/exp2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e1017045b7be3852669b46ce0d74a56f6cdaa3f68dda3b5a3190367abebd29f6",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 118,
+      "path": "musl-1.2.5/src/math/exp2f.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c0d38bf9658ee5bebdb19a72064ca647b573547ab317d1c27a040120369429a2",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 129,
+      "path": "musl-1.2.5/src/math/exp2f_data.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4e078cb6cf5324ddf6bdeec63d52283d278c39c391651e3e92fbaa8f20a97c1a",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/math/exp2f_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f1302639ff01b3707be6eef965e58cb0a9d1190a3170ee072ce9a4eb8410f3ac",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1472,
+      "path": "musl-1.2.5/src/math/exp2l.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "dc88eee09618c4d61ff8e87a2334c6711260158d78c72eab5c094c851673e1ab",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 121,
+      "path": "musl-1.2.5/src/math/exp_data.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "af710fc02739f06f406db14d25b1432e1aafbecf2b064e63d2e8515c1894a99b",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 75,
+      "path": "musl-1.2.5/src/math/exp_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0fa9b54b296a10b434687151ecc47e103a3ed5f06d497758106cf59552d7d2f3",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 118,
+      "path": "musl-1.2.5/src/math/expf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "07a119201b1601e24ddf6c3142f92eaeb103120d6a37cc5349cb27eee4faf03f",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2190,
+      "path": "musl-1.2.5/src/math/expl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "105deb76b04c71e121886e1187d219ea0587d0d5501aa8b7b818094f817fe659",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 4559,
+      "path": "musl-1.2.5/src/math/expm1.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "315b699168d3fc813e2f80370171b3284cb1c72af20999ae610f21c299907c6c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 519,
+      "path": "musl-1.2.5/src/math/expm1f.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "600c0e0c50dcd5ce98c3d57f4ac1bb6068df9b0515edfdd6f3657a2b8d954c97",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1530,
+      "path": "musl-1.2.5/src/math/expm1l.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "87c1032d27d0ed348feebb4c65448ee7fc773b08430f46f17f6132c6b492d5ac",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1432,
+      "path": "musl-1.2.5/src/math/fmaf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ceba0b483522a5c09b22ae51b1833f2fabcf183c6e26077189f39f6a29c92ad5",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1433,
+      "path": "musl-1.2.5/src/math/fmal.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "541bf7c1610ec70e4c233de014d6e4cf739a56f16a53bae1703eaa8854f742c9",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2351,
+      "path": "musl-1.2.5/src/math/j0.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9df863b170b09a6983d5e84051c1b5aff9d0b8a3e9398ba06792b2fbfde02f9c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 516,
+      "path": "musl-1.2.5/src/math/j0f.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "efdb29f5f1cc9488e9fbc277e943258c80a7b0b26750d05dc19b45434f619036",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2424,
+      "path": "musl-1.2.5/src/math/j1.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "7f8d2f7a5d15b2856ba4af0fb589812b84fbae701d6ad099a3f63fd27bf9e71e",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 516,
+      "path": "musl-1.2.5/src/math/j1f.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "16f0f987fed994bc4597d3bf2dd136c3bc59d7f8b839572e9fac23020ce2a02e",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1312,
+      "path": "musl-1.2.5/src/math/jn.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "716300eada77aa92846d1879f25fb204506581658b46286419af3c942b57394a",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 516,
+      "path": "musl-1.2.5/src/math/jnf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1a07949cc89ca12f71d5aecb1854a084f5c63e29e34bafeda5bed76bb1f41bf6",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 3281,
+      "path": "musl-1.2.5/src/math/lgamma_r.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "659444b5fd4826d7e723636d1f11998e4f007dc80b4a01c0f673dcaf51d768d2",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 522,
+      "path": "musl-1.2.5/src/math/lgammaf_r.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2a57d54e54a045a877e0dd27e5ae53a7d88092329c68213aac87e81789687ee2",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 3771,
+      "path": "musl-1.2.5/src/math/lgammal.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "13d8e556cfff0050b5eb422d2866d70a012c1be10f5ba649455c1a835bd865ac",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 116,
+      "path": "musl-1.2.5/src/math/log.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "3b0f4b6e0ba95a6f9205a61c3e20c272cb6f4d0b50ab2865340ff43a57c69932",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 691,
+      "path": "musl-1.2.5/src/math/log10.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a10b1a81999d6e187cc65a869b53fcc2168bbd62b4b8ffb7b932726ddb2a5081",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 471,
+      "path": "musl-1.2.5/src/math/log10f.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "38a62e94ec64429d40e70621dcd7177d1d87c90acbc87dc1b197cbba1de18536",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1850,
+      "path": "musl-1.2.5/src/math/log10l.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "73f4f5ef2a95f04a3d8d2d0b0b046b35551adaf30f5b00163e45de0042715ad3",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2047,
+      "path": "musl-1.2.5/src/math/log1p.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2749569e3881bbf6491a7140ad7d9ebe76f36d17758f59b70e87e12fa74f8de1",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 436,
+      "path": "musl-1.2.5/src/math/log1pf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "2cedca6545a7daf07dcb06545c86ad286f5cf5f8f3211ea7bff1b5ac43cf9b64",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1586,
+      "path": "musl-1.2.5/src/math/log1pl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "40705faf8fff9cbc21aca95e6bf4d79bb82e28d8455643d28336cf0c2a3d9cf2",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 117,
+      "path": "musl-1.2.5/src/math/log2.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1811ecaf980210c8286b1bbd6e08a494f751b73f9bbecc410de5f29ffee2ff8d",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 97,
+      "path": "musl-1.2.5/src/math/log2_data.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "aeae385a739a08c7d276c5462f16c88f81ccab39dfca123ac70b219c4a9ae5b8",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 75,
+      "path": "musl-1.2.5/src/math/log2_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0fa9b54b296a10b434687151ecc47e103a3ed5f06d497758106cf59552d7d2f3",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 119,
+      "path": "musl-1.2.5/src/math/log2f.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "87c98c5b0ceb9c72e117cd0eff3a8686d02835ac4aec1d008c0386eeb96d3a97",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 114,
+      "path": "musl-1.2.5/src/math/log2f_data.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4f2d1ad05d73ffa598d2e5c4b7a5684b2e93cf8a165120794ce1c05f261d7c96",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/math/log2f_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f1302639ff01b3707be6eef965e58cb0a9d1190a3170ee072ce9a4eb8410f3ac",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1745,
+      "path": "musl-1.2.5/src/math/log2l.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1e463ce84dff30ce9c0528b75b3571903cdde6d530226ef804b7b6483d1a9071",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 96,
+      "path": "musl-1.2.5/src/math/log_data.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "13755d13feb33602c841286fcd7a637820a7bbe08474bdd8b14991584f336823",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 75,
+      "path": "musl-1.2.5/src/math/log_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0fa9b54b296a10b434687151ecc47e103a3ed5f06d497758106cf59552d7d2f3",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 118,
+      "path": "musl-1.2.5/src/math/logf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "ecb8ce4061e2890f3c26f093f7c4d9bb254cb66c2329b79115c2f0b7ccff190a",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 113,
+      "path": "musl-1.2.5/src/math/logf_data.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0a70e240519b22b97cdd7fb8fb5030cf996343c07578670fa6f0fa4a1715c505",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/math/logf_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f1302639ff01b3707be6eef965e58cb0a9d1190a3170ee072ce9a4eb8410f3ac",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1773,
+      "path": "musl-1.2.5/src/math/logl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "a26002f8270531dc1b92835b4aae057e90c51ad9ce0c0cec81bcf0903c4a21d6",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 113,
+      "path": "musl-1.2.5/src/math/pow.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "19941f43d6fb6c02a46feb375e14e57daccf9e400fe1f0b4c7dc08aae603d41c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 112,
+      "path": "musl-1.2.5/src/math/pow_data.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e237d73cc422efa2525decfa88f5017a754b5e7d82719b4f989f28e6968ce977",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 75,
+      "path": "musl-1.2.5/src/math/pow_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "0fa9b54b296a10b434687151ecc47e103a3ed5f06d497758106cf59552d7d2f3",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 81,
+      "path": "musl-1.2.5/src/math/powf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "064421e9a1d9b06eb20f9a1224d899f915273864dc24f852073db05de592a766",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 113,
+      "path": "musl-1.2.5/src/math/powf_data.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "763a414f361cd820262f4c47d78a016d2546f3682433774cd9ef8c37eaea3a37",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/math/powf_data.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f1302639ff01b3707be6eef965e58cb0a9d1190a3170ee072ce9a4eb8410f3ac",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 2347,
+      "path": "musl-1.2.5/src/math/powl.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6c44238579378a32e62df09937d36824c07fbc70f8884a85d6a782f584e74c99",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 550,
+      "path": "musl-1.2.5/src/math/scalb.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "60e8602fbc8156061f877f1aadd6d7a137a881db7622afb5a92e04c1010e5c90",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 519,
+      "path": "musl-1.2.5/src/math/scalbf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b4d5f2c855168698779fb4bfc333f7238a8474b23e2b2a74ee9a7273bee10a0c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1488,
+      "path": "musl-1.2.5/src/math/sin.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bc263f1827be6be870e26a0b8a131bd7d5beb363778097a02fcdd4bf0a3fe62c",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 433,
+      "path": "musl-1.2.5/src/math/sincos.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "f4aaef4b13468ac8664a46469257e4d00b045f5e56d890a51757cca5c50304ae",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 549,
+      "path": "musl-1.2.5/src/math/sincosf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b6a2605352aea5dd02e594be2282448e0f9b2b26e3ef9c17120d608068fa6c48",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 549,
+      "path": "musl-1.2.5/src/math/sinf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b6a2605352aea5dd02e594be2282448e0f9b2b26e3ef9c17120d608068fa6c48",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1433,
+      "path": "musl-1.2.5/src/math/tan.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "b48f815fbb4269c92e8c70d45c6f961b3de4ceecc277a35501bff6b10bf92f69",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 549,
+      "path": "musl-1.2.5/src/math/tanf.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "32af7958518d0c3d2854d114f793823817fe691aae1ee15100367632b6644e1d",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1659,
+      "path": "musl-1.2.5/src/math/tgammal.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "91a976d6d3bc3a18dac891ad2ab0617715f94a5741e9f7ab53aa5f500fb45a21",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 63,
+      "path": "musl-1.2.5/src/misc/fmtmsg.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "1b4e9df39df235561f284b28d0b7b81a260c2666c87a3cdfedc0af0e1b6fce50",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1446,
+      "path": "musl-1.2.5/src/regex/regcomp.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "340f121b7769a38bc0bea1857b53cf7ec4d944785e3d786cb97cccd07de4b911",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1448,
+      "path": "musl-1.2.5/src/regex/regexec.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "c2e8004b910e3806ccd56a2ab600dcffeb5702ecaa1c23db67552e6a304cb019",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1666,
+      "path": "musl-1.2.5/src/regex/tre-mem.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "9c57ac7bf68fb3e4e568756f99661bf75be44fe6a46ea2d446e23e75c5d0017d",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1426,
+      "path": "musl-1.2.5/src/regex/tre.h",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "bd0d49fbc87566b07c82d6f2fce1436d2e86bd98612d2cdf8e56ba95d5c5f8e5",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/setjmp/x32/longjmp.s",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e67a3c298a153360228cc1051633c5164692cc786afb6a4a9102b19787e5bc74",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/setjmp/x32/setjmp.s",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e67a3c298a153360228cc1051633c5164692cc786afb6a4a9102b19787e5bc74",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/setjmp/x86_64/longjmp.s",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e67a3c298a153360228cc1051633c5164692cc786afb6a4a9102b19787e5bc74",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/setjmp/x86_64/setjmp.s",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e67a3c298a153360228cc1051633c5164692cc786afb6a4a9102b19787e5bc74",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1342,
+      "path": "musl-1.2.5/src/stdlib/qsort.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8095fd5bdc520e0b8688763e208e4f8ef7690ede2134c89860db4f685ca9e3af",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 181,
+      "path": "musl-1.2.5/src/string/aarch64/memcpy.S",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "4017d17e63ef68de2bfde8aca89cab11ec6241cbc1399b3d43448aa38013e8c6",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 212,
+      "path": "musl-1.2.5/src/string/aarch64/memset.S",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "005ece6f3b672580ac03451836f97e0bf459653b9e4cee97a567ed580bd98c58",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 1928,
+      "path": "musl-1.2.5/src/string/arm/memcpy.S",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "47ae1e4c6730fc9531d54275815bf7341ef9f2d7bfa98bc8606784e6be046d95",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/thread/x32/__set_thread_area.s",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e67a3c298a153360228cc1051633c5164692cc786afb6a4a9102b19787e5bc74",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/thread/x32/__unmapself.s",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e67a3c298a153360228cc1051633c5164692cc786afb6a4a9102b19787e5bc74",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/thread/x86_64/__set_thread_area.s",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e67a3c298a153360228cc1051633c5164692cc786afb6a4a9102b19787e5bc74",
+      "source": "musl-1.2.5.tar.gz"
+    },
+    {
+      "bytes": 80,
+      "path": "musl-1.2.5/src/thread/x86_64/__unmapself.s",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "e67a3c298a153360228cc1051633c5164692cc786afb6a4a9102b19787e5bc74",
+      "source": "musl-1.2.5.tar.gz"
+    }
+  ],
+  "origin": "musl",
+  "schema": 1
+}

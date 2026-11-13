@@ -1,0 +1,117 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * A tiny 'top' utility.
+ *
+ * This is written specifically for the linux /proc/<PID>/stat(m)
+ * files format.
+ *
+ * This reads the PIDs of all processes and their status and shows
+ * the status of processes (first ones that fit to screen) at given
+ * intervals.
+ *
+ * NOTES:
+ * - At startup this changes to /proc, all the reads are then
+ *   relative to that.
+ *
+ * (C) Eero Tamminen <oak at welho dot com>
+ *
+ * Rewritten by Vladimir Oleynik (C) 2002 <dzo@simtreas.ru>
+ *
+ * Sept 2008: Vineet Gupta <vineet.gupta@arc.com>
+ * Added Support for reporting SMP Information
+ * - CPU where process was last seen running
+ *   (to see effect of sched_setaffinity() etc)
+ * - CPU time split (idle/IO/wait etc) per CPU
+ *
+ * Copyright (c) 1992 Branko Lankester
+ * Copyright (c) 1992 Roger Binns
+ * Copyright (C) 1994-1996 Charles L. Blake.
+ * Copyright (C) 1992-1998 Michael K. Johnson
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+/* How to snapshot /proc for debugging top problems:
+ * for f in /proc/[0-9]*""/stat; do
+ *         n=${f#/proc/}
+ *         n=${n%/stat}_stat
+ *         cp $f $n
+ * done
+ * cp /proc/stat /proc/meminfo /proc/loadavg .
+ * top -bn1 >top.out
+ *
+ * ...and how to run top on it on another machine:
+ * rm -rf proc; mkdir proc
+ * for f in [0-9]*_stat; do
+ *         p=${f%_stat}
+ *         mkdir -p proc/$p
+ *         cp $f proc/$p/stat
+ * done
+ * cp stat meminfo loadavg proc
+ * chroot . ./top -bn1 >top1.out
+ */
+//config:config TOP
+//config:	bool "top (18 kb)"
+//config:	default y
+//config:	help
+//config:	The top program provides a dynamic real-time view of a running
+//config:	system.
+//config:
+//config:config FEATURE_TOP_INTERACTIVE
+//config:	bool "Accept keyboard commands"
+//config:	default y
+//config:	depends on TOP
+//config:	help
+//config:	Without this, top will only refresh display every 5 seconds.
+//config:	No keyboard commands will work, only ^C to terminate.
+//config:
+//config:config FEATURE_TOP_CPU_USAGE_PERCENTAGE
+//config:	bool "Show CPU per-process usage percentage"
+//config:	default y
+//config:	depends on TOP
+//config:	help
+//config:	Make top display CPU usage for each process.
+//config:	This adds about 2k.
+//config:
+//config:config FEATURE_TOP_CPU_GLOBAL_PERCENTS
+//config:	bool "Show CPU global usage percentage"
+//config:	default y
+//config:	depends on FEATURE_TOP_CPU_USAGE_PERCENTAGE
+//config:	help
+//config:	Makes top display "CPU: NN% usr NN% sys..." line.
+//config:	This adds about 0.5k.
+//config:
+//config:config FEATURE_TOP_SMP_CPU
+//config:	bool "SMP CPU usage display ('c' key)"
+//config:	default y
+//config:	depends on FEATURE_TOP_CPU_GLOBAL_PERCENTS
+//config:	help
+//config:	Allow 'c' key to switch between individual/cumulative CPU stats
+//config:	This adds about 0.5k.
+//config:
+//config:config FEATURE_TOP_DECIMALS
+//config:	bool "Show 1/10th of a percent in CPU/mem statistics"
+//config:	default y
+//config:	depends on FEATURE_TOP_CPU_USAGE_PERCENTAGE
+//config:	help
+//config:	Show 1/10th of a percent in CPU/mem statistics.
+//config:	This adds about 0.3k.
+//config:
+//config:config FEATURE_TOP_SMP_PROCESS
+//config:	bool "Show CPU process runs on ('j' field)"
+//config:	default y
+//config:	depends on TOP
+//config:	help
+//config:	Show CPU where process was last found running on.
+//config:	This is the 'j' field.
+//config:
+//config:config FEATURE_TOPMEM
+//config:	bool "Topmem command ('s' key)"
+//config:	default y
+//config:	depends on TOP
+//config:	help
+//config:	Enable 's' in top (gives lots of memory info).
+
+//applet:IF_TOP(APPLET(top, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TOP) += top.o
+

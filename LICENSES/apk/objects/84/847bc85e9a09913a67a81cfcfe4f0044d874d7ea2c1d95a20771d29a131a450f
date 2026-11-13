@@ -1,0 +1,169 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini syslogd implementation for busybox
+ *
+ * Copyright (C) 1999-2004 by Erik Andersen <andersen@codepoet.org>
+ *
+ * Copyright (C) 2000 by Karl M. Hegbloom <karlheg@debian.org>
+ *
+ * "circular buffer" Copyright (C) 2001 by Gennady Feldman <gfeldman@gena01.com>
+ *
+ * Maintainer: Gennady Feldman <gfeldman@gena01.com> as of Mar 12, 2001
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config SYSLOGD
+//config:	bool "syslogd (14 kb)"
+//config:	default y
+//config:	help
+//config:	The syslogd utility is used to record logs of all the
+//config:	significant events that occur on a system. Every
+//config:	message that is logged records the date and time of the
+//config:	event, and will generally also record the name of the
+//config:	application that generated the message. When used in
+//config:	conjunction with klogd, messages from the Linux kernel
+//config:	can also be recorded. This is terribly useful,
+//config:	especially for finding what happened when something goes
+//config:	wrong. And something almost always will go wrong if
+//config:	you wait long enough....
+//config:
+//config:config FEATURE_ROTATE_LOGFILE
+//config:	bool "Rotate message files"
+//config:	default y
+//config:	depends on SYSLOGD
+//config:	help
+//config:	This enables syslogd to rotate the message files
+//config:	on his own. No need to use an external rotate script.
+//config:
+//config:config FEATURE_REMOTE_LOG
+//config:	bool "Remote Log support"
+//config:	default y
+//config:	depends on SYSLOGD
+//config:	help
+//config:	When you enable this feature, the syslogd utility can
+//config:	be used to send system log messages to another system
+//config:	connected via a network. This allows the remote
+//config:	machine to log all the system messages, which can be
+//config:	terribly useful for reducing the number of serial
+//config:	cables you use. It can also be a very good security
+//config:	measure to prevent system logs from being tampered with
+//config:	by an intruder.
+//config:
+//config:config FEATURE_SYSLOGD_DUP
+//config:	bool "Support -D (drop dups) option"
+//config:	default y
+//config:	depends on SYSLOGD
+//config:	help
+//config:	Option -D instructs syslogd to drop consecutive messages
+//config:	which are totally the same.
+//config:
+//config:config FEATURE_SYSLOGD_CFG
+//config:	bool "Support syslog.conf"
+//config:	default y
+//config:	depends on SYSLOGD
+//config:	help
+//config:	Supports restricted syslogd config. See docs/syslog.conf.txt
+//config:
+//config:config FEATURE_SYSLOGD_PRECISE_TIMESTAMPS
+//config:	bool "Include milliseconds in timestamps"
+//config:	default n
+//config:	depends on SYSLOGD
+//config:	help
+//config:	Includes milliseconds (HH:MM:SS.mmm) in timestamp when
+//config:	timestamps are added.
+//config:
+//config:config FEATURE_SYSLOGD_READ_BUFFER_SIZE
+//config:	int "Read buffer size in bytes"
+//config:	default 256
+//config:	range 256 20000
+//config:	depends on SYSLOGD
+//config:	help
+//config:	This option sets the size of the syslog read buffer.
+//config:	Actual memory usage increases around five times the
+//config:	change done here.
+//config:
+//config:config FEATURE_IPC_SYSLOG
+//config:	bool "Circular Buffer support"
+//config:	default y
+//config:	depends on SYSLOGD
+//config:	help
+//config:	When you enable this feature, the syslogd utility will
+//config:	use a circular buffer to record system log messages.
+//config:	When the buffer is filled it will continue to overwrite
+//config:	the oldest messages. This can be very useful for
+//config:	systems with little or no permanent storage, since
+//config:	otherwise system logs can eventually fill up your
+//config:	entire filesystem, which may cause your system to
+//config:	break badly.
+//config:
+//config:config FEATURE_IPC_SYSLOG_BUFFER_SIZE
+//config:	int "Circular buffer size in Kbytes (minimum 4KB)"
+//config:	default 16
+//config:	range 4 2147483647
+//config:	depends on FEATURE_IPC_SYSLOG
+//config:	help
+//config:	This option sets the size of the circular buffer
+//config:	used to record system log messages.
+//config:
+//config:config FEATURE_KMSG_SYSLOG
+//config:	bool "Linux kernel printk buffer support"
+//config:	default y
+//config:	depends on SYSLOGD
+//config:	help
+//config:	When you enable this feature, the syslogd utility will
+//config:	write system log message to the Linux kernel's printk buffer.
+//config:	This can be used as a smaller alternative to the syslogd IPC
+//config:	support, as klogd and logread aren't needed.
+//config:
+//config:	NOTICE: Syslog facilities in log entries needs kernel 3.5+.
+
+//applet:IF_SYSLOGD(APPLET(syslogd, BB_DIR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_SYSLOGD) += syslogd_and_logger.o
+
+//usage:#define syslogd_trivial_usage
+//usage:       "[OPTIONS]"
+//usage:#define syslogd_full_usage "\n\n"
+//usage:       "System logging utility\n"
+//usage:	IF_NOT_FEATURE_SYSLOGD_CFG(
+//usage:       "(this version of syslogd ignores /etc/syslog.conf)\n"
+//usage:	)
+//usage:     "\n	-n		Run in foreground"
+//usage:	IF_FEATURE_REMOTE_LOG(
+//usage:     "\n	-R HOST[:PORT]	Log to HOST:PORT (default PORT:514)"
+//usage:     "\n	-L		Log locally and via network (default is network only if -R)"
+//usage:	)
+//usage:	IF_FEATURE_IPC_SYSLOG(
+/* NB: -Csize shouldn't have space (because size is optional) */
+//usage:     "\n	-C[size_kb]	Log to shared mem buffer (use logread to read it)"
+//usage:	)
+//usage:	IF_FEATURE_KMSG_SYSLOG(
+//usage:     "\n	-K		Log to kernel printk buffer (use dmesg to read it)"
+//usage:	)
+//usage:     "\n	-O FILE		Log to FILE (default: /var/log/messages, stdout if -)"
+//usage:	IF_FEATURE_ROTATE_LOGFILE(
+//usage:     "\n	-s SIZE		Max size (KB) before rotation (default 200KB, 0=off)"
+//usage:     "\n	-b N		N rotated logs to keep (default 1, max 99, 0=purge)"
+//usage:	)
+//usage:     "\n	-l N		Log only messages more urgent than prio N (1-8)"
+//usage:     "\n	-S		Smaller output"
+//usage:     "\n	-t		Strip client-generated timestamps"
+//usage:	IF_FEATURE_SYSLOGD_DUP(
+//usage:     "\n	-D		Drop duplicates"
+//usage:	)
+//usage:	IF_FEATURE_SYSLOGD_CFG(
+//usage:     "\n	-f FILE		Use FILE as config (default:/etc/syslog.conf)"
+//usage:	)
+/* //usage:  "\n	-m MIN		Minutes between MARK lines (default 20, 0=off)" */
+//usage:
+//usage:#define syslogd_example_usage
+//usage:       "$ syslogd -R masterlog:514\n"
+//usage:       "$ syslogd -R 192.168.1.1:601\n"
+
+/*
+ * Done in syslogd_and_logger.c:
+#include "libbb.h"
+#define SYSLOG_NAMES
+#define SYSLOG_NAMES_CONST
+#include <syslog.h>
+*/

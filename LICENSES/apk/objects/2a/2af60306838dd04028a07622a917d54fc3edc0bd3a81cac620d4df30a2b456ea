@@ -1,0 +1,70 @@
+#! /usr/bin/env perl
+# Copyright 2010-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# January 2010
+#
+# "Teaser" Montgomery multiplication module for IA-64. There are
+# several possibilities for improvement:
+#
+# - modulo-scheduling outer loop would eliminate quite a number of
+#   stalls after ldf8, xma and getf.sig outside inner loop and
+#   improve shorter key performance;
+# - shorter vector support [with input vectors being fetched only
+#   once] should be added;
+# - 2x unroll with help of n0[1] would make the code scalable on
+#   "wider" IA-64, "wider" than Itanium 2 that is, which is not of
+#   acute interest, because upcoming Tukwila's individual cores are
+#   reportedly based on Itanium 2 design;
+# - dedicated squaring procedure(?);
+#
+# January 2010
+#
+# Shorter vector support is implemented by zero-padding ap and np
+# vectors up to 8 elements, or 512 bits. This means that 256-bit
+# inputs will be processed only 2 times faster than 512-bit inputs,
+# not 4 [as one would expect, because algorithm complexity is n^2].
+# The reason for padding is that inputs shorter than 512 bits won't
+# be processed faster anyway, because minimal critical path of the
+# core loop happens to match 512-bit timing. Either way, it resulted
+# in >100% improvement of 512-bit RSA sign benchmark and 50% - of
+# 1024-bit one [in comparison to original version of *this* module].
+#
+# So far 'openssl speed rsa dsa' output on 900MHz Itanium 2 *with*
+# this module is:
+#                   sign    verify    sign/s verify/s
+# rsa  512 bits 0.000290s 0.000024s   3452.8  42031.4
+# rsa 1024 bits 0.000793s 0.000058s   1261.7  17172.0
+# rsa 2048 bits 0.005908s 0.000148s    169.3   6754.0
+# rsa 4096 bits 0.033456s 0.000469s     29.9   2133.6
+# dsa  512 bits 0.000253s 0.000198s   3949.9   5057.0
+# dsa 1024 bits 0.000585s 0.000607s   1708.4   1647.4
+# dsa 2048 bits 0.001453s 0.001703s    688.1    587.4
+#
+# ... and *without* (but still with ia64.S):
+#
+# rsa  512 bits 0.000670s 0.000041s   1491.8  24145.5
+# rsa 1024 bits 0.001988s 0.000080s    502.9  12499.3
+# rsa 2048 bits 0.008702s 0.000189s    114.9   5293.9
+# rsa 4096 bits 0.043860s 0.000533s     22.8   1875.9
+# dsa  512 bits 0.000441s 0.000427s   2265.3   2340.6
+# dsa 1024 bits 0.000823s 0.000867s   1215.6   1153.2
+# dsa 2048 bits 0.001894s 0.002179s    528.1    458.9
+#
+# As it can be seen, RSA sign performance improves by 130-30%,
+# hereafter less for longer keys, while verify - by 74-13%.
+# DSA performance improves by 115-30%.
+
+# $output is the last argument if it looks like a file (it has an extension)

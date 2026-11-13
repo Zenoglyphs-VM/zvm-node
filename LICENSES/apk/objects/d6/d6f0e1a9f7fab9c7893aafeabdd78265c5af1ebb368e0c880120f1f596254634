@@ -1,0 +1,13 @@
+/*
+ * Hardware-accelerated CRC-32 variants for Linux on z Systems
+ *
+ * Use the z/Architecture Vector Extension Facility to accelerate the
+ * computing of bitreflected CRC-32 checksums.
+ *
+ * This CRC-32 implementation algorithm is bitreflected and processes
+ * the least-significant bit first (Little-Endian).
+ *
+ * This code was originally written by Hendrik Brueckner
+ * <brueckner@linux.vnet.ibm.com> for use in the Linux kernel and has been
+ * relicensed under the zlib license.
+ */

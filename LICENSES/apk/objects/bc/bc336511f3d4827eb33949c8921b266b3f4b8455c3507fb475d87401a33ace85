@@ -1,0 +1,32 @@
+#! /usr/bin/env perl
+# Copyright 2009-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# AES for PA-RISC.
+#
+# June 2009.
+#
+# The module is mechanical transliteration of aes-sparcv9.pl, but with
+# a twist: S-boxes are compressed even further down to 1K+256B. On
+# PA-7100LC performance is ~40% better than gcc 3.2 generated code and
+# is about 33 cycles per byte processed with 128-bit key. Newer CPUs
+# perform at 16 cycles per byte. It's not faster than code generated
+# by vendor compiler, but recall that it has compressed S-boxes, which
+# requires extra processing.
+#
+# Special thanks to polarhome.com for providing HP-UX account.
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

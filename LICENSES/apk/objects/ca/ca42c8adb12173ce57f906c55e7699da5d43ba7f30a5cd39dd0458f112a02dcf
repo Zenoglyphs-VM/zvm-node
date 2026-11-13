@@ -1,0 +1,110 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini ps implementation(s) for busybox
+ *
+ * Copyright (C) 1999-2004 by Erik Andersen <andersen@codepoet.org>
+ * Fix for SELinux Support:(c)2007 Hiroshi Shinji <shiroshi@my.email.ne.jp>
+ *                         (c)2007 Yuichi Nakamura <ynakam@hitachisoft.jp>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config PS
+//config:	bool "ps (12 kb)"
+//config:	default y
+//config:	help
+//config:	ps gives a snapshot of the current processes.
+//config:
+//config:config FEATURE_PS_WIDE
+//config:	bool "Enable wide output (-w)"
+//config:	default y
+//config:	depends on (PS || MINIPS) && !DESKTOP
+//config:	help
+//config:	Support argument 'w' for wide output.
+//config:	If given once, 132 chars are printed, and if given more
+//config:	than once, the length is unlimited.
+//config:
+//config:config FEATURE_PS_LONG
+//config:	bool "Enable long output (-l)"
+//config:	default y
+//config:	depends on (PS || MINIPS) && !DESKTOP
+//config:	help
+//config:	Support argument 'l' for long output.
+//config:	Adds fields PPID, RSS, START, TIME & TTY
+//config:
+//config:config FEATURE_PS_TIME
+//config:	bool "Enable -o time and -o etime specifiers"
+//config:	default y
+//config:	depends on (PS || MINIPS) && DESKTOP
+//config:
+//config:config FEATURE_PS_UNUSUAL_SYSTEMS
+//config:	bool "Support Linux prior to 2.4.0 and non-ELF systems"
+//config:	default n
+//config:	depends on FEATURE_PS_TIME
+//config:	help
+//config:	Include support for measuring HZ on old kernels and non-ELF systems
+//config:	(if you are on Linux 2.4.0+ and use ELF, you don't need this)
+//config:
+//config:config FEATURE_PS_ADDITIONAL_COLUMNS
+//config:	bool "Enable -o rgroup, -o ruser, -o nice specifiers"
+//config:	default y
+//config:	depends on (PS || MINIPS) && DESKTOP
+
+//                 APPLET_NOEXEC:name    main location    suid_type     help
+//applet:IF_PS(    APPLET_NOEXEC(ps,     ps,  BB_DIR_BIN, BB_SUID_DROP, ps))
+//applet:IF_MINIPS(APPLET_NOEXEC(minips, ps,  BB_DIR_BIN, BB_SUID_DROP, ps))
+
+//kbuild:lib-$(CONFIG_PS) += ps.o
+//kbuild:lib-$(CONFIG_MINIPS) += ps.o
+
+//usage:#if ENABLE_DESKTOP
+//usage:
+//usage:#define ps_trivial_usage
+//usage:       "[-o COL1,COL2=HEADER]" IF_FEATURE_SHOW_THREADS(" [-T]")
+//usage:#define ps_full_usage "\n\n"
+//usage:       "Show list of processes\n"
+//usage:     "\n	-o COL1,COL2=HEADER	Select columns for display"
+//usage:	IF_FEATURE_SHOW_THREADS(
+//usage:     "\n	-T			Show threads"
+//usage:	)
+//usage:
+//usage:#else /* !ENABLE_DESKTOP */
+//usage:
+//usage:#if !ENABLE_SELINUX && !ENABLE_FEATURE_PS_WIDE
+//usage:#define USAGE_PS "\nThis version of ps accepts no options"
+//usage:#else
+//usage:#define USAGE_PS ""
+//usage:#endif
+//usage:
+//usage:#define ps_trivial_usage
+//usage:       ""
+//usage:#define ps_full_usage "\n\n"
+//usage:       "Show list of processes\n"
+//usage:	USAGE_PS
+//usage:	IF_SELINUX(
+//usage:     "\n	-Z	Show selinux context"
+//usage:	)
+//usage:	IF_FEATURE_PS_WIDE(
+//usage:     "\n	w	Wide output"
+//usage:	)
+//usage:	IF_FEATURE_PS_LONG(
+//usage:     "\n	l	Long output"
+//usage:	)
+//usage:	IF_FEATURE_SHOW_THREADS(
+//usage:     "\n	T	Show threads"
+//usage:	)
+//usage:
+//usage:#endif /* ENABLE_DESKTOP */
+//usage:
+//usage:#define ps_example_usage
+//usage:       "$ ps\n"
+//usage:       "  PID  Uid      Gid State Command\n"
+//usage:       "    1 root     root     S init\n"
+//usage:       "    2 root     root     S [kflushd]\n"
+//usage:       "    3 root     root     S [kupdate]\n"
+//usage:       "    4 root     root     S [kpiod]\n"
+//usage:       "    5 root     root     S [kswapd]\n"
+//usage:       "  742 andersen andersen S [bash]\n"
+//usage:       "  743 andersen andersen S -bash\n"
+//usage:       "  745 root     root     S [getty]\n"
+//usage:       " 2990 andersen andersen R ps\n"
+

@@ -1,0 +1,26 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * shows keys pressed. inspired by kbd package
+ *
+ * Copyright (C) 2008 by Vladimir Dronnikov <dronnikov@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config SHOWKEY
+//config:	bool "showkey (4.9 kb)"
+//config:	default y
+//config:	help
+//config:	Shows keys pressed.
+
+//applet:IF_SHOWKEY(APPLET(showkey, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_SHOWKEY) += showkey.o
+
+//usage:#define showkey_trivial_usage
+//usage:       "[-a | -k | -s]"
+//usage:#define showkey_full_usage "\n\n"
+//usage:       "Show keys pressed\n"
+//usage:     "\n	-a	Display decimal/octal/hex values of the keys"
+//usage:     "\n	-k	Display interpreted keycodes (default)"
+//usage:     "\n	-s	Display raw scan-codes"
+

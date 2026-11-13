@@ -1,0 +1,5 @@
+/* SHA256 and SHA512-based Unix crypt implementation.
+ * Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.
+ */
+
+/* Prefix for optional rounds specification.  */

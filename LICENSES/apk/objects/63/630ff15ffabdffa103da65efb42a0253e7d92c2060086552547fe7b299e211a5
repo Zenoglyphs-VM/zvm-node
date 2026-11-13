@@ -1,0 +1,49 @@
+/*
+ * Copyright 2018-2022 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * Contemporary compilers implement lock-free atomic memory access
+ * primitives that facilitate writing "thread-opportunistic" or even real
+ * multi-threading low-overhead code. "Thread-opportunistic" is when
+ * exact result is not required, e.g. some statistics, or execution flow
+ * doesn't have to be unambiguous. Simplest example is lazy "constant"
+ * initialization when one can synchronize on variable itself, e.g.
+ *
+ * if (var == NOT_YET_INITIALIZED)
+ *     var = function_returning_same_value();
+ *
+ * This does work provided that loads and stores are single-instruction
+ * operations (and integer ones are on *all* supported platforms), but
+ * it upsets Thread Sanitizer. Suggested solution is
+ *
+ * if (tsan_load(&var) == NOT_YET_INITIALIZED)
+ *     tsan_store(&var, function_returning_same_value());
+ *
+ * Production machine code would be the same, so one can wonder why
+ * bother. Having Thread Sanitizer accept "thread-opportunistic" code
+ * allows to move on trouble-shooting real bugs.
+ *
+ * Resolving Thread Sanitizer nits was the initial purpose for this module,
+ * but it was later extended with more nuanced primitives that are useful
+ * even in "non-opportunistic" scenarios. Most notably verifying if a shared
+ * structure is fully initialized and bypassing the initialization lock.
+ * It's suggested to view macros defined in this module as "annotations" for
+ * thread-safe lock-free code, "Thread-Safe ANnotations"...
+ *
+ * It's assumed that ATOMIC_{LONG|INT}_LOCK_FREE are assigned same value as
+ * ATOMIC_POINTER_LOCK_FREE. And check for >= 2 ensures that corresponding
+ * code is inlined. It should be noted that statistics counters become
+ * accurate in such case.
+ *
+ * Special note about TSAN_QUALIFIER. It might be undesired to use it in
+ * a shared header. Because whether operation on specific variable or member
+ * is atomic or not might be irrelevant in other modules. In such case one
+ * can use TSAN_QUALIFIER in cast specifically when it has to count.
+ */
+

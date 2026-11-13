@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Block ifup until DAD completion
+# Copyright (c) 2016-2018 Kaarle Ritvanen
+

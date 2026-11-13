@@ -1,0 +1,34 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * lsattr.c		- List file attributes on an ext2 file system
+ *
+ * Copyright (C) 1993, 1994  Remy Card <card@masi.ibp.fr>
+ *                           Laboratoire MASI, Institut Blaise Pascal
+ *                           Universite Pierre et Marie Curie (Paris VI)
+ *
+ * This file can be redistributed under the terms of the GNU General
+ * Public License
+ */
+//config:config LSATTR
+//config:	bool "lsattr (5.7 kb)"
+//config:	default y
+//config:	help
+//config:	lsattr lists the file attributes on a second extended file system.
+
+//applet:IF_LSATTR(APPLET_NOEXEC(lsattr, lsattr, BB_DIR_BIN, BB_SUID_DROP, lsattr))
+/* ls is NOEXEC, so we should be too! ;) */
+
+//kbuild:lib-$(CONFIG_LSATTR) += lsattr.o e2fs_lib.o
+
+//usage:#define lsattr_trivial_usage
+//usage:       "[-Radlpv] [FILE]..."
+//usage:#define lsattr_full_usage "\n\n"
+//usage:       "List ext2 file attributes\n"
+//usage:     "\n	-R	Recurse"
+//usage:     "\n	-a	Include names starting with ."
+//usage:     "\n	-d	List directory names, not contents"
+// -a,-d text should match ls --help
+//usage:     "\n	-l	List long flag names"
+//usage:     "\n	-p	List project ID"
+//usage:     "\n	-v	List version/generation number"
+

@@ -1,0 +1,47 @@
+/* gzlog.h
+  Copyright (C) 2004, 2008, 2012 Mark Adler, all rights reserved
+  version 2.2, 14 Aug 2012
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the author be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+
+  Mark Adler    madler@alumni.caltech.edu
+ */
+
+/* Version History:
+   1.0  26 Nov 2004  First version
+   2.0  25 Apr 2008  Complete redesign for recovery of interrupted operations
+                     Interface changed slightly in that now path is a prefix
+                     Compression now occurs as needed during gzlog_write()
+                     gzlog_write() now always leaves the log file as valid gzip
+   2.1   8 Jul 2012  Fix argument checks in gzlog_compress() and gzlog_write()
+   2.2  14 Aug 2012  Clean up signed comparisons
+ */
+
+/*
+   The gzlog object allows writing short messages to a gzipped log file,
+   opening the log file locked for small bursts, and then closing it.  The log
+   object works by appending stored (uncompressed) data to the gzip file until
+   1 MB has been accumulated.  At that time, the stored data is compressed, and
+   replaces the uncompressed data in the file.  The log file is truncated to
+   its new size at that time.  After each write operation, the log file is a
+   valid gzip file that can decompressed to recover what was written.
+
+   The gzlog operations can be interrupted at any point due to an application or
+   system crash, and the log file will be recovered the next time the log is
+   opened with gzlog_open().
+ */
+

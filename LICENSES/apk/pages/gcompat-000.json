@@ -1,0 +1,34 @@
+{
+  "notices": [
+    {
+      "bytes": 1618,
+      "path": "gcompat-1.1.0/LICENSE",
+      "selectionScope": "ARCHIVE_NOTICE_FILE",
+      "sha256": "f4c84f1cbf38c025a0448add9888b280a7a391d2cc736a0e0226249881f1d8f7",
+      "source": "gcompat-1.1.0.tar.gz"
+    },
+    {
+      "bytes": 1145,
+      "path": "gcompat-1.1.0/libgcompat/malloc.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "76e45e52e61de4c53f86505cd785443348ae04fe5e744660bdceaca38d4d8d18",
+      "source": "gcompat-1.1.0.tar.gz"
+    },
+    {
+      "bytes": 1399,
+      "path": "gcompat-1.1.0/libgcompat/random_r.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "8266adeca64d6b56627005fd1924f133e512c519a84450edc259ea5a1ba85528",
+      "source": "gcompat-1.1.0.tar.gz"
+    },
+    {
+      "bytes": 542,
+      "path": "gcompat-1.1.0/loader/loader.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "65e76646c844d687ab592eba9efc0c1d2c01aa83e377e24f3023e8325b18a4e3",
+      "source": "gcompat-1.1.0.tar.gz"
+    }
+  ],
+  "origin": "gcompat",
+  "schema": 1
+}

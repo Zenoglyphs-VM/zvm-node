@@ -1,0 +1,114 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * fsck.c - a file system consistency checker for Linux.
+ *
+ * (C) 1991, 1992 Linus Torvalds.
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+
+/*
+ * 09.11.91  -  made the first rudimentary functions
+ *
+ * 10.11.91  -  updated, does checking, no repairs yet.
+ *		Sent out to the mailing-list for testing.
+ *
+ * 14.11.91  -  Testing seems to have gone well. Added some
+ *		correction-code, and changed some functions.
+ *
+ * 15.11.91  -  More correction code. Hopefully it notices most
+ *		cases now, and tries to do something about them.
+ *
+ * 16.11.91  -  More corrections (thanks to Mika Jalava). Most
+ *		things seem to work now. Yeah, sure.
+ *
+ * 19.04.92  -  Had to start over again from this old version, as a
+ *		kernel bug ate my enhanced fsck in february.
+ *
+ * 28.02.93  -  added support for different directory entry sizes..
+ *
+ * Sat Mar  6 18:59:42 1993, faith@cs.unc.edu: Output namelen with
+ *                           superblock information
+ *
+ * Sat Oct  9 11:17:11 1993, faith@cs.unc.edu: make exit status conform
+ *                           to that required by fsutil
+ *
+ * Mon Jan  3 11:06:52 1994 - Dr. Wettstein (greg%wind.uucp@plains.nodak.edu)
+ *                            Added support for file system valid flag.  Also
+ *                            added program_version variable and output of
+ *                            program name and version number when program
+ *                            is executed.
+ *
+ * 30.10.94  - added support for v2 filesystem
+ *             (Andreas Schwab, schwab@issan.informatik.uni-dortmund.de)
+ *
+ * 10.12.94  - added test to prevent checking of mounted fs adapted
+ *             from Theodore Ts'o's (tytso@athena.mit.edu) e2fsck
+ *             program.  (Daniel Quinlan, quinlan@yggdrasil.com)
+ *
+ * 01.07.96  - Fixed the v2 fs stuff to use the right #defines and such
+ *             for modern libcs (janl@math.uio.no, Nicolai Langfeldt)
+ *
+ * 02.07.96  - Added C bit fiddling routines from rmk@ecs.soton.ac.uk
+ *             (Russell King).  He made them for ARM.  It would seem
+ *             that the ARM is powerful enough to do this in C whereas
+ *             i386 and m64k must use assembly to get it fast >:-)
+ *             This should make minix fsck system-independent.
+ *             (janl@math.uio.no, Nicolai Langfeldt)
+ *
+ * 04.11.96  - Added minor fixes from Andreas Schwab to avoid compiler
+ *             warnings.  Added mc68k bitops from
+ *             Joerg Dorchain <dorchain@mpi-sb.mpg.de>.
+ *
+ * 06.11.96  - Added v2 code submitted by Joerg Dorchain, but written by
+ *             Andreas Schwab.
+ *
+ * 1999-02-22 Arkadiusz Mickiewicz <misiek@misiek.eu.org>
+ * - added Native Language Support
+ *
+ *
+ * I've had no time to add comments - hopefully the function names
+ * are comments enough. As with all file system checkers, this assumes
+ * the file system is quiescent - don't use it on a mounted device
+ * unless you can be sure nobody is writing to it (and remember that the
+ * kernel can write to it when it searches for files).
+ *
+ * Usage: fsck [-larvsm] device
+ *	-l for a listing of all the filenames
+ *	-a for automatic repairs (not implemented)
+ *	-r for repairs (interactive) (not implemented)
+ *	-v for verbose (tells how many files)
+ *	-s for superblock info
+ *	-m for minix-like "mode not cleared" warnings
+ *	-f force filesystem check even if filesystem marked as valid
+ *
+ * The device may be a block device or a image of one, but this isn't
+ * enforced (but it's not much fun on a character device :-).
+ */
+//config:config FSCK_MINIX
+//config:	bool "fsck.minix (13 kb)"
+//config:	default y
+//config:	help
+//config:	The minix filesystem is a nice, small, compact, read-write filesystem
+//config:	with little overhead. It is not a journaling filesystem however and
+//config:	can experience corruption if it is not properly unmounted or if the
+//config:	power goes off in the middle of a write. This utility allows you to
+//config:	check for and attempt to repair any corruption that occurs to a minix
+//config:	filesystem.
+
+//applet:IF_FSCK_MINIX(APPLET_ODDNAME(fsck.minix, fsck_minix, BB_DIR_SBIN, BB_SUID_DROP, fsck_minix))
+
+//kbuild:lib-$(CONFIG_FSCK_MINIX) += fsck_minix.o
+
+//usage:#define fsck_minix_trivial_usage
+//usage:       "[-larvsmf] BLOCKDEV"
+//usage:#define fsck_minix_full_usage "\n\n"
+//usage:       "Check MINIX filesystem\n"
+//usage:     "\n	-l	List all filenames"
+//usage:     "\n	-r	Perform interactive repairs"
+//usage:     "\n	-a	Perform automatic repairs"
+//usage:     "\n	-v	Verbose"
+//usage:     "\n	-s	Output superblock information"
+//usage:     "\n	-m	Show \"mode not cleared\" warnings"
+//usage:     "\n	-f	Force file system check"
+

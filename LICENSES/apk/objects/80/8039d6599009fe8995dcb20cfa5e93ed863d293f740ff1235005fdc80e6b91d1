@@ -1,0 +1,20 @@
+/*
+ * Copyright (c) 2017 Denys Vlasenko <vda.linux@googlemail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config NUKE
+//config:	bool "nuke (2.9 kb)"
+//config:	default n  # off by default: too "accidentally destructive"
+//config:	help
+//config:	Alias to "rm -rf".
+
+//applet:IF_NUKE(APPLET_NOEXEC(nuke, nuke, BB_DIR_BIN, BB_SUID_DROP, nuke))
+
+//kbuild:lib-$(CONFIG_NUKE) += nuke.o
+
+//usage:#define nuke_trivial_usage
+//usage:       "DIR..."
+//usage:#define nuke_full_usage "\n\n"
+//usage:       "Remove DIRs"
+

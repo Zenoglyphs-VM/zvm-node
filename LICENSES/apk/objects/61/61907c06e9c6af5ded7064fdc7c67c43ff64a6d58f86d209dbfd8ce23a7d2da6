@@ -1,0 +1,38 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini readlink implementation for busybox
+ *
+ * Copyright (C) 2000,2001 Matt Kraai <kraai@alumni.carnegiemellon.edu>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config READLINK
+//config:	bool "readlink (4.8 kb)"
+//config:	default y
+//config:	help
+//config:	This program reads a symbolic link and returns the name
+//config:	of the file it points to
+//config:
+//config:config FEATURE_READLINK_FOLLOW
+//config:	bool "Enable canonicalization by following all symlinks (-f)"
+//config:	default y
+//config:	depends on READLINK
+//config:	help
+//config:	Enable the readlink option (-f).
+
+//applet:IF_READLINK(APPLET_NOFORK(readlink, readlink, BB_DIR_USR_BIN, BB_SUID_DROP, readlink))
+
+//kbuild:lib-$(CONFIG_READLINK) += readlink.o
+
+//usage:#define readlink_trivial_usage
+//usage:	IF_FEATURE_READLINK_FOLLOW("[-fnv] ")
+//usage:	IF_NOT_FEATURE_READLINK_FOLLOW("[-n] ")
+//usage:	"FILE"
+//usage:#define readlink_full_usage "\n\n"
+//usage:       "Display the value of a symlink" "\n"
+//usage:     "\n	-n	Don't add newline"
+//usage:	IF_FEATURE_READLINK_FOLLOW(
+//usage:     "\n	-f	Canonicalize by following all symlinks"
+//usage:     "\n	-v	Verbose"
+//usage:	)
+

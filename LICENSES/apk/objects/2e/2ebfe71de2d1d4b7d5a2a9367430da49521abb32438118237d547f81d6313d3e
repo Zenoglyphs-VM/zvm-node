@@ -1,0 +1,71 @@
+#! /usr/bin/env perl
+# Copyright 2007-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# SHA256 block transform for x86. September 2007.
+#
+# Performance improvement over compiler generated code varies from
+# 10% to 40% [see below]. Not very impressive on some µ-archs, but
+# it's 5 times smaller and optimizes amount of writes.
+#
+# May 2012.
+#
+# Optimization including two of Pavel Semjanov's ideas, alternative
+# Maj and full unroll, resulted in ~20-25% improvement on most CPUs,
+# ~7% on Pentium, ~40% on Atom. As fully unrolled loop body is almost
+# 15x larger, 8KB vs. 560B, it's fired only for longer inputs. But not
+# on P4, where it kills performance, nor Sandy Bridge, where folded
+# loop is approximately as fast...
+#
+# June 2012.
+#
+# Add AMD XOP-specific code path, >30% improvement on Bulldozer over
+# May version, >60% over original. Add AVX+shrd code path, >25%
+# improvement on Sandy Bridge over May version, 60% over original.
+#
+# May 2013.
+#
+# Replace AMD XOP code path with SSSE3 to cover more processors.
+# (Biggest improvement coefficient is on upcoming Atom Silvermont,
+# not shown.) Add AVX+BMI code path.
+#
+# March 2014.
+#
+# Add support for Intel SHA Extensions.
+#
+# Performance in clock cycles per processed byte (less is better):
+#
+#		gcc	icc	x86 asm(*)	SIMD	x86_64 asm(**)
+# Pentium	46	57	40/38		-	-
+# PIII		36	33	27/24		-	-
+# P4		41	38	28		-	17.3
+# AMD K8	27	25	19/15.5		-	14.9
+# Core2		26	23	18/15.6		14.3	13.8
+# Westmere	27	-	19/15.7		13.4	12.3
+# Sandy Bridge	25	-	15.9		12.4	11.6
+# Ivy Bridge	24	-	15.0		11.4	10.3
+# Haswell	22	-	13.9		9.46	7.80
+# Skylake	20	-	14.9		9.50	7.70
+# Bulldozer	36	-	27/22		17.0	13.6
+# VIA Nano	36	-	25/22		16.8	16.5
+# Atom		50	-	30/25		21.9	18.9
+# Silvermont	40	-	34/31		22.9	20.6
+# Goldmont	29	-	20		16.3(***)
+#
+# (*)	numbers after slash are for unrolled loop, where applicable;
+# (**)	x86_64 assembly performance is presented for reference
+#	purposes, results are best-available;
+# (***)	SHAEXT result is 4.1, strangely enough better than 64-bit one;
+

@@ -1,0 +1,51 @@
+#! /usr/bin/env perl
+# Copyright 2012-2021 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by David S. Miller and Andy Polyakov.
+# The module is licensed under 2-clause BSD
+# license. October 2012. All rights reserved.
+# ====================================================================
+
+######################################################################
+# Camellia for SPARC T4.
+#
+# As with AES below results [for aligned data] are virtually identical
+# to critical path lengths for 3-cycle instruction latency:
+#
+#		128-bit key	192/256-
+# CBC encrypt	4.14/4.21(*)	5.46/5.52
+#			 (*) numbers after slash are for
+#			     misaligned data.
+#
+# As with Intel AES-NI, question is if it's possible to improve
+# performance of parallelizable modes by interleaving round
+# instructions. In Camellia every instruction is dependent on
+# previous, which means that there is place for 2 additional ones
+# in between two dependent. Can we expect 3x performance improvement?
+# At least one can argue that it should be possible to break 2x
+# barrier... For some reason not even 2x appears to be possible:
+#
+#		128-bit key	192/256-
+# CBC decrypt	2.21/2.74	2.99/3.40
+# CTR		2.15/2.68(*)	2.93/3.34
+#			 (*) numbers after slash are for
+#			     misaligned data.
+#
+# This is for 2x interleave. But compared to 1x interleave CBC decrypt
+# improved by ... 0% for 128-bit key, and 11% for 192/256-bit one.
+# So that out-of-order execution logic can take non-interleaved code
+# to 1.87x, but can't take 2x interleaved one any further. There
+# surely is some explanation... As result 3x interleave was not even
+# attempted. Instead an effort was made to share specific modes
+# implementations with AES module (therefore sparct4_modes.pl).
+#
+# To anchor to something else, software C implementation processes
+# one byte in 38 cycles with 128-bit key on same processor.
+

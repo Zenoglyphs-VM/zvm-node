@@ -1,0 +1,22 @@
+# Copyright 2016-2022 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+# Blank and comment lines ignored.
+#
+# The first line in each block takes the form:
+#
+#       <TLSA-count> <cert-count> <nonamechecks> <desired-verify-result> <desired-match-depth>
+#
+# It is followed by <TLSA-count> lines of the form:
+#
+#       <usage> <selector> <mtype> <hex-data>
+#
+# and finally, by <cert-count> certificates.
+
+# 1
+# Ensure TLSA with direct root works when peer chain provides a
+# cross-cert.

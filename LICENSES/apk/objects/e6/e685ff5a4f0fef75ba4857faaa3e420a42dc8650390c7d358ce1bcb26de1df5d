@@ -1,0 +1,36 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * route
+ *
+ * Similar to the standard Unix route, but with only the necessary
+ * parts for AF_INET and AF_INET6
+ *
+ * Bjorn Wesen, Axis Communications AB
+ *
+ * Author of the original route:
+ *              Fred N. van Kempen, <waltje@uwalt.nl.mugnet.org>
+ *              (derived from FvK's 'route.c     1.70    01/04/94')
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ *
+ * displayroute() code added by Vladimir N. Oleynik <dzo@simtreas.ru>
+ * adjustments by Larry Doolittle  <LRDoolittle@lbl.gov>
+ *
+ * IPV6 support added by Bart Visscher <magick@linux-fan.com>
+ */
+/* 2004/03/09  Manuel Novoa III <mjn3@codepoet.org>
+ *
+ * Rewritten to fix several bugs, add additional error checking, and
+ * remove ridiculous amounts of bloat.
+ */
+//config:config ROUTE
+//config:	bool "route (9 kb)"
+//config:	default y
+//config:	help
+//config:	Route displays or manipulates the kernel's IP routing tables.
+
+//applet:IF_ROUTE(APPLET(route, BB_DIR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_ROUTE) += route.o
+

@@ -1,0 +1,15 @@
+#!/usr/bin/perl -w
+# vi: set sw=4 ts=4:
+# Copyright (c) 2001 David Schleef <ds@schleef.org>
+# Copyright (c) 2001 Erik Andersen <andersen@codepoet.org>
+# Copyright (c) 2001 Stuart Hughes <seh@zee2.com>
+# Copyright (c) 2002 Steven J. Hill <shill@broadcom.com>
+# Copyright (c) 2006 Freescale Semiconductor, Inc <stuarth@freescale.com>
+#
+# History:
+# March 2006: Stuart Hughes <stuarth@freescale.com>.
+#             Significant updates, including implementing the '-F' option
+#             and adding support for 2.6 kernels.
+
+# This program is free software; you can redistribute it and/or modify it
+# under the same terms as Perl itself.

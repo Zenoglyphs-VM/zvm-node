@@ -1,0 +1,50 @@
+/* origin: OpenBSD /usr/src/lib/libm/src/ld80/e_tgammal.c */
+/*
+ * Copyright (c) 2008 Stephen L. Moshier <steve@moshier.net>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+/*
+ *      Gamma function
+ *
+ *
+ * SYNOPSIS:
+ *
+ * long double x, y, tgammal();
+ *
+ * y = tgammal( x );
+ *
+ *
+ * DESCRIPTION:
+ *
+ * Returns gamma function of the argument.  The result is
+ * correctly signed.
+ *
+ * Arguments |x| <= 13 are reduced by recurrence and the function
+ * approximated by a rational function of degree 7/8 in the
+ * interval (2,3).  Large arguments are handled by Stirling's
+ * formula. Large negative arguments are made positive using
+ * a reflection formula.
+ *
+ *
+ * ACCURACY:
+ *
+ *                      Relative error:
+ * arithmetic   domain     # trials      peak         rms
+ *    IEEE     -40,+40      10000       3.6e-19     7.9e-20
+ *    IEEE    -1755,+1755   10000       4.8e-18     6.5e-19
+ *
+ * Accuracy for large arguments is dominated by error in powl().
+ *
+ */
+

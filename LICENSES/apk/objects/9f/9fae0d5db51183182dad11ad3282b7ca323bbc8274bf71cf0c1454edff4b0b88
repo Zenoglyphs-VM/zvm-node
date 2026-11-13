@@ -1,0 +1,36 @@
+#! /usr/bin/env perl
+# Copyright 2010-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# SHA2 block procedures for MIPS.
+
+# October 2010.
+#
+# SHA256 performance improvement on MIPS R5000 CPU is ~27% over gcc-
+# generated code in o32 build and ~55% in n32/64 build. SHA512 [which
+# for now can only be compiled for MIPS64 ISA] improvement is modest
+# ~17%, but it comes for free, because it's same instruction sequence.
+# Improvement coefficients are for aligned input.
+
+# September 2012.
+#
+# Add MIPS[32|64]R2 code (>25% less instructions).
+
+######################################################################
+# There is a number of MIPS ABI in use, O32 and N32/64 are most
+# widely used. Then there is a new contender: NUBI. It appears that if
+# one picks the latter, it's possible to arrange code in ABI neutral
+# manner. Therefore let's stick to NUBI register layout:
+#

@@ -1,0 +1,28 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * shuf: Write a random permutation of the input lines to standard output.
+ *
+ * Copyright (C) 2014 by Bartosz Golaszewski <bartekgola@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config SHUF
+//config:	bool "shuf (6 kb)"
+//config:	default y
+//config:	help
+//config:	Generate random permutations
+
+//applet:IF_SHUF(APPLET_NOEXEC(shuf, shuf, BB_DIR_USR_BIN, BB_SUID_DROP, shuf))
+
+//kbuild:lib-$(CONFIG_SHUF) += shuf.o
+
+//usage:#define shuf_trivial_usage
+//usage:       "[-n NUM] [-o FILE] [-z] [FILE | -e [ARG...] | -i L-H]"
+//usage:#define shuf_full_usage "\n\n"
+//usage:       "Randomly permute lines\n"
+//usage:     "\n	-n NUM	Output at most NUM lines"
+//usage:     "\n	-o FILE	Write to FILE, not standard output"
+//usage:     "\n	-z	NUL terminated output"
+//usage:     "\n	-e	Treat ARGs as lines"
+//usage:     "\n	-i L-H	Treat numbers L-H as lines"
+

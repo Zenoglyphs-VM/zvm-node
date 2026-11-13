@@ -1,0 +1,43 @@
+#! /usr/bin/env perl
+# Copyright 2013-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# Multi-buffer SHA256 procedure processes n buffers in parallel by
+# placing buffer data to designated lane of SIMD register. n is
+# naturally limited to 4 on pre-AVX2 processors and to 8 on
+# AVX2-capable processors such as Haswell.
+#
+#		this	+aesni(i)	sha256	aesni-sha256	gain(iv)
+# -------------------------------------------------------------------
+# Westmere(ii)	23.3/n	+1.28=7.11(n=4)	12.3	+3.75=16.1	+126%
+# Atom(ii)	38.7/n	+3.93=13.6(n=4)	20.8	+5.69=26.5	+95%
+# Sandy Bridge	(20.5	+5.15=25.7)/n	11.6	13.0		+103%
+# Ivy Bridge	(20.4	+5.14=25.5)/n	10.3	11.6		+82%
+# Haswell(iii)	(21.0	+5.00=26.0)/n	7.80	8.79		+170%
+# Skylake	(18.9	+5.00=23.9)/n	7.70	8.17		+170%
+# Bulldozer	(21.6	+5.76=27.4)/n	13.6	13.7		+100%
+#
+# (i)	multi-block CBC encrypt with 128-bit key;
+# (ii)	(HASH+AES)/n does not apply to Westmere for n>3 and Atom,
+#	because of lower AES-NI instruction throughput, nor is there
+#	AES-NI-SHA256 stitch for these processors;
+# (iii)	"this" is for n=8, when we gather twice as much data, result
+#	for n=4 is 20.3+4.44=24.7;
+# (iv)	presented improvement coefficients are asymptotic limits and
+#	in real-life application are somewhat lower, e.g. for 2KB
+#	fragments they range from 75% to 130% (on Haswell);
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

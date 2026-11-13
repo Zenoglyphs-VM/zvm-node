@@ -1,0 +1,72 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini unzip implementation for busybox
+ *
+ * Copyright (C) 2004 by Ed Clark
+ *
+ * Loosely based on original busybox unzip applet by Laurence Anderson.
+ * All options and features should work in this version.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* For reference see
+ * http://www.pkware.com/company/standards/appnote/
+ * http://www.info-zip.org/pub/infozip/doc/appnote-iz-latest.zip
+ *
+ * TODO
+ * Zip64 + other methods
+ */
+//config:config UNZIP
+//config:	bool "unzip (26 kb)"
+//config:	default y
+//config:	help
+//config:	unzip will list or extract files from a ZIP archive,
+//config:	commonly found on DOS/WIN systems. The default behavior
+//config:	(with no options) is to extract the archive into the
+//config:	current directory.
+//config:
+//config:config FEATURE_UNZIP_CDF
+//config:	bool "Read and use Central Directory data"
+//config:	default y
+//config:	depends on UNZIP
+//config:	help
+//config:	If you know that you only need to deal with simple
+//config:	ZIP files without deleted/updated files, SFX archives etc,
+//config:	you can reduce code size by unselecting this option.
+//config:	To support less trivial ZIPs, say Y.
+//config:
+//config:config FEATURE_UNZIP_BZIP2
+//config:	bool "Support compression method 12 (bzip2)"
+//config:	default y
+//config:	depends on FEATURE_UNZIP_CDF && DESKTOP
+// FEATURE_UNZIP_CDF is needed, otherwise we can't find start of next file
+// DESKTOP is needed to get back uncompressed length
+//config:
+//config:config FEATURE_UNZIP_LZMA
+//config:	bool "Support compression method 14 (lzma)"
+//config:	default y
+//config:	depends on FEATURE_UNZIP_CDF && DESKTOP
+//config:
+//config:config FEATURE_UNZIP_XZ
+//config:	bool "Support compression method 95 (xz)"
+//config:	default y
+//config:	depends on FEATURE_UNZIP_CDF && DESKTOP
+
+//applet:IF_UNZIP(APPLET(unzip, BB_DIR_USR_BIN, BB_SUID_DROP))
+//kbuild:lib-$(CONFIG_UNZIP) += unzip.o
+
+//usage:#define unzip_trivial_usage
+//usage:       "[-lnojpqK] FILE[.zip] [FILE]... [-x FILE]... [-d DIR]"
+//usage:#define unzip_full_usage "\n\n"
+//usage:       "Extract FILEs from ZIP archive\n"
+//usage:     "\n	-l	List contents (with -q for short form)"
+//usage:     "\n	-n	Never overwrite files (default: ask)"
+//usage:     "\n	-o	Overwrite"
+//usage:     "\n	-j	Do not restore paths"
+//usage:     "\n	-p	Write to stdout"
+//usage:     "\n	-t	Test"
+//usage:     "\n	-q	Quiet"
+//usage:     "\n	-K	Do not clear SUID bit"
+//usage:     "\n	-x FILE	Exclude FILEs"
+//usage:     "\n	-d DIR	Extract into DIR"
+

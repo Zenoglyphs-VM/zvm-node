@@ -1,0 +1,24 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * nice implementation for busybox
+ *
+ * Copyright (C) 2005  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config NICE
+//config:	bool "nice (2.3 kb)"
+//config:	default y
+//config:	help
+//config:	nice runs a program with modified scheduling priority.
+
+//applet:IF_NICE(APPLET_NOEXEC(nice, nice, BB_DIR_BIN, BB_SUID_DROP, nice))
+
+//kbuild:lib-$(CONFIG_NICE) += nice.o
+
+//usage:#define nice_trivial_usage
+//usage:       "[-n ADJUST] [PROG ARGS]"
+//usage:#define nice_full_usage "\n\n"
+//usage:       "Change scheduling priority, run PROG\n"
+//usage:     "\n	-n ADJUST	Adjust priority by ADJUST"
+

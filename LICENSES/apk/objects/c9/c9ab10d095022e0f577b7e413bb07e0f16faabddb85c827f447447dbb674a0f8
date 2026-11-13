@@ -1,0 +1,97 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * bare bones sendmail
+ *
+ * Copyright (C) 2008 by Vladimir Dronnikov <dronnikov@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config SENDMAIL
+//config:	bool "sendmail (14 kb)"
+//config:	default y
+//config:	help
+//config:	Barebones sendmail.
+
+//applet:IF_SENDMAIL(APPLET(sendmail, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_SENDMAIL) += sendmail.o mail.o
+
+//usage:#define sendmail_trivial_usage
+//usage:       "[-tv] [-f SENDER] [-amLOGIN 4<user_pass.txt | -auUSER -apPASS]"
+//usage:     "\n		[-w SECS] [-H 'PROG ARGS' | -S HOST] [RECIPIENT_EMAIL]..."
+//usage:#define sendmail_full_usage "\n\n"
+//usage:       "Read email from stdin and send it\n"
+//usage:     "\nStandard options:"
+//usage:     "\n	-t		Read additional recipients from message body"
+//usage:     "\n	-f SENDER	For use in MAIL FROM:<sender>. Can be empty string"
+//usage:     "\n			Default: -auUSER, or username of current UID"
+//usage:     "\n	-o OPTIONS	Various options. -oi implied, others are ignored"
+//usage:     "\n	-i		-oi synonym, implied and ignored"
+//usage:     "\n"
+//usage:     "\nBusybox specific options:"
+//usage:     "\n	-v		Verbose"
+//usage:     "\n	-w SECS		Network timeout"
+//usage:     "\n	-H 'PROG ARGS'	Run connection helper. Examples:"
+//usage:     "\n		openssl s_client -quiet -tls1 -starttls smtp -connect smtp.gmail.com:25"
+//usage:     "\n		openssl s_client -quiet -tls1 -connect smtp.gmail.com:465"
+//usage:     "\n			$SMTP_ANTISPAM_DELAY: seconds to wait after helper connect"
+//usage:     "\n	-S HOST[:PORT]	Server (default $SMTPHOST or 127.0.0.1)"
+//usage:     "\n	-amLOGIN	Log in using AUTH LOGIN"
+//usage:     "\n	-amPLAIN	or AUTH PLAIN"
+//usage:     "\n			(-amCRAM-MD5 not supported)"
+//usage:     "\n	-auUSER		Username for AUTH"
+//usage:     "\n	-apPASS 	Password for AUTH"
+//usage:     "\n"
+//usage:     "\nIf no -a options are given, authentication is not done."
+//usage:     "\nIf -amLOGIN is given but no -au/-ap, user/password is read from fd #4."
+//usage:     "\nOther options are silently ignored; -oi is implied."
+//usage:	IF_MAKEMIME(
+//usage:     "\nUse makemime to create emails with attachments."
+//usage:	)
+
+/* Currently we don't sanitize or escape user-supplied SENDER and RECIPIENT_EMAILs.
+ * We may need to do so. For one, '.' in usernames seems to require escaping!
+ *
+ * From http://cr.yp.to/smtp/address.html:
+ *
+ * SMTP offers three ways to encode a character inside an address:
+ *
+ * "safe": the character, if it is not <>()[].,;:@, backslash,
+ *  double-quote, space, or an ASCII control character;
+ * "quoted": the character, if it is not \012, \015, backslash,
+ *   or double-quote; or
+ * "slashed": backslash followed by the character.
+ *
+ * An encoded box part is either (1) a sequence of one or more slashed
+ * or safe characters or (2) a double quote, a sequence of zero or more
+ * slashed or quoted characters, and a double quote. It represents
+ * the concatenation of the characters encoded inside it.
+ *
+ * For example, the encoded box parts
+ *	angels
+ *	\a\n\g\e\l\s
+ *	"\a\n\g\e\l\s"
+ *	"angels"
+ *	"ang\els"
+ * all represent the 6-byte string "angels", and the encoded box parts
+ *	a\,comma
+ *	\a\,\c\o\m\m\a
+ *	"a,comma"
+ * all represent the 7-byte string "a,comma".
+ *
+ * An encoded address contains
+ *	the byte <;
+ *	optionally, a route followed by a colon;
+ *	an encoded box part, the byte @, and a domain; and
+ *	the byte >.
+ *
+ * It represents an Internet mail address, given by concatenating
+ * the string represented by the encoded box part, the byte @,
+ * and the domain. For example, the encoded addresses
+ *     <God@heaven.af.mil>
+ *     <\God@heaven.af.mil>
+ *     <"God"@heaven.af.mil>
+ *     <@gateway.af.mil,@uucp.local:"\G\o\d"@heaven.af.mil>
+ * all represent the Internet mail address "God@heaven.af.mil".
+ */
+

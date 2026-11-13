@@ -1,0 +1,43 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * ifplugd for busybox, based on ifplugd 0.28 (written by Lennart Poettering).
+ *
+ * Copyright (C) 2009 Maksym Kryzhanovskyy <xmaks@email.cz>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config IFPLUGD
+//config:	bool "ifplugd (11 kb)"
+//config:	default y
+//config:	help
+//config:	Network interface plug detection daemon.
+
+//applet:IF_IFPLUGD(APPLET(ifplugd, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_IFPLUGD) += ifplugd.o
+
+//usage:#define ifplugd_trivial_usage
+//usage:       "[OPTIONS]"
+//usage:#define ifplugd_full_usage "\n\n"
+//usage:       "Network interface plug detection daemon\n"
+//usage:     "\n	-n		Run in foreground"
+//usage:     "\n	-s		Don't log to syslog"
+//usage:     "\n	-i IFACE	Interface"
+//usage:     "\n	-f/-F		Treat link detection error as link down/link up"
+//usage:     "\n			(otherwise exit on error)"
+//usage:     "\n	-a		Don't up interface at each link probe"
+//usage:     "\n	-M		Monitor creation/destruction of interface"
+//usage:     "\n			(otherwise it must exist)"
+//usage:     "\n	-A		Don't up newly appeared interface"
+//usage:     "\n	-r PROG		Script to run"
+//usage:     "\n	-x ARG		Extra argument for script"
+//usage:     "\n	-I		Don't exit on nonzero exit code from script"
+//usage:     "\n	-p		Don't run \"up\" script on startup"
+//usage:     "\n	-q		Don't run \"down\" script on exit"
+//usage:     "\n	-l		Always run script on startup"
+//usage:     "\n	-t SECS		Poll time in seconds"
+//usage:     "\n	-u SECS		Delay before running script after link up"
+//usage:     "\n	-d SECS		Delay after link down"
+//usage:     "\n	-m MODE		API mode (mii, priv, ethtool, wlan, iff, auto)"
+//usage:     "\n	-k		Kill running daemon"
+

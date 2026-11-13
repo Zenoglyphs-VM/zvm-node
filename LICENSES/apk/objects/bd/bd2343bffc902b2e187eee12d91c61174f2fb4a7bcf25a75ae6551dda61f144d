@@ -1,0 +1,93 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Poweroff reboot and halt, oh my.
+ *
+ * Copyright 2006 by Rob Landley <rob@landley.net>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config HALT
+//config:	bool "halt (4.3 kb)"
+//config:	default y
+//config:	help
+//config:	Stop all processes and halt the system.
+//config:
+//config:config POWEROFF
+//config:	bool "poweroff (4.3 kb)"
+//config:	default y
+//config:	help
+//config:	Stop all processes and power off the system.
+//config:
+//config:config REBOOT
+//config:	bool "reboot (4.3 kb)"
+//config:	default y
+//config:	help
+//config:	Stop all processes and reboot the system.
+//config:
+//config:config FEATURE_WAIT_FOR_INIT
+//config:	bool "Before signaling init, make sure it is ready for it"
+//config:	default y
+//config:	depends on HALT || POWEROFF || REBOOT
+//config:	help
+//config:	In rare cases, poweroff may be commanded by firmware to OS
+//config:	even before init process exists. On Linux, this spawns
+//config:	"/sbin/poweroff" very early. This option adds code
+//config:	which checks that init is ready to receive poweroff
+//config:	commands. Code size increase of ~80 bytes.
+//config:
+//config:config FEATURE_CALL_TELINIT
+//config:	bool "Call telinit on shutdown and reboot"
+//config:	default y
+//config:	depends on (HALT || POWEROFF || REBOOT) && !INIT
+//config:	help
+//config:	Call an external program (normally telinit) to facilitate
+//config:	a switch to a proper runlevel.
+//config:
+//config:	This option is only available if you selected halt and friends,
+//config:	but did not select init.
+//config:
+//config:config TELINIT_PATH
+//config:	string "Path to telinit executable"
+//config:	default "/sbin/telinit"
+//config:	depends on FEATURE_CALL_TELINIT
+//config:	help
+//config:	When busybox halt and friends have to call external telinit
+//config:	to facilitate proper shutdown, this path is to be used when
+//config:	locating telinit executable.
+
+//applet:IF_HALT(APPLET(halt, BB_DIR_SBIN, BB_SUID_DROP))
+//                   APPLET_ODDNAME:name      main  location     suid_type     help
+//applet:IF_POWEROFF(APPLET_ODDNAME(poweroff, halt, BB_DIR_SBIN, BB_SUID_DROP, poweroff))
+//applet:IF_REBOOT(  APPLET_ODDNAME(reboot,   halt, BB_DIR_SBIN, BB_SUID_DROP, reboot))
+
+//kbuild:lib-$(CONFIG_HALT) += halt.o
+//kbuild:lib-$(CONFIG_POWEROFF) += halt.o
+//kbuild:lib-$(CONFIG_REBOOT) += halt.o
+
+//usage:#define halt_trivial_usage
+//usage:       "[-d DELAY] [-nf"IF_FEATURE_WTMP("w")"]"
+//usage:#define halt_full_usage "\n\n"
+//usage:       "Halt the system\n"
+//usage:     "\n	-d SEC	Delay interval"
+//usage:     "\n	-n	Do not sync"
+//usage:     "\n	-f	Force (don't go through init)"
+//usage:	IF_FEATURE_WTMP(
+//usage:     "\n	-w	Only write a wtmp record"
+//usage:	)
+//usage:
+//usage:#define poweroff_trivial_usage
+//usage:       "[-d DELAY] [-nf]"
+//usage:#define poweroff_full_usage "\n\n"
+//usage:       "Halt and shut off power\n"
+//usage:     "\n	-d SEC	Delay interval"
+//usage:     "\n	-n	Do not sync"
+//usage:     "\n	-f	Force (don't go through init)"
+//usage:
+//usage:#define reboot_trivial_usage
+//usage:       "[-d DELAY] [-nf]"
+//usage:#define reboot_full_usage "\n\n"
+//usage:       "Reboot the system\n"
+//usage:     "\n	-d SEC	Delay interval"
+//usage:     "\n	-n	Do not sync"
+//usage:     "\n	-f	Force (don't go through init)"
+

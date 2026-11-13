@@ -1,0 +1,35 @@
+/*
+ * Copyright 2020-2021 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * This program tests the following known key type specific function against
+ * the corresponding OSSL_ENCODER implementation:
+ *
+ * - i2d_{TYPE}PrivateKey()
+ * - i2d_{TYPE}PublicKey(),
+ * - i2d_{TYPE}params(),
+ * - i2d_{TYPE}_PUBKEY(),
+ * - PEM_write_bio_{TYPE}PrivateKey()
+ * - PEM_write_bio_{TYPE}PublicKey()
+ * - PEM_write_bio_{TYPE}params()
+ * - PEM_write_bio_{TYPE}_PUBKEY()
+ *
+ * as well as the following functions against the corresponding OSSL_DECODER
+ * implementation.
+ *
+ * - d2i_{TYPE}PrivateKey()
+ * - d2i_{TYPE}PublicKey(),
+ * - d2i_{TYPE}params(),
+ * - d2i_{TYPE}_PUBKEY(),
+ * - PEM_read_bio_{TYPE}PrivateKey()
+ * - PEM_read_bio_{TYPE}PublicKey()
+ * - PEM_read_bio_{TYPE}params()
+ * - PEM_read_bio_{TYPE}_PUBKEY()
+ */
+

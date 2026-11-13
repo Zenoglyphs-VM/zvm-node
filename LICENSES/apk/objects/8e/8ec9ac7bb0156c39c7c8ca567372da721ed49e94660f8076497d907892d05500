@@ -1,0 +1,57 @@
+/*
+Copyright (c) 2001-2006, Gerrit Pape
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+   2. Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+   3. The name of the author may not be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ''AS IS'' AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/* Busyboxed by Denys Vlasenko <vda.linux@googlemail.com> */
+
+//config:config RUNSVDIR
+//config:	bool "runsvdir (6.6 kb)"
+//config:	default y
+//config:	help
+//config:	runsvdir starts a runsv process for each subdirectory, or symlink to
+//config:	a directory, in the services directory dir, up to a limit of 1000
+//config:	subdirectories, and restarts a runsv process if it terminates.
+//config:
+//config:config FEATURE_RUNSVDIR_LOG
+//config:	bool "Enable scrolling argument log"
+//config:	depends on RUNSVDIR
+//config:	default n
+//config:	help
+//config:	Enable feature where second parameter of runsvdir holds last error
+//config:	message (viewable via top/ps). Otherwise (feature is off
+//config:	or no parameter), error messages go to stderr only.
+
+//applet:IF_RUNSVDIR(APPLET(runsvdir, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_RUNSVDIR) += runsvdir.o
+
+//usage:#define runsvdir_trivial_usage
+//usage:       "[-P] [-s SCRIPT] DIR"
+//usage:#define runsvdir_full_usage "\n\n"
+//usage:       "Start a runsv process for each subdirectory. If it exits, restart it.\n"
+//usage:     "\n	-P		Put each runsv in a new session"
+//usage:     "\n	-s SCRIPT	Run SCRIPT <signo> after signal is processed"
+

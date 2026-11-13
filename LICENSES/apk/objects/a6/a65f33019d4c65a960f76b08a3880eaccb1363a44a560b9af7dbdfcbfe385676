@@ -1,0 +1,10 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * xgetcwd.c -- return current directory with unlimited length
+ * Copyright (C) 1992, 1996 Free Software Foundation, Inc.
+ * Written by David MacKenzie <djm@gnu.ai.mit.edu>.
+ *
+ * Special function for busybox written by Vladimir Oleynik <dzo@simtreas.ru>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */

@@ -1,0 +1,183 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini mount implementation for busybox
+ *
+ * Copyright (C) 1995, 1996 by Bruce Perens <bruce@pixar.com>.
+ * Copyright (C) 1999-2004 by Erik Andersen <andersen@codepoet.org>
+ * Copyright (C) 2005-2006 by Rob Landley <rob@landley.net>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+// Design notes: There is no spec for mount.  Remind me to write one.
+//
+// mount_main() calls singlemount() which calls mount_it_now().
+//
+// mount_main() can loop through /etc/fstab for mount -a
+// singlemount() can loop through /etc/filesystems for fstype detection.
+// mount_it_now() does the actual mount.
+//
+
+//config:config MOUNT
+//config:	bool "mount (24 kb)"
+//config:	default y
+//config:	help
+//config:	All files and filesystems in Unix are arranged into one big directory
+//config:	tree. The 'mount' utility is used to graft a filesystem onto a
+//config:	particular part of the tree. A filesystem can either live on a block
+//config:	device, or it can be accessible over the network, as is the case with
+//config:	NFS filesystems.
+//config:
+//config:config FEATURE_MOUNT_FAKE
+//config:	bool "Support -f (fake mount)"
+//config:	default y
+//config:	depends on MOUNT
+//config:	help
+//config:	Enable support for faking a file system mount.
+//config:
+//config:config FEATURE_MOUNT_VERBOSE
+//config:	bool "Support -v (verbose)"
+//config:	default y
+//config:	depends on MOUNT
+//config:	help
+//config:	Enable multi-level -v[vv...] verbose messages. Useful if you
+//config:	debug mount problems and want to see what is exactly passed
+//config:	to the kernel.
+//config:
+//config:config FEATURE_MOUNT_HELPERS
+//config:	bool "Support mount helpers"
+//config:	default n
+//config:	depends on MOUNT
+//config:	help
+//config:	Enable mounting of virtual file systems via external helpers.
+//config:	E.g. "mount obexfs#-b00.11.22.33.44.55 /mnt" will in effect call
+//config:	"obexfs -b00.11.22.33.44.55 /mnt"
+//config:	Also "mount -t sometype [-o opts] fs /mnt" will try
+//config:	"sometype [-o opts] fs /mnt" if simple mount syscall fails.
+//config:	The idea is to use such virtual filesystems in /etc/fstab.
+//config:
+//config:config FEATURE_MOUNT_LABEL
+//config:	bool "Support specifying devices by label or UUID"
+//config:	default y
+//config:	depends on MOUNT
+//config:	select VOLUMEID
+//config:	help
+//config:	This allows for specifying a device by label or uuid, rather than by
+//config:	name. This feature utilizes the same functionality as blkid/findfs.
+//config:
+//config:config FEATURE_MOUNT_NFS
+//config:	bool "Support mounting NFS file systems on Linux < 2.6.23"
+//config:	default n
+//config:	depends on MOUNT
+//config:	select FEATURE_SYSLOG
+//config:	help
+//config:	Enable mounting of NFS file systems on Linux kernels prior
+//config:	to version 2.6.23. Note that in this case mounting of NFS
+//config:	over IPv6 will not be possible.
+//config:
+//config:	Note that this option links in RPC support from libc,
+//config:	which is rather large (~10 kbytes on uclibc).
+//config:
+//config:config FEATURE_MOUNT_CIFS
+//config:	bool "Support mounting CIFS/SMB file systems"
+//config:	default y
+//config:	depends on MOUNT
+//config:	help
+//config:	Enable support for samba mounts.
+//config:
+//config:config FEATURE_MOUNT_FLAGS
+//config:	depends on MOUNT
+//config:	bool "Support lots of -o flags"
+//config:	default y
+//config:	help
+//config:	Without this, mount only supports ro/rw/remount. With this, it
+//config:	supports nosuid, suid, dev, nodev, exec, noexec, sync, async, atime,
+//config:	noatime, diratime, nodiratime, loud, bind, move, shared, slave,
+//config:	private, unbindable, rshared, rslave, rprivate, and runbindable.
+//config:
+//config:config FEATURE_MOUNT_FSTAB
+//config:	depends on MOUNT
+//config:	bool "Support /etc/fstab and -a (mount all)"
+//config:	default y
+//config:	help
+//config:	Support mount all and looking for files in /etc/fstab.
+//config:
+//config:config FEATURE_MOUNT_OTHERTAB
+//config:	depends on FEATURE_MOUNT_FSTAB
+//config:	bool "Support -T <alt_fstab>"
+//config:	default y
+//config:	help
+//config:	Support mount -T (specifying an alternate fstab)
+
+/* On full-blown systems, requires suid for user mounts.
+ * But it's not unthinkable to have it available in non-suid flavor on some systems,
+ * for viewing mount table.
+ * Therefore we use BB_SUID_MAYBE instead of BB_SUID_REQUIRE: */
+//applet:IF_MOUNT(APPLET(mount, BB_DIR_BIN, IF_DESKTOP(BB_SUID_MAYBE) IF_NOT_DESKTOP(BB_SUID_DROP)))
+
+//kbuild:lib-$(CONFIG_MOUNT) += mount.o
+
+//usage:#define mount_trivial_usage
+//usage:       "[OPTIONS] [-o OPT] DEVICE NODE"
+//usage:#define mount_full_usage "\n\n"
+//usage:       "Mount a filesystem. Filesystem autodetection requires /proc.\n"
+//usage:     "\n	-a		Mount all filesystems in fstab"
+//usage:	IF_FEATURE_MOUNT_FAKE(
+//usage:	IF_FEATURE_MTAB_SUPPORT(
+//usage:     "\n	-f		Update /etc/mtab, but don't mount"
+//usage:	)
+//usage:	IF_NOT_FEATURE_MTAB_SUPPORT(
+//usage:     "\n	-f		Dry run"
+//usage:	)
+//usage:	)
+//usage:	IF_FEATURE_MOUNT_HELPERS(
+//usage:     "\n	-i		Don't run mount helper"
+//usage:	)
+//usage:	IF_FEATURE_MTAB_SUPPORT(
+//usage:     "\n	-n		Don't update /etc/mtab"
+//usage:	)
+//usage:	IF_FEATURE_MOUNT_VERBOSE(
+//usage:     "\n	-v		Verbose"
+//usage:	)
+////usage:   "\n	-s		Sloppy (ignored)"
+//usage:     "\n	-r		Read-only mount"
+////usage:     "\n	-w		Read-write mount (default)"
+//usage:     "\n	-t FSTYPE[,...]	Filesystem type(s)"
+//usage:	IF_FEATURE_MOUNT_OTHERTAB(
+//usage:     "\n	-T FILE		Read FILE instead of /etc/fstab"
+//usage:	)
+//usage:     "\n	-O OPT		Mount only filesystems with option OPT (-a only)"
+//usage:     "\n-o OPT:"
+//usage:	IF_FEATURE_MOUNT_LOOP(
+//usage:     "\n	loop		Ignored (loop devices are autodetected)"
+//usage:	)
+//usage:	IF_FEATURE_MOUNT_FLAGS(
+//usage:     "\n	[a]sync		Writes are [a]synchronous"
+//usage:     "\n	[no]atime	Disable/enable updates to inode access times"
+//usage:     "\n	[no]diratime	Disable/enable atime updates to directories"
+//usage:     "\n	[no]relatime	Disable/enable atime updates relative to modification time"
+//usage:     "\n	[no]dev		(Dis)allow use of special device files"
+//usage:     "\n	[no]exec	(Dis)allow use of executable files"
+//usage:     "\n	[no]suid	(Dis)allow set-user-id-root programs"
+//usage:     "\n	[r]shared	Convert [recursively] to a shared subtree"
+//usage:     "\n	[r]slave	Convert [recursively] to a slave subtree"
+//usage:     "\n	[r]private	Convert [recursively] to a private subtree"
+//usage:     "\n	[un]bindable	Make mount point [un]able to be bind mounted"
+//usage:     "\n	[r]bind		Bind a file or directory [recursively] to another location"
+//usage:     "\n	move		Relocate an existing mount point"
+//usage:	)
+//usage:     "\n	remount		Remount a mounted filesystem, changing flags"
+//usage:     "\n	ro		Same as -r"
+//usage:     "\n"
+//usage:     "\nThere are filesystem-specific -o flags."
+//usage:
+//usage:#define mount_example_usage
+//usage:       "$ mount\n"
+//usage:       "/dev/hda3 on / type minix (rw)\n"
+//usage:       "proc on /proc type proc (rw)\n"
+//usage:       "devpts on /dev/pts type devpts (rw)\n"
+//usage:       "$ mount /dev/fd0 /mnt -t msdos -o ro\n"
+//usage:       "$ mount /tmp/diskimage /opt -t ext2 -o loop\n"
+//usage:       "$ mount cd_image.iso mydir\n"
+//usage:#define mount_notes_usage
+//usage:       "Returns 0 for success, number of failed mounts for -a, or errno for one mount."
+

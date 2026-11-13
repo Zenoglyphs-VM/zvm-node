@@ -1,0 +1,22 @@
+#
+# Copyright 2001-2024 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+# Tests start with one of these keywords
+#       Cipher Decrypt Derive Digest Encoding KDF MAC PBE
+#       PrivPubKeyPair Sign Verify VerifyRecover
+# and continue until a blank line. Lines starting with a pound sign are ignored.
+# The keyword Availablein must appear before the test name if needed.
+
+
+# Public key algorithm tests
+# Private keys used for PKEY operations.
+
+
+# http://csrc.nist.gov/groups/STM/cavp/component-testing.html#ECCCDH   #
+# sha256sum(KAS_ECC_CDH_PrimitiveTest.txt) =                           #
+#     456068d3f8aad8ac62a03d19ed3173f00ad51f42b51aeab4753c20f30c01cf23 #

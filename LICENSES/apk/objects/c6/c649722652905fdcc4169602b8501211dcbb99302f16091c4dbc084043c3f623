@@ -1,0 +1,65 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Minimal i2c-tools implementation for busybox.
+ * Parts of code ported from i2c-tools:
+ * 		http://www.lm-sensors.org/wiki/I2CTools.
+ *
+ * Copyright (C) 2014 by Bartosz Golaszewski <bartekgola@gmail.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config I2CGET
+//config:	bool "i2cget (5.7 kb)"
+//config:	default y
+//config:	help
+//config:	Read from I2C/SMBus chip registers.
+//config:
+//config:config I2CSET
+//config:	bool "i2cset (6.9 kb)"
+//config:	default y
+//config:	help
+//config:	Set I2C registers.
+//config:
+//config:config I2CDUMP
+//config:	bool "i2cdump (7.2 kb)"
+//config:	default y
+//config:	help
+//config:	Examine I2C registers.
+//config:
+//config:config I2CDETECT
+//config:	bool "i2cdetect (7.3 kb)"
+//config:	default y
+//config:	help
+//config:	Detect I2C chips.
+//config:
+//config:config I2CTRANSFER
+//config:	bool "i2ctransfer (5.5 kb)"
+//config:	default y
+//config:	help
+//config:	Send user-defined I2C messages in one transfer.
+//config:
+
+//applet:IF_I2CGET(APPLET(i2cget, BB_DIR_USR_SBIN, BB_SUID_DROP))
+//applet:IF_I2CSET(APPLET(i2cset, BB_DIR_USR_SBIN, BB_SUID_DROP))
+//applet:IF_I2CDUMP(APPLET(i2cdump, BB_DIR_USR_SBIN, BB_SUID_DROP))
+//applet:IF_I2CDETECT(APPLET(i2cdetect, BB_DIR_USR_SBIN, BB_SUID_DROP))
+//applet:IF_I2CTRANSFER(APPLET(i2ctransfer, BB_DIR_USR_SBIN, BB_SUID_DROP))
+/* not NOEXEC: if hw operation stalls, use less memory in "hung" process */
+
+//kbuild:lib-$(CONFIG_I2CGET) += i2c_tools.o
+//kbuild:lib-$(CONFIG_I2CSET) += i2c_tools.o
+//kbuild:lib-$(CONFIG_I2CDUMP) += i2c_tools.o
+//kbuild:lib-$(CONFIG_I2CDETECT) += i2c_tools.o
+//kbuild:lib-$(CONFIG_I2CTRANSFER) += i2c_tools.o
+
+/*
+ * Unsupported stuff:
+ *
+ * - upstream i2c-tools can also look-up i2c busses by name, we only accept
+ *   numbers,
+ * - bank and bankreg parameters for i2cdump are not supported because of
+ *   their limited usefulness (see i2cdump manual entry for more info),
+ * - i2cdetect doesn't look for bus info in /proc as it does in upstream, but
+ *   it shouldn't be a problem in modern kernels.
+ */
+

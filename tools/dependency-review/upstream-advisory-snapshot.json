@@ -1,0 +1,1519 @@
+{
+  "capturedAt": "2026-11-13T13:06:58.302947+00:00",
+  "effectiveIdentityAtCapture": {
+    "commit": "7da4560d1fb3045286b70a8dc23360d2626543f2",
+    "module": "github.com/ethereum-optimism/op-geth",
+    "version": "v1.101702.3"
+  },
+  "nominalModule": "github.com/ethereum/go-ethereum",
+  "queries": [
+    {
+      "completeWithinSelectedQuery": true,
+      "provider": "geth-legacy",
+      "recordOccurrences": 12,
+      "responses": [
+        {
+          "bytes": 13740,
+          "sha256": "c0d3311d521e0b619129e8318b754474511ce104ca57f90faa9f7c92fa5a7346"
+        }
+      ],
+      "subject": "github.com/ethereum/go-ethereum",
+      "url": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json"
+    },
+    {
+      "completeWithinSelectedQuery": true,
+      "provider": "github-effective",
+      "recordOccurrences": 0,
+      "responses": [
+        {
+          "bytes": 2,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ],
+      "subject": "github.com/ethereum-optimism/op-geth",
+      "url": "https://api.github.com/repos/ethereum-optimism/op-geth/security-advisories"
+    },
+    {
+      "completeWithinSelectedQuery": true,
+      "provider": "github-upstream",
+      "recordOccurrences": 17,
+      "responses": [
+        {
+          "bytes": 65608,
+          "sha256": "2bea80c184d2300f435ca413aff73f8c9b83a2a0411f789778805139da7ef19e"
+        }
+      ],
+      "subject": "github.com/ethereum/go-ethereum",
+      "url": "https://api.github.com/repos/ethereum/go-ethereum/security-advisories"
+    },
+    {
+      "completeWithinSelectedQuery": true,
+      "provider": "osv-commit",
+      "recordOccurrences": 0,
+      "responses": [
+        {
+          "bytes": 2,
+          "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+        }
+      ],
+      "subject": "7da4560d1fb3045286b70a8dc23360d2626543f2",
+      "url": "https://api.osv.dev/v1/query"
+    },
+    {
+      "completeWithinSelectedQuery": true,
+      "provider": "osv-effective",
+      "recordOccurrences": 0,
+      "responses": [
+        {
+          "bytes": 2,
+          "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+        }
+      ],
+      "subject": "github.com/ethereum-optimism/op-geth",
+      "url": "https://api.osv.dev/v1/query"
+    },
+    {
+      "completeWithinSelectedQuery": true,
+      "provider": "osv-upstream",
+      "recordOccurrences": 45,
+      "responses": [
+        {
+          "bytes": 77944,
+          "sha256": "51d0539289763d85cce65a557620b4391583ae54fdd1f4e7b5649511a206acf8"
+        }
+      ],
+      "subject": "github.com/ethereum/go-ethereum",
+      "url": "https://api.osv.dev/v1/query"
+    }
+  ],
+  "records": [
+    {
+      "aliases": [
+        "CVE-2020-26240",
+        "GHSA-v592-xf75-856p"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "567d41d9363706b4b13ce0903804e8acf214af49"
+      ],
+      "id": "GETH-2020-01",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2020-11-12",
+      "recordSha256": "240605d94c599f70e206f8c4987144a8e1a3cb5f816623001a699f5efe278426",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.9.24"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-28362",
+        "GHSA-m6gx-rhvj-fh52"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2020-02",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2020-11-12",
+      "recordSha256": "6ce5f3feb5252d1e5e8f6150f73dfe495195b9e99dcc8ea65e69a39f18da5953",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.9.24"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26241",
+        "GHSA-69v6-xc2j-r2jf"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2020-03",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2020-11-12",
+      "recordSha256": "d9423c7e8bc8a1c87b3e0a7c9e15663a3ed4425caa21c67a49ffbc9a76b8decd",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.9.17"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26242",
+        "GHSA-jm5c-rv3w-w83m"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2020-04",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2020-11-12",
+      "recordSha256": "07346658d4389e1192955c58c777689c426f88948ce6e1f8f2697e2b11d29ba4",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.9.18"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26264",
+        "GHSA-r33q-22hv-j29q"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2020-05",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2020-12-10",
+      "recordSha256": "2c726e1a490c57b08eef7e6ec6486f38316af14cacd478d899a7dd81c0c4c6d8",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.9.25"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26265",
+        "GHSA-xw37-57qp-9mm4"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2020-06",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2020-12-10",
+      "recordSha256": "e256f4c0e29e62119b7d6c6be9448abcc2d07c9ca011346456a83fcbbf61b806",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.9.20"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2021-01",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2021-07-22",
+      "recordSha256": "89b531a3da33d127792d50ea28cecf834b3248ea7b149267d004136ce2a45063",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.10.6"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-39137",
+        "GHSA-9856-9gg9-qcmq"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2021-02",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2021-08-24",
+      "recordSha256": "72e75bdb56ef64d58e003d3fb191c615a55c90e31607e51cc2511e303574dc7b",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.10.8"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-41173",
+        "GHSA-59hh-656j-3p7v"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2021-03",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2021-10-24",
+      "recordSha256": "fbf9413d92e9f1e58a1ffd4e820672ae4a75388cb5b82ca93399976a89a852f1",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.10.9"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2022-29177",
+        "GHSA-wjxw-gh3m-7pm5"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2022-01",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2022-05-11",
+      "recordSha256": "7b12c4036157e46b44663b0cd858de53947daf3fe31b7351e06bfd34832b2a1b",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.10.17"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2023-40591",
+        "GHSA-ppjg-v974-84cm"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2023-01",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2023-09-06",
+      "recordSha256": "dfa2152a7d1b2ef321e88f09a13b686c5b532e0bdbd148bb5780d9713a9e8967",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.12.1"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2024-32972",
+        "GHSA-4xc9-8hmq-j652"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GETH-2024-01",
+      "modified": null,
+      "packageAnnotations": [],
+      "provider": "geth-legacy",
+      "published": "2024-05-06",
+      "recordSha256": "947145030ead516e7b99735a1354875d5c30eadbd68f9914105b847b14177375",
+      "recordURL": "https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json",
+      "upstreamFixedVersions": [
+        "v1.13.15"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26314"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-2gjw-fg97-vg3r",
+      "modified": "2026-02-17T16:23:48Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2026-02-17T16:23:48Z",
+      "recordSha256": "5066d4ec8c0e882d1b474a40d51479edceaa9692208c1b809dd81d8920e48148",
+      "recordURL": "https://github.com/advisories/GHSA-2gjw-fg97-vg3r",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2024-32972"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-4xc9-8hmq-j652",
+      "modified": "2024-08-16T06:17:45Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2024-05-06T13:24:45Z",
+      "recordSha256": "167177a52cb01a5660b9ed05c07ab0c9ef2b05c0ec38263484939db3a8b013b3",
+      "recordURL": "https://github.com/advisories/GHSA-4xc9-8hmq-j652",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-41173"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "f1fd963a5a965e643e52fcf805a2a02a323c32b8"
+      ],
+      "id": "GHSA-59hh-656j-3p7v",
+      "modified": "2021-11-23T11:39:54Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2021-10-25T06:28:36Z",
+      "recordSha256": "dabda4ca1a7a67ca3daa3ec08984f790e7c67e99b69007357a2c3e4379d959dc",
+      "recordURL": "https://github.com/advisories/GHSA-59hh-656j-3p7v",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26313"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-689v-6xwf-5jf3",
+      "modified": "2026-02-17T16:23:39Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2026-02-17T16:23:39Z",
+      "recordSha256": "399f1edee3bfb20da1fe91d8aa93546ffe65ad9f25f7e1145c5caee98b05eedb",
+      "recordURL": "https://github.com/advisories/GHSA-689v-6xwf-5jf3",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26241"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-69v6-xc2j-r2jf",
+      "modified": "2020-11-24T19:12:56Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2020-11-24T18:38:28Z",
+      "recordSha256": "1bd01c6bc2d97ff8235af1a33f78c230ec98c111b3a233019848931674b42e98",
+      "recordURL": "https://github.com/advisories/GHSA-69v6-xc2j-r2jf",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-39137"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "4d4879cafd1b3c906fc184a8c4a357137465128f"
+      ],
+      "id": "GHSA-9856-9gg9-qcmq",
+      "modified": "2021-09-07T07:35:57Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2021-08-24T07:25:57Z",
+      "recordSha256": "1888e0c510920aa17a67164f91070b8cb84062c2ce06879b048c1c69d12f30ff",
+      "recordURL": "https://github.com/advisories/GHSA-9856-9gg9-qcmq",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26242"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "cf6674539c589f80031f3371a71c6a80addbe454"
+      ],
+      "id": "GHSA-jm5c-rv3w-w83m",
+      "modified": "2021-03-25T19:05:35Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2020-11-24T18:40:03Z",
+      "recordSha256": "911746ba13afe174207ae0fb97656e775256b62cf5e9d98b03fe6dbd24415c61",
+      "recordURL": "https://github.com/advisories/GHSA-jm5c-rv3w-w83m",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-28362"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-m6gx-rhvj-fh52",
+      "modified": "2020-11-24T19:10:51Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2020-11-24T18:39:50Z",
+      "recordSha256": "89ea37faad02ea1399bfbdf9c36b691377708e1ac20d996895258ca6b14d0464",
+      "recordURL": "https://github.com/advisories/GHSA-m6gx-rhvj-fh52",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26315"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-m6j8-rg6r-7mv8",
+      "modified": "2026-02-17T16:23:56Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2026-02-17T16:23:56Z",
+      "recordSha256": "b118deef617c39bbed240b8266f479c8638344f4c9799dbe625ed4a57bf20a22",
+      "recordURL": "https://github.com/advisories/GHSA-m6j8-rg6r-7mv8",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-22868"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-mq3p-rrmp-79jg",
+      "modified": "2026-01-13T20:04:07Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2026-01-13T19:24:59Z",
+      "recordSha256": "029ee62753629e50dcb79b4ba49320eeaab1b0ffb3f1cdddac77459a09155c16",
+      "recordURL": "https://github.com/advisories/GHSA-mq3p-rrmp-79jg",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-22862"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-mr7q-c9w9-wh4h",
+      "modified": "2026-01-13T17:41:33Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2026-01-13T17:40:23Z",
+      "recordSha256": "b4fc92e4635aaa9a389299c20f1c556974a7818d7be02c87f8d0b5ff8d35c94c",
+      "recordURL": "https://github.com/advisories/GHSA-mr7q-c9w9-wh4h",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2023-40591"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-ppjg-v974-84cm",
+      "modified": "2023-11-08T14:30:02Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2023-09-06T07:29:44Z",
+      "recordSha256": "a92682abdb9f49c96b80d4f5685fa86e94a0ddcc0a675f309ad635e43c70ab88",
+      "recordURL": "https://github.com/advisories/GHSA-ppjg-v974-84cm",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2025-24883"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "159fb1a1db551c544978dc16a5568a4730b4abf3"
+      ],
+      "id": "GHSA-q26p-9cq4-7fc2",
+      "modified": "2025-03-16T09:57:35Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2025-01-30T13:23:02Z",
+      "recordSha256": "19361b181a547007bdc5090164024a7b8a6481eec1545a7c95520c8b7935ec78",
+      "recordURL": "https://github.com/advisories/GHSA-q26p-9cq4-7fc2",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26264"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-r33q-22hv-j29q",
+      "modified": "2020-12-11T08:07:23Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2020-12-11T08:07:23Z",
+      "recordSha256": "793c886a1b4a16335b1ee49b87be98a6849c23e3a091b1eafb9575b531fa05c1",
+      "recordURL": "https://github.com/advisories/GHSA-r33q-22hv-j29q",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26240"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-v592-xf75-856p",
+      "modified": "2020-11-24T19:21:28Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2020-11-24T18:40:29Z",
+      "recordSha256": "8a0233c57c53f0f1e9d282922aa48ac6c9713c0592cc7d433ae4003e8961b083",
+      "recordURL": "https://github.com/advisories/GHSA-v592-xf75-856p",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2022-29177"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-wjxw-gh3m-7pm5",
+      "modified": "2022-05-11T08:51:21Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2022-05-11T08:51:21Z",
+      "recordSha256": "2731739b3fc12e78438deb6e0958fab4b9b627dfe84272a6fbfda6a4952ea957",
+      "recordURL": "https://github.com/advisories/GHSA-wjxw-gh3m-7pm5",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26265"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "223b950944f494a5b4e0957fd9f92c48b09037ad"
+      ],
+      "id": "GHSA-xw37-57qp-9mm4",
+      "modified": "2021-03-25T19:02:48Z",
+      "packageAnnotations": [],
+      "provider": "github-upstream",
+      "published": "2020-12-11T08:07:15Z",
+      "recordSha256": "bebbc1a8b6ea74a638262d72694f851da543b7fa70783741e8e8c79d1da04c51",
+      "recordURL": "https://github.com/advisories/GHSA-xw37-57qp-9mm4",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26314",
+        "GO-2026-4507"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "895a8597cb16c02203e38707ed2d1da5c500fe60"
+      ],
+      "id": "GHSA-2gjw-fg97-vg3r",
+      "modified": "2026-02-28T06:26:28.686606Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2026-02-18T22:35:15Z",
+      "recordSha256": "69c94cec1295373b733f9597d6cbe2cd55b63a8578cb4785ec7640780062af48",
+      "recordURL": "https://github.com/advisories/GHSA-2gjw-fg97-vg3r",
+      "upstreamFixedVersions": [
+        "1.16.9"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2024-32972",
+        "GO-2024-2819"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-4xc9-8hmq-j652",
+      "modified": "2024-08-16T18:15:47Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2024-05-06T14:20:40Z",
+      "recordSha256": "f279244cd496a30e637ca842e20e70cf65a5bdb751cc2b5f0b27e925d31546db",
+      "recordURL": "https://github.com/advisories/GHSA-4xc9-8hmq-j652",
+      "upstreamFixedVersions": [
+        "1.13.15"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-41173",
+        "GO-2022-0256"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "e40b37718326b8b4873b3b00a0db2e6c6d9ea738",
+        "f1fd963a5a965e643e52fcf805a2a02a323c32b8"
+      ],
+      "id": "GHSA-59hh-656j-3p7v",
+      "modified": "2026-07-08T06:29:52.493797877Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-10-25T19:42:57Z",
+      "recordSha256": "e618240050590c98bc2d9eb40e113f2132db7e319e5ae289a8c84dd7fa528112",
+      "recordURL": "https://github.com/advisories/GHSA-59hh-656j-3p7v",
+      "upstreamFixedVersions": [
+        "1.10.9"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-43668"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-5m8f-chrv-7rw5",
+      "modified": "2023-11-08T04:07:11.261421Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-11-23T18:04:47Z",
+      "recordSha256": "bd70cae6ba1a453ffe55955f45dbcdbff2cafefb17e78cbcffd9e86da015a27d",
+      "recordURL": "https://github.com/advisories/GHSA-5m8f-chrv-7rw5",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26313",
+        "GO-2026-4508"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-689v-6xwf-5jf3",
+      "modified": "2026-02-28T06:26:25.973770Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2026-02-18T22:34:49Z",
+      "recordSha256": "1887dc0d43e4924544f7f8f42ea565ba047a65b9271942f5d8c243ef5c2cbb80",
+      "recordURL": "https://github.com/advisories/GHSA-689v-6xwf-5jf3",
+      "upstreamFixedVersions": [
+        "1.17.0"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26241",
+        "GO-2022-0771"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "295693759e5ded05fec0b2fb39359965b60da785"
+      ],
+      "id": "GHSA-69v6-xc2j-r2jf",
+      "modified": "2026-07-08T06:00:35.934223631Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-06-29T21:13:01Z",
+      "recordSha256": "86282a12c0488a103e28aeb92a4768ae1de9a174b10c742559dab85e999541fd",
+      "recordURL": "https://github.com/advisories/GHSA-69v6-xc2j-r2jf",
+      "upstreamFixedVersions": [
+        "1.9.17"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-39137",
+        "GO-2022-0254"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "4d4879cafd1b3c906fc184a8c4a357137465128f"
+      ],
+      "id": "GHSA-9856-9gg9-qcmq",
+      "modified": "2026-07-08T06:29:39.134531916Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-08-30T16:15:41Z",
+      "recordSha256": "2f144dcd4729fb08f89b116dcbbf4264e0a3d73325a7c8c8d1161e8f886bd063",
+      "recordURL": "https://github.com/advisories/GHSA-9856-9gg9-qcmq",
+      "upstreamFixedVersions": [
+        "1.10.8"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2018-19184",
+        "GO-2022-0814"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "83e2761c3a13524bd5d6597ac08994488cf872ef",
+        "fb9f7261ec51e38eedb454594fc19f00de1a6834"
+      ],
+      "id": "GHSA-9h4h-8w5p-f28w",
+      "modified": "2024-08-21T15:58:34.213313Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-06-29T21:23:15Z",
+      "recordSha256": "44b1805d1dda1a9f629d20795d5c79a775e2ef869602e392de5d2374a4dd50c0",
+      "recordURL": "https://github.com/advisories/GHSA-9h4h-8w5p-f28w",
+      "upstreamFixedVersions": [
+        "1.8.14"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26242",
+        "GO-2021-0103"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "7163a6664ee664df81b9028ab3ba13b9d65a7196"
+      ],
+      "id": "GHSA-jm5c-rv3w-w83m",
+      "modified": "2026-07-08T05:59:51.548470893Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-06-29T21:13:20Z",
+      "recordSha256": "dbca886755ed897b5d9b861b3b311bf0fe1dd637b5ca3ddda861765e380e5848",
+      "recordURL": "https://github.com/advisories/GHSA-jm5c-rv3w-w83m",
+      "upstreamFixedVersions": [
+        "1.9.18"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "GO-2022-0392"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-m6gx-rhvj-fh52",
+      "modified": "2025-01-30T14:37:03Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-06-29T21:13:54Z",
+      "recordSha256": "7fd0ada553a4c6a815f6b108f30177fe3511579844090300ea775d7fa1b496fb",
+      "recordURL": "https://github.com/advisories/GHSA-m6gx-rhvj-fh52",
+      "upstreamFixedVersions": [
+        "1.9.24"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26315",
+        "GO-2026-4511"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "46bee92f9e64c0a06a12586a5d21cffc49d1ba8e"
+      ],
+      "id": "GHSA-m6j8-rg6r-7mv8",
+      "modified": "2026-02-28T06:26:19.014657Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2026-02-18T22:36:06Z",
+      "recordSha256": "a0bd3ccce0372e66f0d2490fda5a606895cc415808edfcb860d398c5ea26271f",
+      "recordURL": "https://github.com/advisories/GHSA-m6j8-rg6r-7mv8",
+      "upstreamFixedVersions": [
+        "1.16.9"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-22868",
+        "GO-2026-4314"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "abeb78c647e354ed922726a1d719ac7bc64a07e2"
+      ],
+      "id": "GHSA-mq3p-rrmp-79jg",
+      "modified": "2026-02-03T02:58:49.032697Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2026-01-13T21:55:29Z",
+      "recordSha256": "8e9d6ce414202bbd9ee3cadc7c8ef76cf99cb8d86f070bb3542b14cf19f38529",
+      "recordURL": "https://github.com/advisories/GHSA-mq3p-rrmp-79jg",
+      "upstreamFixedVersions": [
+        "1.16.8"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-22862",
+        "GO-2026-4315"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "abeb78c647e354ed922726a1d719ac7bc64a07e2"
+      ],
+      "id": "GHSA-mr7q-c9w9-wh4h",
+      "modified": "2026-02-03T02:59:06.834692Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2026-01-13T21:55:12Z",
+      "recordSha256": "e37342361462a2bd28b1b6f0221a48f0949380ce8203e3f7a7323bf1b3127ccc",
+      "recordURL": "https://github.com/advisories/GHSA-mr7q-c9w9-wh4h",
+      "upstreamFixedVersions": [
+        "1.16.8"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2018-12018",
+        "GO-2021-0075"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "a5237a27eaf81946a3edb4fafe13ed6359d119e4"
+      ],
+      "id": "GHSA-p5gc-957x-gfw9",
+      "modified": "2024-05-20T19:55:50Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2022-05-14T03:01:31Z",
+      "recordSha256": "30216cb88e6485f7fd3e41c0b24a5eceac5790be39e14ab1ad173c175dfa9fa1",
+      "recordURL": "https://github.com/advisories/GHSA-p5gc-957x-gfw9",
+      "upstreamFixedVersions": [
+        "1.8.11"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2023-40591",
+        "GO-2023-2046"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-ppjg-v974-84cm",
+      "modified": "2026-09-10T03:49:58.385793589Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2023-09-06T19:49:46Z",
+      "recordSha256": "34954838bb5ae52ad6f5364de27ecf3caa84a6e2fe5a5ca8ef8327be7db5a8ca",
+      "recordURL": "https://github.com/advisories/GHSA-ppjg-v974-84cm",
+      "upstreamFixedVersions": [
+        "1.12.1-stable"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2022-23327"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-pvx3-gm3c-gmpr",
+      "modified": "2026-09-02T22:15:05.254645426Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2022-03-05T00:00:46Z",
+      "recordSha256": "848e301409289d89c082b1376bf1a35e187bc62024af21dbb0f1b9d7a4c77c9e",
+      "recordURL": "https://github.com/advisories/GHSA-pvx3-gm3c-gmpr",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2025-24883",
+        "GO-2025-3436"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "159fb1a1db551c544978dc16a5568a4730b4abf3",
+        "fa9a2ff8687ec9efe57b4b9833d5590d20f8a83f"
+      ],
+      "id": "GHSA-q26p-9cq4-7fc2",
+      "modified": "2025-03-17T20:25:21Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2025-01-30T17:51:57Z",
+      "recordSha256": "22c757177fd25653e4d013350dfe0123741cee9bbe07046ffdb57ecbeacbf2be",
+      "recordURL": "https://github.com/advisories/GHSA-q26p-9cq4-7fc2",
+      "upstreamFixedVersions": [
+        "1.14.13"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2018-16733",
+        "GO-2022-0871"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "106d196ec4a6451efedc60ab15957f231fa85639"
+      ],
+      "id": "GHSA-qr2j-wrhx-4829",
+      "modified": "2024-08-21T15:58:56.915586Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-05-18T18:38:06Z",
+      "recordSha256": "56f8ac7a313e17426cbe6aa0544232ad6268e75a18dcf92d095e81cd92f376ae",
+      "recordURL": "https://github.com/advisories/GHSA-qr2j-wrhx-4829",
+      "upstreamFixedVersions": [
+        "1.8.14"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26264",
+        "GO-2021-0063"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "bddd103a9f0af27ef533f04e06ea429cf76b6d46"
+      ],
+      "id": "GHSA-r33q-22hv-j29q",
+      "modified": "2026-09-10T03:49:26.935137633Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-06-29T21:14:07Z",
+      "recordSha256": "d89e312defcfb61e5fab65fd3c958effd83e092cb99b82bc31b4edd1087dfa3f",
+      "recordURL": "https://github.com/advisories/GHSA-r33q-22hv-j29q",
+      "upstreamFixedVersions": [
+        "1.9.25"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2022-37450"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-rqmg-hrg4-fm69",
+      "modified": "2023-11-08T04:10:08.624430Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2022-08-06T00:00:36Z",
+      "recordSha256": "06b718e3b4a2ccd13d54a37ef3053a2fbc2930835fc255dd99501c98a5a7230b",
+      "recordURL": "https://github.com/advisories/GHSA-rqmg-hrg4-fm69",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26240",
+        "GO-2022-0775"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "d990df909d7839640143344e79356754384dcdd0"
+      ],
+      "id": "GHSA-v592-xf75-856p",
+      "modified": "2026-09-10T03:49:06.349442645Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-06-29T21:12:56Z",
+      "recordSha256": "bd394d54ba8b121ea8aea6646ef34a84d579fbaa9d6f864c2ede2cc3990fdbe5",
+      "recordURL": "https://github.com/advisories/GHSA-v592-xf75-856p",
+      "upstreamFixedVersions": [
+        "1.9.24"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2023-42319"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-v9jh-j8px-98vq",
+      "modified": "2024-09-13T18:36:55Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2023-10-18T06:30:30Z",
+      "recordSha256": "f0c624e3c3d6938ab16f5519b347590a74717e55f7289545ad2d3de703affd27",
+      "recordURL": "https://github.com/advisories/GHSA-v9jh-j8px-98vq",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2022-23328"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-vmf7-hmh6-vv57",
+      "modified": "2023-11-08T04:08:17.939029Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2022-03-05T00:00:46Z",
+      "recordSha256": "edbf33370c08f1b032f432c8edb15d358359f7f1da961941ee96f3885bb11acb",
+      "recordURL": "https://github.com/advisories/GHSA-vmf7-hmh6-vv57",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-42219"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-vrcc-g6vj-mh5w",
+      "modified": "2023-11-08T04:07:05.160401Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2022-03-18T00:01:13Z",
+      "recordSha256": "7bbb3983eef2059e4b3932ebbe9ce38692749c330edeb36e8776dd61994ff79a",
+      "recordURL": "https://github.com/advisories/GHSA-vrcc-g6vj-mh5w",
+      "upstreamFixedVersions": [],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2022-29177",
+        "GO-2022-0456"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GHSA-wjxw-gh3m-7pm5",
+      "modified": "2024-08-21T15:26:57.121560Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2022-05-24T20:54:55Z",
+      "recordSha256": "d2700868cc9174a73296c68938fcf65d4e741b809efb3123e72e6fd3f8f10292",
+      "recordURL": "https://github.com/advisories/GHSA-wjxw-gh3m-7pm5",
+      "upstreamFixedVersions": [
+        "1.10.17"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26265",
+        "GO-2021-0105"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "87c0ba92136a75db0ab2aba1046d4a9860375d6a"
+      ],
+      "id": "GHSA-xw37-57qp-9mm4",
+      "modified": "2026-09-10T03:49:15.235306786Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2021-06-29T21:14:16Z",
+      "recordSha256": "b0a7e05b7b17d4cf8c3e447a13c35163371d78d0957b856ce8485b8799d2f43b",
+      "recordURL": "https://github.com/advisories/GHSA-xw37-57qp-9mm4",
+      "upstreamFixedVersions": [
+        "1.9.20"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26264",
+        "GHSA-r33q-22hv-j29q"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "bddd103a9f0af27ef533f04e06ea429cf76b6d46"
+      ],
+      "id": "GO-2021-0063",
+      "modified": "2024-05-20T16:03:47Z",
+      "packageAnnotations": [
+        {
+          "goarch": [],
+          "goos": [],
+          "path": "github.com/ethereum/go-ethereum/les",
+          "symbols": [
+            "PrivateLightServerAPI.Benchmark",
+            "serverHandler.handleMsg"
+          ]
+        }
+      ],
+      "provider": "osv-upstream",
+      "published": "2021-04-14T20:04:52Z",
+      "recordSha256": "51ee58d983f747477ff330549d039ef1c23ea92a19b9e40f80da660e557c62ac",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2021-0063",
+      "upstreamFixedVersions": [
+        "1.9.25"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2018-12018",
+        "GHSA-p5gc-957x-gfw9"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "a5237a27eaf81946a3edb4fafe13ed6359d119e4"
+      ],
+      "id": "GO-2021-0075",
+      "modified": "2024-06-03T20:51:31Z",
+      "packageAnnotations": [
+        {
+          "goarch": [],
+          "goos": [],
+          "path": "github.com/ethereum/go-ethereum/les",
+          "symbols": [
+            "ProtocolManager.handleMsg"
+          ]
+        }
+      ],
+      "provider": "osv-upstream",
+      "published": "2021-04-14T20:04:52Z",
+      "recordSha256": "53b0983ec6cc00ad162b151b8349e61b10e96137da567fe2f6e389cdb71c0889",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2021-0075",
+      "upstreamFixedVersions": [
+        "1.8.11"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26265",
+        "GHSA-xw37-57qp-9mm4"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "87c0ba92136a75db0ab2aba1046d4a9860375d6a"
+      ],
+      "id": "GO-2021-0105",
+      "modified": "2024-05-20T16:03:47Z",
+      "packageAnnotations": [
+        {
+          "goarch": [],
+          "goos": [],
+          "path": "github.com/ethereum/go-ethereum/core/state",
+          "symbols": [
+            "StateDB.AddBalance",
+            "StateDB.CreateAccount",
+            "StateDB.GetOrNewStateObject",
+            "StateDB.SetBalance",
+            "StateDB.SetCode",
+            "StateDB.SetNonce",
+            "StateDB.SetState",
+            "StateDB.SetStorage",
+            "StateDB.SubBalance",
+            "StateDB.createObject"
+          ]
+        }
+      ],
+      "provider": "osv-upstream",
+      "published": "2021-07-28T18:08:05Z",
+      "recordSha256": "9564c9eb3847c192240dfd90784f0afb99f442f29290312f0af770df26d255b4",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2021-0105",
+      "upstreamFixedVersions": [
+        "1.9.20"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-39137",
+        "GHSA-9856-9gg9-qcmq"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "4d4879cafd1b3c906fc184a8c4a357137465128f"
+      ],
+      "id": "GO-2022-0254",
+      "modified": "2024-05-20T16:03:47Z",
+      "packageAnnotations": [
+        {
+          "goarch": [],
+          "goos": [],
+          "path": "github.com/ethereum/go-ethereum/core/vm",
+          "symbols": [
+            "EVM.Call",
+            "EVM.CallCode",
+            "EVM.Create",
+            "EVM.Create2",
+            "EVM.DelegateCall",
+            "EVM.StaticCall",
+            "EVMInterpreter.Run",
+            "opCall",
+            "opCallCode",
+            "opDelegateCall",
+            "opStaticCall"
+          ]
+        }
+      ],
+      "provider": "osv-upstream",
+      "published": "2022-07-15T23:07:56Z",
+      "recordSha256": "5d8dc8c2f517ad49bd0333f88bda4ff13f7e26bcc56b18ea8070f938deec41aa",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2022-0254",
+      "upstreamFixedVersions": [
+        "1.10.8"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2021-41173",
+        "GHSA-59hh-656j-3p7v"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "f1fd963a5a965e643e52fcf805a2a02a323c32b8"
+      ],
+      "id": "GO-2022-0256",
+      "modified": "2024-05-20T16:03:47Z",
+      "packageAnnotations": [
+        {
+          "goarch": [],
+          "goos": [],
+          "path": "github.com/ethereum/go-ethereum/eth/protocols/snap",
+          "symbols": [
+            "handleMessage"
+          ]
+        },
+        {
+          "goarch": [],
+          "goos": [],
+          "path": "github.com/ethereum/go-ethereum/trie",
+          "symbols": [
+            "SecureTrie.TryGetNode",
+            "Trie.TryGetNode",
+            "Trie.tryGetNode"
+          ]
+        }
+      ],
+      "provider": "osv-upstream",
+      "published": "2022-07-15T23:08:03Z",
+      "recordSha256": "59515275179ebcaca115da8d2b98ee833ec0fd0c174204c299ada4ec1100c287",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2022-0256",
+      "upstreamFixedVersions": [
+        "1.10.9"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "GHSA-m6gx-rhvj-fh52"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GO-2022-0392",
+      "modified": "2026-03-03T04:50:12.374809Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2024-08-21T14:30:31Z",
+      "recordSha256": "b01593467a0d65f24a3bd3f85eada0bc67bb7703dc57128871bd9c3abb53d0a6",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2022-0392",
+      "upstreamFixedVersions": [
+        "1.9.24"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2022-29177",
+        "GHSA-wjxw-gh3m-7pm5"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GO-2022-0456",
+      "modified": "2026-03-03T04:50:23.914217Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2024-08-21T15:11:31Z",
+      "recordSha256": "d76d7201cf1bd8c42b42a41d983cb247c2df08c8c1910c9757a069090526ce1b",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2022-0456",
+      "upstreamFixedVersions": [
+        "1.10.17"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26241",
+        "GHSA-69v6-xc2j-r2jf"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "295693759e5ded05fec0b2fb39359965b60da785"
+      ],
+      "id": "GO-2022-0771",
+      "modified": "2026-03-03T04:50:50.860337Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2024-08-21T15:28:59Z",
+      "recordSha256": "956c3be5bb215ca3ebc988301c814bafd2f48cf5f07ab5aca982cb023854fd95",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2022-0771",
+      "upstreamFixedVersions": [
+        "1.9.17"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2020-26240",
+        "GHSA-v592-xf75-856p"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "d990df909d7839640143344e79356754384dcdd0"
+      ],
+      "id": "GO-2022-0775",
+      "modified": "2026-03-03T04:50:52.225184Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2024-08-21T15:28:59Z",
+      "recordSha256": "11183341e538327d427ff98e50bb4f636223605a5b821b4d0e15063762f860aa",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2022-0775",
+      "upstreamFixedVersions": [
+        "1.9.24"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2018-19184",
+        "GHSA-9h4h-8w5p-f28w"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "83e2761c3a13524bd5d6597ac08994488cf872ef",
+        "fb9f7261ec51e38eedb454594fc19f00de1a6834"
+      ],
+      "id": "GO-2022-0814",
+      "modified": "2026-03-03T04:50:56.416895Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2024-08-21T15:29:02Z",
+      "recordSha256": "2db7622983195fbc8b7ca0ed5bbcdd21c25b50ac4cf7ea32d6e76e6f5f6491e8",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2022-0814",
+      "upstreamFixedVersions": [
+        "1.8.14"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2018-16733",
+        "GHSA-qr2j-wrhx-4829"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "106d196ec4a6451efedc60ab15957f231fa85639"
+      ],
+      "id": "GO-2022-0871",
+      "modified": "2026-03-03T04:52:21.287219Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2024-08-21T15:29:06Z",
+      "recordSha256": "d81cd165123c307ecce3ea98c1bb31c3926190d463132e7c41be973a5d3f8c4a",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2022-0871",
+      "upstreamFixedVersions": [
+        "1.8.14"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2023-40591",
+        "GHSA-ppjg-v974-84cm"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GO-2023-2046",
+      "modified": "2026-03-03T04:54:08.965124Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2023-10-25T18:06:33Z",
+      "recordSha256": "260fd0aab9586ab9b46b30ea7159bad6dc8814d621a890644c1a6345b85baa5c",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2023-2046",
+      "upstreamFixedVersions": [
+        "1.12.1"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2024-32972",
+        "GHSA-4xc9-8hmq-j652"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GO-2024-2819",
+      "modified": "2026-03-03T04:55:20.016567Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2024-05-08T23:23:56Z",
+      "recordSha256": "23684cf159554b04a1c06f64110ddcf6b441c221b7992ccee71c44ec61de1c2a",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2024-2819",
+      "upstreamFixedVersions": [
+        "1.13.15"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2025-24883",
+        "GHSA-q26p-9cq4-7fc2"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "fa9a2ff8687ec9efe57b4b9833d5590d20f8a83f"
+      ],
+      "id": "GO-2025-3436",
+      "modified": "2026-03-03T04:57:10.587836Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2025-02-04T22:06:11Z",
+      "recordSha256": "603f9916c5998fc0a2b26162c7123bb3b501629f3715b3df8cdd3b36a4a4d46b",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2025-3436",
+      "upstreamFixedVersions": [
+        "1.14.13"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-22868",
+        "GHSA-mq3p-rrmp-79jg"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "abeb78c647e354ed922726a1d719ac7bc64a07e2"
+      ],
+      "id": "GO-2026-4314",
+      "modified": "2026-03-03T04:57:50.887835Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2026-01-23T02:28:11Z",
+      "recordSha256": "94bf2b8c96472ae7a7bb25dc57d08f14deb203a145d18d2f6ceccf8ac86f3cf5",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2026-4314",
+      "upstreamFixedVersions": [
+        "1.16.8"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-22862",
+        "GHSA-mr7q-c9w9-wh4h"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "abeb78c647e354ed922726a1d719ac7bc64a07e2"
+      ],
+      "id": "GO-2026-4315",
+      "modified": "2026-03-03T04:57:51.678614Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2026-01-23T02:28:11Z",
+      "recordSha256": "ad304af8e6adb59e6839156fe75d30c9f96d28ce8680d44e70e4134718fafcbb",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2026-4315",
+      "upstreamFixedVersions": [
+        "1.16.8"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26314",
+        "GHSA-2gjw-fg97-vg3r"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "895a8597cb16c02203e38707ed2d1da5c500fe60"
+      ],
+      "id": "GO-2026-4507",
+      "modified": "2026-02-24T23:40:59.354322Z",
+      "packageAnnotations": [
+        {
+          "goarch": [],
+          "goos": [],
+          "path": "github.com/ethereum/go-ethereum/crypto/secp256k1",
+          "symbols": [
+            "BitCurve.IsOnCurve"
+          ]
+        }
+      ],
+      "provider": "osv-upstream",
+      "published": "2026-02-24T23:10:26Z",
+      "recordSha256": "633d6e2d0c931981cd8f864f8ee72cd11198d805830f872350f79c89c80f839d",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2026-4507",
+      "upstreamFixedVersions": [
+        "1.16.9"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26313",
+        "GHSA-689v-6xwf-5jf3"
+      ],
+      "explicitUpstreamCommitReferences": [],
+      "id": "GO-2026-4508",
+      "modified": "2026-02-24T23:41:15.959791Z",
+      "packageAnnotations": [],
+      "provider": "osv-upstream",
+      "published": "2026-02-24T23:10:26Z",
+      "recordSha256": "1e649d1c9a5fb15503571b69172887e79d199786927d8f8ff76745f24dd61b3a",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2026-4508",
+      "upstreamFixedVersions": [
+        "1.17.0"
+      ],
+      "withdrawnAt": null
+    },
+    {
+      "aliases": [
+        "CVE-2026-26315",
+        "GHSA-m6j8-rg6r-7mv8"
+      ],
+      "explicitUpstreamCommitReferences": [
+        "46bee92f9e64c0a06a12586a5d21cffc49d1ba8e"
+      ],
+      "id": "GO-2026-4511",
+      "modified": "2026-02-24T23:41:04.631464Z",
+      "packageAnnotations": [
+        {
+          "goarch": [],
+          "goos": [],
+          "path": "github.com/ethereum/go-ethereum/crypto/ecies",
+          "symbols": [
+            "Encrypt",
+            "PrivateKey.Decrypt",
+            "PrivateKey.GenerateShared"
+          ]
+        }
+      ],
+      "provider": "osv-upstream",
+      "published": "2026-02-24T23:10:26Z",
+      "recordSha256": "923a83888faf92ff3d4687793fab07984b541f9e3255471af0c95dd636a4fb11",
+      "recordURL": "https://pkg.go.dev/vuln/GO-2026-4511",
+      "upstreamFixedVersions": [
+        "1.16.9"
+      ],
+      "withdrawnAt": null
+    }
+  ],
+  "schema": 1
+}

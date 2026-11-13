@@ -1,0 +1,48 @@
+#! /usr/bin/env perl
+# Copyright 2016-2025 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# June 2015
+#
+# ChaCha20 for ARMv8.
+#
+# April 2019
+#
+# Replace 3xNEON+1xIALU code path with 4+1. 4+1 is actually fastest
+# option on most(*), but not all, processors, yet 6+2 is retained.
+# This is because penalties are considered tolerable in comparison to
+# improvement on processors where 6+2 helps. Most notably +37% on
+# ThunderX2. It's server-oriented processor which will have to serve
+# as many requests as possible. While others are mostly clients, when
+# performance doesn't have to be absolute top-notch, just fast enough,
+# as majority of time is spent "entertaining" relatively slow human.
+#
+# Performance in cycles per byte out of large buffer.
+#
+#			IALU/gcc-4.9	4xNEON+1xIALU	6xNEON+2xIALU
+#
+# Apple A7		5.50/+49%	2.72		1.60
+# Cortex-A53		8.40/+80%	4.06		4.45(*)
+# Cortex-A57		8.06/+43%	4.15		4.40(*)
+# Denver		4.50/+82%	2.30		2.70(*)
+# X-Gene		9.50/+46%	8.20		8.90(*)
+# Mongoose		8.00/+44%	2.74		3.12(*)
+# Kryo			8.17/+50%	4.47		4.65(*)
+# ThunderX2		7.22/+48%	5.64		4.10
+#
+# (*)	slower than 4+1:-(
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

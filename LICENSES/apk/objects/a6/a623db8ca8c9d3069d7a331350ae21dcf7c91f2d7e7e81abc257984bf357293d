@@ -1,0 +1,8 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * universal getopt32 implementation for busybox
+ *
+ * Copyright (C) 2003-2005  Vladimir Oleynik  <dzo@simtreas.ru>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */

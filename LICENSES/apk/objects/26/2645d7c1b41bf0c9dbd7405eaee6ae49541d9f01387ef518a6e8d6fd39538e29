@@ -1,0 +1,8 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Check user and group names for illegal characters
+ *
+ * Copyright (C) 2008 Tito Ragusa <farmatito@tiscali.it>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */

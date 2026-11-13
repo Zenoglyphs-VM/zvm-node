@@ -1,0 +1,37 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * addgroup - add groups to /etc/group and /etc/gshadow
+ *
+ * Copyright (C) 1999 by Lineo, inc. and John Beppu
+ * Copyright (C) 1999,2000,2001 by John Beppu <beppu@codepoet.org>
+ * Copyright (C) 2007 by Tito Ragusa <farmatito@tiscali.it>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config ADDGROUP
+//config:	bool "addgroup (8.8 kb)"
+//config:	default y
+//config:	select LONG_OPTS
+//config:	help
+//config:	Utility for creating a new group account.
+//config:
+//config:config FEATURE_ADDUSER_TO_GROUP
+//config:	bool "Support adding users to groups"
+//config:	default y
+//config:	depends on ADDGROUP
+//config:	help
+//config:	If called with two non-option arguments,
+//config:	addgroup will add an existing user to an
+//config:	existing group.
+
+//applet:IF_ADDGROUP(APPLET_NOEXEC(addgroup, addgroup, BB_DIR_USR_SBIN, BB_SUID_DROP, addgroup))
+
+//kbuild:lib-$(CONFIG_ADDGROUP) += addgroup.o
+
+//usage:#define addgroup_trivial_usage
+//usage:       "[-g GID] [-S] " IF_FEATURE_ADDUSER_TO_GROUP("[USER] ") "GROUP"
+//usage:#define addgroup_full_usage "\n\n"
+//usage:       "Add a group" IF_FEATURE_ADDUSER_TO_GROUP(" or add a user to a group") "\n"
+//usage:     "\n	-g GID	Group id"
+//usage:     "\n	-S	Create a system group"
+

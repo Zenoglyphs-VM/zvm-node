@@ -1,0 +1,29 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * vconfig implementation for busybox
+ *
+ * Copyright (C) 2001  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config VCONFIG
+//config:	bool "vconfig (2.6 kb)"
+//config:	default y
+//config:	help
+//config:	Creates, removes, and configures VLAN interfaces
+
+//applet:IF_VCONFIG(APPLET_NOEXEC(vconfig, vconfig, BB_DIR_SBIN, BB_SUID_DROP, vconfig))
+
+//kbuild:lib-$(CONFIG_VCONFIG) += vconfig.o
+
+//usage:#define vconfig_trivial_usage
+//usage:       "COMMAND [OPTIONS]"
+//usage:#define vconfig_full_usage "\n\n"
+//usage:       "Create and remove virtual ethernet devices\n"
+//usage:     "\n	add IFACE VLAN_ID"
+//usage:     "\n	rem VLAN_NAME"
+//usage:     "\n	set_flag IFACE 0|1 VLAN_QOS"
+//usage:     "\n	set_egress_map VLAN_NAME SKB_PRIO VLAN_QOS"
+//usage:     "\n	set_ingress_map VLAN_NAME SKB_PRIO VLAN_QOS"
+//usage:     "\n	set_name_type NAME_TYPE"
+

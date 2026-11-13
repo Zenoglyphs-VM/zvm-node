@@ -1,0 +1,31 @@
+#! /usr/bin/env perl
+# Copyright 2018-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# X25519 lower-level primitives for PPC64.
+#
+# July 2018.
+#
+# Base 2^64 is faster than base 2^51 on pre-POWER8, most notably ~15%
+# faster on PPC970/G5. POWER8 on the other hand seems to trip on own
+# shoelaces when handling longer carry chains. As base 2^51 has just
+# single-carry pairs, it's 25% faster than base 2^64. Since PPC970 is
+# pretty old, base 2^64 implementation is not engaged. Comparison to
+# compiler-generated code is complicated by the fact that not all
+# compilers support 128-bit integers. When compiler doesn't, like xlc,
+# this module delivers more than 2x improvement, and when it does,
+# from 12% to 30% improvement was measured...
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

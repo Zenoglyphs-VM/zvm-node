@@ -1,0 +1,27 @@
+{
+  "notices": [
+    {
+      "bytes": 331,
+      "path": "ca-certificates-20261020/c_rehash.c",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "515c46baf7b58dade73f2c18a93694b52edfed88d5064a9662e912c59a8beb4f",
+      "source": "ca-certificates-20261020.tar.bz2"
+    },
+    {
+      "bytes": 3069,
+      "path": "ca-certificates-20261020/certdata.txt",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "6f3d0ca739e01730cb2314a8302be79cb23a5956d7770dc3de37bc4b4db79df1",
+      "source": "ca-certificates-20261020.tar.bz2"
+    },
+    {
+      "bytes": 1664,
+      "path": "ca-certificates-20261020/mk-ca-bundle.pl",
+      "selectionScope": "ARCHIVE_INITIAL_SOURCE_NOTICE",
+      "sha256": "54bd510dfad4bbfc8d45c2864d9e321fac823512c65d1b3ced04105f7977f7f8",
+      "source": "ca-certificates-20261020.tar.bz2"
+    }
+  ],
+  "origin": "ca-certificates",
+  "schema": 1
+}

@@ -1,0 +1,29 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * A mini 'powertop' utility:
+ *   Analyze power consumption on Intel-based laptops.
+ * Based on powertop 1.11.
+ *
+ * Copyright (C) 2010 Marek Polacek <mmpolacek@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config POWERTOP
+//config:	bool "powertop (9.9 kb)"
+//config:	default y
+//config:	help
+//config:	Analyze power consumption on Intel-based laptops
+//config:
+//config:config FEATURE_POWERTOP_INTERACTIVE
+//config:	bool "Accept keyboard commands"
+//config:	default y
+//config:	depends on POWERTOP
+//config:	help
+//config:	Without this, powertop will only refresh display every 10 seconds.
+//config:	No keyboard commands will work, only ^C to terminate.
+
+//applet:IF_POWERTOP(APPLET(powertop, BB_DIR_USR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_POWERTOP) += powertop.o
+
+// XXX This should be configurable

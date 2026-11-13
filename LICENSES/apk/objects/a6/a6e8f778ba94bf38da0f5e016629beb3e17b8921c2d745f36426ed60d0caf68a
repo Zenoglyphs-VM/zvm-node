@@ -1,0 +1,24 @@
+/*
+ * Copyright 2015 Denys Vlasenko
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config UEVENT
+//config:	bool "uevent (3.5 kb)"
+//config:	default y
+//config:	help
+//config:	uevent is a netlink listener for kernel uevent notifications
+//config:	sent via netlink. It is usually used for dynamic device creation.
+
+//applet:IF_UEVENT(APPLET(uevent, BB_DIR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_UEVENT) += uevent.o
+
+//usage:#define uevent_trivial_usage
+//usage:       "[PROG ARGS]"
+//usage:#define uevent_full_usage "\n\n"
+//usage:       "uevent runs PROG for every netlink notification."
+//usage:   "\n""PROG's environment contains data passed from the kernel."
+//usage:   "\n""Typical usage (daemon for dynamic device node creation):"
+//usage:   "\n""	# uevent mdev & mdev -s"
+

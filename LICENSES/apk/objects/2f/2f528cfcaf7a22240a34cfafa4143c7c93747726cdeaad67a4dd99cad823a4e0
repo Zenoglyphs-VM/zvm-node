@@ -1,0 +1,23 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini fgconsole implementation for busybox
+ *
+ * Copyright (C) 2010 by Grigory Batalov <bga@altlinux.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config FGCONSOLE
+//config:	bool "fgconsole (1.8 kb)"
+//config:	default y
+//config:	help
+//config:	This program prints active (foreground) console number.
+
+//applet:IF_FGCONSOLE(APPLET_NOEXEC(fgconsole, fgconsole, BB_DIR_USR_BIN, BB_SUID_DROP, fgconsole))
+
+//kbuild:lib-$(CONFIG_FGCONSOLE) += fgconsole.o
+
+//usage:#define fgconsole_trivial_usage
+//usage:	""
+//usage:#define fgconsole_full_usage "\n\n"
+//usage:	"Get active console"
+

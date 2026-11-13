@@ -1,0 +1,163 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini cpio implementation for busybox
+ *
+ * Copyright (C) 2001 by Glenn McGrath
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Limitations:
+ * Doesn't check CRC's
+ * Only supports new ASCII and CRC formats
+ */
+//config:config CPIO
+//config:	bool "cpio (15 kb)"
+//config:	default y
+//config:	help
+//config:	cpio is an archival utility program used to create, modify, and
+//config:	extract contents from archives.
+//config:	cpio has 110 bytes of overheads for every stored file.
+//config:
+//config:	This implementation of cpio can extract cpio archives created in the
+//config:	"newc" or "crc" format.
+//config:
+//config:	Unless you have a specific application which requires cpio, you
+//config:	should probably say N here.
+//config:
+//config:config FEATURE_CPIO_O
+//config:	bool "Support archive creation"
+//config:	default y
+//config:	depends on CPIO
+//config:	help
+//config:	This implementation of cpio can create cpio archives in the "newc"
+//config:	format only.
+//config:
+//config:config FEATURE_CPIO_P
+//config:	bool "Support passthrough mode"
+//config:	default y
+//config:	depends on FEATURE_CPIO_O
+//config:	help
+//config:	Passthrough mode. Rarely used.
+//config:
+//config:config FEATURE_CPIO_IGNORE_DEVNO
+//config:	bool "Support --ignore-devno like GNU cpio"
+//config:	default y
+//config:	depends on FEATURE_CPIO_O && LONG_OPTS
+//config:	help
+//config:	Optionally ignore device numbers when creating archives.
+//config:
+//config:config FEATURE_CPIO_RENUMBER_INODES
+//config:	bool "Support --renumber-inodes like GNU cpio"
+//config:	default y
+//config:	depends on FEATURE_CPIO_O && LONG_OPTS
+//config:	help
+//config:	Optionally renumber inodes when creating archives.
+
+//applet:IF_CPIO(APPLET(cpio, BB_DIR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_CPIO) += cpio.o
+
+//usage:#define cpio_trivial_usage
+//usage:       "[-dmvu] [-F FILE] [-R USER[:GRP]]" IF_FEATURE_CPIO_O(" [-H newc]")
+//usage:       " [-ti"IF_FEATURE_CPIO_O("o")"]" IF_FEATURE_CPIO_P(" [-p DIR]")
+//usage:       " [EXTR_FILE]..."
+//usage:#define cpio_full_usage "\n\n"
+//usage:       "Extract (-i) or list (-t) files from a cpio archive on stdin"
+//usage:	IF_FEATURE_CPIO_O(", or"
+//usage:     "\ntake file list from stdin and create an archive (-o)"
+//usage:                IF_FEATURE_CPIO_P(" or copy files (-p)")
+//usage:	)
+//usage:     "\n"
+//usage:     "\nMain operation mode:"
+//usage:     "\n	-t	List"
+//usage:     "\n	-i	Extract EXTR_FILEs (or all)"
+//usage:	IF_FEATURE_CPIO_O(
+//usage:     "\n	-o	Create (requires -H newc)"
+//usage:	)
+//usage:	IF_FEATURE_CPIO_P(
+//usage:     "\n	-p DIR	Copy files to DIR"
+//usage:	)
+//usage:     "\nOptions:"
+//usage:	IF_FEATURE_CPIO_O(
+//usage:     "\n	-H newc	Archive format"
+//usage:	)
+//usage:     "\n	-d	Make leading directories"
+//usage:     "\n	-m	Restore mtime"
+//usage:     "\n	-v	Verbose"
+//usage:     "\n	-u	Overwrite"
+//usage:     "\n	-F FILE	Input (-t,-i,-p) or output (-o) file"
+//usage:     "\n	-R USER[:GRP]	Set owner of created files"
+//usage:     "\n	-L	Dereference symlinks"
+//usage:     "\n	-0	NUL terminated input"
+//usage:	IF_FEATURE_CPIO_IGNORE_DEVNO(
+//usage:     "\n	--ignore-devno"
+//usage:	)
+//usage:	IF_FEATURE_CPIO_RENUMBER_INODES(
+//usage:     "\n	--renumber-inodes"
+//usage:	)
+
+/* GNU cpio 2.9 --help (abridged):
+
+ Modes:
+  -t, --list                 List the archive
+  -i, --extract              Extract files from an archive
+  -o, --create               Create the archive
+  -p, --pass-through         Copy-pass mode
+
+ Options valid in any mode:
+      --block-size=SIZE      I/O block size = SIZE * 512 bytes
+  -B                         I/O block size = 5120 bytes
+  -c                         Use the old portable (ASCII) archive format
+  -C, --io-size=NUMBER       I/O block size in bytes
+  -f, --nonmatching          Only copy files that do not match given pattern
+  -F, --file=FILE            Use FILE instead of standard input or output
+  -H, --format=FORMAT        Use given archive FORMAT
+  -M, --message=STRING       Print STRING when the end of a volume of the
+                             backup media is reached
+  -n, --numeric-uid-gid      If -v, show numeric UID and GID
+      --quiet                Do not print the number of blocks copied
+      --rsh-command=COMMAND  Use remote COMMAND instead of rsh
+  -v, --verbose              Verbosely list the files processed
+  -V, --dot                  Print a "." for each file processed
+  -W, --warning=FLAG         Control warning display: 'none','truncate','all';
+                             multiple options accumulate
+
+ Options valid only in --extract mode:
+  -b, --swap                 Swap both halfwords of words and bytes of
+                             halfwords in the data (equivalent to -sS)
+  -r, --rename               Interactively rename files
+  -s, --swap-bytes           Swap the bytes of each halfword in the files
+  -S, --swap-halfwords       Swap the halfwords of each word (4 bytes)
+      --to-stdout            Extract files to standard output
+  -E, --pattern-file=FILE    Read additional patterns specifying filenames to
+                             extract or list from FILE
+      --only-verify-crc      Verify CRC's, don't actually extract the files
+
+ Options valid only in --create mode:
+  -A, --append               Append to an existing archive
+  -O FILE                    File to use instead of standard output
+
+ Options valid only in --pass-through mode:
+  -l, --link                 Link files instead of copying them, when possible
+
+ Options valid in --extract and --create modes:
+      --absolute-filenames   Do not strip file system prefix components from
+                             the file names
+      --no-absolute-filenames Create all files relative to the current dir
+
+ Options valid in --create and --pass-through modes:
+  -0, --null                 A list of filenames is terminated by a NUL
+  -a, --reset-access-time    Reset the access times of files after reading them
+  -I FILE                    File to use instead of standard input
+  -L, --dereference          Dereference symbolic links (copy the files
+                             that they point to instead of copying the links)
+  -R, --owner=[USER][:.][GRP] Set owner of created files
+
+ Options valid in --extract and --pass-through modes:
+  -d, --make-directories     Create leading directories where needed
+  -m, --preserve-modification-time  Retain mtime when creating files
+      --no-preserve-owner    Do not change the ownership of the files
+      --sparse               Write files with blocks of zeros as sparse files
+  -u, --unconditional        Replace all files unconditionally
+ */
+

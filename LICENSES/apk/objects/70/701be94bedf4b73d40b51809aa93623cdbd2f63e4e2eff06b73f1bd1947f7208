@@ -1,0 +1,73 @@
+#! /usr/bin/env perl
+# Copyright 2012-2021 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by David S. Miller and Andy Polyakov.
+# The module is licensed under 2-clause BSD license. October 2012.
+# All rights reserved.
+# ====================================================================
+
+######################################################################
+# AES for SPARC T4.
+#
+# AES round instructions complete in 3 cycles and can be issued every
+# cycle. It means that round calculations should take 4*rounds cycles,
+# because any given round instruction depends on result of *both*
+# previous instructions:
+#
+#	|0 |1 |2 |3 |4
+#	|01|01|01|
+#	   |23|23|23|
+#	            |01|01|...
+#	               |23|...
+#
+# Provided that fxor [with IV] takes 3 cycles to complete, critical
+# path length for CBC encrypt would be 3+4*rounds, or in other words
+# it should process one byte in at least (3+4*rounds)/16 cycles. This
+# estimate doesn't account for "collateral" instructions, such as
+# fetching input from memory, xor-ing it with zero-round key and
+# storing the result. Yet, *measured* performance [for data aligned
+# at 64-bit boundary!] deviates from this equation by less than 0.5%:
+#
+#		128-bit key	192-		256-
+# CBC encrypt	2.70/2.90(*)	3.20/3.40	3.70/3.90
+#			 (*) numbers after slash are for
+#			     misaligned data.
+#
+# Out-of-order execution logic managed to fully overlap "collateral"
+# instructions with those on critical path. Amazing!
+#
+# As with Intel AES-NI, question is if it's possible to improve
+# performance of parallelizable modes by interleaving round
+# instructions. Provided round instruction latency and throughput
+# optimal interleave factor is 2. But can we expect 2x performance
+# improvement? Well, as round instructions can be issued one per
+# cycle, they don't saturate the 2-way issue pipeline and therefore
+# there is room for "collateral" calculations... Yet, 2x speed-up
+# over CBC encrypt remains unattaintable:
+#
+#		128-bit key	192-		256-
+# CBC decrypt	1.64/2.11	1.89/2.37	2.23/2.61
+# CTR		1.64/2.08(*)	1.89/2.33	2.23/2.61
+#			 (*) numbers after slash are for
+#			     misaligned data.
+#
+# Estimates based on amount of instructions under assumption that
+# round instructions are not pairable with any other instruction
+# suggest that latter is the actual case and pipeline runs
+# underutilized. It should be noted that T4 out-of-order execution
+# logic is so capable that performance gain from 2x interleave is
+# not even impressive, ~7-13% over non-interleaved code, largest
+# for 256-bit keys.
+
+# To anchor to something else, software implementation processes
+# one byte in 29 cycles with 128-bit key on same processor. Intel
+# Sandy Bridge encrypts byte in 5.07 cycles in CBC mode and decrypts
+# in 0.93, naturally with AES-NI.
+

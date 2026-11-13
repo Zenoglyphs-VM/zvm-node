@@ -1,0 +1,70 @@
+/*
+ * Copyright 1995-2025 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*-
+        From: Arne Ansper
+
+        Why BIO_f_reliable?
+
+        I wrote function which took BIO* as argument, read data from it
+        and processed it. Then I wanted to store the input file in
+        encrypted form. OK I pushed BIO_f_cipher to the BIO stack
+        and everything was OK. BUT if user types wrong password
+        BIO_f_cipher outputs only garbage and my function crashes. Yes
+        I can and I should fix my function, but BIO_f_cipher is
+        easy way to add encryption support to many existing applications
+        and it's hard to debug and fix them all.
+
+        So I wanted another BIO which would catch the incorrect passwords and
+        file damages which cause garbage on BIO_f_cipher's output.
+
+        The easy way is to push the BIO_f_md and save the checksum at
+        the end of the file. However there are several problems with this
+        approach:
+
+        1) you must somehow separate checksum from actual data.
+        2) you need lot's of memory when reading the file, because you
+        must read to the end of the file and verify the checksum before
+        letting the application to read the data.
+
+        BIO_f_reliable tries to solve both problems, so that you can
+        read and write arbitrary long streams using only fixed amount
+        of memory.
+
+        BIO_f_reliable splits data stream into blocks. Each block is prefixed
+        with its length and suffixed with its digest. So you need only
+        several Kbytes of memory to buffer single block before verifying
+        its digest.
+
+        BIO_f_reliable goes further and adds several important capabilities:
+
+        1) the digest of the block is computed over the whole stream
+        -- so nobody can rearrange the blocks or remove or replace them.
+
+        2) to detect invalid passwords right at the start BIO_f_reliable
+        adds special prefix to the stream. In order to avoid known plain-text
+        attacks this prefix is generated as follows:
+
+                *) digest is initialized with random seed instead of
+                standardized one.
+                *) same seed is written to output
+                *) well-known text is then hashed and the output
+                of the digest is also written to output.
+
+        reader can now read the seed from stream, hash the same string
+        and then compare the digest output.
+
+        Bad things: BIO_f_reliable knows what's going on in EVP_Digest. I
+        initially wrote and tested this code on x86 machine and wrote the
+        digests out in machine-dependent order :( There are people using
+        this code and I cannot change this easily without making existing
+        data files unreadable.
+
+*/
+

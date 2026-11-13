@@ -1,0 +1,42 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * split - split a file into pieces
+ * Copyright (c) 2007 Bernhard Reutner-Fischer
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config SPLIT
+//config:	bool "split (5.2 kb)"
+//config:	default y
+//config:	help
+//config:	Split a file into pieces.
+//config:
+//config:config FEATURE_SPLIT_FANCY
+//config:	bool "Fancy extensions"
+//config:	default y
+//config:	depends on SPLIT
+//config:	help
+//config:	Add support for features not required by SUSv3.
+//config:	Supports additional suffixes 'b' for 512 bytes,
+//config:	'g' for 1GiB for the -b option.
+
+//applet:IF_SPLIT(APPLET(split, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_SPLIT) += split.o
+
+/* BB_AUDIT: SUSv3 compliant
+ * SUSv3 requirements:
+ * http://www.opengroup.org/onlinepubs/009695399/utilities/split.html
+ */
+
+//usage:#define split_trivial_usage
+//usage:       "[OPTIONS] [INPUT [PREFIX]]"
+//usage:#define split_full_usage "\n\n"
+//usage:       "	-b N[k|m]	Split by N (kilo|mega)bytes"
+//usage:     "\n	-l N		Split by N lines"
+//usage:     "\n	-a N		Use N letters as suffix"
+//usage:
+//usage:#define split_example_usage
+//usage:       "$ split TODO foo\n"
+//usage:       "$ cat TODO | split -a 2 -l 2 TODO_\n"
+

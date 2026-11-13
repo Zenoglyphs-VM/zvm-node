@@ -1,0 +1,35 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright (C) 2017 Denys Vlasenko <vda.linux@googlemail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config NL
+//config:	bool "nl (4.9 kb)"
+//config:	default y
+//config:	help
+//config:	nl is used to number lines of files.
+
+//applet:IF_NL(APPLET(nl, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_NL) += nl.o
+
+//usage:#define nl_trivial_usage
+//usage:       "[OPTIONS] [FILE]..."
+//usage:#define nl_full_usage "\n\n"
+//usage:       "Write FILEs to standard output with line numbers added\n"
+//usage:     "\n	-b STYLE	Which lines to number - a: all, t: nonempty, n: none"
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^TODO: support "pBRE": number only lines that match regexp BRE"
+////usage:     "\n	-f STYLE	footer lines"
+////usage:     "\n	-h STYLE	header lines"
+////usage:     "\n	-d CC		use CC for separating logical pages"
+//usage:     "\n	-i N		Line number increment"
+////usage:     "\n	-l NUMBER	group of NUMBER empty lines counted as one"
+////usage:     "\n	-n FORMAT	lneft justified, no leading zeros; rn or rz"
+////usage:     "\n	-p 		do not reset line numbers at logical pages (huh?)"
+//usage:     "\n	-s STRING	Use STRING as line number separator"
+//usage:     "\n	-v N		Start from N"
+//usage:     "\n	-w N		Width of line numbers"
+
+/* By default, selects -v1 -i1 -l1 -sTAB -w6 -nrn -hn -bt -fn */
+

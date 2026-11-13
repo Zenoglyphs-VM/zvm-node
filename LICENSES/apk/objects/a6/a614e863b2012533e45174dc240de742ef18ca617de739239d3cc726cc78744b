@@ -1,0 +1,29 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini loadkmap implementation for busybox
+ *
+ * Copyright (C) 1998 Enrique Zanardi <ezanardi@ull.es>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config LOADKMAP
+//config:	bool "loadkmap (2.1 kb)"
+//config:	default y
+//config:	help
+//config:	This program loads a keyboard translation table from
+//config:	standard input.
+
+//applet:IF_LOADKMAP(APPLET_NOEXEC(loadkmap, loadkmap, BB_DIR_SBIN, BB_SUID_DROP, loadkmap))
+
+//kbuild:lib-$(CONFIG_LOADKMAP) += loadkmap.o
+
+//usage:#define loadkmap_trivial_usage
+//usage:       "< keymap"
+//usage:#define loadkmap_full_usage "\n\n"
+//usage:       "Load a binary keyboard translation table from stdin"
+////usage:       "\n"
+////usage:       "\n	-C TTY	Affect TTY instead of /dev/tty"
+//usage:
+//usage:#define loadkmap_example_usage
+//usage:       "$ loadkmap < /etc/i18n/lang-keymap\n"
+

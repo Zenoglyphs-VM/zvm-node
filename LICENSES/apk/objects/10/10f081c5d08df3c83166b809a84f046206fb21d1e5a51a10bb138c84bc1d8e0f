@@ -1,0 +1,55 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * RFC3927 ZeroConf IPv4 Link-Local addressing
+ * (see <http://www.zeroconf.org/>)
+ *
+ * Copyright (C) 2003 by Arthur van Hoff (avh@strangeberry.com)
+ * Copyright (C) 2004 by David Brownell
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/*
+ * ZCIP just manages the 169.254.*.* addresses.  That network is not
+ * routed at the IP level, though various proxies or bridges can
+ * certainly be used.  Its naming is built over multicast DNS.
+ */
+//config:config ZCIP
+//config:	bool "zcip (8.7 kb)"
+//config:	default y
+//config:	select FEATURE_SYSLOG
+//config:	help
+//config:	ZCIP provides ZeroConf IPv4 address selection, according to RFC 3927.
+//config:	It's a daemon that allocates and defends a dynamically assigned
+//config:	address on the 169.254/16 network, requiring no system administrator.
+//config:
+//config:	See http://www.zeroconf.org for further details, and "zcip.script"
+//config:	in the busybox examples.
+
+//applet:IF_ZCIP(APPLET(zcip, BB_DIR_SBIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_ZCIP) += zcip.o
+
+//#define DEBUG
+
+// TODO:
+// - more real-world usage/testing, especially daemon mode
+// - kernel packet filters to reduce scheduling noise
+// - avoid silent script failures, especially under load...
+// - link status monitoring (restart on link-up; stop on link-down)
+
+//usage:#define zcip_trivial_usage
+//usage:       "[OPTIONS] IFACE SCRIPT"
+//usage:#define zcip_full_usage "\n\n"
+//usage:       "Manage a ZeroConf IPv4 link-local address\n"
+//usage:     "\n	-f		Run in foreground"
+//usage:     "\n	-q		Quit after obtaining address"
+//usage:     "\n	-r 169.254.x.x	Request this address first"
+//usage:     "\n	-l x.x.0.0	Use this range instead of 169.254"
+//usage:     "\n	-v		Verbose"
+//usage:     "\n"
+//usage:     "\n$LOGGING=none		Suppress logging"
+//usage:     "\n$LOGGING=syslog 	Log to syslog"
+//usage:     "\n"
+//usage:     "\nWith no -q, runs continuously monitoring for ARP conflicts,"
+//usage:     "\nexits only on I/O errors (link down etc)"
+

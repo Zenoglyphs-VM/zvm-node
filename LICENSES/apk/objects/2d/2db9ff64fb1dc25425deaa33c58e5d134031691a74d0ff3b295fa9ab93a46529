@@ -1,0 +1,101 @@
+#! /usr/bin/env perl
+# Copyright 2011-2024 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+###################################################################
+### AES-128 [originally in CTR mode]				###
+### bitsliced implementation for Intel Core 2 processors	###
+### requires support of SSE extensions up to SSSE3		###
+### Author: Emilia Käsper and Peter Schwabe			###
+### Date: 2009-03-19						###
+### Public domain						###
+###								###
+### See http://homes.esat.kuleuven.be/~ekasper/#software for	###
+### further information.					###
+###################################################################
+#
+# September 2011.
+#
+# Started as transliteration to "perlasm" the original code has
+# undergone following changes:
+#
+# - code was made position-independent;
+# - rounds were folded into a loop resulting in >5x size reduction
+#   from 12.5KB to 2.2KB;
+# - above was possible thanks to mixcolumns() modification that
+#   allowed to feed its output back to aesenc[last], this was
+#   achieved at cost of two additional inter-registers moves;
+# - some instruction reordering and interleaving;
+# - this module doesn't implement key setup subroutine, instead it
+#   relies on conversion of "conventional" key schedule as returned
+#   by AES_set_encrypt_key (see discussion below);
+# - first and last round keys are treated differently, which allowed
+#   to skip one shiftrows(), reduce bit-sliced key schedule and
+#   speed-up conversion by 22%;
+# - support for 192- and 256-bit keys was added;
+#
+# Resulting performance in CPU cycles spent to encrypt one byte out
+# of 4096-byte buffer with 128-bit key is:
+#
+#		Emilia's	this(*)		difference
+#
+# Core 2    	9.30		8.69		+7%
+# Nehalem(**) 	7.63		6.88		+11%
+# Atom	    	17.1		16.4		+4%
+# Silvermont	-		12.9
+# Goldmont	-		8.85
+#
+# (*)	Comparison is not completely fair, because "this" is ECB,
+#	i.e. no extra processing such as counter values calculation
+#	and xor-ing input as in Emilia's CTR implementation is
+#	performed. However, the CTR calculations stand for not more
+#	than 1% of total time, so comparison is *rather* fair.
+#
+# (**)	Results were collected on Westmere, which is considered to
+#	be equivalent to Nehalem for this code.
+#
+# As for key schedule conversion subroutine. Interface to OpenSSL
+# relies on per-invocation on-the-fly conversion. This naturally
+# has impact on performance, especially for short inputs. Conversion
+# time in CPU cycles and its ratio to CPU cycles spent in 8x block
+# function is:
+#
+# 		conversion	conversion/8x block
+# Core 2	240		0.22
+# Nehalem	180		0.20
+# Atom		430		0.20
+#
+# The ratio values mean that 128-byte blocks will be processed
+# 16-18% slower, 256-byte blocks - 9-10%, 384-byte blocks - 6-7%,
+# etc. Then keep in mind that input sizes not divisible by 128 are
+# *effectively* slower, especially shortest ones, e.g. consecutive
+# 144-byte blocks are processed 44% slower than one would expect,
+# 272 - 29%, 400 - 22%, etc. Yet, despite all these "shortcomings"
+# it's still faster than ["hyper-threading-safe" code path in]
+# aes-x86_64.pl on all lengths above 64 bytes...
+#
+# October 2011.
+#
+# Add decryption procedure. Performance in CPU cycles spent to decrypt
+# one byte out of 4096-byte buffer with 128-bit key is:
+#
+# Core 2	9.98
+# Nehalem	7.80
+# Atom		17.9
+# Silvermont	14.0
+# Goldmont	10.2
+#
+# November 2011.
+#
+# Add bsaes_xts_[en|de]crypt. Less-than-80-bytes-block performance is
+# suboptimal, but XTS is meant to be used with larger blocks...
+#
+#						<appro@openssl.org>
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

@@ -1,0 +1,54 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * tee implementation for busybox
+ *
+ * Copyright (C) 2003  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config TEE
+//config:	bool "tee (4.4 kb)"
+//config:	default y
+//config:	help
+//config:	tee is used to read from standard input and write
+//config:	to standard output and files.
+//config:
+//config:config FEATURE_TEE_USE_BLOCK_IO
+//config:	bool "Enable block I/O (larger/faster) instead of byte I/O"
+//config:	default y
+//config:	depends on TEE
+//config:	help
+//config:	Enable this option for a faster tee, at expense of size.
+
+//applet:IF_TEE(APPLET(tee, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TEE) += tee.o
+
+/* BB_AUDIT SUSv3 compliant */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/tee.html */
+
+//usage:#define tee_trivial_usage
+//usage:       "[-ai] [FILE]..."
+//usage:#define tee_full_usage "\n\n"
+//usage:       "Copy stdin to each FILE, and also to stdout\n"
+//usage:     "\n	-a	Append to the given FILEs, don't overwrite"
+//usage:     "\n	-i	Ignore interrupt signals (SIGINT)"
+//usage:
+//usage:#define tee_example_usage
+//usage:       "$ echo \"Hello\" | tee /tmp/foo\n"
+//usage:       "$ cat /tmp/foo\n"
+//usage:       "Hello\n"
+
+// Bare "tee" with no below options does not install SIGPIPE handler - just dies on it.
+// TODO:
+//	--output-error[=MODE]
+//		'warn'		diagnose errors writing to any output
+//		'warn-nopipe'	diagnose errors writing to any output not a pipe
+//		'exit'		exit on error writing to any output
+//		'exit-nopipe'	exit on error writing to any output not a pipe
+// ^^^ all of these should set SIGPIPE to SIG_IGN.
+// Because "exit" mode should print error message and exit1(1) - not die on SIGPIPE.
+// "exit-nopipe" does not exit on EPIPE and does not set exitcode to 1 too.
+//	-p	diagnose errors writing to non pipes
+// ^^^^ this should set SIGPIPE to SIG_IGN. EPIPE is ignored (same as "warn-nopipe")
+

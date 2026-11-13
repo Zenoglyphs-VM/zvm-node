@@ -1,0 +1,24 @@
+/*
+ * Copyright 2018-2026 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright (c) 2018-2019, Oracle and/or its affiliates.  All rights reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * According to NIST SP800-131A "Transitioning the use of cryptographic
+ * algorithms and key lengths" Generation of 1024 bit RSA keys are no longer
+ * allowed for signatures (Table 2) or key transport (Table 5). In the code
+ * below any attempt to generate 1024 bit RSA keys will result in an error (Note
+ * that digital signature verification can still use deprecated 1024 bit keys).
+ *
+ * FIPS 186-4 relies on the use of the auxiliary primes p1, p2, q1 and q2 that
+ * must be generated before the module generates the RSA primes p and q.
+ * Table B.1 in FIPS 186-4 specifies RSA modulus lengths of 2048 and
+ * 3072 bits only, the min/max total length of the auxiliary primes.
+ * FIPS 186-5 Table A.1 includes an additional entry for 4096 which has been
+ * included here.
+ */

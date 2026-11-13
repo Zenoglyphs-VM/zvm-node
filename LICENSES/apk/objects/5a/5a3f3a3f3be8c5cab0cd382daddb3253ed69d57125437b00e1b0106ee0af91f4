@@ -1,0 +1,20 @@
+/*
+ * volume_id - reads filesystem label and uuid
+ *
+ * Copyright (C) 2018 Sven-Göran Bergh <sgb@systemaxion.se>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config FEATURE_VOLUMEID_LFS
+//config:	bool "LittleFS filesystem"
+//config:	default y
+//config:	depends on VOLUMEID && FEATURE_BLKID_TYPE
+//config:	help
+//config:	LittleFS is a small fail-safe filesystem designed for embedded
+//config:	systems. It has strong copy-on-write guarantees and storage on disk
+//config:	is always kept in a valid state. It also provides a form of dynamic
+//config:	wear levelling for systems that can not fit a full flash translation
+//config:	layer.
+
+//kbuild:lib-$(CONFIG_FEATURE_VOLUMEID_LFS) += lfs.o
+

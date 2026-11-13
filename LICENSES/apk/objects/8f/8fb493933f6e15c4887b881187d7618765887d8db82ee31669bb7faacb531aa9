@@ -1,0 +1,38 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini mv implementation for busybox
+ *
+ * Copyright (C) 2000 by Matt Kraai <kraai@alumni.carnegiemellon.edu>
+ * SELinux support by Yuichi Nakamura <ynakam@hitachisoft.jp>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Mar 16, 2003      Manuel Novoa III   (mjn3@codepoet.org)
+ *
+ * Size reduction and improved error checking.
+ */
+//config:config MV
+//config:	bool "mv (10 kb)"
+//config:	default y
+//config:	help
+//config:	mv is used to move or rename files or directories.
+
+//applet:IF_MV(APPLET_NOEXEC(mv, mv, BB_DIR_BIN, BB_SUID_DROP, mv))
+/* NOEXEC despite cases when it can be a "runner" (mv LARGE_DIR OTHER_FS) */
+
+//kbuild:lib-$(CONFIG_MV) += mv.o
+
+//usage:#define mv_trivial_usage
+//usage:       "[-finT] SOURCE DEST\n"
+//usage:       "or: mv [-fin] SOURCE... { -t DIRECTORY | DIRECTORY }"
+//usage:#define mv_full_usage "\n\n"
+//usage:       "Rename SOURCE to DEST, or move SOURCEs to DIRECTORY\n"
+//usage:     "\n	-f	Don't prompt before overwriting"
+//usage:     "\n	-i	Interactive, prompt before overwrite"
+//usage:     "\n	-n	Don't overwrite an existing file"
+//usage:     "\n	-T	Refuse to move if DEST is a directory"
+//usage:     "\n	-t DIR	Move all SOURCEs into DIR"
+//usage:
+//usage:#define mv_example_usage
+//usage:       "$ mv /tmp/foo /bin/bar\n"
+

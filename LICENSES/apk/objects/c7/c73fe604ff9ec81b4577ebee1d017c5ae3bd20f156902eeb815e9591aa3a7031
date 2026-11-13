@@ -1,0 +1,27 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Signal name/number conversion routines.
+ *
+ * Copyright 2006 Rob Landley <rob@landley.net>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config FEATURE_RTMINMAX
+//config:	bool "Support RTMIN[+n] and RTMAX[-n] signal names"
+//config:	default y
+//config:	help
+//config:	Support RTMIN[+n] and RTMAX[-n] signal names
+//config:	in kill, killall etc. This costs ~250 bytes.
+//config:
+//config:config FEATURE_RTMINMAX_USE_LIBC_DEFINITIONS
+//config:	bool "Use the definitions of SIGRTMIN/SIGRTMAX provided by libc"
+//config:	default y
+//config:	depends on FEATURE_RTMINMAX
+//config:	help
+//config:	Some C libraries reserve a few real-time signals for internal
+//config:	use, and adjust the values of SIGRTMIN/SIGRTMAX seen by
+//config:	applications accordingly. Saying yes here means that a signal
+//config:	name RTMIN+n will be interpreted according to the libc definition
+//config:	of SIGRTMIN, and not the raw definition provided by the kernel.
+//config:	This behavior matches "kill -l RTMIN+n" from bash.
+

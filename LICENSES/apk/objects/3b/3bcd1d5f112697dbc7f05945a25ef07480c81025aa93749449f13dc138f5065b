@@ -1,0 +1,29 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * bare bones 'talk to modem' program - similar to 'cu -l $device'
+ * inspired by mgetty's microcom
+ *
+ * Copyright (C) 2008 by Vladimir Dronnikov <dronnikov@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config MICROCOM
+//config:	bool "microcom (5.9 kb)"
+//config:	default y
+//config:	help
+//config:	The poor man's minicom utility for chatting with serial port devices.
+
+//applet:IF_MICROCOM(APPLET(microcom, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_MICROCOM) += microcom.o
+
+//usage:#define microcom_trivial_usage
+//usage:       "[-d DELAY_MS] [-t TIMEOUT_MS ] [-s SPEED] [-X] TTY"
+//usage:#define microcom_full_usage "\n\n"
+//usage:       "Copy bytes from stdin to TTY and from TTY to stdout\n"
+//usage:     "\n	-d DELAY	Wait up to DELAY ms for TTY output before sending"
+//usage:     "\n			every next byte to it"
+//usage:     "\n	-t TIMEOUT	Exit if both stdin and TTY are silent for TIMEOUT ms"
+//usage:     "\n	-s SPEED	Set serial line to SPEED"
+//usage:     "\n	-X		Disable special meaning of NUL and Ctrl-X from stdin"
+

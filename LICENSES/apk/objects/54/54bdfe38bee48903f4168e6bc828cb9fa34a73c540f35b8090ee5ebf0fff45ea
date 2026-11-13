@@ -1,0 +1,9 @@
+/*
+ * Copyright 2024 Gentoo Foundation
+ * Distributed under the terms of the GNU General Public License v2
+ *
+ * Copyright 2024 Mike Frysinger  - <vapier@gentoo.org>
+ */
+
+/* Fuzz the ar interface. */
+

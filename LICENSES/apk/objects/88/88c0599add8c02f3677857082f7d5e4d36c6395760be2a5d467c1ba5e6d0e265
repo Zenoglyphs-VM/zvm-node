@@ -1,0 +1,9 @@
+/* solver.c - Alpine Package Keeper (APK)
+ * Up- and down-propagating, forwarding checking, deductive dependency solver.
+ *
+ * Copyright (C) 2008-2013 Timo Teräs <timo.teras@iki.fi>
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ */
+

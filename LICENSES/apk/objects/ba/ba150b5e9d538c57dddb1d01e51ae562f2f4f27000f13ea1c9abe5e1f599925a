@@ -1,0 +1,55 @@
+#! /usr/bin/env perl
+# Copyright 2007-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+
+# April 2007.
+#
+# Performance improvement over vanilla C code varies from 85% to 45%
+# depending on key length and benchmark. Unfortunately in this context
+# these are not very impressive results [for code that utilizes "wide"
+# 64x64=128-bit multiplication, which is not commonly available to C
+# programmers], at least hand-coded bn_asm.c replacement is known to
+# provide 30-40% better results for longest keys. Well, on a second
+# thought it's not very surprising, because z-CPUs are single-issue
+# and _strictly_ in-order execution, while bn_mul_mont is more or less
+# dependent on CPU ability to pipe-line instructions and have several
+# of them "in-flight" at the same time. I mean while other methods,
+# for example Karatsuba, aim to minimize amount of multiplications at
+# the cost of other operations increase, bn_mul_mont aim to neatly
+# "overlap" multiplications and the other operations [and on most
+# platforms even minimize the amount of the other operations, in
+# particular references to memory]. But it's possible to improve this
+# module performance by implementing dedicated squaring code-path and
+# possibly by unrolling loops...
+
+# January 2009.
+#
+# Reschedule to minimize/avoid Address Generation Interlock hazard,
+# make inner loops counter-based.
+
+# November 2010.
+#
+# Adapt for -m31 build. If kernel supports what's called "highgprs"
+# feature on Linux [see /proc/cpuinfo], it's possible to use 64-bit
+# instructions and achieve "64-bit" performance even in 31-bit legacy
+# application context. The feature is not specific to any particular
+# processor, as long as it's "z-CPU". Latter implies that the code
+# remains z/Architecture specific. Compatibility with 32-bit BN_ULONG
+# is achieved by swapping words after 64-bit loads, follow _dswap-s.
+# On z990 it was measured to perform 2.6-2.2 times better than
+# compiler-generated code, less for longer keys...
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

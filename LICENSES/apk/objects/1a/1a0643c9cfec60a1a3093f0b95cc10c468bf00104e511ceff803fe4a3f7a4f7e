@@ -1,0 +1,21 @@
+/*
+ * Copyright 2020-2026 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+
+ * These tests are setup to load null into the default library context.
+ * Any tests are expected to use the created 'libctx' to find algorithms.
+ * The framework runs the tests twice using the 'default' provider or
+ * 'fips' provider as inputs.
+ */
+
+/*
+ * DSA/DH low level APIs are deprecated for public use, but still ok for
+ * internal use.
+ */

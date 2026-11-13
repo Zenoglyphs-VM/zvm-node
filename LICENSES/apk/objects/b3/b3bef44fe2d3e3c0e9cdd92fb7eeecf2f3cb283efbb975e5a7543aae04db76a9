@@ -1,0 +1,39 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * setconsole.c - redirect system console output
+ *
+ * Copyright (C) 2004,2005  Enrik Berkhan <Enrik.Berkhan@inka.de>
+ * Copyright (C) 2008 Bernhard Reutner-Fischer
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config SETCONSOLE
+//config:	bool "setconsole (3.8 kb)"
+//config:	default y
+//config:	help
+//config:	Redirect writes to /dev/console to another device,
+//config:	like the current tty while logged in via telnet.
+//config:	This does not redirect kernel log, only writes
+//config:	from user space.
+//config:
+//config:config FEATURE_SETCONSOLE_LONG_OPTIONS
+//config:	bool "Enable long options"
+//config:	default y
+//config:	depends on SETCONSOLE && LONG_OPTS
+
+//applet:IF_SETCONSOLE(APPLET_NOEXEC(setconsole, setconsole, BB_DIR_SBIN, BB_SUID_DROP, setconsole))
+
+//kbuild:lib-$(CONFIG_SETCONSOLE) += setconsole.o
+
+//usage:#define setconsole_trivial_usage
+//usage:       "[-r] [DEVICE]"
+//usage:#define setconsole_full_usage "\n\n"
+//usage:       "Make writes to /dev/console appear on DEVICE (default: /dev/tty)."
+//usage:   "\n""Does not redirect kernel log output or reads from /dev/console."
+//usage:   "\n"
+//usage:   "\n""	-r	Reset: writes to /dev/console go to kernel log tty(s)"
+
+/* It was a bbox-specific invention, but SUSE does have a similar utility.
+ * SUSE has no -r option, though.
+ */
+

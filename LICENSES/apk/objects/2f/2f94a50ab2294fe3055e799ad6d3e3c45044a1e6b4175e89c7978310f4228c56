@@ -1,0 +1,165 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright (C) 1996 Brian Candler <B.Candler@pobox.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* [date unknown. Perhaps before year 2000]
+ * To achieve a small memory footprint, this version of 'ls' doesn't do any
+ * file sorting, and only has the most essential command line switches
+ * (i.e., the ones I couldn't live without :-) All features which involve
+ * linking in substantial chunks of libc can be disabled.
+ *
+ * Although I don't really want to add new features to this program to
+ * keep it small, I *am* interested to receive bug fixes and ways to make
+ * it more portable.
+ *
+ * KNOWN BUGS:
+ * 1. hidden files can make column width too large
+ *
+ * NON-OPTIMAL BEHAVIOUR:
+ * 1. autowidth reads directories twice
+ * 2. if you do a short directory listing without filetype characters
+ *    appended, there's no need to stat each one
+ * PORTABILITY:
+ * 1. requires lstat (BSD) - how do you do it without?
+ *
+ * [2009-03]
+ * ls sorts listing now, and supports almost all options.
+ */
+//config:config LS
+//config:	bool "ls (14 kb)"
+//config:	default y
+//config:	help
+//config:	ls is used to list the contents of directories.
+//config:
+//config:config FEATURE_LS_FILETYPES
+//config:	bool "Enable filetyping options (-p and -F)"
+//config:	default y
+//config:	depends on LS
+//config:
+//config:config FEATURE_LS_FOLLOWLINKS
+//config:	bool "Enable symlinks dereferencing (-L)"
+//config:	default y
+//config:	depends on LS
+//config:
+//config:config FEATURE_LS_RECURSIVE
+//config:	bool "Enable recursion (-R)"
+//config:	default y
+//config:	depends on LS
+//config:
+//config:config FEATURE_LS_WIDTH
+//config:	bool "Enable -w WIDTH and window size autodetection"
+//config:	default y
+//config:	depends on LS
+//config:
+//config:config FEATURE_LS_SORTFILES
+//config:	bool "Sort the file names"
+//config:	default y
+//config:	depends on LS
+//config:	help
+//config:	Allow ls to sort file names alphabetically.
+//config:
+//config:config FEATURE_LS_TIMESTAMPS
+//config:	bool "Show file timestamps"
+//config:	default y
+//config:	depends on LS
+//config:	help
+//config:	Allow ls to display timestamps for files.
+//config:
+//config:config FEATURE_LS_USERNAME
+//config:	bool "Show username/groupnames"
+//config:	default y
+//config:	depends on LS
+//config:	help
+//config:	Allow ls to display username/groupname for files.
+//config:
+//config:config FEATURE_LS_COLOR
+//config:	bool "Allow use of color to identify file types"
+//config:	default y
+//config:	depends on LS && LONG_OPTS
+//config:	help
+//config:	This enables the --color option to ls.
+//config:
+//config:config FEATURE_LS_COLOR_IS_DEFAULT
+//config:	bool "Produce colored ls output by default"
+//config:	default y
+//config:	depends on FEATURE_LS_COLOR
+//config:	help
+//config:	Saying yes here will turn coloring on by default,
+//config:	even if no "--color" option is given to the ls command.
+//config:	This is not recommended, since the colors are not
+//config:	configurable, and the output may not be legible on
+//config:	many output screens.
+
+//applet:IF_LS(APPLET_NOEXEC(ls, ls, BB_DIR_BIN, BB_SUID_DROP, ls))
+
+//kbuild:lib-$(CONFIG_LS) += ls.o
+
+//usage:#define ls_trivial_usage
+//usage:	"[-1AaCxd"
+//usage:	IF_FEATURE_LS_FOLLOWLINKS("LH")
+//usage:	IF_FEATURE_LS_RECURSIVE("R")
+//usage:	IF_FEATURE_LS_FILETYPES("Fp") "lins"
+//usage:	IF_FEATURE_HUMAN_READABLE("h")
+//usage:	IF_FEATURE_LS_SORTFILES("rSXv")
+//usage:	IF_FEATURE_LS_TIMESTAMPS("ctu")
+//usage:	IF_SELINUX("kZ") "]"
+//usage:	IF_FEATURE_LS_WIDTH(" [-w WIDTH]") " [FILE]..."
+//usage:#define ls_full_usage "\n\n"
+//usage:       "List directory contents\n"
+//usage:     "\n	-1	One column output"
+//usage:     "\n	-a	Include names starting with ."
+//usage:     "\n	-A	Like -a, but exclude . and .."
+////usage:     "\n	-C	List by columns" - don't show, this is a default anyway
+//usage:     "\n	-x	List by lines"
+//usage:     "\n	-d	List directory names, not contents"
+//usage:	IF_FEATURE_LS_FOLLOWLINKS(
+//usage:     "\n	-L	Follow symlinks"
+//usage:     "\n	-H	Follow symlinks on command line"
+//usage:	)
+//usage:	IF_FEATURE_LS_RECURSIVE(
+//usage:     "\n	-R	Recurse"
+//usage:	)
+//usage:	IF_FEATURE_LS_FILETYPES(
+//usage:     "\n	-p	Append / to directory names"
+//usage:     "\n	-F	Append indicator (one of */=@|) to names"
+//usage:	)
+//usage:     "\n	-l	Long format"
+//usage:     "\n	-i	List inode numbers"
+//usage:     "\n	-n	List numeric UIDs and GIDs instead of names"
+//usage:     "\n	-s	List allocated blocks"
+//usage:	IF_FEATURE_LS_TIMESTAMPS(
+//usage:     "\n	-lc	List ctime"
+//usage:     "\n	-lu	List atime"
+//usage:	)
+//usage:	IF_FEATURE_LS_TIMESTAMPS(IF_LONG_OPTS(
+//usage:     "\n	--full-time	List full date/time"
+//usage:	))
+//usage:	IF_FEATURE_HUMAN_READABLE(
+//usage:     "\n	-h	Human readable sizes (1K 243M 2G)"
+//usage:	)
+//usage:	IF_FEATURE_LS_SORTFILES(
+//usage:	IF_LONG_OPTS(
+//usage:     "\n	--group-directories-first"
+//usage:	)
+//usage:     "\n	-S	Sort by size"
+//usage:     "\n	-X	Sort by extension"
+//usage:     "\n	-v	Sort by version"
+//usage:	)
+//usage:	IF_FEATURE_LS_TIMESTAMPS(
+//usage:     "\n	-t	Sort by mtime"
+//usage:     "\n	-tc	Sort by ctime"
+//usage:     "\n	-tu	Sort by atime"
+//usage:	)
+//usage:     "\n	-r	Reverse sort order"
+//usage:	IF_SELINUX(
+//usage:     "\n	-Z	List security context and permission"
+//usage:	)
+//usage:	IF_FEATURE_LS_WIDTH(
+//usage:     "\n	-w N	Format N columns wide"
+//usage:	)
+//usage:	IF_FEATURE_LS_COLOR(
+//usage:     "\n	--color[={always,never,auto}]"
+//usage:	)
+

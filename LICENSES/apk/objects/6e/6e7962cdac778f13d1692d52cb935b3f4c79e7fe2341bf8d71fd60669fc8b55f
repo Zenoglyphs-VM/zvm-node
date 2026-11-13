@@ -1,0 +1,20 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Common code for gunzip-like applets
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//kbuild:lib-$(CONFIG_ZCAT) += bbunzip.o
+//kbuild:lib-$(CONFIG_GUNZIP) += bbunzip.o
+//kbuild:lib-$(CONFIG_BZCAT) += bbunzip.o
+//kbuild:lib-$(CONFIG_BUNZIP2) += bbunzip.o
+
+/* lzop_main() uses bbunpack(), need this: */
+//kbuild:lib-$(CONFIG_LZOP) += bbunzip.o
+//kbuild:lib-$(CONFIG_LZOPCAT) += bbunzip.o
+//kbuild:lib-$(CONFIG_UNLZOP) += bbunzip.o
+/* bzip2_main() too: */
+//kbuild:lib-$(CONFIG_BZIP2) += bbunzip.o
+/* gzip_main() too: */
+//kbuild:lib-$(CONFIG_GZIP) += bbunzip.o
+

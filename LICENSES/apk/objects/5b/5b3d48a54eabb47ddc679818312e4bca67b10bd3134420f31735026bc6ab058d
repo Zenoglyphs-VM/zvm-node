@@ -1,0 +1,99 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * uname -- print system information
+ * Copyright (C) 1989-1999 Free Software Foundation, Inc.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Option		Example
+ * -s, --sysname	SunOS
+ * -n, --nodename	rocky8
+ * -r, --release	4.0
+ * -v, --version
+ * -m, --machine	sun
+ * -a, --all		SunOS rocky8 4.0  sun
+ *
+ * The default behavior is equivalent to '-s'.
+ *
+ * David MacKenzie <djm@gnu.ai.mit.edu>
+ *
+ * GNU coreutils 6.10:
+ * Option:                      struct   Example(s):
+ *                              utsname
+ *                              field:
+ * -s, --kernel-name            sysname  Linux
+ * -n, --nodename               nodename localhost.localdomain
+ * -r, --kernel-release         release  2.6.29
+ * -v, --kernel-version         version  #1 SMP Sun Jan 11 20:52:37 EST 2009
+ * -m, --machine                machine  x86_64   i686
+ * -p, --processor              (none)   x86_64   i686
+ * -i, --hardware-platform      (none)   x86_64   i386
+ *      NB: vanilla coreutils reports "unknown" -p and -i,
+ *      x86_64 and i686/i386 shown above are Fedora's inventions.
+ * -o, --operating-system       (none)   GNU/Linux
+ * -a, --all: all of the above, in the order shown.
+ *      If -p or -i is not known, don't show them
+ */
+/* Busyboxed by Erik Andersen
+ *
+ * Before 2003: Glenn McGrath and Manuel Novoa III
+ *  Further size reductions.
+ * Mar 16, 2003: Manuel Novoa III (mjn3@codepoet.org)
+ *  Now does proper error checking on i/o.  Plus some further space savings.
+ * Jan 2009:
+ *  Fix handling of -a to not print "unknown", add -o and -i support.
+ */
+//config:config UNAME
+//config:	bool "uname (4.2 kb)"
+//config:	default y
+//config:	help
+//config:	uname is used to print system information.
+//config:
+//config:config UNAME_OSNAME
+//config:	string "Operating system name"
+//config:	default "GNU/Linux"
+//config:	depends on UNAME
+//config:	help
+//config:	Sets the operating system name reported by uname -o.  The
+//config:	default is "GNU/Linux".
+//config:
+//can't use "ARCH" for this applet, all hell breaks loose in build system :)
+//config:config BB_ARCH
+//config:	bool "arch (1.4 kb)"
+//config:	default y
+//config:	help
+//config:	Same as uname -m.
+
+//                  APPLET_NOFORK:name   main   location    suid_type     help
+//applet:IF_UNAME(APPLET_NOFORK(  uname, uname, BB_DIR_BIN, BB_SUID_DROP, uname))
+//applet:IF_BB_ARCH(APPLET_NOFORK(arch,  uname, BB_DIR_BIN, BB_SUID_DROP, arch))
+
+//kbuild:lib-$(CONFIG_UNAME)   += uname.o
+//kbuild:lib-$(CONFIG_BB_ARCH) += uname.o
+
+/* BB_AUDIT SUSv3 compliant */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/uname.html */
+
+//usage:#define uname_trivial_usage
+//usage:       "[-amnrspvio]"
+//usage:#define uname_full_usage "\n\n"
+//usage:       "Print system information\n"
+//usage:     "\n	-a	Print all"
+//usage:     "\n	-m	Machine (hardware) type"
+//usage:     "\n	-n	Hostname"
+//usage:     "\n	-r	Kernel release"
+//usage:     "\n	-s	Kernel name (default)"
+//usage:     "\n	-p	Processor type"
+//usage:     "\n	-v	Kernel version"
+//usage:     "\n	-i	Hardware platform"
+//usage:     "\n	-o	OS name"
+//usage:
+//usage:#define uname_example_usage
+//usage:       "$ uname -a\n"
+//usage:       "Linux debian 2.4.23 #2 Tue Dec 23 17:09:10 MST 2003 i686 GNU/Linux\n"
+
+//usage:#define arch_trivial_usage
+//usage:       ""
+//usage:#define arch_full_usage "\n\n"
+//usage:       "Print system architecture"
+

@@ -1,0 +1,17 @@
+/*
+ * getfattr - get extended attributes of filesystem objects.
+ *
+ * Copyright (C) 2023 by LoveSy <lovesykun@gmail.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config GETFATTR
+//config:	bool "getfattr (12.3 kb)"
+//config:	default y
+//config:	help
+//config:	Get extended attributes on files
+
+//applet:IF_GETFATTR(APPLET_NOEXEC(getfattr, getfattr, BB_DIR_USR_BIN, BB_SUID_DROP, getfattr))
+
+//kbuild:lib-$(CONFIG_GETFATTR) += getfattr.o
+

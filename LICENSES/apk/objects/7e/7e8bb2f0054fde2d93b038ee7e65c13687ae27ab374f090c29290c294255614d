@@ -1,0 +1,112 @@
+/*
+ * Arithmetic code ripped out of ash shell for code sharing.
+ *
+ * This code is derived from software contributed to Berkeley by
+ * Kenneth Almquist.
+ *
+ * Original BSD copyright notice is retained at the end of this file.
+ *
+ * Copyright (c) 1989, 1991, 1993, 1994
+ *      The Regents of the University of California.  All rights reserved.
+ *
+ * Copyright (c) 1997-2005 Herbert Xu <herbert@gondor.apana.org.au>
+ * was re-ported from NetBSD and debianized.
+ *
+ * rewrite arith.y to micro stack based cryptic algorithm by
+ * Copyright (c) 2001 Aaron Lehmann <aaronl@vitelus.com>
+ *
+ * Modified by Paul Mundt <lethal@linux-sh.org> (c) 2004 to support
+ * dynamic variables.
+ *
+ * Modified by Vladimir Oleynik <dzo@simtreas.ru> (c) 2001-2005 to be
+ * used in busybox and size optimizations,
+ * rewrote arith (see notes to this), added locale support,
+ * rewrote dynamic variables.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/* Copyright (c) 2001 Aaron Lehmann <aaronl@vitelus.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/* This is my infix parser/evaluator. It is optimized for size, intended
+ * as a replacement for yacc-based parsers. However, it may well be faster
+ * than a comparable parser written in yacc. The supported operators are
+ * listed in #defines below. Parens, order of operations, and error handling
+ * are supported. This code is thread safe. The exact expression format should
+ * be that which POSIX specifies for shells.
+ *
+ * The code uses a simple two-stack algorithm. See
+ * http://www.onthenet.com.au/~grahamis/int2008/week02/lect02.html
+ * for a detailed explanation of the infix-to-postfix algorithm on which
+ * this is based (this code differs in that it applies operators immediately
+ * to the stack instead of adding them to a queue to end up with an
+ * expression).
+ */
+/*
+ * Aug 24, 2001              Manuel Novoa III
+ *
+ * Reduced the generated code size by about 30% (i386) and fixed several bugs.
+ *
+ * 1) In arith_apply():
+ *    a) Cached values of *numptr and &(numptr[-1]).
+ *    b) Removed redundant test for zero denominator.
+ *
+ * 2) In arith():
+ *    a) Eliminated redundant code for processing operator tokens by moving
+ *       to a table-based implementation.  Also folded handling of parens
+ *       into the table.
+ *    b) Combined all 3 loops which called arith_apply to reduce generated
+ *       code size at the cost of speed.
+ *
+ * 3) The following expressions were treated as valid by the original code:
+ *       1()  ,    0!  ,    1 ( *3 )   .
+ *    These bugs have been fixed by internally enclosing the expression in
+ *    parens and then checking that all binary ops and right parens are
+ *    preceded by a valid expression (NUM_TOKEN).
+ *
+ * Note: It may be desirable to replace Aaron's test for whitespace with
+ * ctype's isspace() if it is used by another busybox applet or if additional
+ * whitespace chars should be considered.  Look below the "#include"s for a
+ * precompiler test.
+ */
+/*
+ * Aug 26, 2001              Manuel Novoa III
+ *
+ * Return 0 for null expressions.  Pointed out by Vladimir Oleynik.
+ *
+ * Merge in Aaron's comments previously posted to the busybox list,
+ * modified slightly to take account of my changes to the code.
+ */
+/*
+ *  (C) 2003 Vladimir Oleynik <dzo@simtreas.ru>
+ *
+ * - allow access to variable,
+ *   use recursive value indirection: c="2*2"; a="c"; echo $((a+=2)) produce 6
+ * - implement assign syntax (VAR=expr, +=, *= etc)
+ * - implement exponentiation (** operator)
+ * - implement comma separated - expr, expr
+ * - implement ++expr --expr expr++ expr--
+ * - implement expr ? expr : expr (but second expr is always calculated)
+ * - allow hexadecimal and octal numbers
+ * - restore lost XOR operator
+ * - protect $((num num)) as true zero expr (Manuel's error)
+ * - always use special isspace(), see comment from bash ;-)
+ */

@@ -1,0 +1,18 @@
+/*
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+/*
+You need to define the following (example):
+
+#define type long
+#define xstrtou(rest) xstrtoul##rest
+#define xstrto(rest) xstrtol##rest
+#define xatou(rest) xatoul##rest
+#define xato(rest) xatol##rest
+#define XSTR_UTYPE_MAX ULONG_MAX
+#define XSTR_TYPE_MAX LONG_MAX
+#define XSTR_TYPE_MIN LONG_MIN
+#define XSTR_STRTOU strtoul
+*/
+

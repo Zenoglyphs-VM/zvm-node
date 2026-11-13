@@ -1,0 +1,9 @@
+# Makefile for zlib using Microsoft (Visual) C
+# zlib is copyright (C) 1995-2017 Jean-loup Gailly and Mark Adler
+#
+# Usage:
+#   nmake -f win32/Makefile.msc                          (standard build)
+#   nmake -f win32/Makefile.msc LOC=-DFOO                (nonstandard build)
+
+# The toplevel directory of the source tree.
+#

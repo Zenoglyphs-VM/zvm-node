@@ -1,0 +1,28 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini dumpkmap implementation for busybox
+ *
+ * Copyright (C) Arne Bernin <arne@matrix.loopback.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config DUMPKMAP
+//config:	bool "dumpkmap (1.9 kb)"
+//config:	default y
+//config:	help
+//config:	This program dumps the kernel's keyboard translation table to
+//config:	stdout, in binary format. You can then use loadkmap to load it.
+
+//applet:IF_DUMPKMAP(APPLET_NOEXEC(dumpkmap, dumpkmap, BB_DIR_BIN, BB_SUID_DROP, dumpkmap))
+/* bb_common_bufsiz1 usage here is safe wrt NOEXEC: not expecting it to be zeroed. */
+
+//kbuild:lib-$(CONFIG_DUMPKMAP) += dumpkmap.o
+
+//usage:#define dumpkmap_trivial_usage
+//usage:       "> keymap"
+//usage:#define dumpkmap_full_usage "\n\n"
+//usage:       "Print a binary keyboard translation table to stdout"
+//usage:
+//usage:#define dumpkmap_example_usage
+//usage:       "$ dumpkmap > keymap\n"
+

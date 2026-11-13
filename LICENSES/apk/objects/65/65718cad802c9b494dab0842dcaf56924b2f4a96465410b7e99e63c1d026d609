@@ -1,0 +1,107 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * getopt.c - Enhanced implementation of BSD getopt(1)
+ * Copyright (c) 1997, 1998, 1999, 2000  Frodo Looijaard <frodol@dds.nl>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+/*
+ * Version 1.0-b4: Tue Sep 23 1997. First public release.
+ * Version 1.0: Wed Nov 19 1997.
+ *   Bumped up the version number to 1.0
+ *   Fixed minor typo (CSH instead of TCSH)
+ * Version 1.0.1: Tue Jun 3 1998
+ *   Fixed sizeof instead of strlen bug
+ *   Bumped up the version number to 1.0.1
+ * Version 1.0.2: Thu Jun 11 1998 (not present)
+ *   Fixed gcc-2.8.1 warnings
+ *   Fixed --version/-V option (not present)
+ * Version 1.0.5: Tue Jun 22 1999
+ *   Make -u option work (not present)
+ * Version 1.0.6: Tue Jun 27 2000
+ *   No important changes
+ * Version 1.1.0: Tue Jun 30 2000
+ *   Added NLS support (partly written by Arkadiusz Mickiewicz
+ *     <misiek@misiek.eu.org>)
+ * Ported to Busybox - Alfred M. Szmidt <ams@trillian.itslinux.org>
+ *  Removed --version/-V and --help/-h
+ *  Removed parse_error(), using bb_error_msg() from Busybox instead
+ *  Replaced our_malloc with xmalloc and our_realloc with xrealloc
+ */
+//config:config GETOPT
+//config:	bool "getopt (6 kb)"
+//config:	default y
+//config:	help
+//config:	The getopt utility is used to break up (parse) options in command
+//config:	lines to make it easy to write complex shell scripts that also check
+//config:	for legal (and illegal) options. If you want to write horribly
+//config:	complex shell scripts, or use some horribly complex shell script
+//config:	written by others, this utility may be for you. Most people will
+//config:	wisely leave this disabled.
+//config:
+//config:config FEATURE_GETOPT_LONG
+//config:	bool "Support -l LONGOPTs"
+//config:	default y
+//config:	depends on GETOPT && LONG_OPTS
+//config:	help
+//config:	Enable support for long options (option -l).
+
+//applet:IF_GETOPT(APPLET_NOEXEC(getopt, getopt, BB_DIR_BIN, BB_SUID_DROP, getopt))
+
+//kbuild:lib-$(CONFIG_GETOPT) += getopt.o
+
+//usage:#define getopt_trivial_usage
+//usage:       "[OPTIONS] [--] OPTSTRING PARAMS"
+//usage:#define getopt_full_usage "\n\n"
+//usage:	IF_FEATURE_GETOPT_LONG(
+//usage:       "	-a		Allow long options starting with single -\n"
+//usage:       "	-l LOPT[,...]	Long options to recognize\n"
+//usage:	)
+//usage:       "	-n PROGNAME	The name under which errors are reported"
+//usage:     "\n	-o OPTSTRING	Short options to recognize"
+//usage:     "\n	-q		No error messages on unrecognized options"
+//usage:     "\n	-Q		No normal output"
+//usage:     "\n	-s SHELL	Set shell quoting conventions"
+//usage:     "\n	-T		Version test (exits with 4)"
+//usage:     "\n	-u		Don't quote output"
+//usage:	IF_FEATURE_GETOPT_LONG( /* example uses -l, needs FEATURE_GETOPT_LONG */
+//usage:     "\n"
+//usage:     "\nExample:"
+//usage:     "\n"
+//usage:     "\nO=`getopt -l bb: -- ab:c:: \"$@\"` || exit 1"
+//usage:     "\neval set -- \"$O\""
+//usage:     "\nwhile true; do"
+//usage:     "\n	case \"$1\" in"
+//usage:     "\n	-a)	echo A; shift;;"
+//usage:     "\n	-b|--bb) echo \"B:'$2'\"; shift 2;;"
+//usage:     "\n	-c)	case \"$2\" in"
+//usage:     "\n		\"\")	echo C; shift 2;;"
+//usage:     "\n		*)	echo \"C:'$2'\"; shift 2;;"
+//usage:     "\n		esac;;"
+//usage:     "\n	--)	shift; break;;"
+//usage:     "\n	*)	echo Error; exit 1;;"
+//usage:     "\n	esac"
+//usage:     "\ndone"
+//usage:	)
+//usage:
+//usage:#define getopt_example_usage
+//usage:       "$ cat getopt.test\n"
+//usage:       "#!/bin/sh\n"
+//usage:       "GETOPT=`getopt -o ab:c:: --long a-long,b-long:,c-long:: \\\n"
+//usage:       "       -n 'example.busybox' -- \"$@\"`\n"
+//usage:       "if [ $? != 0 ]; then exit 1; fi\n"
+//usage:       "eval set -- \"$GETOPT\"\n"
+//usage:       "while true; do\n"
+//usage:       " case $1 in\n"
+//usage:       "   -a|--a-long) echo \"Option a\"; shift;;\n"
+//usage:       "   -b|--b-long) echo \"Option b, argument '$2'\"; shift 2;;\n"
+//usage:       "   -c|--c-long)\n"
+//usage:       "     case \"$2\" in\n"
+//usage:       "       \"\") echo \"Option c, no argument\"; shift 2;;\n"
+//usage:       "       *)  echo \"Option c, argument '$2'\"; shift 2;;\n"
+//usage:       "     esac;;\n"
+//usage:       "   --) shift; break;;\n"
+//usage:       "   *) echo \"Internal error!\"; exit 1;;\n"
+//usage:       " esac\n"
+//usage:       "done\n"
+

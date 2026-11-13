@@ -1,0 +1,28 @@
+/*
+ * Copyright 2022-2024 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/* X Macro Definitions for Specification of RISC-V Arch Capabilities */
+
+/*
+ * Each RISC-V capability ends up encoded as a single set bit in an array of
+ * words. When specifying a new capability, write a new RISCV_DEFINE_CAP
+ * statement, with an argument as the extension name in all-caps,
+ * second argument as the index in the array where the capability will be stored
+ * and third argument as the index of the bit to be used to encode the
+ * capability.
+ *
+ * The fourth and the fifth arguments are copied from linux header asm/hwprobe.h.
+ * Directly coping values instead of macro names comes from the fact
+ * that an old version may lack definition of some macro.
+ * When there is no hwprobe key/value pair for a capability, the key is set to -1
+ * and the value is set to 0, as when the hwprobe syscall returns a key of -1,
+ * the value is set to 0 and the corresponding capability would not be enabled.
+ *
+ * RISCV_DEFINE_CAP(EXTENSION NAME, array index, bit index, hwprobe key, hwprobe value) */
+

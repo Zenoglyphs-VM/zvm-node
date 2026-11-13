@@ -1,0 +1,43 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * cryptpw.c - output a crypt(3)ed password to stdout.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Cooked from passwd.c by Thomas Lundquist <thomasez@zelow.no>
+ * mkpasswd compatible options added by Bernhard Reutner-Fischer
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config CRYPTPW
+//config:	bool "cryptpw (15 kb)"
+//config:	default y
+//config:	help
+//config:	Encrypts the given password with the crypt(3) libc function
+//config:	using the given salt.
+//config:
+//config:config MKPASSWD
+//config:	bool "mkpasswd (16 kb)"
+//config:	default y
+//config:	help
+//config:	Encrypts the given password with the crypt(3) libc function
+//config:	using the given salt. Debian has this utility under mkpasswd
+//config:	name. Busybox provides mkpasswd as an alias for cryptpw.
+
+//applet:IF_CRYPTPW( APPLET_NOEXEC(cryptpw,  cryptpw, BB_DIR_USR_BIN, BB_SUID_DROP, cryptpw))
+//                   APPLET_NOEXEC:name      main     location        suid_type     help
+//applet:IF_MKPASSWD(APPLET_NOEXEC(mkpasswd, cryptpw, BB_DIR_USR_BIN, BB_SUID_DROP, cryptpw))
+
+//kbuild:lib-$(CONFIG_CRYPTPW) += cryptpw.o
+//kbuild:lib-$(CONFIG_MKPASSWD) += cryptpw.o
+
+//usage:#define cryptpw_trivial_usage
+//usage:       "[-P FD] [-m TYPE] [-S SALT] [PASSWORD] [SALT]"
+/* We do support -s, we just don't mention it */
+//usage:#define cryptpw_full_usage "\n\n"
+//usage:       "Print crypt(3) hashed PASSWORD\n"
+//usage:     "\n	-P N	Read password from fd N"
+/* //usage:  "\n	-s	Use stdin; like -P0" */
+//usage:     "\n	-m TYPE	"CRYPT_METHODS_HELP_STR
+//usage:     "\n	-S SALT"
+

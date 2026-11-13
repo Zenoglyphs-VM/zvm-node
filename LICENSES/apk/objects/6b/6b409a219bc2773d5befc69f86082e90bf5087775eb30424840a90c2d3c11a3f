@@ -1,0 +1,76 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini xargs implementation for busybox
+ *
+ * (C) 2002,2003 by Vladimir Oleynik <dzo@simtreas.ru>
+ *
+ * Special thanks
+ * - Mark Whitley and Glenn McGrath for stimulus to rewrite :)
+ * - Mike Rendell <michael@cs.mun.ca>
+ * and David MacKenzie <djm@gnu.ai.mit.edu>.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * xargs is described in the Single Unix Specification v3 at
+ * http://www.opengroup.org/onlinepubs/007904975/utilities/xargs.html
+ */
+//config:config XARGS
+//config:	bool "xargs (7.6 kb)"
+//config:	default y
+//config:	help
+//config:	xargs is used to execute a specified command for
+//config:	every item from standard input.
+//config:
+//config:config FEATURE_XARGS_SUPPORT_CONFIRMATION
+//config:	bool "Enable -p: prompt and confirmation"
+//config:	default y
+//config:	depends on XARGS
+//config:	help
+//config:	Support -p: prompt the user whether to run each command
+//config:	line and read a line from the terminal.
+//config:
+//config:config FEATURE_XARGS_SUPPORT_QUOTES
+//config:	bool "Enable single and double quotes and backslash"
+//config:	default y
+//config:	depends on XARGS
+//config:	help
+//config:	Support quoting in the input.
+//config:
+//config:config FEATURE_XARGS_SUPPORT_TERMOPT
+//config:	bool "Enable -x: exit if -s or -n is exceeded"
+//config:	default y
+//config:	depends on XARGS
+//config:	help
+//config:	Support -x: exit if the command size (see the -s or -n option)
+//config:	is exceeded.
+//config:
+//config:config FEATURE_XARGS_SUPPORT_ZERO_TERM
+//config:	bool "Enable -0: NUL-terminated input"
+//config:	default y
+//config:	depends on XARGS
+//config:	help
+//config:	Support -0: input items are terminated by a NUL character
+//config:	instead of whitespace, and the quotes and backslash
+//config:	are not special.
+//config:
+//config:config FEATURE_XARGS_SUPPORT_REPL_STR
+//config:	bool "Enable -I STR: string to replace"
+//config:	default y
+//config:	depends on XARGS
+//config:	help
+//config:	Support -I STR and -i[STR] options.
+//config:
+//config:config FEATURE_XARGS_SUPPORT_PARALLEL
+//config:	bool "Enable -P N: processes to run in parallel"
+//config:	default y
+//config:	depends on XARGS
+//config:
+//config:config FEATURE_XARGS_SUPPORT_ARGS_FILE
+//config:	bool "Enable -a FILE: use FILE instead of stdin"
+//config:	default y
+//config:	depends on XARGS
+
+//applet:IF_XARGS(APPLET_NOEXEC(xargs, xargs, BB_DIR_USR_BIN, BB_SUID_DROP, xargs))
+
+//kbuild:lib-$(CONFIG_XARGS) += xargs.o
+

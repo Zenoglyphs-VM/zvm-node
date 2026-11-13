@@ -1,0 +1,27 @@
+/*
+ * pmap implementation for busybox
+ *
+ * Copyright (C) 2010 Nokia Corporation. All rights reserved.
+ * Written by Alexander Shishkin <virtuoso@slind.org>
+ *
+ * Licensed under GPLv2 or later, see the LICENSE file in this source tree
+ * for details.
+ */
+//config:config PMAP
+//config:	bool "pmap (6.2 kb)"
+//config:	default y
+//config:	help
+//config:	Display processes' memory mappings.
+
+//applet:IF_PMAP(APPLET(pmap, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_PMAP) += pmap.o
+
+//usage:#define pmap_trivial_usage
+//usage:       "[-xq] PID..."
+//usage:#define pmap_full_usage "\n\n"
+//usage:       "Display process memory usage"
+//usage:     "\n"
+//usage:     "\n	-x	Show details"
+//usage:     "\n	-q	Quiet"
+

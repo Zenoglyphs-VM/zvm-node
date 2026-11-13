@@ -1,0 +1,20 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright (C) 2019 Denys Vlasenko <vda.linux@googlemail.com>
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config TS
+//config:	bool "ts (4.4 kb)"
+//config:	default y
+
+//applet:IF_TS(APPLET(ts, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_TS) += ts.o
+
+//usage:#define ts_trivial_usage
+//usage:       "[-is] [STRFTIME]"
+//usage:#define ts_full_usage "\n\n"
+//usage:       "Pipe stdin to stdout, add timestamp to each line\n"
+//usage:     "\n	-s	Time since start"
+//usage:     "\n	-i	Time since previous line"
+

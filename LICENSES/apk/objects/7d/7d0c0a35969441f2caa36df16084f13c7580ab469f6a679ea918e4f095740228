@@ -1,0 +1,77 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * test implementation for busybox
+ *
+ * Copyright (c) by a whole pile of folks:
+ *
+ *     test(1); version 7-like  --  author Erik Baalbergen
+ *     modified by Eric Gisin to be used as built-in.
+ *     modified by Arnold Robbins to add SVR3 compatibility
+ *     (-x -c -b -p -u -g -k) plus Korn's -L -nt -ot -ef and new -S (socket).
+ *     modified by J.T. Conklin for NetBSD.
+ *     modified by Herbert Xu to be used as built-in in ash.
+ *     modified by Erik Andersen <andersen@codepoet.org> to be used
+ *     in busybox.
+ *     modified by Bernhard Reutner-Fischer to be useable (i.e. a bit less bloaty).
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Original copyright notice states:
+ *     "This program is in the Public Domain."
+ */
+//config:config TEST
+//config:	bool "test (4.4 kb)"
+//config:	default y
+//config:	help
+//config:	test is used to check file types and compare values,
+//config:	returning an appropriate exit code. The bash shell
+//config:	has test built in, ash can build it in optionally.
+//config:
+//config:config TEST1
+//config:	bool "test as ["
+//config:	default y
+//config:	help
+//config:	Provide test command in the "[ EXPR ]" form
+//config:
+//config:config TEST2
+//config:	bool "test as [["
+//config:	default y
+//config:	help
+//config:	Provide test command in the "[[ EXPR ]]" form
+//config:
+//config:config FEATURE_TEST_64
+//config:	bool "Extend test to 64 bit"
+//config:	default y
+//config:	depends on TEST || TEST1 || TEST2 || ASH_TEST || HUSH_TEST
+//config:	help
+//config:	Enable 64-bit support in test.
+
+//applet:IF_TEST(APPLET_NOFORK(test, test, BB_DIR_USR_BIN, BB_SUID_DROP, test))
+//applet:IF_TEST1(APPLET_NOFORK([,   test, BB_DIR_USR_BIN, BB_SUID_DROP, test))
+//applet:IF_TEST2(APPLET_NOFORK([[,  test, BB_DIR_USR_BIN, BB_SUID_DROP, test))
+
+//kbuild:lib-$(CONFIG_TEST)  += test.o test_ptr_hack.o
+//kbuild:lib-$(CONFIG_TEST1) += test.o test_ptr_hack.o
+//kbuild:lib-$(CONFIG_TEST2) += test.o test_ptr_hack.o
+
+//kbuild:lib-$(CONFIG_ASH_TEST)  += test.o test_ptr_hack.o
+//kbuild:lib-$(CONFIG_HUSH_TEST) += test.o test_ptr_hack.o
+
+/* "test --help" is special-cased to ignore --help */
+//usage:#define test_trivial_usage NOUSAGE_STR
+//usage:#define test_full_usage ""
+//usage:
+//usage:#define test_example_usage
+//usage:       "$ test 1 -eq 2\n"
+//usage:       "$ echo $?\n"
+//usage:       "1\n"
+//usage:       "$ test 1 -eq 1\n"
+//usage:       "$ echo $?\n"
+//usage:       "0\n"
+//usage:       "$ [ -d /etc ]\n"
+//usage:       "$ echo $?\n"
+//usage:       "0\n"
+//usage:       "$ [ -d /junk ]\n"
+//usage:       "$ echo $?\n"
+//usage:       "1\n"
+

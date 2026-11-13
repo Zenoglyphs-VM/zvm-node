@@ -1,0 +1,24 @@
+/*
+ * Copyright (C) 2010 Timo Teras <timo.teras@iki.fi>
+ *
+ * This is free software, licensed under the GNU General Public License v2.
+ */
+//config:config FLOCK
+//config:	bool "flock (6.5 kb)"
+//config:	default y
+//config:	help
+//config:	Manage locks from shell scripts
+
+//applet:IF_FLOCK(APPLET(flock, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_FLOCK) += flock.o
+
+//usage:#define flock_trivial_usage
+//usage:       "[-sxun] FD | { FILE [-c] PROG ARGS }"
+//usage:#define flock_full_usage "\n\n"
+//usage:       "[Un]lock file descriptor, or lock FILE, run PROG\n"
+//usage:     "\n	-s	Shared lock"
+//usage:     "\n	-x	Exclusive lock (default)"
+//usage:     "\n	-u	Unlock FD"
+//usage:     "\n	-n	Fail rather than wait"
+

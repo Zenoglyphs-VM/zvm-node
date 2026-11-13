@@ -1,0 +1,57 @@
+#! /usr/bin/env perl
+# Copyright 2007-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# SHA512 block transform for x86. September 2007.
+#
+# May 2013.
+#
+# Add SSSE3 code path, 20-25% improvement [over original SSE2 code].
+#
+# Performance in clock cycles per processed byte (less is better):
+#
+#		gcc	icc	x86 asm	SIMD(*)	x86_64(**)
+# Pentium	100	97	61	-	-
+# PIII		75	77	56	-	-
+# P4		116	95	82	34.6	30.8
+# AMD K8	54	55	36	20.7	9.57
+# Core2		66	57	40	15.9	9.97
+# Westmere	70	-	38	12.2	9.58
+# Sandy Bridge	58	-	35	11.9	11.2
+# Ivy Bridge	50	-	33	11.5	8.17
+# Haswell	46	-	29	11.3	7.66
+# Skylake	40	-	26	13.3	7.25
+# Bulldozer	121	-	50	14.0	13.5
+# VIA Nano	91	-	52	33	14.7
+# Atom		126	-	68	48(***)	14.7
+# Silvermont	97	-	58	42(***)	17.5
+# Goldmont	80	-	48	19.5	12.0
+#
+# (*)	whichever best applicable.
+# (**)	x86_64 assembler performance is presented for reference
+#	purposes, the results are for integer-only code.
+# (***)	paddq is incredibly slow on Atom.
+#
+# IALU code-path is optimized for elder Pentiums. On vanilla Pentium
+# performance improvement over compiler generated code reaches ~60%,
+# while on PIII - ~35%. On newer µ-archs improvement varies from 15%
+# to 50%, but it's less important as they are expected to execute SSE2
+# code-path, which is commonly ~2-3x faster [than compiler generated
+# code]. SSE2 code-path is as fast as original sha512-sse2.pl, even
+# though it does not use 128-bit operations. The latter means that
+# SSE2-aware kernel is no longer required to execute the code. Another
+# difference is that new code optimizes amount of writes, but at the
+# cost of increased data cache "footprint" by 1/2KB.
+

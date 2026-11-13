@@ -1,0 +1,47 @@
+#! /usr/bin/env perl
+# Copyright 2014-2020 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# This module implements support for AES instructions as per PowerISA
+# specification version 2.07, first implemented by POWER8 processor.
+# The module is endian-agnostic in sense that it supports both big-
+# and little-endian cases. Data alignment in parallelizable modes is
+# handled with VSX loads and stores, which implies MSR.VSX flag being
+# set. It should also be noted that ISA specification doesn't prohibit
+# alignment exceptions for these instructions on page boundaries.
+# Initially alignment was handled in pure AltiVec/VMX way [when data
+# is aligned programmatically, which in turn guarantees exception-
+# free execution], but it turned to hamper performance when vcipher
+# instructions are interleaved. It's reckoned that eventual
+# misalignment penalties at page boundaries are in average lower
+# than additional overhead in pure AltiVec approach.
+#
+# May 2016
+#
+# Add XTS subroutine, 9x on little- and 12x improvement on big-endian
+# systems were measured.
+#
+######################################################################
+# Current large-block performance in cycles per byte processed with
+# 128-bit key (less is better).
+#
+#		CBC en-/decrypt	CTR	XTS
+# POWER8[le]	3.96/0.72	0.74	1.1
+# POWER8[be]	3.75/0.65	0.66	1.0
+# POWER9[le]	4.02/0.86	0.84	1.05
+# POWER9[be]	3.99/0.78	0.79	0.97
+
+# $output is the last argument if it looks like a file (it has an extension)
+# $flavour is the first argument if it doesn't look like a file

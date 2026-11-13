@@ -1,0 +1,155 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Mini start-stop-daemon implementation(s) for busybox
+ *
+ * Written by Marek Michalkiewicz <marekm@i17linuxb.ists.pwr.wroc.pl>,
+ * Adapted for busybox David Kimdon <dwhedon@gordian.com>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+
+/*
+This is how it is supposed to work:
+
+start-stop-daemon [OPTIONS] [--start|--stop] [[--] ARGS]
+
+One (only) of these must be given:
+        -S,--start              Start
+        -K,--stop               Stop
+        -T,--status             Check for the existence of a process, return exitcode (since version 1.16.1)
+                                0 - program is running
+                                1 - program is not running and the pid file exists
+                                3 - program is not running
+                                4 - can't determine program status
+
+Search for matching processes.
+If --stop is given, stop all matching processes (by sending a signal).
+If --start is given, start a new process unless a matching process was found.
+
+Options controlling process matching
+(if multiple conditions are specified, all must match):
+        -u,--user USERNAME|UID  Only consider this user's processes
+        -n,--name PROCESS_NAME  Look for processes by matching PROCESS_NAME
+                                with comm field in /proc/$PID/stat.
+                                Only basename is compared:
+                                "ntpd" == "./ntpd" == "/path/to/ntpd".
+[TODO: can PROCESS_NAME be a full pathname? Should we require full match then
+with /proc/$PID/exe or argv[0] (comm can't be matched, it never contains path)]
+        -x,--exec EXECUTABLE    Look for processes that were started with this
+                                command in /proc/$PID/exe and /proc/$PID/cmdline
+                                (/proc/$PID/cmdline is a bbox extension)
+                                Unlike -n, we match against the full path:
+                                "ntpd" != "./ntpd" != "/path/to/ntpd"
+        -p,--pidfile PID_FILE   Look for processes with PID from this file
+        --pid PID               Look for process with this pid (since version 1.17.6)
+        --ppid PPID             Look for processes with parent pid (since version 1.17.7)
+
+Options which are valid for --start only:
+        -x,--exec EXECUTABLE    Program to run (1st arg of execvp).
+                                If no -x, EXECUTABLE is taken from ARGS[0]
+        -a,--startas NAME       argv[0] (defaults to EXECUTABLE)
+        -b,--background         Put process into background
+        -O,--output FILE        Redirect stdout and stderr to FILE when forcing the
+                                daemon into the background (since version 1.20.6).
+                                Requires --background and absolute pathname (tested with 1.21.22).
+                                Uses O_CREAT|O_APPEND!
+                                If execv fails, error message goes to FILE.
+        -N,--nicelevel N        Add N to process' nice level
+        -c,--chuid USER[:[GRP]] Change to specified user [and group]
+        -m,--make-pidfile       Write PID to the pidfile
+                                (both -m and -p must be given!)
+        -P,--procsched policy:priority
+                                This alters the process scheduler policy and priority of the
+                                process before starting it (since version 1.15.0).  The
+                                priority can be optionally specified by appending a :
+                                followed by the value. The default priority is 0. The
+                                currently supported policy values are other, fifo and rr.
+        -r,--chroot DIR         Change directory and chroot to DIR before starting the
+                                process. Please note that the pidfile is also written after
+                                the chroot.
+        -d,--chdir DIR          Change directory to DIR before starting the process. This is
+                                done after the chroot if the -r|--chroot option is set.
+                                When not specified, start-stop-daemon will change directory to the
+                                root directory before starting the process.
+                                ^^^^ Gentoo does not have the default chdir("/"). Debian does.
+        Tested -S with 1.21.22:
+        "start-stop-daemon -S -x /bin/pwd" is the minimum needed to run pwd.
+        "start-stop-daemon -S -a /bin/pwd -n pwd" works too.
+        "start-stop-daemon -S -a /bin/pwd" does NOT work.
+        Earlier versions were less picky (which? Or is it only Gentoo's clone?)
+
+Options which are valid for --stop only:
+        -s,--signal SIG         Signal to send (default:TERM)
+        -t,--test               Exit with status 0 if process is found
+                                (we don't actually start or stop daemons)
+        --remove-pidfile        Used when stopping a program that does not remove its own pid
+                                file (since version 1.17.19). Requires -p PIDFILE?
+
+Misc options:
+        -o,--oknodo             Exit with status 0 if nothing is done
+        -q,--quiet              Quiet
+        -v,--verbose            Verbose
+*/
+//config:config START_STOP_DAEMON
+//config:	bool "start-stop-daemon (12 kb)"
+//config:	default y
+//config:	help
+//config:	start-stop-daemon is used to control the creation and
+//config:	termination of system-level processes, usually the ones
+//config:	started during the startup of the system.
+//config:
+//config:config FEATURE_START_STOP_DAEMON_LONG_OPTIONS
+//config:	bool "Enable long options"
+//config:	default y
+//config:	depends on START_STOP_DAEMON && LONG_OPTS
+//config:
+//config:config FEATURE_START_STOP_DAEMON_FANCY
+//config:	bool "Support additional arguments"
+//config:	default y
+//config:	depends on START_STOP_DAEMON
+//config:	help
+//config:	-o|--oknodo ignored since we exit with 0 anyway
+//config:	-v|--verbose
+//config:	-N|--nicelevel N
+
+//applet:IF_START_STOP_DAEMON(APPLET_ODDNAME(start-stop-daemon, start_stop_daemon, BB_DIR_SBIN, BB_SUID_DROP, start_stop_daemon))
+/* not NOEXEC: uses bb_common_bufsiz1 */
+
+//kbuild:lib-$(CONFIG_START_STOP_DAEMON) += start_stop_daemon.o
+
+//usage:#define start_stop_daemon_trivial_usage
+//usage:       "-S|-K [OPTIONS] [-- ARGS]"
+//usage:#define start_stop_daemon_full_usage "\n\n"
+//usage:       "Search for matching processes, and then\n"
+//usage:       "-S: start a process unless a matching process is found\n"
+//usage:       "-K: stop all matching processes\n"
+//usage:     "\nProcess matching:"
+//usage:     "\n	-u USERNAME|UID	Match only this user's processes"
+//usage:     "\n	-n NAME		Match processes with NAME"
+//usage:     "\n			in comm field in /proc/PID/stat"
+//usage:     "\n	-x EXECUTABLE	Match processes with this command"
+//usage:     "\n			in /proc/PID/cmdline"
+//usage:     "\n	-p FILE		Match a process with PID from FILE"
+//usage:     "\n	All specified conditions must match"
+//usage:     "\n-S only:"
+//usage:     "\n	-x EXECUTABLE	Program to run"
+//usage:     "\n	-a NAME		Zeroth argument"
+//usage:     "\n	-b		Background"
+//usage:     "\n	-O FILE		Append stdout and stderr to FILE"
+//usage:	IF_FEATURE_START_STOP_DAEMON_FANCY(
+//usage:     "\n	-N N		Change nice level"
+//usage:	)
+//usage:     "\n	-c USER[:[GRP]]	Change user/group"
+//usage:     "\n	-d DIR		Change to DIR"
+//usage:     "\n	-m		Write PID to pidfile specified by -p"
+//usage:     "\n-K only:"
+//usage:     "\n	-s SIG		Signal to send"
+//usage:     "\n	-t		Match only, exit with 0 if found"
+//usage:     "\nOther:"
+//usage:	IF_FEATURE_START_STOP_DAEMON_FANCY(
+//usage:     "\n	-o		Exit with status 0 if nothing is done"
+//usage:     "\n	-v		Verbose"
+//usage:     "\n	-q		Quiet"
+//usage:	)
+
+/* Override ENABLE_FEATURE_PIDFILE */

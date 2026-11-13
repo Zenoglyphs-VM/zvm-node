@@ -1,0 +1,23 @@
+/*
+ * Copyright 2023 The OpenSSL Project Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.openssl.org/source/license.html
+ */
+
+/*
+ * This is the precomputed table for the code in ecp_sm2p256.c, for the default
+ * generator. The table consists of 32 subtables, each subtable contains 256
+ * affine points.
+ * subtable 0:   0*  (2^0)*G, 1*  (2^0)*G, 2*  (2^0)*G, ... , 255*  (2^0)*G,
+ * subtable 1:   0*  (2^8)*G, 1*  (2^8)*G, 2*  (2^8)*G, ... , 255*  (2^8)*G,
+ * subtable 2:   0* (2^16)*G, 1* (2^16)*G, 2* (2^16)*G, ... , 255* (2^16)*G,
+ * ...
+ * subtable 31:  0*(2^248)*G, 1*(2^248)*G, 2*(2^248)*G, ... , 255*(2^248)*G,
+ *
+ * The affine points are encoded as eight uint64's, four for the
+ * x coordinate and four for the y. Both values are in little-endian order.
+ */
+

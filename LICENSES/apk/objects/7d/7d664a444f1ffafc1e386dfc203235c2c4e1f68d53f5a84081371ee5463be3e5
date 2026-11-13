@@ -1,0 +1,45 @@
+#! /usr/bin/env perl
+# Copyright 2016-2026 The OpenSSL Project Authors. All Rights Reserved.
+#
+# Licensed under the Apache License 2.0 (the "License").  You may not use
+# this file except in compliance with the License.  You can obtain a copy
+# in the file LICENSE in the source distribution or at
+# https://www.openssl.org/source/license.html
+
+#
+# ====================================================================
+# Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
+# project. The module is, however, dual licensed under OpenSSL and
+# CRYPTOGAMS licenses depending on where you obtain it. For further
+# details see http://www.openssl.org/~appro/cryptogams/.
+# ====================================================================
+#
+# This module implements Poly1305 hash for x86.
+#
+# April 2015
+#
+# Numbers are cycles per processed byte with poly1305_blocks alone,
+# measured with rdtsc at fixed clock frequency.
+#
+#		IALU/gcc-3.4(*)	SSE2(**)	AVX2
+# Pentium	15.7/+80%	-
+# PIII		6.21/+90%	-
+# P4		19.8/+40%	3.24
+# Core 2	4.85/+90%	1.80
+# Westmere	4.58/+100%	1.43
+# Sandy Bridge	3.90/+100%	1.36
+# Haswell	3.88/+70%	1.18		0.72
+# Skylake	3.10/+60%	1.14		0.62
+# Silvermont	11.0/+40%	4.80
+# Goldmont	4.10/+200%	2.10
+# VIA Nano	6.71/+90%	2.47
+# Sledgehammer	3.51/+180%	4.27
+# Bulldozer	4.53/+140%	1.31
+#
+# (*)	gcc 4.8 for some reason generated worse code;
+# (**)	besides SSE2 there are floating-point and AVX options; FP
+#	is deemed unnecessary, because pre-SSE2 processor are too
+#	old to care about, while it's not the fastest option on
+#	SSE2-capable ones; AVX is omitted, because it doesn't give
+#	a lot of improvement, 5-10% depending on processor;
+

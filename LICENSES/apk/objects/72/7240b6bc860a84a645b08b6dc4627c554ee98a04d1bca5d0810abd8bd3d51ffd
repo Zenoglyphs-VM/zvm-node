@@ -1,0 +1,58 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * taskset - retrieve or set a processes' CPU affinity
+ * Copyright (c) 2006 Bernhard Reutner-Fischer
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config TASKSET
+//config:	bool "taskset (5.6 kb)"
+//config:	default y
+//config:	help
+//config:	Retrieve or set a processes's CPU affinity.
+//config:	This requires sched_{g,s}etaffinity support in your libc.
+//config:
+//config:config FEATURE_TASKSET_FANCY
+//config:	bool "Fancy output"
+//config:	default y
+//config:	depends on TASKSET
+//config:	help
+//config:	Needed for machines with more than 32-64 CPUs:
+//config:	affinity parameter 0xHHHHHHHHHHHHHHHHHHHH can be arbitrarily long
+//config:	in this case. Otherwise, it is limited to sizeof(long).
+//config:
+//config:config FEATURE_TASKSET_CPULIST
+//config:	bool "CPU list support (-c option)"
+//config:	default y
+//config:	depends on FEATURE_TASKSET_FANCY
+//config:	help
+//config:	Add support for taking/printing affinity as CPU list when '-c'
+//config:	option is used. For example, it prints '0-3,7' instead of mask '8f'.
+
+//applet:IF_TASKSET(APPLET_NOEXEC(taskset, taskset, BB_DIR_USR_BIN, BB_SUID_DROP, taskset))
+
+//kbuild:lib-$(CONFIG_TASKSET) += taskset.o
+
+//usage:#define taskset_trivial_usage
+//usage:       "[-ap] [HEXMASK"IF_FEATURE_TASKSET_CPULIST(" | -c LIST")"] { PID | PROG ARGS }"
+//usage:#define taskset_full_usage "\n\n"
+//usage:       "Set or get CPU affinity\n"
+//usage:     "\n	-p	Operate on PID"
+//usage:     "\n	-a	Operate on all threads"
+//usage:     "\n	-c	Affinity is a list, not mask"
+//usage:
+//usage:#define taskset_example_usage
+//usage:       "$ taskset 0x7 ./dgemm_test&\n"
+//usage:       "$ taskset -p 0x1 $!\n"
+//usage:       "pid 4790's current affinity mask: 7\n"
+//usage:       "pid 4790's new affinity mask: 1\n"
+//usage:       "$ taskset 0x7 /bin/sh -c './taskset -p 0x1 $$'\n"
+//usage:       "pid 6671's current affinity mask: 1\n"
+//usage:       "pid 6671's new affinity mask: 1\n"
+//usage:       "$ taskset -p 1\n"
+//usage:       "pid 1's current affinity mask: 3\n"
+/*
+ * Not yet implemented:
+ * -a/--all-tasks (affect all threads)
+ *	needs to get TIDs from /proc/PID/task/ and use _them_ as "pid" in sched_setaffinity(pid)
+ */

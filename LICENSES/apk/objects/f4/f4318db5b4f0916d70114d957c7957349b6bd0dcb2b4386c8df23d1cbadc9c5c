@@ -1,0 +1,51 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * env implementation for busybox
+ *
+ * Copyright (c) 1988, 1993, 1994
+ * The Regents of the University of California.  All rights reserved.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ *
+ * Original copyright notice is retained at the end of this file.
+ *
+ * Modified for BusyBox by Erik Andersen <andersen@codepoet.org>
+ */
+/* Mar 16, 2003      Manuel Novoa III   (mjn3@codepoet.org)
+ *
+ * Fixed bug involving exit return codes if execvp fails.  Also added
+ * output error checking.
+ */
+/*
+ * Modified by Vladimir Oleynik <dzo@simtreas.ru> (C) 2003
+ * - correct "-" option usage
+ * - multiple "-u unsetenv" support
+ * - GNU long option support
+ * - use xfunc_error_retval
+ */
+//config:config ENV
+//config:	bool "env (4.3 kb)"
+//config:	default y
+//config:	help
+//config:	env is used to set an environment variable and run
+//config:	a command; without options it displays the current
+//config:	environment.
+
+//applet:IF_ENV(APPLET_NOEXEC(env, env, BB_DIR_USR_BIN, BB_SUID_DROP, env))
+
+//kbuild:lib-$(CONFIG_ENV) += env.o
+
+/* BB_AUDIT SUSv3 compliant */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/env.html */
+
+//usage:#define env_trivial_usage
+//usage:       "[-i0] [-u NAME]... [-] [NAME=VALUE]... [PROG ARGS]"
+// The "-" can occur only once (unlike, say, -i): it terminates option processing,
+// so if it is followed by another "-" arg (or any option-looking arg),
+// that arg will be taken as PROG (or even as NAME=VALUE, example: "-z=QWE").
+//usage:#define env_full_usage "\n\n"
+//usage:       "Print current environment or run PROG after setting up environment\n"
+//usage:     "\n	-, -i	Start with empty environment"
+//usage:     "\n	-0	NUL terminated output"
+//usage:     "\n	-u NAME	Remove variable from environment"
+

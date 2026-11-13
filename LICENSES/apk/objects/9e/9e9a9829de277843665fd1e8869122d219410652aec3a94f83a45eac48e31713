@@ -1,0 +1,33 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Display or change file attributes on a fat file system
+ *
+ * Copyright 2005 H. Peter Anvin
+ * Busybox'ed (2014) by Pascal Bellard <pascal.bellard@ads-lu.com>
+ *
+ * This file can be redistributed under the terms of the GNU General
+ * Public License
+ */
+//config:config FATATTR
+//config:	bool "fatattr (2.2 kb)"
+//config:	default y
+//config:	help
+//config:	fatattr lists or changes the file attributes on a fat file system.
+
+//applet:IF_FATATTR(APPLET_NOEXEC(fatattr, fatattr, BB_DIR_BIN, BB_SUID_DROP, fatattr))
+
+//kbuild:lib-$(CONFIG_FATATTR) += fatattr.o
+
+//usage:#define fatattr_trivial_usage
+//usage:       "[-+rhsvda] FILE..."
+//usage:#define fatattr_full_usage "\n\n"
+//usage:       "Change file attributes on FAT filesystem\n"
+//usage:     "\n	-	Clear attributes"
+//usage:     "\n	+	Set attributes"
+//usage:     "\n	r	Read only"
+//usage:     "\n	h	Hidden"
+//usage:     "\n	s	System"
+//usage:     "\n	v	Volume label"
+//usage:     "\n	d	Directory"
+//usage:     "\n	a	Archive"
+

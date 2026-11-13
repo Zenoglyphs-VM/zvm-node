@@ -1,0 +1,27 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * fstrim.c - discard the part (or whole) of mounted filesystem.
+ *
+ * 03 March 2012 - Malek Degachi <malek-degachi@laposte.net>
+ * Adapted for busybox from util-linux-2.12a.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config FSTRIM
+//config:	bool "fstrim (4.6 kb)"
+//config:	default y
+//config:	help
+//config:	Discard unused blocks on a mounted filesystem.
+
+//applet:IF_FSTRIM(APPLET_NOEXEC(fstrim, fstrim, BB_DIR_SBIN, BB_SUID_DROP, fstrim))
+
+//kbuild:lib-$(CONFIG_FSTRIM) += fstrim.o
+
+//usage:#define fstrim_trivial_usage
+//usage:       "[OPTIONS] MOUNTPOINT"
+//usage:#define fstrim_full_usage "\n\n"
+//usage:       "	-o OFFSET	Offset in bytes to discard from"
+//usage:     "\n	-l LEN		Bytes to discard"
+//usage:     "\n	-m MIN		Minimum extent length"
+//usage:     "\n	-v		Print number of discarded bytes"
+

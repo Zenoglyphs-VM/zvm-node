@@ -1,0 +1,33 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * rmdir implementation for busybox
+ *
+ * Copyright (C) 2003  Manuel Novoa III  <mjn3@codepoet.org>
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
+//config:config RMDIR
+//config:	bool "rmdir (3.8 kb)"
+//config:	default y
+//config:	help
+//config:	rmdir is used to remove empty directories.
+
+//applet:IF_RMDIR(APPLET_NOFORK(rmdir, rmdir, BB_DIR_BIN, BB_SUID_DROP, rmdir))
+
+//kbuild:lib-$(CONFIG_RMDIR) += rmdir.o
+
+/* BB_AUDIT SUSv3 compliant */
+/* http://www.opengroup.org/onlinepubs/007904975/utilities/rmdir.html */
+
+//usage:#define rmdir_trivial_usage
+//usage:       "[-p] DIRECTORY..."
+//usage:#define rmdir_full_usage "\n\n"
+//usage:       "Remove DIRECTORY if it is empty\n"
+//usage:     "\n	-p	Include parents"
+//usage:	IF_LONG_OPTS(
+//usage:     "\n	--ignore-fail-on-non-empty"
+//usage:	)
+//usage:
+//usage:#define rmdir_example_usage
+//usage:       "# rmdir /tmp/foo\n"
+

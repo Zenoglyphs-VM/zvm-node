@@ -1,0 +1,10 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Utility routines.
+ *
+ * Copyright (C) 2005, 2006 Rob Landley <rob@landley.net>
+ * Copyright (C) 2004 Erik Andersen <andersen@codepoet.org>
+ * Copyright (C) 2001 Matt Krai
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */

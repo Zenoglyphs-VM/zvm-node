@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Tests for the sourcecode base itself.
+# Copyright 2006 by Mike Frysinger <vapier@gentoo.org>
+# Licensed under GPLv2, see file LICENSE in this source tree.
+

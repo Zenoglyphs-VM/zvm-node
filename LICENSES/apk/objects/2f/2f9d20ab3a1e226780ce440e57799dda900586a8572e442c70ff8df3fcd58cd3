@@ -1,0 +1,84 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * sed.c - very minimalist version of sed
+ *
+ * Copyright (C) 1999,2000,2001 by Lineo, inc. and Mark Whitley
+ * Copyright (C) 1999,2000,2001 by Mark Whitley <markw@codepoet.org>
+ * Copyright (C) 2002  Matt Kraai
+ * Copyright (C) 2003 by Glenn McGrath
+ * Copyright (C) 2003,2004 by Rob Landley <rob@landley.net>
+ *
+ * MAINTAINER: Rob Landley <rob@landley.net>
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+/* Code overview.
+ *
+ * Files are laid out to avoid unnecessary function declarations.  So for
+ * example, every function add_cmd calls occurs before add_cmd in this file.
+ *
+ * add_cmd() is called on each line of sed command text (from a file or from
+ * the command line).  It calls get_address() and parse_cmd_args().  The
+ * resulting sed_cmd_t structures are appended to a linked list
+ * (G.sed_cmd_head/G.sed_cmd_tail).
+ *
+ * process_files() does actual sedding, reading data lines from each input FILE*
+ * (which could be stdin) and applying the sed command list (sed_cmd_head) to
+ * each of the resulting lines.
+ *
+ * sed_main() is where external code calls into this, with a command line.
+ */
+/* Supported features and commands in this version of sed:
+ *
+ * - comments ('#')
+ * - address matching: num|/matchstr/[,num|/matchstr/|$]command
+ * - commands: (p)rint, (d)elete, (s)ubstitue (with g & I flags)
+ * - edit commands: (a)ppend, (i)nsert, (c)hange
+ * - file commands: (r)ead
+ * - backreferences in substitution expressions (\0, \1, \2...\9)
+ * - grouped commands: {cmd1;cmd2}
+ * - transliteration (y/source-chars/dest-chars/)
+ * - pattern space hold space storing / swapping (g, h, x)
+ * - labels / branching (: label, b, t, T)
+ *
+ * (Note: Specifying an address (range) to match is *optional*; commands
+ * default to the whole pattern space if no specific address match was
+ * requested.)
+ *
+ * Todo:
+ * - Create a wrapper around regex to make libc's regex conform with sed
+ *
+ * Reference
+ * http://www.opengroup.org/onlinepubs/007904975/utilities/sed.html
+ * http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sed.html
+ * http://sed.sourceforge.net/sedfaq3.html
+ */
+//config:config SED
+//config:	bool "sed (12 kb)"
+//config:	default y
+//config:	help
+//config:	sed is used to perform text transformations on a file
+//config:	or input from a pipeline.
+
+//applet:IF_SED(APPLET(sed, BB_DIR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_SED) += sed.o
+
+//usage:#define sed_trivial_usage
+//usage:       "[-i[SFX]] [-nrE] [-f FILE]... [-e CMD]... [FILE]...\n"
+//usage:       "or: sed [-i[SFX]] [-nrE] CMD [FILE]..."
+//usage:#define sed_full_usage "\n\n"
+//usage:       "	-e CMD	Add CMD to sed commands to be executed"
+//usage:     "\n	-f FILE	Add FILE contents to sed commands to be executed"
+//usage:     "\n	-i[SFX]	Edit files in-place (otherwise write to stdout)"
+//usage:     "\n		Optionally back files up, appending SFX"
+//usage:     "\n	-n	Suppress automatic printing of pattern space"
+//usage:     "\n	-r,-E	Use extended regex syntax"
+//usage:     "\n"
+//usage:     "\nIf no -e or -f, the first non-option argument is the sed command string."
+//usage:     "\nRemaining arguments are input files (stdin if none)."
+//usage:
+//usage:#define sed_example_usage
+//usage:       "$ echo \"foo\" | sed -e 's/f[a-zA-Z]o/bar/g'\n"
+//usage:       "bar\n"
+

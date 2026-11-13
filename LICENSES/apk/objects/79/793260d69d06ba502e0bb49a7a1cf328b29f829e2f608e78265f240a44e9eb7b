@@ -1,0 +1,56 @@
+/*
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ *
+ * Based on nanotop.c from floppyfw project
+ *
+ * Contact me: vda.linux@googlemail.com
+ */
+//config:config NMETER
+//config:	bool "nmeter (12 kb)"
+//config:	default y
+//config:	help
+//config:	Prints selected system stats continuously, one line per update.
+
+//applet:IF_NMETER(APPLET(nmeter, BB_DIR_USR_BIN, BB_SUID_DROP))
+
+//kbuild:lib-$(CONFIG_NMETER) += nmeter.o
+
+//usage:#define nmeter_trivial_usage
+//usage:       "[-d MSEC] FORMAT_STRING"
+//usage:#define nmeter_full_usage "\n\n"
+//usage:       "Monitor system in real time"
+//usage:     "\n"
+//usage:     "\n -d MSEC	Milliseconds between updates, default:1000, none:-1"
+//usage:     "\n"
+//usage:     "\nFormat specifiers:"
+//usage:     "\n %Nc or %[cN]	CPU. N - bar size (default 10)"
+//usage:     "\n		(displays: S:system U:user N:niced D:iowait I:irq i:softirq)"
+//usage:     "\n %[nINTERFACE]	Network INTERFACE"
+//usage:     "\n %m		Allocated memory"
+//usage:     "\n %[md]		Dirty file-backed memory"
+//usage:     "\n %[mw]		Memory being written to storage"
+//usage:     "\n %[mf]		Free memory"
+//usage:     "\n %[mt]		Total memory"
+//usage:     "\n %s		Allocated swap"
+//usage:     "\n %f		Number of used file descriptors"
+//usage:     "\n %Ni		Total/specific IRQ rate"
+//usage:     "\n %x		Context switch rate"
+//usage:     "\n %p		Forks"
+//usage:     "\n %[pn]		# of processes"
+//usage:     "\n %b		Block io"
+//usage:     "\n %Nt		Time (with N decimal points)"
+//usage:     "\n %NT		Zero-based timestamp (with N decimal points)"
+//usage:     "\n %r		Print <cr> instead of <lf> at EOL"
+
+//TODO:
+// simplify code
+// /proc/locks
+// /proc/stat:
+// disk_io: (3,0):(22272,17897,410702,4375,54750)
+// btime 1059401962
+//TODO: use sysinfo libc call/syscall, if appropriate
+// (faster than open/read/close):
+// sysinfo({uptime=15017, loads=[5728, 15040, 16480]
+//  totalram=2107416576, freeram=211525632, sharedram=0, bufferram=157204480}
+//  totalswap=134209536, freeswap=134209536, procs=157})
+

@@ -1,0 +1,24 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * pwdx implementation for busybox
+ *
+ * Copyright (c) 2004 Nicholas Miell
+ * ported from procps by Pere Orga <gotrunks@gmail.com> 2011
+ *
+ * Licensed under GPLv2, see file LICENSE in this source tree.
+ */
+//config:config PWDX
+//config:	bool "pwdx (3.9 kb)"
+//config:	default y
+//config:	help
+//config:	Report current working directory of a process
+
+//applet:IF_PWDX(APPLET_NOFORK(pwdx, pwdx, BB_DIR_USR_BIN, BB_SUID_DROP, pwdx))
+
+//kbuild:lib-$(CONFIG_PWDX) += pwdx.o
+
+//usage:#define pwdx_trivial_usage
+//usage:       "PID..."
+//usage:#define pwdx_full_usage "\n\n"
+//usage:       "Show current directory for PIDs"
+
