@@ -227,6 +227,7 @@
   "legalReviewComplete": false,
   "noticeObjectCount": 2444,
   "noticePayloadBytes": 2269541,
+  "noticeStorageLayout": "SHA256_PREFIX_2",
   "origins": [
     {
       "noticePages": [],
@@ -1631,7 +1632,7 @@
     }
   ],
   "releaseAccepted": false,
-  "schema": 1,
+  "schema": 2,
   "scope": "Installed APK declarations and selected original source notices; corresponding source and legal acceptance remain unqualified.",
   "sourceOriginAuthenticated": false,
   "status": "APK_SOURCE_NOTICE_CANDIDATES_REVIEW_REQUIRED"

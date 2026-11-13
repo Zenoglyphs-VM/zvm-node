@@ -234,6 +234,14 @@ name. Page hashes, exact origin ownership, source-input references and payload
 counts are checked. The scoped Git attributes disable newline conversion for
 original notice and reference-document payloads.
 
+APK catalog schema 2 stores source payloads under a two-character SHA-256 prefix.
+The source tree is checked against the collector's existing 1024-entry directory
+and depth bounds before qualification; the full image collector still covers
+other module directories. Schema-1 flat catalogs remain historical inputs.
+The exported image packet keeps one payload per digest. One `stat` invocation
+reads size and link count together; the larger packet has an explicit finite
+observation timeout.
+
 Versioned reference documents are tracked separately from recipe-checksummed
 source inputs. The original [MPL 2.0 reference](https://www.mozilla.org/MPL/2.0/index.txt)
 is retained for the ca-certificates origin alongside its observed source

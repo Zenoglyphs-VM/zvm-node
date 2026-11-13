@@ -30,7 +30,7 @@ def fixture():
     origins[1]['notices'] = [
         {'source': 'demo-1.0.tar.gz', 'path': 'demo-1.0/COPYING', 'bytes': len(notice), 'sha256': digest, 'selectionScope': 'ARCHIVE_NOTICE_FILE'},
         {'source': 'helper.c', 'path': 'helper.c', 'bytes': len(notice), 'sha256': digest, 'selectionScope': 'INITIAL_SOURCE_NOTICE'}]
-    value = {'schema': 1, 'status': apk.STATUS, 'scope': apk.SCOPE, 'installedPackages': packages,
+    value = {'schema': apk.SCHEMA, 'status': apk.STATUS, 'scope': apk.SCOPE, 'noticeStorageLayout': apk.LAYOUT, 'installedPackages': packages,
         'origins': origins, 'objects': {digest: len(notice)}, 'referenceDocuments': [], **{key: False for key in apk.FLAGS}}
     return value, {digest: notice}
 
@@ -41,7 +41,7 @@ def files_for(value, objects):
     declared_objects = manifest.pop('objects')
     manifest['noticeObjectCount'] = len(declared_objects)
     manifest['noticePayloadBytes'] = sum(declared_objects.values())
-    files = {apk.README: apk.README_BYTES, **{apk.PREFIX + 'objects/' + key: payload for key, payload in objects.items()}}
+    files = {apk.README: apk.README_BYTES, **{apk.object_path(key): payload for key, payload in objects.items()}}
     for origin in manifest['origins']:
         notices = origin.pop('notices'); origin['noticePages'] = []
         for index, offset in enumerate(range(0, len(notices), 128)):
@@ -192,6 +192,20 @@ class APKSourceNoticeTests(unittest.TestCase):
         self.assertFalse(result['legalReviewComplete'])
         value['referenceDocuments'][0]['url'] = 'https://example.com/changed.txt'
         with self.assertRaises(ReviewError): check(value, objects)
+
+    def test_source_payload_prefix_directories_fit_existing_collector_bounds(self):
+        keys = [sha(('source-' + str(index)).encode()) for index in range(2444)]
+        paths = [apk.object_path(key) for key in keys] + [apk.MANIFEST, apk.README]
+        summary = apk.source_layout(paths)
+        self.assertLessEqual(summary['maximumDirectoryEntries'], 1024)
+        self.assertEqual(summary['maximumDirectoryDepth'], 3)
+        with self.assertRaises(ReviewError): apk.source_layout([apk.PREFIX + 'objects/' + key for key in keys])
+        with self.assertRaises(ReviewError): apk.source_layout(paths + [paths[0]])
+
+    def test_flat_or_historically_labelled_catalogs_cannot_be_requalified(self):
+        for field, replacement in [('schema', 1), ('noticeStorageLayout', 'FLAT_SHA256')]:
+            value, objects = fixture(); value[field] = replacement
+            with self.assertRaises(ReviewError): check(value, objects)
 
 
 if __name__ == '__main__':

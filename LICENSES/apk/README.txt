@@ -4,6 +4,8 @@ This catalog records exact installed APK metadata, declared aports recipe pins,
 recipe-checksummed source inputs and selected original notice bytes. The Go
 notice collector retains this directory through its existing module notice
 directory support; identical payloads are stored once per digest in the image.
+Source payloads use objects/<first-two-digest-characters>/<sha256> so the source
+directory reader stays within its existing entry bound.
 Bounded occurrence pages retain archive notice and initial-comment references.
 Separate reference documents retain their own source and byte pins.
 

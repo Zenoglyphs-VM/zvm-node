@@ -1,6 +1,7 @@
 """Bind retained APK notice candidates to installed metadata and checked source."""
 
 import re
+from pathlib import PurePosixPath
 from urllib.parse import urlsplit
 
 from bounded import ReviewError, sha
@@ -14,6 +15,8 @@ PAGES = PREFIX + 'pages/'
 REFERENCES = 'LICENSES/apk-references/'
 REFERENCE_URLS = {'MPL-2.0': 'https://www.mozilla.org/MPL/2.0/index.txt'}
 STATUS = 'APK_SOURCE_NOTICE_CANDIDATES_REVIEW_REQUIRED'
+SCHEMA = 2
+LAYOUT = 'SHA256_PREFIX_2'
 SCOPE = 'Installed APK declarations and selected original source notices; corresponding source and legal acceptance remain unqualified.'
 FLAGS = ('legalReviewComplete', 'sourceOriginAuthenticated', 'completeCorrespondingSource',
     'completeLicenseCoverage', 'completeSBOM', 'releaseAccepted')
@@ -28,6 +31,8 @@ This catalog records exact installed APK metadata, declared aports recipe pins,
 recipe-checksummed source inputs and selected original notice bytes. The Go
 notice collector retains this directory through its existing module notice
 directory support; identical payloads are stored once per digest in the image.
+Source payloads use objects/<first-two-digest-characters>/<sha256> so the source
+directory reader stays within its existing entry bound.
 Bounded occurrence pages retain archive notice and initial-comment references.
 Separate reference documents retain their own source and byte pins.
 
@@ -49,6 +54,27 @@ def require(condition, message):
 
 def filename(value):
     return isinstance(value, str) and 0 < len(value) <= 256 and re.fullmatch(r'[A-Za-z0-9_+@.-]+', value) and value not in ('.', '..')
+
+
+def object_path(key):
+    digest(key)
+    return PREFIX + 'objects/' + key[:2] + '/' + key
+
+
+def source_layout(paths):
+    children = {}
+    require(len(paths) == len(set(paths)), 'duplicate APK catalog source path')
+    for path in paths:
+        require(public_path(path) and path.startswith((PREFIX, REFERENCES)), 'unexpected APK catalog source namespace')
+        parts = PurePosixPath(path).parts
+        for index in range(1, len(parts)):
+            directory = '/'.join(parts[:index])
+            children.setdefault(directory, set()).add(parts[index])
+    require(children and max(map(len, children.values())) <= 1024, 'APK source directory exceeds the existing collector entry bound')
+    depth = max(len(PurePosixPath(path).parts) - 1 for path in children)
+    require(depth <= 4 and sum(map(len, children.values())) <= 8192, 'APK source directory depth or entry budget exceeded')
+    return {'directories': len(children), 'maximumDirectoryEntries': max(map(len, children.values())),
+        'maximumDirectoryDepth': depth, 'scope': 'This APK catalog tree; other module directories require the full image collector.'}
 
 
 def url(value):
@@ -83,8 +109,9 @@ def summarize(raw, installed, read_source):
 
     require(copied(README) == README_BYTES, 'APK notice review boundary text differs')
     manifest_raw = copied(MANIFEST); value = checked_json(manifest_raw)
-    fields(value, ('schema', 'status', 'scope', 'installedPackages', 'origins', 'noticeObjectCount', 'noticePayloadBytes', 'referenceDocuments', *FLAGS))
-    require(type(value['schema']) is int and value['schema'] == 1 and value['status'] == STATUS and value['scope'] == SCOPE, 'unknown APK notice catalog')
+    fields(value, ('schema', 'status', 'scope', 'noticeStorageLayout', 'installedPackages', 'origins', 'noticeObjectCount', 'noticePayloadBytes', 'referenceDocuments', *FLAGS))
+    require(type(value['schema']) is int and value['schema'] == SCHEMA and value['noticeStorageLayout'] == LAYOUT
+        and value['status'] == STATUS and value['scope'] == SCOPE, 'unknown APK notice catalog')
     require(all(value[key] is False for key in FLAGS), 'APK notice candidates cannot establish legal or release acceptance')
     require(isinstance(installed, list) and 0 < len(installed) <= 512 and value['installedPackages'] == installed, 'APK notice catalog differs from installed package metadata')
     require(len({row['name'] for row in installed}) == len(installed), 'duplicate installed APK identity')
@@ -156,7 +183,7 @@ def summarize(raw, installed, read_source):
                 and notice['selectionScope'] in NOTICE_SCOPES, 'APK notice lacks a selected source input')
             require((sources[notice['source']]['kind'] == 'SOURCE_ARCHIVE') == (notice['selectionScope'] in {'ARCHIVE_NOTICE_FILE', 'ARCHIVE_INITIAL_SOURCE_NOTICE'}), 'APK notice selection scope differs from source input kind')
             digest(notice['sha256']); integer(notice['bytes'], 1, 128 << 10)
-            key = notice['sha256']; path = PREFIX + 'objects/' + key; payload = copied(path)
+            key = notice['sha256']; path = object_path(key); payload = copied(path)
             require(len(payload) == notice['bytes'] and sha(payload) == key, 'APK notice reference differs from payload')
             require(key not in objects or objects[key] == notice['bytes'], 'APK notice payload has conflicting sizes')
             objects[key] = notice['bytes']; expected_paths.add(path)
@@ -169,7 +196,8 @@ def summarize(raw, installed, read_source):
     require(origins == sorted(selected) and used == set(objects) and used_references == set(references), 'APK source origin ordering or notice object reachability differs')
     require(value['noticeObjectCount'] == len(objects) and value['noticePayloadBytes'] == sum(objects.values()), 'APK unique notice count or byte total differs')
     require(set(pins) == expected_paths, 'unexpected APK catalog file copied')
-    return {'schema': 1, 'status': STATUS, 'manifestSha256': sha(manifest_raw),
+    layout = source_layout(list(pins))
+    return {'schema': SCHEMA, 'status': STATUS, 'manifestSha256': sha(manifest_raw), 'sourceStorageLayout': LAYOUT, 'sourceDirectoryLayout': layout,
         'installedPackageCount': len(installed), 'sourceOriginCount': len(origins), 'recipePinnedSourceInputReferences': source_count,
         'selectedNoticeOccurrences': notice_count, 'distinctNoticeObjects': len(objects), 'noticePayloadBytes': sum(objects.values()),
         'noticeOccurrencePages': page_count, 'referenceDocumentCount': len(references), 'referenceDocumentBytes': reference_bytes,

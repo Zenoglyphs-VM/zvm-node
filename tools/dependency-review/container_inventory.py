@@ -85,7 +85,7 @@ def main():
                 'runtimeAPKLicenseDeclarations': apk_licenses(declarations, packages),
                 'recipe': recipe if role == 'candidate' else {'path': CONTROL_RECIPE, 'sha256': CONTROL_RECIPE_SHA, 'sourceCommit': PARENT}}
             if role == 'candidate':
-                exported = run('notices', common + ['--entrypoint=/bin/sh', image['id'], '-euc', EXPORT_SCRIPT], MAX_EXPORT)
+                exported = run('notices', common + ['--entrypoint=/bin/sh', image['id'], '-euc', EXPORT_SCRIPT], MAX_EXPORT, timeout=90)
                 result['sourceNotices'] = summarize_export(exported, before, binary[0], expected_readme(),
                     lambda path, limit: file_bytes(Path(path), limit))
                 phase = 'apk-source-notice-consumer'

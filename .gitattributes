@@ -3,5 +3,5 @@
 * text=auto eol=lf
 
 # Preserve original upstream notice and reference document bytes.
-LICENSES/apk/objects/* -text
+LICENSES/apk/objects/** -text
 LICENSES/apk-references/* -text

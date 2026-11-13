@@ -32,8 +32,8 @@ root=/usr/share/doc/zvm-node/notices
 emit() {
   kind=$1; key=$2; file=$3
   test -f "$file" && test ! -L "$file"
-  links=$(/bin/busybox stat -c %h "$file")
-  size=$(/bin/busybox stat -c %s "$file")
+  set -- $(/bin/busybox stat -c '%s %h' "$file")
+  size=$1; links=$2
   test "$links" = 1
   printf '%s\t%s\t%s\t%s\t' "$kind" "$key" "$size" "$links"
   /bin/busybox base64 "$file" | /bin/busybox tr -d '\n'
