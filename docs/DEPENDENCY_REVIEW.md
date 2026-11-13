@@ -190,3 +190,39 @@ that exact head, run/attempt, archive digest and complete streams. Existing Core
 results and earlier Node native/container results are historical evidence for
 their original source; they are not fresh qualification of this workflow or its
 findings.
+
+## Temporary op-geth library migration preparation
+
+The reviewed v1.101702.3 library candidate selects STUN v3.1.5 and DTLS v3.1.4.
+Its source delta also changes Engine fields, optional header RLP, PostExec hashes,
+receipts and Interop/Lagoon naming. This candidate therefore requires separate
+compatibility observations, rather than a version-only security claim. The
+upstream release supports library use and deprecates running its geth executable;
+this workflow does not run or distribute that executable.
+
+`Dependency migration preparation` keeps the ordinary Node locks and Core Gitlink
+unchanged until its outputs are inspected and adopted for fresh qualification.
+It verifies the original Node/Core source closure and exact SDK, then records a
+bounded malformed-attribute regression against the existing STUN v2 dependency.
+That negative control must fail with the intended parser panic and complete Go
+JSON; its failure remains explicit. The same control fixture is later run against
+the candidate STUN v3 dependency and must pass.
+
+A synthetic library control executable is compiled against each replacement with
+the same Go SDK and source. It compares both Core chain-321 genesis profiles,
+legacy/EIP-1559/deposit transaction encodings and hashes, and a legacy header.
+The old payload codec must accept the candidate payload without changing its
+existing fields. The additional null `targetGasLimit` key remains recorded.
+Slotful headers, Amsterdam, PostExec behavior, Lagoon activation and active Engine
+execution remain outside those compatibility claims. These controls do not
+activate any chain rule or qualify a real operator database.
+
+Only the reviewed op-geth replacement version may change. Original direct
+requirements, module identity, SDK and local Core replacement remain checked.
+Candidate locks, exact resolved versions, actual process exits/EOF, source/lock
+pins, synthetic observations and failures are retained for fourteen days. A
+900-second aggregate command budget and per-stream caps bound the preparation.
+Temporary binaries and source copies stay in a freshly owned hosted workspace
+outside the output archive; no executable is published. Full Node native/race,
+current source/graph and distribution/license qualification remain required after
+adoption. Original reports and failure evidence remain historical records.

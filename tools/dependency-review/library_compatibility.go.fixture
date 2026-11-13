@@ -1,0 +1,102 @@
+// Synthetic library compatibility controls; this is not an operator executable.
+package main
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"math/big"
+	"os"
+	"runtime"
+	"runtime/debug"
+
+	"github.com/Zenoglyphs-VM/zvm-core/l2"
+	"github.com/Zenoglyphs-VM/zvm-core/rollup"
+	"github.com/ethereum/go-ethereum/beacon/engine"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rlp"
+)
+
+func fail(err error) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
+}
+
+func main() {
+	if len(os.Args) == 3 && os.Args[1] == "decode-payload" {
+		raw, err := os.ReadFile(os.Args[2])
+		fail(err)
+		if len(raw) > 65536 {
+			os.Exit(2)
+		}
+		var payload engine.PayloadAttributes
+		fail(json.Unmarshal(raw, &payload))
+		fail(json.NewEncoder(os.Stdout).Encode(payload))
+		return
+	}
+	if len(os.Args) != 1 {
+		os.Exit(2)
+	}
+	genesis := map[string]any{}
+	for _, rules := range []string{"isthmus", "karst"} {
+		cfg := &rollup.Config{L2ChainID: 321, GasLimit: 30_000_000, EVM: rules, MinBaseFee: 1}
+		value, err := l2.BuildGenesis(cfg, 1_700_000_000)
+		fail(err)
+		block := value.ToBlock()
+		encoded, err := rlp.EncodeToBytes(block.Header())
+		fail(err)
+		config, err := json.Marshal(value.Config)
+		fail(err)
+		genesis[rules] = map[string]any{"blockHash": block.Hash().Hex(), "stateRoot": block.Root().Hex(),
+			"headerRLP": hex.EncodeToString(encoded), "chainConfig": json.RawMessage(config)}
+	}
+	to := common.HexToAddress("0x1111111111111111111111111111111111111111")
+	transactions := []*types.Transaction{
+		types.NewTx(&types.LegacyTx{Nonce: 1, GasPrice: big.NewInt(2), Gas: 21_000, To: &to, Value: big.NewInt(3)}),
+		types.NewTx(&types.DynamicFeeTx{ChainID: big.NewInt(321), Nonce: 4, GasTipCap: big.NewInt(2),
+			GasFeeCap: big.NewInt(10), Gas: 26_000, To: &to, Value: big.NewInt(5), Data: []byte{1, 2}}),
+		types.NewTx(&types.DepositTx{SourceHash: common.HexToHash("0x42"), From: to, To: &to,
+			Mint: big.NewInt(9), Value: big.NewInt(4), Gas: 50_000, Data: []byte{3, 4}}),
+	}
+	txVectors := make([]map[string]string, len(transactions))
+	for i, tx := range transactions {
+		encoded, err := tx.MarshalBinary()
+		fail(err)
+		txVectors[i] = map[string]string{"hash": tx.Hash().Hex(), "encoding": hex.EncodeToString(encoded)}
+	}
+	header := &types.Header{Number: big.NewInt(1), Difficulty: big.NewInt(0), GasLimit: 30_000_000,
+		GasUsed: 21_000, Time: 1_700_000_001, BaseFee: big.NewInt(10), Root: common.HexToHash("0x1234")}
+	headerRLP, err := rlp.EncodeToBytes(header)
+	fail(err)
+	legacyHeader := map[string]string{"hash": header.Hash().Hex(), "encoding": hex.EncodeToString(headerRLP)}
+	slot := uint64(1)
+	header.SlotNumber = &slot
+	slotRLP, err := rlp.EncodeToBytes(header)
+	fail(err)
+	beaconRoot := common.HexToHash("0x1234")
+	gasLimit := uint64(30_000_000)
+	payload := &engine.PayloadAttributes{Timestamp: 1_700_000_001, Random: common.HexToHash("0x88"),
+		SuggestedFeeRecipient: to, Withdrawals: []*types.Withdrawal{}, BeaconRoot: &beaconRoot,
+		Transactions: [][]byte{}, NoTxPool: true, GasLimit: &gasLimit, EIP1559Params: make([]byte, 8)}
+	payloadJSON, err := json.Marshal(payload)
+	fail(err)
+	version := ""
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, module := range info.Deps {
+			if module.Path == "github.com/ethereum/go-ethereum" && module.Replace != nil {
+				version = module.Replace.Version
+			}
+		}
+	}
+	if version == "" {
+		fail(fmt.Errorf("missing embedded replacement version"))
+	}
+	fail(json.NewEncoder(os.Stdout).Encode(map[string]any{"schema": 1, "SDK": runtime.Version(),
+		"effectiveOpGethVersion": version, "genesis": genesis, "transactions": txVectors,
+		"legacyHeader": legacyHeader, "slotfulHeader": map[string]string{"hash": header.Hash().Hex(),
+			"encoding": hex.EncodeToString(slotRLP)}, "payload": json.RawMessage(payloadJSON),
+		"scope": "Synthetic chain-321 genesis, legacy/EIP-1559/deposit encodings and payload codec; no engine, signing, live state or activation"}))
+}

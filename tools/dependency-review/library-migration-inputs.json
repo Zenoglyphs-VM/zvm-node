@@ -1,0 +1,24 @@
+{
+  "candidateReplacement": "v1.101702.3",
+  "candidateUpstreamSourceCommit": "7da4560d1fb3045286b70a8dc23360d2626543f2",
+  "fixtures": {
+    "library_compatibility.go.fixture": {
+      "bytes": 3979,
+      "sha256": "a44657e786c8357d1b42b40dee6f3560ead1e2689494b69346e57d747516a7d8"
+    },
+    "stun_parser_test.go.fixture": {
+      "bytes": 773,
+      "sha256": "16df726facf888568dad63490615124e9d2d05ec7386f1391ce63db587099aec"
+    }
+  },
+  "goModSha256": "672255368e94ff1a0d73abab6aed8c96ec265f0bd71832008c01d3e25db75db3",
+  "goSumSha256": "8d2a2daf60d3a5edabb3781bb09db7e7e86e4953d5f2c81cc34e3b03dd87250f",
+  "goVersion": "go1.26.11",
+  "oldReplacement": "v1.101702.2",
+  "oldUpstreamSourceCommit": "e8800cffe53d459cde8a07c8e8f1de9d86e79e07",
+  "requiredResolved": {
+    "github.com/pion/dtls/v3": "v3.1.4",
+    "github.com/pion/stun/v3": "v3.1.5"
+  },
+  "schema": 1
+}

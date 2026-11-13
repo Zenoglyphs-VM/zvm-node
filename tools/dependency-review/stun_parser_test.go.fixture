@@ -1,0 +1,29 @@
+// The same bounded malformed-input controls are run against old and new STUN majors.
+package dependencyreview
+
+import (
+	"testing"
+
+	"github.com/pion/stun/v3"
+)
+
+func TestSTUNXORMappedAddressRejectsShortInput(t *testing.T) {
+	for _, length := range []int{0, 1, 2, 3} {
+		t.Run(string(rune('0'+length)), func(t *testing.T) {
+			defer func() {
+				if recovered := recover(); recovered != nil {
+					t.Errorf("short attribute caused a panic: %v", recovered)
+				}
+			}()
+			message, err := stun.Build(stun.BindingRequest)
+			if err != nil {
+				t.Fatal(err)
+			}
+			message.Add(stun.AttrXORMappedAddress, make([]byte, length))
+			var address stun.XORMappedAddress
+			if err := address.GetFrom(message); err == nil {
+				t.Fatal("short attribute was accepted")
+			}
+		})
+	}
+}
