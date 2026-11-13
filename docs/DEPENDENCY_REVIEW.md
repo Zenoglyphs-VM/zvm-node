@@ -164,6 +164,28 @@ link, traversal, size, count and aggregate limits bound the collection. Selected
 source and embedded files are recorded separately; ignored build profiles and
 compiler intermediates are outside this inventory.
 
+Manifest schema 2 also supports explicit source supplements for notices absent
+from a selected module archive. The checked-in
+[`notice-supplements.json`](../tools/noticebundle/notice-supplements.json) binds
+each original notice to a versioned nominal/effective module identity, upstream
+commit/blob IDs, every selected source/embedded-file hash and the module's
+`go.mod` bytes. Changed identities, source sets, content or provenance records
+stop collection. The consumer independently matches the registry and notice
+bytes to the exact Node checkout and compares the supplement's source pins with
+the observed selected inputs. No network lookup is added to the image build.
+
+The initial supplement preserves `MIT-LICENSE.txt` from
+[`holiman/bloomfilter@cb834897ed3b94c6a6fb37ec57bc7cdd651c6c32`](https://github.com/holiman/bloomfilter/blob/cb834897ed3b94c6a6fb37ec57bc7cdd651c6c32/MIT-LICENSE.txt).
+Its eight selected `v2` source files match `github.com/holiman/bloomfilter/v2@v2.0.3`.
+The license is at the upstream repository root, outside that module directory;
+Go's special parent-license copying rule names `LICENSE`. The collector also
+recognizes prefixed names such as `MIT-LICENSE.txt` and `UNLICENSE` where present.
+Upstream attribution is retained byte for byte. The supplement records selected
+source equality and provider-supplied origin references; it does not authenticate
+the provider, cover all upstream source or establish legal approval. Historical
+schema-1 packets retain their original evidence and require their original
+consumer rather than being relabelled as schema 2.
+
 CI reads the packet from the immutable local image without network access,
 privileges or host mounts. A framed stream carries each payload once; no tar or
 second extracted packet is created. The consumer rehashes every object, matches

@@ -2,6 +2,7 @@
 
 import base64
 import copy
+import hashlib
 import json
 import unittest
 
@@ -47,7 +48,7 @@ def fixture():
         'stdout': {'bytesCaptured': 1, 'sha256': sha(b'x'), 'limit': 8 << 20, 'truncated': False},
         'stderr': {'bytesCaptured': 0, 'sha256': sha(b''), 'limit': 256 << 10, 'truncated': False}}
         for label in ('profile', 'verify_before', 'selected_packages', 'verify_after')]
-    manifest = {'schema': 1, 'status': 'SOURCE_NOTICE_BUNDLE_RECORDED_REVIEW_REQUIRED', 'entryPackage': notice.ROOT + '/cmd/zvm-node',
+    manifest = {'schema': 2, 'status': 'SOURCE_NOTICE_BUNDLE_RECORDED_REVIEW_REQUIRED', 'entryPackage': notice.ROOT + '/cmd/zvm-node',
         'profile': {'GOVERSION': 'go1.26.11', 'GOOS': 'linux', 'GOARCH': 'amd64', 'CGO_ENABLED': '0'},
         'callerSourceCommit': source['root']['commit'], 'callerCoreCommit': source['core']['commit'], 'sourceCommitAuthenticated': False,
         'rootLockSha256': {'go.mod': 'a' * 64, 'go.sum': 'b' * 64}, 'coreLockSha256': {'go.mod': 'c' * 64, 'go.sum': 'd' * 64},
@@ -68,6 +69,51 @@ def encode(manifest, objects, *, readme=README):
     lines += [line('O', key, raw) for key, raw in sorted(objects.items())]
     lines.append(b'END\t' + str(len(objects)).encode())
     return b'\n'.join(lines) + b'\n'
+
+
+def upstream_pin(raw):
+    return {'bytes': len(raw), 'sha256': sha(raw),
+        'gitBlob': hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest()}
+
+
+def supplement_fixture():
+    values = fixture(); manifest, objects, _, files = values
+    module = 'example.org/library'
+    identity = {'path': module, 'version': 'v1.2.3', 'effectivePath': module, 'effectiveVersion': 'v1.2.3', 'main': False}
+    text = b'Copyright Public Upstream Authors\nOriginal upstream notice\n'
+    retained = 'tools/noticebundle/supplements/fixture/MIT-LICENSE.txt'
+    source = b'package library\n'
+    entry = {'module': copy.deepcopy(identity), 'repository': 'https://github.com/example/library', 'commit': '3' * 40,
+        'moduleSubdirectory': 'v2', 'moduleGoMod': upstream_pin(b'module example.org/library\n\ngo 1.18\n'),
+        'selectedFiles': {'library.go': upstream_pin(source), 'empty.dat': upstream_pin(b'')},
+        'notice': {'path': 'MIT-LICENSE.txt', 'sourcePath': retained, **upstream_pin(text)},
+        'status': notice.SUPPLEMENT_STATUS, 'legalReviewComplete': False,
+        'independentOriginAuthenticated': False, 'completeSourceCoverage': False}
+    files[retained] = text
+    files[notice.REGISTRY_PATH] = json.dumps({'schema': 1, 'entries': [entry]}, sort_keys=True).encode()
+    origin = {'registryPath': notice.REGISTRY_PATH, 'registrySha256': sha(files[notice.REGISTRY_PATH]), 'entry': entry}
+    pin = {'path': 'MIT-LICENSE.txt', 'bytes': len(text), 'sha256': sha(text),
+        'selectionScope': 'PINNED_UPSTREAM_SUPPLEMENT', 'upstreamSupplement': origin}
+    manifest['modules'].append({'identity': identity, 'notices': [pin], 'reviewRequired': True, 'noCandidateNoticeFileObserved': False})
+    manifest['modules'].sort(key=lambda row: row['identity']['path'])
+    files_pin = lambda path, raw, group: {'path': path, 'bytes': len(raw), 'sha256': sha(raw),
+        'spdxIdentifiersObserved': [], 'selectionGroup': group}
+    manifest['packages'].append({'path': module, 'module': module,
+        'selectedSourceFiles': [files_pin('library.go', source, 'GoFiles')],
+        'embeddedFiles': [files_pin('empty.dat', b'', 'EmbedFiles')]})
+    manifest['packages'].sort(key=lambda row: row['path'])
+    objects[sha(text)] = text; manifest['objects'][sha(text)] = len(text)
+    return values
+
+
+def supplement_origin(values):
+    return next(row for row in values[0]['modules'] if row['identity']['path'] == 'example.org/library')['notices'][0]['upstreamSupplement']
+
+
+def sync_registry(values):
+    origin = supplement_origin(values)
+    raw = json.dumps({'schema': 1, 'entries': [origin['entry']]}, sort_keys=True).encode()
+    values[3][notice.REGISTRY_PATH] = raw; origin['registrySha256'] = sha(raw)
 
 
 class NoticeInventoryTests(unittest.TestCase):
@@ -177,6 +223,69 @@ class NoticeInventoryTests(unittest.TestCase):
         values = fixture(); values[0]['modules'].append(copy.deepcopy(values[0]['modules'][0])); self.reject(values)
         values = fixture(); values[0]['packages'].append(copy.deepcopy(values[0]['packages'][0])); self.reject(values)
         values = fixture(); extra = b'extra'; values[1][sha(extra)] = extra; values[0]['objects'][sha(extra)] = len(extra); self.reject(values)
+
+    def test_historical_manifest_schema_is_not_relabelled(self):
+        values = fixture(); values[0]['schema'] = 1; self.reject(values)
+
+    def test_upstream_supplement_binds_registry_notice_and_selected_files(self):
+        result = self.check(supplement_fixture())
+        self.assertEqual(result['upstreamSourceSupplementCount'], 1)
+        self.assertEqual(result['upstreamSourceSupplementModules'], ['example.org/library'])
+        self.assertEqual(result['modulesWithOnlySupplementalNoticeFiles'], ['example.org/library'])
+        self.assertEqual(result['checkoutFilesIndependentlyMatched'], 9)
+        self.assertFalse(result['legalReviewComplete'])
+
+    def test_supplement_registry_and_entry_cannot_be_substituted(self):
+        for change in ('registry_digest', 'revision', 'module_version', 'registry_path', 'duplicate'):
+            values = supplement_fixture(); origin = supplement_origin(values)
+            if change == 'registry_digest': origin['registrySha256'] = 'a' * 64
+            elif change == 'revision': origin['entry']['commit'] = '4' * 40
+            elif change == 'module_version': origin['entry']['module']['version'] = 'v1.2.4'; sync_registry(values)
+            elif change == 'registry_path': origin['registryPath'] = 'other.json'
+            else:
+                entry = origin['entry']; raw = json.dumps({'schema': 1, 'entries': [entry, entry]}).encode()
+                values[3][notice.REGISTRY_PATH] = raw; origin['registrySha256'] = sha(raw)
+            self.reject(values)
+
+    def test_supplement_requires_exact_source_set_hashes_and_empty_embeds(self):
+        for change in ('missing_file', 'extra_file', 'digest', 'bytes', 'blob'):
+            values = supplement_fixture(); entry = supplement_origin(values)['entry']
+            if change == 'missing_file': del entry['selectedFiles']['empty.dat']
+            elif change == 'extra_file': entry['selectedFiles']['other.go'] = upstream_pin(b'package other\n')
+            elif change == 'digest': entry['selectedFiles']['library.go']['sha256'] = 'a' * 64
+            elif change == 'bytes': entry['selectedFiles']['empty.dat']['bytes'] = 1
+            else: entry['selectedFiles']['library.go']['gitBlob'] = 'invalid'
+            sync_registry(values); self.reject(values)
+
+    def test_supplement_legal_origin_and_completeness_flags_stay_false(self):
+        for field in ('legalReviewComplete', 'independentOriginAuthenticated', 'completeSourceCoverage'):
+            values = supplement_fixture(); supplement_origin(values)['entry'][field] = True
+            sync_registry(values); self.reject(values)
+        values = supplement_fixture(); del supplement_origin(values)['entry']['legalReviewComplete']
+        sync_registry(values); self.reject(values)
+
+    def test_supplement_rewritten_notice_and_blob_are_refused(self):
+        values = supplement_fixture(); entry = supplement_origin(values)['entry']; values[3][entry['notice']['sourcePath']] = b'changed'; self.reject(values)
+        values = supplement_fixture(); entry = supplement_origin(values)['entry']; entry['notice']['gitBlob'] = 'a' * 40; sync_registry(values); self.reject(values)
+
+    def test_supplement_scope_requires_origin_on_the_same_notice(self):
+        values = supplement_fixture()
+        row = next(row for row in values[0]['modules'] if row['identity']['path'] == 'example.org/library')['notices'][0]
+        del row['upstreamSupplement']; self.reject(values)
+        values = supplement_fixture()
+        next(row for row in values[0]['modules'] if row['identity']['path'] == 'example.org/library')['notices'][0]['selectionScope'] = 'SELECTED_PACKAGE_ANCESTOR'
+        self.reject(values)
+
+    def test_supplement_rejects_private_paths_unpinned_origins_and_extra_fields(self):
+        for change in ('source_path', 'repository', 'commit', 'subdirectory', 'unknown_field', 'schema'):
+            values = supplement_fixture(); entry = supplement_origin(values)['entry']
+            if change == 'source_path': entry['notice']['sourcePath'] = '../outside'
+            elif change == 'repository': entry['repository'] = 'https://example.invalid/private'
+            elif change == 'commit': entry['commit'] = 'main'
+            elif change == 'subdirectory': entry['moduleSubdirectory'] = '../outside'
+            elif change == 'unknown_field': entry['extra'] = True
+            else: values[0]['schema'] = 3
+            sync_registry(values); self.reject(values)
 
 
 APK = b'ZVM-APK-LICENSES-1\nP:fixture\nV:1.0-r0\nA:x86_64\nC:Q1' + b'a' * 27 + b'\nL:MIT\no:fixture\n\nEND\t1\n'

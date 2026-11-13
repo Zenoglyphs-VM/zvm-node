@@ -298,7 +298,7 @@ func TestNewOutputNeverOverwritesAnExistingFile(t *testing.T) {
 }
 
 func TestGoSourcesUseCanonicalFormatting(t *testing.T) {
-	for _, name := range []string{"main.go", "model.go", "collect.go", "bundle_test.go"} {
+	for _, name := range []string{"main.go", "model.go", "collect.go", "supplements.go", "bundle_test.go"} {
 		raw, err := os.ReadFile(name)
 		if err != nil {
 			t.Fatal(err)
@@ -307,5 +307,176 @@ func TestGoSourcesUseCanonicalFormatting(t *testing.T) {
 		if err != nil || !bytes.Equal(raw, formatted) {
 			t.Fatalf("Go source formatting differs: %s", name)
 		}
+	}
+}
+
+func TestPrefixedAndUnlicenseNoticeNamesAreSelected(t *testing.T) {
+	for _, name := range []string{"MIT-LICENSE.txt", "BSD-3-Clause-LICENSE", "UNLICENSE", "LICENSE", "COPYING.LESSER", "NOTICE.md"} {
+		if !noticeFile.MatchString(name) {
+			t.Fatal("notice name not selected", name)
+		}
+	}
+	for _, name := range []string{"main.go", "noticeable.go", "licensedata.go", "README.md"} {
+		if noticeFile.MatchString(name) {
+			t.Fatal("unrelated file selected", name)
+		}
+	}
+}
+
+func falseFlag() *bool { value := false; return &value }
+
+func pinnedSource(raw string) upstreamPin {
+	return upstreamPin{Bytes: int64(len(raw)), SHA256: hash([]byte(raw)), GitBlob: gitBlob([]byte(raw))}
+}
+
+func supplementFixture(t *testing.T) (*collector, string, supplement) {
+	t.Helper()
+	project, root := t.TempDir(), t.TempDir()
+	identity := moduleIdentity{Path: "example.org/library", Version: "v1.2.3", EffectivePath: "example.org/library", EffectiveVersion: "v1.2.3"}
+	module := "module example.org/library\n\ngo 1.18\n"
+	source, notice := "package library\n", "Copyright Public Fixture Authors\nOriginal notice\n"
+	retained := "tools/noticebundle/supplements/fixture/MIT-LICENSE.txt"
+	put(t, filepath.Join(root, "go.mod"), module)
+	put(t, filepath.Join(root, "library.go"), source)
+	put(t, filepath.Join(root, "empty.dat"), "")
+	put(t, filepath.Join(project, retained), notice)
+	c := newCollector()
+	c.modules[identity.Path] = &moduleObservation{Identity: identity, Notices: []noticePin{}, ReviewRequired: true}
+	c.moduleRoots[identity.Path] = root
+	for name, group := range map[string]string{"library.go": "GoFiles", "empty.dat": "EmbedFiles"} {
+		if _, err := c.pinFile(identity.Path, root, filepath.Join(root, name), group); err != nil {
+			t.Fatal(err)
+		}
+	}
+	entry := supplement{Module: identity, Repository: "https://github.com/example/library", Commit: strings.Repeat("3", 40), ModuleSubdirectory: "v2",
+		ModuleGoMod: pinnedSource(module), SelectedFiles: map[string]upstreamPin{"library.go": pinnedSource(source), "empty.dat": pinnedSource("")},
+		Notice: upstreamNotice{Path: "MIT-LICENSE.txt", SourcePath: retained, upstreamPin: pinnedSource(notice)}, Status: supplementStatus,
+		LegalReviewComplete: falseFlag(), IndependentOriginAuthenticated: falseFlag(), CompleteSourceCoverage: falseFlag()}
+	return c, project, entry
+}
+
+func registryBytes(t *testing.T, entries ...supplement) []byte {
+	t.Helper()
+	raw, err := json.Marshal(struct {
+		Schema  int          `json:"schema"`
+		Entries []supplement `json:"entries"`
+	}{1, entries})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return raw
+}
+
+func TestPinnedSupplementBindsSelectedBytesAndPreservesNotice(t *testing.T) {
+	c, project, entry := supplementFixture(t)
+	raw := registryBytes(t, entry)
+	if err := c.supplements(project, raw); err != nil {
+		t.Fatal(err)
+	}
+	rows := c.modules[entry.Module.Path].Notices
+	if len(rows) != 1 || rows[0].Scope != supplementScope || rows[0].Origin == nil ||
+		rows[0].Origin.RegistrySHA256 != hash(raw) || rows[0].Origin.Entry.Commit != entry.Commit ||
+		gitBlob(c.objects[rows[0].SHA256]) != entry.Notice.GitBlob || *rows[0].Origin.Entry.LegalReviewComplete {
+		t.Fatal("supplement attribution or binding differs")
+	}
+}
+
+func TestSupplementRefusesModuleSourceAndMetadataDrift(t *testing.T) {
+	for _, change := range []string{"version", "source_digest", "source_blob", "source_set", "source_disk", "go_mod"} {
+		t.Run(change, func(t *testing.T) {
+			c, project, entry := supplementFixture(t)
+			switch change {
+			case "version":
+				entry.Module.Version = "v1.2.4"
+			case "source_digest":
+				pin := entry.SelectedFiles["library.go"]
+				pin.SHA256 = strings.Repeat("a", 64)
+				entry.SelectedFiles["library.go"] = pin
+			case "source_blob":
+				pin := entry.SelectedFiles["library.go"]
+				pin.GitBlob = strings.Repeat("a", 40)
+				entry.SelectedFiles["library.go"] = pin
+			case "source_set":
+				delete(entry.SelectedFiles, "empty.dat")
+			case "source_disk":
+				put(t, filepath.Join(c.moduleRoots[entry.Module.Path], "library.go"), "package changed\n")
+			case "go_mod":
+				entry.ModuleGoMod = pinnedSource("module example.org/other\n")
+			}
+			if c.supplements(project, registryBytes(t, entry)) == nil {
+				t.Fatal("stale source supplement accepted")
+			}
+		})
+	}
+}
+
+func TestSupplementRefusesChangedLinkedAndConflictingNotice(t *testing.T) {
+	for _, change := range []string{"contents", "symlink", "path_collision"} {
+		t.Run(change, func(t *testing.T) {
+			c, project, entry := supplementFixture(t)
+			name := filepath.Join(project, entry.Notice.SourcePath)
+			switch change {
+			case "contents":
+				put(t, name, "rewritten notice\n")
+			case "symlink":
+				if err := os.Remove(name); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink(filepath.Join(project, "absent"), name); err != nil {
+					t.Fatal(err)
+				}
+			case "path_collision":
+				c.modules[entry.Module.Path].Notices = []noticePin{{Path: entry.Notice.Path}}
+			}
+			if c.supplements(project, registryBytes(t, entry)) == nil {
+				t.Fatal("ambiguous notice supplement accepted")
+			}
+		})
+	}
+}
+
+func TestSupplementRegistryRejectsOverstatedAndUnpinnedEntries(t *testing.T) {
+	for _, change := range []string{"legal", "origin", "coverage", "missing_flag", "commit", "repository", "source_path", "upstream_path", "duplicate"} {
+		t.Run(change, func(t *testing.T) {
+			c, project, entry := supplementFixture(t)
+			switch change {
+			case "legal":
+				*entry.LegalReviewComplete = true
+			case "origin":
+				*entry.IndependentOriginAuthenticated = true
+			case "coverage":
+				*entry.CompleteSourceCoverage = true
+			case "missing_flag":
+				entry.LegalReviewComplete = nil
+			case "commit":
+				entry.Commit = "main"
+			case "repository":
+				entry.Repository = "https://example.invalid/private"
+			case "source_path":
+				entry.Notice.SourcePath = "../outside"
+			case "upstream_path":
+				entry.Notice.Path = "/fixture/private"
+			}
+			entries := []supplement{entry}
+			if change == "duplicate" {
+				entries = append(entries, entry)
+			}
+			if c.supplements(project, registryBytes(t, entries...)) == nil {
+				t.Fatal("invalid source supplement accepted")
+			}
+		})
+	}
+	for _, raw := range []string{`{"schema":1,"entries":[] ,"extra":true}`, `{"schema":1,"schema":1,"entries":[]}`, `{"schema":1,"entries":null}`} {
+		if newCollector().supplements(t.TempDir(), []byte(raw)) == nil {
+			t.Fatal("malformed registry accepted")
+		}
+	}
+}
+
+func TestUnselectedSupplementDoesNotCopyItsNotice(t *testing.T) {
+	c, project, entry := supplementFixture(t)
+	delete(c.modules, entry.Module.Path)
+	if err := c.supplements(project, registryBytes(t, entry)); err != nil || len(c.objects) != 0 {
+		t.Fatal("unselected notice copied", err)
 	}
 }

@@ -38,7 +38,7 @@ var (
 	publicPath = regexp.MustCompile(`^[A-Za-z0-9._~!+/-]+$`)
 	version    = regexp.MustCompile(`^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$`)
 	digest40   = regexp.MustCompile(`^[0-9a-f]{40}$`)
-	noticeFile = regexp.MustCompile(`(?i)^(licen[cs]es?|copying|notice|copyright|authors|contributors|patents|legal)(?:[._-].*)?$`)
+	noticeFile = regexp.MustCompile(`(?i)^(?:[a-z0-9.+_-]+[-_.])?(licen[cs]es?|copying|notice|copyright|authors|contributors|patents|legal|unlicense)(?:[._-].*)?$`)
 	spdx       = regexp.MustCompile(`(?m)SPDX-License-Identifier:\s*([A-Za-z0-9.+() -]+)`)
 )
 
@@ -84,10 +84,11 @@ type filePin struct {
 }
 
 type noticePin struct {
-	Path   string `json:"path"`
-	Bytes  int64  `json:"bytes"`
-	SHA256 string `json:"sha256"`
-	Scope  string `json:"selectionScope"`
+	Path   string            `json:"path"`
+	Bytes  int64             `json:"bytes"`
+	SHA256 string            `json:"sha256"`
+	Scope  string            `json:"selectionScope"`
+	Origin *supplementOrigin `json:"upstreamSupplement,omitempty"`
 }
 
 type moduleObservation struct {

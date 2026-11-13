@@ -22,6 +22,11 @@ mention copyright or licensing; their selection is a mechanical observation.
 Package ancestor notices and module notice directories can include material
 beyond this build. A missing candidate is unresolved, not an exemption.
 
+Versioned source supplements retain upstream notice text from outside a module
+archive. Each supplement binds the exact selected module, source-file and go.mod
+bytes, upstream commit/blob identifiers and the checked-in notice/registry bytes.
+Those observations do not authenticate the upstream provider or approve a license.
+
 This packet does not establish complete license obligations, classification,
 compatibility, corresponding-source or relinking requirements, runtime APK
 notice texts, compiler-intermediate coverage, independent input origin or legal
@@ -31,7 +36,7 @@ checked source and image. No host/cache paths or raw Go metadata are exported.
 `
 
 func collectBundle(output, binary, sourceCommit, coreCommit string) (manifest, error) {
-	result := manifest{Schema: 1, Status: "SOURCE_NOTICE_BUNDLE_FAILED_OR_INCOMPLETE", Entry: rootModule + "/cmd/zvm-node",
+	result := manifest{Schema: 2, Status: "SOURCE_NOTICE_BUNDLE_FAILED_OR_INCOMPLETE", Entry: rootModule + "/cmd/zvm-node",
 		RootLocks: map[string]string{}, CoreLocks: map[string]string{}, Objects: map[string]int{}, Commands: []commandPin{},
 		Modules: []moduleObservation{}, Packages: []packageObservation{},
 		CorrespondingSourceOrRelinkingReview: "NOT_ASSESSED", APKLicenseTextReview: "NOT_ASSESSED",
@@ -114,6 +119,13 @@ func collectBundle(output, binary, sourceCommit, coreCommit string) (manifest, e
 	}
 	if err := c.notice("std", privateProfile["GOROOT"], filepath.Join(privateProfile["GOROOT"], "LICENSE"), "REQUIRED_SDK_NOTICE"); err != nil {
 		return result, safeError("required_sdk_notice")
+	}
+	registry, err := readRegular(project, filepath.Join(project, supplementRegistryPath), 1<<20)
+	if err != nil {
+		return result, safeError("source_supplement_registry")
+	}
+	if err := c.supplements(project, registry); err != nil {
+		return result, safeError("source_supplement_binding")
 	}
 	result.BinarySHA256, result.BinaryBytes, err = readBinary(binary, result.Profile, c.modules)
 	if err != nil {

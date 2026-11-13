@@ -1,6 +1,7 @@
 """Check one runtime image's source-notice packet without legal approval."""
 
 import base64
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -17,8 +18,11 @@ MAX_MANIFEST = 8 << 20
 MAX_PAYLOAD = 8 << 20
 MAX_EXPORT = 24 << 20
 GROUPS = {'GoFiles', 'CgoFiles', 'CFiles', 'CXXFiles', 'MFiles', 'HFiles', 'FFiles', 'SFiles', 'SwigFiles', 'SwigCXXFiles', 'SysoFiles'}
-SCOPES = {'SELECTED_PACKAGE_ANCESTOR', 'MODULE_NOTICE_DIRECTORY', 'REQUIRED_PROJECT_NOTICE', 'REQUIRED_SDK_NOTICE'}
+SCOPES = {'SELECTED_PACKAGE_ANCESTOR', 'MODULE_NOTICE_DIRECTORY', 'REQUIRED_PROJECT_NOTICE', 'REQUIRED_SDK_NOTICE', 'PINNED_UPSTREAM_SUPPLEMENT'}
 SOURCE_SCOPE = 'Selected non-test CLI source inputs and embedded files; compiler intermediates are not exported.'
+REGISTRY_PATH = 'tools/noticebundle/notice-supplements.json'
+SUPPLEMENT_STATUS = 'UPSTREAM_SOURCE_BYTES_MATCHED_REVIEW_REQUIRED'
+NOTICE_FILE = re.compile(r'(?:[a-z0-9.+_-]+[-_.])?(licen[cs]es?|copying|notice|copyright|authors|contributors|patents|legal|unlicense)(?:[._-].*)?', re.I)
 
 # Only fixed image paths and digest-named payloads are read. No tar extraction,
 # host bind mount, service, network or additional image publication is involved.
@@ -118,6 +122,60 @@ def expected_readme():
     return values[0]
 
 
+def upstream_pin(value, limit, *, minimum=0):
+    fields(value, ('bytes', 'sha256', 'gitBlob'))
+    integer(value['bytes'], minimum, limit); digest(value['sha256'])
+    require(isinstance(value['gitBlob'], str) and re.fullmatch(r'[0-9a-f]{40}', value['gitBlob']), 'invalid upstream Git blob identifier')
+
+
+def supplement_entry(entry):
+    fields(entry, ('module', 'repository', 'commit', 'moduleSubdirectory', 'moduleGoMod', 'selectedFiles', 'notice',
+        'status', 'legalReviewComplete', 'independentOriginAuthenticated', 'completeSourceCoverage'))
+    identity = entry['module']; fields(identity, ('path', 'version', 'effectivePath', 'effectiveVersion', 'main'))
+    require(public_path(identity['path']) and public_path(identity['effectivePath']) and identity['main'] is False
+        and identity['path'] not in (ROOT, CORE, 'std') and isinstance(identity['version'], str)
+        and VERSION.fullmatch(identity['version']) and isinstance(identity['effectiveVersion'], str)
+        and VERSION.fullmatch(identity['effectiveVersion']), 'supplement module is not versioned')
+    require(isinstance(entry['repository'], str) and re.fullmatch(r'https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', entry['repository']), 'unsafe upstream repository reference')
+    require(isinstance(entry['commit'], str) and re.fullmatch(r'[0-9a-f]{40}', entry['commit']), 'unpinned supplement revision')
+    require(entry['moduleSubdirectory'] == '' or public_path(entry['moduleSubdirectory']), 'unsafe upstream module subdirectory')
+    require(entry['status'] == SUPPLEMENT_STATUS and all(entry[k] is False for k in
+        ('legalReviewComplete', 'independentOriginAuthenticated', 'completeSourceCoverage')), 'supplement overstates qualification')
+    upstream_pin(entry['moduleGoMod'], 65536, minimum=1)
+    selected = entry['selectedFiles']
+    require(isinstance(selected, dict) and 0 < len(selected) <= 4096, 'missing or oversized supplement source set')
+    for path, pin in selected.items():
+        require(public_path(path), 'unsafe supplemented source path'); upstream_pin(pin, 32 << 20)
+    require(sum(p['bytes'] for p in selected.values()) <= 256 << 20, 'supplement source budget exceeded')
+    notice = entry['notice']; fields(notice, ('path', 'sourcePath', 'bytes', 'sha256', 'gitBlob'))
+    upstream_pin({k: notice[k] for k in ('bytes', 'sha256', 'gitBlob')}, 128 << 10, minimum=1)
+    require(public_path(notice['path']) and NOTICE_FILE.fullmatch(notice['path'].split('/')[-1]), 'unsafe upstream notice reference')
+    require(public_path(notice['sourcePath']) and notice['sourcePath'].startswith('tools/noticebundle/supplements/'), 'unsafe checked-in supplement path')
+
+
+def upstream_supplement(origin, pin, identity, payload, read_source):
+    fields(origin, ('registryPath', 'registrySha256', 'entry'))
+    require(origin['registryPath'] == REGISTRY_PATH, 'unknown source supplement registry')
+    digest(origin['registrySha256'])
+    raw = read_source(REGISTRY_PATH, 1 << 20)
+    require(sha(raw) == origin['registrySha256'], 'supplement registry differs from checked source')
+    registry = checked_json(raw); fields(registry, ('schema', 'entries'))
+    require(type(registry['schema']) is int and registry['schema'] == 1, 'unknown supplement registry schema')
+    entries = records(registry['entries'], 64)
+    keys = []
+    for entry in entries:
+        supplement_entry(entry); keys.append((entry['module']['path'], entry['notice']['path']))
+    require(len(set(keys)) == len(keys), 'duplicate registry supplement')
+    entry = origin['entry']; supplement_entry(entry)
+    require(sum(row == entry for row in entries) == 1 and entry['module'] == identity, 'supplement identity differs from selected registry entry')
+    notice = entry['notice']
+    require(all(pin[k] == notice[k] for k in ('path', 'bytes', 'sha256')), 'notice does not match its upstream supplement')
+    retained = read_source(notice['sourcePath'], 128 << 10)
+    require(retained == payload and sha(retained) == notice['sha256'] and len(retained) == notice['bytes'], 'retained upstream notice was rewritten')
+    require(hashlib.sha1(b'blob ' + str(len(retained)).encode() + b'\0' + retained).hexdigest() == notice['gitBlob'], 'upstream notice Git blob differs')
+    return entry
+
+
 def summarize_export(raw, source, binary_sha, readme, read_source):
     payloads = decode_export(raw)
     require(payloads['README.txt'] == readme, 'review limitations readme differs from source')
@@ -126,7 +184,7 @@ def summarize_export(raw, source, binary_sha, readme, read_source):
         'rootLockSha256', 'coreLockSha256', 'binarySha256', 'binaryBytes', 'modules', 'packages', 'objects', 'commands',
         'privatePathsExported', 'legalReviewComplete', 'correspondingSourceOrRelinkingReview', 'runtimeAPKLicenseTextReview',
         'completeSBOM', 'releaseAccepted', 'binaryModuleIdentitiesMatched', 'sourceSelectionScope'))
-    require(type(value['schema']) is int and value['schema'] == 1 and value['status'] == 'SOURCE_NOTICE_BUNDLE_RECORDED_REVIEW_REQUIRED', 'unknown notice manifest status')
+    require(type(value['schema']) is int and value['schema'] == 2 and value['status'] == 'SOURCE_NOTICE_BUNDLE_RECORDED_REVIEW_REQUIRED', 'unknown notice manifest status')
     require(value['entryPackage'] == ROOT + '/cmd/zvm-node' and value['profile'] == {
         'GOVERSION': 'go1.26.11', 'GOOS': 'linux', 'GOARCH': 'amd64', 'CGO_ENABLED': '0'}, 'notice profile differs')
     require(value['callerSourceCommit'] == source['root']['commit'] and value['callerCoreCommit'] == source['core']['commit'], 'caller revisions differ from checked source')
@@ -151,7 +209,7 @@ def summarize_export(raw, source, binary_sha, readme, read_source):
             pin = command[name]; fields(pin, ('bytesCaptured', 'sha256', 'limit', 'truncated'))
             integer(pin['bytesCaptured'], 0, limit); digest(pin['sha256'])
             require(pin['limit'] == limit and pin['truncated'] is False, 'metadata stream cap or completeness differs')
-    modules, used_objects, checked_files = {}, set(), set()
+    modules, used_objects, checked_files, supplements = {}, set(), set(), []
 
     def checkout_file(module, relative, pin, notice_payload=None):
         if module not in (ROOT, CORE):
@@ -182,12 +240,17 @@ def summarize_export(raw, source, binary_sha, readme, read_source):
         require(module['noCandidateNoticeFileObserved'] == (not notices), 'missing notice accounting differs')
         paths = []
         for pin in notices:
-            fields(pin, ('path', 'bytes', 'sha256', 'selectionScope'))
+            fields(pin, {'path', 'bytes', 'sha256', 'selectionScope'} | ({'upstreamSupplement'} if 'upstreamSupplement' in pin else set()))
             require(public_path(pin['path']) and pin['selectionScope'] in SCOPES, 'unsafe notice reference')
             integer(pin['bytes'], 0, 128 << 10); digest(pin['sha256'])
             require(pin['sha256'] in objects and pin['bytes'] == objects[pin['sha256']], 'notice payload missing')
             used_objects.add(pin['sha256']); paths.append(pin['path'])
-            checkout_file(key, pin['path'], pin, payloads[pin['sha256']])
+            require(('upstreamSupplement' in pin) == (pin['selectionScope'] == 'PINNED_UPSTREAM_SUPPLEMENT'), 'supplement origin or scope is missing')
+            if 'upstreamSupplement' in pin:
+                entry = upstream_supplement(pin['upstreamSupplement'], pin, identity, payloads[pin['sha256']], read_source)
+                supplements.append(entry); checked_files.update((REGISTRY_PATH, entry['notice']['sourcePath']))
+            else:
+                checkout_file(key, pin['path'], pin, payloads[pin['sha256']])
         require(paths == sorted(set(paths)), 'notice paths duplicate or unordered')
         if key in (ROOT, CORE): require({'LICENSE', 'NOTICE.md'} <= set(paths), 'required project source notices missing')
         if key == 'std': require('LICENSE' in paths, 'SDK license missing')
@@ -229,7 +292,11 @@ def summarize_export(raw, source, binary_sha, readme, read_source):
             require(paths == sorted(set(paths)), 'source paths duplicate or unordered')
     require(package_names == sorted(set(package_names)) and ROOT + '/cmd/zvm-node' in package_names, 'runtime package set incomplete or duplicate')
     require(used_objects == set(objects), 'unreferenced notice payload exported')
-    return {'schema': 1, 'status': 'IMAGE_SOURCE_NOTICES_OBSERVED_REVIEW_REQUIRED',
+    for entry in supplements:
+        observed = {path: {'bytes': size, 'sha256': digest} for (module, path), (size, digest) in source_pins.items() if module == entry['module']['path']}
+        expected = {path: {k: pin[k] for k in ('bytes', 'sha256')} for path, pin in entry['selectedFiles'].items()}
+        require(observed == expected, 'upstream supplement does not match the exact selected file set')
+    return {'schema': 2, 'status': 'IMAGE_SOURCE_NOTICES_OBSERVED_REVIEW_REQUIRED',
         'manifestSha256': sha(payloads['manifest.json']), 'manifestBytes': len(payloads['manifest.json']),
         'readmeSha256': sha(readme), 'binarySha256': binary_sha, 'profile': value['profile'],
         'callerSourceCommit': value['callerSourceCommit'], 'callerCoreCommit': value['callerCoreCommit'],
@@ -238,6 +305,10 @@ def summarize_export(raw, source, binary_sha, readme, read_source):
         'selectedSourceFileCount': source_count, 'embeddedFiles': embedded,
         'modules': [modules[k] for k in sorted(modules)], 'noticeObjectCount': len(objects), 'noticePayloadBytes': sum(objects.values()),
         'modulesWithoutCandidateNoticeFiles': sorted(k for k, v in modules.items() if v['noCandidateNoticeFileObserved']),
+        'upstreamSourceSupplementCount': len(supplements),
+        'upstreamSourceSupplementModules': sorted({entry['module']['path'] for entry in supplements}),
+        'modulesWithOnlySupplementalNoticeFiles': sorted(k for k, v in modules.items() if v['notices'] and
+            all(p['selectionScope'] == 'PINNED_UPSTREAM_SUPPLEMENT' for p in v['notices'])),
         'checkoutFilesIndependentlyMatched': len(checked_files), 'metadataCommands': commands,
         'privatePathsExported': False, 'rawPrivateGoMetadataExported': False,
         'legalReviewComplete': False, 'completeSBOM': False, 'releaseAccepted': False}
