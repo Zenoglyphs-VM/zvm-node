@@ -31,7 +31,9 @@ FROM alpine:3.22.8@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b
 # gcompat: contract verification runs solc releases fetched from
 # soliditylang.org, and some of them (0.8.12 to 0.8.23 among others) are linked
 # against glibc rather than static.
-RUN apk add --no-cache ca-certificates=20261020-r0 wget=1.25.0-r1 gcompat=1.1.0-r4
+# BusyBox already provides wget for the local HTTP health commands. Compiler
+# downloads use Go's HTTP client; the GNU wget package is unnecessary here.
+RUN apk add --no-cache ca-certificates=20261020-r0 gcompat=1.1.0-r4
 # solcd runs as nobody and keeps its compiler cache in /solc; a named volume
 # mounted there inherits this ownership, so it can write.
 RUN mkdir -p /solc && chown 65534:65534 /solc

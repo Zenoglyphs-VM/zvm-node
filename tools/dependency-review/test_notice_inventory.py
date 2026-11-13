@@ -288,7 +288,7 @@ class NoticeInventoryTests(unittest.TestCase):
             sync_registry(values); self.reject(values)
 
 
-APK = b'ZVM-APK-LICENSES-1\nP:fixture\nV:1.0-r0\nA:x86_64\nC:Q1' + b'a' * 27 + b'\nL:MIT\no:fixture\n\nEND\t1\n'
+APK = b'ZVM-APK-LICENSES-2\nP:fixture\nV:1.0-r0\nA:x86_64\nC:Q1' + b'a' * 27 + b'\nL:MIT\no:fixture\nc:' + b'1' * 40 + b'\nI:4096\n\nEND\t1\n'
 
 
 class APKNoticeTests(unittest.TestCase):
@@ -296,6 +296,8 @@ class APKNoticeTests(unittest.TestCase):
         rows = notice.apk_licenses(APK, ['fixture-1.0-r0'])
         self.assertEqual(rows[0]['declaredLicense'], 'MIT')
         self.assertFalse(rows[0]['licenseTextOrLegalQualificationEstablished'])
+        self.assertEqual(rows[0]['declaredBuildCommit'], '1' * 40)
+        self.assertEqual(rows[0]['declaredInstalledBytes'], 4096)
 
     def test_missing_license_stays_unresolved(self):
         rows = notice.apk_licenses(APK.replace(b'L:MIT\n', b''), ['fixture-1.0-r0'])
@@ -307,6 +309,16 @@ class APKNoticeTests(unittest.TestCase):
 
     def test_unrequested_metadata_and_partial_records_are_refused(self):
         for raw in (APK + b'm:unrequested\n', APK[:-1], APK.replace(b'P:fixture\n', b'P:fixture\nP:other\n'), APK.replace(b'C:Q1' + b'a' * 27 + b'\n', b'')):
+            with self.assertRaises(ValueError): notice.apk_licenses(raw, ['fixture-1.0-r0'])
+
+    def test_missing_source_commit_stays_unknown_without_omitting_package(self):
+        raw = APK.replace(b'c:' + b'1' * 40 + b'\n', b'')
+        self.assertIsNone(notice.apk_licenses(raw, ['fixture-1.0-r0'])[0]['declaredBuildCommit'])
+
+    def test_invalid_commit_size_and_historical_framing_are_refused(self):
+        for raw in (APK.replace(b'c:' + b'1' * 40, b'c:main'), APK.replace(b'I:4096', b'I:-1'),
+            APK.replace(b'I:4096', b'I:04096'), APK.replace(b'I:4096\n', b''),
+            APK.replace(b'ZVM-APK-LICENSES-2', b'ZVM-APK-LICENSES-1')):
             with self.assertRaises(ValueError): notice.apk_licenses(raw, ['fixture-1.0-r0'])
 
 

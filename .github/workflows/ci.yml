@@ -80,6 +80,12 @@ jobs:
           timeout 720s docker build --progress=plain --tag zvm-node:ci \
             --build-arg NOTICE_SOURCE_COMMIT="$REVIEW_SOURCE_COMMIT" \
             --build-arg NOTICE_CORE_COMMIT="$(git rev-parse HEAD:zvm-core)" .
+      - name: Build the frozen parent recipe control with the same source
+        run: |
+          timeout 720s docker build --progress=plain --tag zvm-node:wget-control \
+            --file tools/dependency-review/fixtures/with-gnu-wget.Dockerfile \
+            --build-arg NOTICE_SOURCE_COMMIT="$REVIEW_SOURCE_COMMIT" \
+            --build-arg NOTICE_CORE_COMMIT="$(git rev-parse HEAD:zvm-core)" .
       - name: Exercise CLI usage without a service or network
         run: |
           python3 -B - <<'PY'

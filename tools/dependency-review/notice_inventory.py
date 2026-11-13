@@ -51,7 +51,7 @@ done
 printf 'END\t%s\n' "$count"
 '''
 
-APK_SCRIPT = r'''/bin/busybox awk 'BEGIN { print "ZVM-APK-LICENSES-1" } /^P:/ { count++ } /^[PVACLo]:/ { print } /^$/ { print "" } END { printf "END\t%d\n", count }' /lib/apk/db/installed'''
+APK_SCRIPT = r'''/bin/busybox awk 'BEGIN { print "ZVM-APK-LICENSES-2" } /^P:/ { count++ } /^[PVACLcoI]:/ { print } /^$/ { print "" } END { printf "END\t%d\n", count }' /lib/apk/db/installed'''
 
 
 def require(condition, message):
@@ -317,7 +317,7 @@ def summarize_export(raw, source, binary_sha, readme, read_source):
 def apk_licenses(raw, installed):
     require(isinstance(raw, bytes) and 0 < len(raw) <= 2 << 20 and raw.endswith(b'\n'), 'APK declaration output incomplete')
     lines = raw.decode('utf-8').splitlines()
-    require(lines and lines[0] == 'ZVM-APK-LICENSES-1' and re.fullmatch(r'END\t[1-9][0-9]{0,3}', lines[-1]), 'APK export framing incomplete')
+    require(lines and lines[0] == 'ZVM-APK-LICENSES-2' and re.fullmatch(r'END\t[1-9][0-9]{0,3}', lines[-1]), 'APK export framing incomplete')
     declared_count = int(lines[-1].split('\t')[1])
     rows = []
     for block in '\n'.join(lines[1:-1]).split('\n\n'):
@@ -325,15 +325,18 @@ def apk_licenses(raw, installed):
         record = {}
         for line in block.splitlines():
             key, separator, value = line.partition(':')
-            require(separator and key in {'P', 'V', 'A', 'C', 'L', 'o'} and key not in record and len(value) <= 4096, 'APK declaration record ambiguous')
+            require(separator and key in {'P', 'V', 'A', 'C', 'L', 'o', 'c', 'I'} and key not in record and len(value) <= 4096, 'APK declaration record ambiguous')
             record[key] = value
-        require({'P', 'V', 'A', 'C'} <= set(record), 'APK identity fields missing')
+        require({'P', 'V', 'A', 'C', 'I'} <= set(record), 'APK identity or size fields missing')
         require(all(re.fullmatch(r'[A-Za-z0-9_.+~-]+', record[k]) for k in ('P', 'V', 'A')), 'invalid APK public identity')
         require(re.fullmatch(r'Q[12][A-Za-z0-9+/=]{20,128}', record['C']), 'invalid installed APK checksum')
         if 'o' in record: require(re.fullmatch(r'[A-Za-z0-9_.+~-]+', record['o']), 'invalid APK origin name')
         if 'L' in record: require(re.fullmatch(r'[A-Za-z0-9.+()_ /:-]{1,4096}', record['L']), 'invalid APK license declaration')
+        if 'c' in record: require(re.fullmatch(r'[0-9a-f]{40}', record['c']), 'invalid declared APK source commit')
+        require(re.fullmatch(r'0|[1-9][0-9]{0,11}', record['I']), 'invalid APK declared installed size')
         rows.append({'name': record['P'], 'version': record['V'], 'architecture': record['A'],
             'installedChecksum': record['C'], 'origin': record.get('o'), 'declaredLicense': record.get('L'),
+            'declaredBuildCommit': record.get('c'), 'declaredInstalledBytes': int(record['I']),
             'licenseTextOrLegalQualificationEstablished': False})
     require(0 < len(rows) <= 512 and len({r['name'] for r in rows}) == len(rows), 'APK inventory duplicate or oversized')
     require(len(rows) == declared_count, 'APK end marker record count differs')

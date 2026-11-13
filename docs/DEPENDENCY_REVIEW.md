@@ -127,21 +127,44 @@ no advisory waiver or test exclusion is introduced.
 The Docker frontend, Go 1.26.11 Alpine builder and Alpine 3.22.8 runtime use
 reviewed manifest-index digests. The builder checks its exact SDK and verifies
 module checksums before the existing static CLI build. Direct runtime selections
-are ca-certificates 20261020-r0, wget 1.25.0-r1 and gcompat 1.1.0-r4; the latter
+are ca-certificates 20261020-r0 and gcompat 1.1.0-r4; the latter
 preserves the existing compiler-service compatibility dependency. Their primary
 package metadata is available from Alpine's
 [ca-certificates](https://pkgs.alpinelinux.org/package/v3.22/main/x86_64/ca-certificates),
-[wget](https://pkgs.alpinelinux.org/package/v3.22/main/x86_64/wget) and
 [gcompat](https://pkgs.alpinelinux.org/package/v3.22/main/x86_64/gcompat) records.
 These pins do not freeze every transitive package or establish image provenance.
 
-The separate hosted container job builds a local image and exercises only
-`zvm-node --help`, expecting exit 2. It runs without network access, with a
+The separate hosted container job builds the candidate and a frozen parent
+recipe using the same current source and builder caches. The control is retained
+under [`fixtures`](../tools/dependency-review/fixtures/with-gnu-wget-origin.json).
+It preserves the old GNU Wget 1.25.0-r1 recipe; this is a same-source recipe
+comparison, not fresh qualification of a historical parent image. Update this
+control explicitly when changing the SDK/profile rather than transferring old CI.
+The candidate uses the existing BusyBox `wget` applet for local health commands;
+compiler downloads use Go's HTTP client.
+
+CI exercises `zvm-node --help`, expecting exit 2. It runs without network access, with a
 read-only root filesystem, UID/GID 65534, dropped capabilities and no new
 privileges. `container_inventory.py` records the immutable local image ID,
-platform, installed package versions and CLI digest with bounded command
-receipts. This is a build/input observation, not a complete SBOM, container
-vulnerability scan, compiler-service isolation test, signed output or release.
+platform, Docker-reported image size, installed package versions, declared build
+commits/installed sizes and CLI digest with bounded command receipts. A missing
+APK commit remains unknown; package metadata sizes are not physical disk usage.
+The control's notice files are rehashed and compared with the candidate's full
+packet without retaining a second copy of the notice payloads.
+
+Two owned verifier containers execute only loopback `GET /status` and a missing
+route, using the actual healthy/unhealthy shell pipelines. Each has network mode
+`none`, a read-only root, UID/GID 65534, dropped capabilities, no new privileges,
+no mounts or published ports, and finite CPU/memory/process/probe limits. Actual
+command exits, isolation observations, clean service exit and exact container
+removal are retained. No compiler, Engine, L1 or L2 execution is covered. The
+consumer rejects changed shared APK metadata, different CLI or notice bytes,
+unexpected package-set changes, missing health/teardown evidence and a size that
+did not decrease. Docker-reported image bytes and APK-declared bytes remain
+separate measurements; neither establishes reclaimed physical space.
+
+This is a build/input and narrow verifier-status observation, not a complete
+SBOM, container vulnerability scan, compiler execution isolation test, signed output or release.
 The existing image entrypoint and operator user policy remain unchanged. No
 service, live chain, compiler download, image publication or deployment is
 performed by this usage control.
