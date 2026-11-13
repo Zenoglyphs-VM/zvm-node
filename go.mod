@@ -2,13 +2,14 @@ module github.com/Zenoglyphs-VM/zvm-node
 
 go 1.26.11
 
-replace github.com/ethereum/go-ethereum => github.com/ethereum-optimism/op-geth v1.101702.2
+replace github.com/ethereum/go-ethereum => github.com/ethereum-optimism/op-geth v1.101702.3
 
 replace github.com/Zenoglyphs-VM/zvm-core => ./zvm-core
 
 require (
 	github.com/Zenoglyphs-VM/zvm-core v0.0.0
 	github.com/ethereum/go-ethereum v0.0.0-00010101000000-000000000000
+	github.com/pion/stun/v3 v3.1.5
 	modernc.org/sqlite v1.58.0
 )
 
@@ -73,11 +74,9 @@ require (
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
-	github.com/pion/dtls/v2 v2.2.7 // indirect
-	github.com/pion/logging v0.2.2 // indirect
-	github.com/pion/stun/v2 v2.0.0 // indirect
-	github.com/pion/transport/v2 v2.2.1 // indirect
-	github.com/pion/transport/v3 v3.0.1 // indirect
+	github.com/pion/dtls/v3 v3.1.4 // indirect
+	github.com/pion/logging v0.2.4 // indirect
+	github.com/pion/transport/v4 v4.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.15.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
@@ -94,6 +93,7 @@ require (
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/urfave/cli/v2 v2.27.5 // indirect
+	github.com/wlynxg/anet v0.0.5 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect
@@ -104,7 +104,7 @@ require (
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
-	golang.org/x/time v0.9.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

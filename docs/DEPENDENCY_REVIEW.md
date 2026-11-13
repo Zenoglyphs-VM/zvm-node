@@ -113,12 +113,14 @@ historical evidence. Producing or inspecting locks does not qualify their native
 compatibility; a subsequent exact-head run is required.
 
 The Core Gitlink remains `29e6d9b30be94de3772c850c7a1e9811585a8833` at its canonical
-upstream URL. The effective op-geth selection remains v1.101702.2. Node's
-simulated-backend tests still select the older networking dependency closure,
-including DTLS v2.2.7. Node-specific advisory and call-reachability review remains
-open. The separately proposed Core source scan result does not transfer to this
-Node/Core source combination. No advisory waiver or reachability exclusion is
-introduced by these lock updates.
+upstream URL. The effective op-geth library is v1.101702.3. Its reviewed networking
+selection uses STUN v3.1.5 and DTLS v3.1.4. The unchanged Core source still has its
+historical module declarations; Node's effective dependency and import graphs
+must be observed at the root. Complete Node root-module tests, including the
+simulated backend, remain selected. The separately proposed Core source scan
+result does not qualify this Node/Core combination. A fresh exact-head scan and
+graph, upstream advisory mapping and distribution/license review remain required;
+no advisory waiver or test exclusion is introduced.
 
 ## Container input observations
 
@@ -191,38 +193,46 @@ results and earlier Node native/container results are historical evidence for
 their original source; they are not fresh qualification of this workflow or its
 findings.
 
-## Temporary op-geth library migration preparation
+## Reviewed networking library migration
 
-The reviewed v1.101702.3 library candidate selects STUN v3.1.5 and DTLS v3.1.4.
-Its source delta also changes Engine fields, optional header RLP, PostExec hashes,
-receipts and Interop/Lagoon naming. This candidate therefore requires separate
-compatibility observations, rather than a version-only security claim. The
-upstream release supports library use and deprecates running its geth executable;
-this workflow does not run or distribute that executable.
+The selected op-geth v1.101702.3 release is a library release. Its 38-path source
+delta includes STUN/DTLS migration, Engine fields, optional header RLP, PostExec
+hash/receipt changes, embedded registry data and Interop/Lagoon naming. The Node
+SDK update does not qualify an op-geth executable, a real Engine or activation of
+those newer chain rules.
 
-`Dependency migration preparation` keeps the ordinary Node locks and Core Gitlink
-unchanged until its outputs are inspected and adopted for fresh qualification.
-It verifies the original Node/Core source closure and exact SDK, then records a
-bounded malformed-attribute regression against the existing STUN v2 dependency.
-That negative control must fail with the intended parser panic and complete Go
-JSON; its failure remains explicit. The same control fixture is later run against
-the candidate STUN v3 dependency and must pass.
+The original candidate was produced at Node commit
+`9a5c6d6145bc46979c08b7d3b3c06100ee4a8b3e`, automatic fork run
+[`43423594443`](https://github.com/edgepillar/zvm-node/actions/runs/43423594443),
+artifact `14035362014`, archive SHA-256
+`5c7393653be404d4395285449e186dea249c21b05e59c3dabf8f6a22930c9daf`.
+Its complete command outputs and Node/Core source/lock observations were
+independently checked. The original STUN v2 parser failed the bounded malformed
+attribute control as expected; the same body with only its module import changed
+passed all five parent/subtest events on STUN v3.1.5. That legacy failure remains
+historical evidence.
 
-A synthetic library control executable is compiled against each replacement with
-the same Go SDK and source. It compares both Core chain-321 genesis profiles,
-legacy/EIP-1559/deposit transaction encodings and hashes, and a legacy header.
-The old payload codec must accept the candidate payload without changing its
-existing fields. The additional null `targetGasLimit` key remains recorded.
-Slotful headers, Amsterdam, PostExec behavior, Lagoon activation and active Engine
-execution remain outside those compatibility claims. These controls do not
-activate any chain rule or qualify a real operator database.
+Old and candidate control executables used identical CI-formatted source and
+Go 1.26.11. Both Core chain-321 genesis profiles, legacy/EIP-1559/deposit
+transaction hashes/encodings and a legacy header were identical. The old payload
+codec accepted the candidate payload with its additional null `targetGasLimit`
+key. Slotful header encoding changed; Amsterdam, PostExec behavior, Lagoon,
+actual Engine execution, real operator state and live-chain acceptance remain
+unqualified. Temporary binaries stayed in a fresh hosted workspace and were not
+published. The temporary lane, recipe and control-source copies were removed
+after adoption; their original Git revision and receipts remain available.
 
-Only the reviewed op-geth replacement version may change. Original direct
-requirements, module identity, SDK and local Core replacement remain checked.
-Candidate locks, exact resolved versions, actual process exits/EOF, source/lock
-pins, synthetic observations and failures are retained for fourteen days. A
-900-second aggregate command budget and per-stream caps bound the preparation.
-Temporary binaries and source copies stay in a freshly owned hosted workspace
-outside the output archive; no executable is published. Full Node native/race,
-current source/graph and distribution/license qualification remain required after
-adoption. Original reports and failure evidence remain historical records.
+`node/library_compatibility_test.go` freezes the retained legacy vector outputs
+for future SDK review. `node/stun_dependency_test.go` retains the malformed-input
+regression in complete normal/race Node suites. The generated candidate sums are
+unchanged; its already selected STUN v3 requirement becomes direct because that
+test imports it. Fresh integrity/tidy, build/vet, full Node tests, container and
+source/graph qualification are required for the adopted source.
+
+Registry results retain separate meanings. The earlier Go source scan reported
+`GO-2026-4479` for DTLS v2.2.7. A separate GitHub version query also matched
+`GHSA-34rh-wp3j-6cxc` for STUN v2.0.0. Neither matched the selected DTLS v3.1.4 or
+STUN v3.1.5 in the reviewed GitHub snapshot; absence in a registry is not global
+advisory coverage. References: [DTLS](https://pkg.go.dev/vuln/GO-2026-4479),
+[STUN](https://github.com/advisories/GHSA-34rh-wp3j-6cxc), and the
+[library release](https://github.com/ethereum-optimism/op-geth/releases/tag/v1.101702.3).

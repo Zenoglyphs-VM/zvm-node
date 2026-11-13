@@ -1,5 +1,5 @@
 // The same bounded malformed-input controls are run against old and new STUN majors.
-package dependencyreview
+package node
 
 import (
 	"testing"
