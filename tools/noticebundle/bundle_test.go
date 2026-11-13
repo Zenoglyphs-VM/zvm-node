@@ -25,12 +25,12 @@ func put(t *testing.T, name, data string) {
 }
 
 func TestPublicPaths(t *testing.T) {
-	for _, good := range []string{"github.com/Example/project/file.go", "src/unsafe/unsafe.go", "LICENSE-MIT"} {
+	for _, good := range []string{"github.com/Example/project/file.go", "src/unsafe/unsafe.go", "LICENSE-MIT", strings.Repeat("a", 1024)} {
 		if !portable(good) {
 			t.Fatal("valid public path refused")
 		}
 	}
-	for _, bad := range []string{"", "/fixture/private", "../outside", "a/../b", "a//b", "a\\b", "a\npath"} {
+	for _, bad := range []string{"", "/fixture/private", "../outside", "a/../b", "a//b", "a\\b", "a\npath", strings.Repeat("a", 1025)} {
 		if portable(bad) {
 			t.Fatal("unsafe path accepted")
 		}

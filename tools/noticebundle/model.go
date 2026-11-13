@@ -35,7 +35,7 @@ const (
 )
 
 var (
-	publicPath = regexp.MustCompile(`^[A-Za-z0-9._~!+/-]{1,1024}$`)
+	publicPath = regexp.MustCompile(`^[A-Za-z0-9._~!+/-]+$`)
 	version    = regexp.MustCompile(`^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$`)
 	digest40   = regexp.MustCompile(`^[0-9a-f]{40}$`)
 	noticeFile = regexp.MustCompile(`(?i)^(licen[cs]es?|copying|notice|copyright|authors|contributors|patents|legal)(?:[._-].*)?$`)
@@ -151,7 +151,7 @@ func hash(raw []byte) string {
 }
 
 func portable(value string) bool {
-	if !publicPath.MatchString(value) || strings.HasPrefix(value, "/") || strings.Contains(value, "\\") {
+	if len(value) == 0 || len(value) > 1024 || !publicPath.MatchString(value) || strings.HasPrefix(value, "/") || strings.Contains(value, "\\") {
 		return false
 	}
 	for _, part := range strings.Split(value, "/") {
