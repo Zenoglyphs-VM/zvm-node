@@ -86,8 +86,9 @@ type Extension interface {
 }
 
 type Server struct {
-	cfg Config
-	db  *sql.DB
+	cfg         Config
+	db          *sql.DB
+	loadedEpoch loadedEpoch
 
 	opsMu      sync.RWMutex
 	opsStorage *storageSample
@@ -104,12 +105,13 @@ func New(cfg Config) *Server {
 	if cfg.Ops.StartedAt.IsZero() {
 		cfg.Ops.StartedAt = time.Now()
 	}
-	return &Server{cfg: cfg, db: cfg.DB.SQL()}
+	return &Server{cfg: cfg, db: cfg.DB.SQL(), loadedEpoch: captureLoadedEpoch(cfg.Deriver)}
 }
 
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/info", s.handle(s.info))
+	mux.HandleFunc("GET /api/epoch", s.epoch)
 	// A readiness probe: 200 while this node is keeping up, 503 once it is
 	// stalled. Derivation retries forever rather than exiting (docs/HALT.md),
 	// so without this a halted node passes every health check and goes on
