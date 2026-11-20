@@ -20,11 +20,20 @@ zvm-node -config l2/rollup.json \
 |---|---|
 | `GET /healthz` | 200 while keeping up, 503 once derivation has stalled |
 | `GET /api/info` | chain parameters, fork status, derivation head |
+| `GET /api/epoch` | chain IDs, L2 genesis and loaded rollup configuration fingerprint |
 | `/api/...` | blocks, transactions, tokens, momentums, contracts, prices, NFTs |
 | `POST /rpc`, `POST /l1rpc` | proxied to op-reth and to NoM |
 
 Derivation retries forever rather than exiting, so watch `/healthz`, not the
 process. On a public hostname, set `-rpc-deny debug_,txpool_,admin_`.
+
+`/api/epoch` returns the startup configuration supplied to the deriver as a
+schema 1 observation. `loadedRollupSha256` is SHA-256 of the loaded
+`rollup.Config` encoded by Go's `encoding/json.Marshal`. The chain IDs are
+decimal strings and the genesis is a hex block hash. The endpoint serves a
+cached startup value with `Cache-Control: no-store` and returns 503 when the
+configuration is unavailable. Peer comparison and release verification use
+this observation alongside independently checked chain state.
 
 Subcommands: `bench`, `apps`, `media`, `solcd`, `dex`, `verify-tokens`
 (`-h` on each). Their endpoints default to `NOM_NODE`, `ZVM_RPC`, `ZVM_NODE`
